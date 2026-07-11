@@ -1,0 +1,5582 @@
+[
+  {
+    "name": "F2L 1",
+    "category": "Free Pairs",
+    "algList": [
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=GJAPWiFQlcY",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 1 - (R F)",
+        "alg": "R' F R F'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=d4iMIP8e_bw",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U r M)",
+        "alg": "y' r' U' R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U L F)",
+        "alg": "y U F' L F L2 U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U r M)",
+        "alg": "M' U R U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U f)",
+        "alg": "y' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "U2 R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U F r)",
+        "alg": "y F' r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (L F)",
+        "alg": "y F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U L)",
+        "alg": "y2 U L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "U R U R' U' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U f)",
+        "alg": "y' U2 f R2 f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U L F)",
+        "alg": "U F' L' U' L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "R' F2 R2 F' R' F R' F2 U' R' U2 R U' R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "z2 x2 y2 U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (L D)",
+        "alg": "z2 D L D' L' z2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (L B)",
+        "alg": "y2 L' B L B'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R F)",
+        "alg": "F R' F' R F R' F' R F R' F' R F R' F' R F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "y U R2 R2 F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U L)",
+        "alg": "U L' U2 R U R' U2 L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U L)",
+        "alg": "L' U2 R U R' U2 L R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U L)",
+        "alg": "y x U' L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U' F' U' F R U' R' F' U' F R U' R' U2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U' F' U' F R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U F' U2 F R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U2 F R' F' R2 U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U' F' U' F R U' R' F' U' F R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U' F' U' F R U' R' F' U' F R U' R' U'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "R' F R2 U R' U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "y' x' U' R U R' x",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "x R' U R U'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U L M)",
+        "alg": "M' U R U' L' x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "U2 R U' R' U' R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U L r)",
+        "alg": "y U2 x r2 U L U' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U F)",
+        "alg": "F' U' R U R' U' R' F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (U F)",
+        "alg": "y U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 1 - (R U)",
+        "alg": "R U R' U' R U R' U' R U R' U' R U R' U' R U R' U'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 2",
+    "category": "Free Pairs",
+    "algList": [
+      {
+        "name": "F2L 2 - (R F)",
+        "alg": "F R' F' R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=xtiPZNtB428",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 2 - (R U)",
+        "alg": "y' U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F)",
+        "alg": "U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L)",
+        "alg": "y U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L)",
+        "alg": "y U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L d)",
+        "alg": "d' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F l)",
+        "alg": "F l' U' l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U r)",
+        "alg": "U' r U' r' U r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F)",
+        "alg": "U2 F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F r)",
+        "alg": "y r U' r' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L)",
+        "alg": "U' y L' U L y'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U B)",
+        "alg": "y2 U' B' U B",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F r)",
+        "alg": "y U2 r' F2 r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (F r d)",
+        "alg": "d' r' F r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L F)",
+        "alg": "y2 U2 L2 F' L' F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U B r)",
+        "alg": "y2 B r' U' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U r)",
+        "alg": "r U R' U' R r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L d)",
+        "alg": "d' L' U L d",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U S)",
+        "alg": "U S U' R U R' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L F D)",
+        "alg": "U L' x' D' L x U' L' F L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U)",
+        "alg": "x U R' U' R x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (L F)",
+        "alg": "y L F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F r)",
+        "alg": "U F' r' F r U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U F)",
+        "alg": "U' F R' F' R2 U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U f)",
+        "alg": "U' R f R f' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L l M)",
+        "alg": "y2 l U L' U' M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U F r)",
+        "alg": "y U' r' F r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L)",
+        "alg": "U' y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U)",
+        "alg": "U' y' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U l)",
+        "alg": "U2 x l2 U' R' U l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L r)",
+        "alg": "y2 U2 x' r2 U' L' U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (R U B)",
+        "alg": "U2 R2 B' R' B R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U L f)",
+        "alg": "y2 U' f' L f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 2 - (U D r)",
+        "alg": "U r' D' r U' r' D r",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 3",
+    "category": "Free Pairs",
+    "algList": [
+      {
+        "name": "F2L 3 - (U F)",
+        "alg": "F' U' F",
+        "youtubeUrl": "https://www.youtube.com/watch?v=hjGuFNoMRW0",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 3 - (R U)",
+        "alg": "y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (U L)",
+        "alg": "y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U S)",
+        "alg": "S U R U' R' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R b)",
+        "alg": "b' R' b",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U M)",
+        "alg": "U M R U' R' U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R F f S)",
+        "alg": "S R' F R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R F S)",
+        "alg": "S R' F R F' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (L f)",
+        "alg": "y2 f' L' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U d)",
+        "alg": "d U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "R U2 R' U' R U2 R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "U R U2 R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "y' R' U2 F R' F' R U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "y' R' U2 F U R U' R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "U' R' F R U R U' R2 F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U)",
+        "alg": "y z U' R' U",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (U F M)",
+        "alg": "M' F' U' F M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (U B r)",
+        "alg": "U' r B U' B' U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U F)",
+        "alg": "U' R' F R F' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U S)",
+        "alg": "U2 S' R U2 R' S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (F r)",
+        "alg": "y r' F' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U M)",
+        "alg": "U' M' U2 R U' R' U' M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (R U S)",
+        "alg": "y' S' R' U' R S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 3 - (U L S)",
+        "alg": "y S L' U' L S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 4",
+    "category": "Free Pairs",
+    "algList": [
+      {
+        "name": "F2L 4 - (R U)",
+        "alg": "R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=EmUXH3oqdh4",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 4 - (R f)",
+        "alg": "y' f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (U F)",
+        "alg": "y F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (U L)",
+        "alg": "y2 L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U L F D f)",
+        "alg": "x y z D' L D L' z2 F' L' U L2 F L' U' y' R' U R U' y' f' L' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U S)",
+        "alg": "S' R U R' S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U L F D M)",
+        "alg": "x y z D' L D L' z2 F' L' U L2 F L' U' y' R' U R U' y U M R U' R' U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U D r)",
+        "alg": "R' D' r U r' D R2 U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (F l)",
+        "alg": "l F l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U)",
+        "alg": "R U' R' U' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U F)",
+        "alg": "U F U R U' R2 F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (U r S)",
+        "alg": "U' S r U' r' U r U r' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U B r f)",
+        "alg": "U2 r R B' R' f U' x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U)",
+        "alg": "R U R' y",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R D)",
+        "alg": "x2 R D R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R F)",
+        "alg": "x3 R F R' x",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (R U)",
+        "alg": "R U R' U",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 4 - (U L S)",
+        "alg": "y2 S L U L' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 5",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 5 - (R U)",
+        "alg": "U' R U R' U2 R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=RyT5JGz41gw",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 5 - (U L F)",
+        "alg": "F2 L' U' L U F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U)",
+        "alg": "U' R U R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U F)",
+        "alg": "U' R U R' U R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L)",
+        "alg": "y2 U' L U L' U2 L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U)",
+        "alg": "R U2 R' U' R U2 R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U r)",
+        "alg": "y' U r' U R U' R' U' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U r M)",
+        "alg": "U' r U R' U2 R U' R' U M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R D b)",
+        "alg": "b2 R' D' R D b2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U F)",
+        "alg": "y U2 F R U R' U2 F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U l)",
+        "alg": "l' U' l U2 R U' R' U' l' U l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L F)",
+        "alg": "y U2 F' L F L' U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L d)",
+        "alg": "y d' L U L' U2 L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L F d)",
+        "alg": "y d' L U L' d F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L B)",
+        "alg": "y L2 B' U' B U L2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U M)",
+        "alg": "y2 M2 U' M U2 M' U' M2 y2 U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U F)",
+        "alg": "F' U' F U F' U' F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U F)",
+        "alg": "U R' F R F' R U2 R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (R U F S)",
+        "alg": "U2 R' F R F' S' R U2 R' S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L)",
+        "alg": "U' y2 L U L' U2 L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L l)",
+        "alg": "y U l' U L U' L' U' l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 5 - (U L F)",
+        "alg": "L F2 L' U' L U F2 U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 6",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 6 - (R U r)",
+        "alg": "U' r U' R' U R U r'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=i2CSmZJc7Ck",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 6 - (R U)",
+        "alg": "y' U R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U d)",
+        "alg": "d R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U F)",
+        "alg": "U F' U' F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U)",
+        "alg": "y' U R' U' R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L)",
+        "alg": "y U L' U' L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U F' U' F U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "y F2 R U R' U' F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "R U R' U' R U' R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U B)",
+        "alg": "R2 B U B' U' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U2 F R' F' R U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U)",
+        "alg": "U y' R' U' R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F l)",
+        "alg": "U' L F' l' U l F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U F)",
+        "alg": "U F' U' F U F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F)",
+        "alg": "y2 L2 F U F' U' L2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U L)",
+        "alg": "U y' R' U' R U2 y2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "R' U' R F R' F' R U' R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F)",
+        "alg": "y2 U L F' L' U' L U F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L)",
+        "alg": "y U L' U' L U L' U2 L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U r)",
+        "alg": "U' R U R' U r' U2 R2 U R2 U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "y' U R' U' R U' y F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "y3 U R' U' R U' y F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U y' R' U' R U2 y F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U R U' R' U' R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U' R' F R F' R U2 R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U' R U' R' U2 F' U' F U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F)",
+        "alg": "U F' U' L' U L U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U)",
+        "alg": "U y' R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U F)",
+        "alg": "U F' U3 F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U L)",
+        "alg": "U2 R U2 R' U R U R' y U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U L F)",
+        "alg": "y U L' U' L U' y' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F)",
+        "alg": "U F' U' F U2 y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "U R U' R' U' R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U d)",
+        "alg": "d R' U' R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L l)",
+        "alg": "y2 U' l U' L' U L U l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U L F)",
+        "alg": "U' L F' R' F R F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (U L F)",
+        "alg": "U2 F' L' U' L U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 6 - (R U F)",
+        "alg": "R' U' R F R' F' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 7",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 7 - (R U)",
+        "alg": "U' R U2 R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": true
+      },
+      {
+        "name": "F2L 7 - (U r M)",
+        "alg": "M' U' M U2 r U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 7 - (R U F)",
+        "alg": "U' R U2 R' U R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 7 - (R U)",
+        "alg": "U' R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 8",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 8 - (R U d)",
+        "alg": "d R' U2 R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": true
+      },
+      {
+        "name": "F2L 8 - (R U r)",
+        "alg": "r' U2 R2 U R2 U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U)",
+        "alg": "y' U R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L)",
+        "alg": "y U L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L)",
+        "alg": "y U L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L F)",
+        "alg": "U F' U2 L' U L U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U F)",
+        "alg": "U F' U2 F U F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U2 R' F R2 U' R' U' R U R2 F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U F)",
+        "alg": "U F' U2 F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U)",
+        "alg": "y' U R' U2 R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U F R' F' R2 U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U M)",
+        "alg": "M R' U2 R2 U R2 U R M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U d)",
+        "alg": "d R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U r)",
+        "alg": "U' r U r' U r U' r' U' r U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U2 R' F R F' R U' R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U B)",
+        "alg": "B' R' U' R2 U R' B",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L f)",
+        "alg": "f' U' L' U2 L U' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U F' U2 F U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U r M)",
+        "alg": "U' R U' M' U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U r M)",
+        "alg": "r' U2 R2 U R2 U R M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "F' U2 F U R U2 R' U' R U R' U F' U' F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "R' U2 R U R' U R U2 F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U r M)",
+        "alg": "y' M U M' U2 r' U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L F)",
+        "alg": "y2 F' L' U' L2 U L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L)",
+        "alg": "y L' U' L U' L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U2 F R U' R' U' R U R' F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U l M)",
+        "alg": "y M' U M U2 l' U l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U B r)",
+        "alg": "B2 R2 B R2 B2 r' U' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U B S)",
+        "alg": "S' U S U2 B' R B",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R L B)",
+        "alg": "L' B2 R2 B R2 B L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U F r f)",
+        "alg": "f' U' r' F2 r U' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U F r)",
+        "alg": "U F' U2 r' F r U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U F r)",
+        "alg": "F' U' r' F2 r U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F r)",
+        "alg": "U R U R' F' r' F' r U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U L F)",
+        "alg": "L F L' U' R U' R' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U)",
+        "alg": "U y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F D)",
+        "alg": "R' D' R U2 R' D R F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U y' R' U2 R U2 y F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U R' F R F' R' F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L F)",
+        "alg": "y U L' U2 L U' L F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U)",
+        "alg": "y' R' U' R U' R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U r M)",
+        "alg": "M' U2 M U2 r U r' U2 M' U2 M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "U R U' R' U R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (U L F)",
+        "alg": "U F' U2 F U2 y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U r)",
+        "alg": "U' R U' R' r U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U)",
+        "alg": "U y' R' U2 R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 8 - (R U F)",
+        "alg": "R2 U2 F R2 F' U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 9",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 9 - (R U F)",
+        "alg": "U' R U' R' U F' U' F",
+        "youtubeUrl": "https://www.youtube.com/watch?v=uKp6lYvTTNc",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 9 - (R U F)",
+        "alg": "F R U R' U' F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 9 - (R U d)",
+        "alg": "U' R U' R' d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 9 - (R U d)",
+        "alg": "d R' U' R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 10",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 10 - (R U)",
+        "alg": "U' R U R' U R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=gyyYICRQg5c",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 10 - (R U)",
+        "alg": "U2 R U' R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 10 - (R U f)",
+        "alg": "y' U R' U R U' f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 10 - (R U d)",
+        "alg": "d R' U R d' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 11",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "U' R U2 R' U F' U' F",
+        "youtubeUrl": "https://www.youtube.com/watch?v=6yXzaZM3GEk",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 11 - (R U)",
+        "alg": "y' R U2 R2 U' R2 U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U d)",
+        "alg": "U' R U2 R' d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L F)",
+        "alg": "F' U L' U2 L U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U r)",
+        "alg": "R U2 R' U' r U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U)",
+        "alg": "U' R U2 R' U y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U F)",
+        "alg": "F U2 F2 U' F2 U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L F)",
+        "alg": "R U2 R' U' F' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U)",
+        "alg": "y' R' U R U' R' U R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U r M)",
+        "alg": "U' r' R2 U2 R' U2 R U' R' U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U' R' U F' U2 F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U2 R' U R U R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "U' R U R' U' R U R' U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "U' R U R' U' R U R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "F R' F' R U' R U' R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L)",
+        "alg": "U' R U2 R' U y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F r)",
+        "alg": "U r' F' r U' r' F2 r2 U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L)",
+        "alg": "y L' U L U' L' U L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L)",
+        "alg": "y L U2 L2 U' L2 U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U' R' U R U' R2 F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "F R' F' R U' R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L)",
+        "alg": "U' y L' U2 L y' R U R' U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F f S)",
+        "alg": "U' R U2 R' U S R' F R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L F d)",
+        "alg": "d' F U' R U' R' F' U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L F d)",
+        "alg": "F R U R' U' F' d' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F r M)",
+        "alg": "R U R' U R' F R F' M' U R U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U d)",
+        "alg": "R U R' d R' U' R U R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U2 R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L f)",
+        "alg": "y2 f' L U' L2 U L2 f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L d)",
+        "alg": "y2 U' L U2 L' d L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U' R U' R' U' R' F R U R U' R2 F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (U L)",
+        "alg": "y L' U2 L U2 L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U R' F R F' R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U d)",
+        "alg": "y U' y' R U2 R' d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "y F R U R' U' R U R' U' R U2 R' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "y R U R' U R U2 R2 F R U R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L)",
+        "alg": "R U2 R' U' y L' U L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U2 R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L)",
+        "alg": "U' R U2 R' y U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U L)",
+        "alg": "R U R' U' R U R' U' R U2 R' y U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "y F U R U' R' U R U' R' U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F f S)",
+        "alg": "R U R' U' R U' R' S R' F R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U R' F R F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U r)",
+        "alg": "U R U2 R' r' U2 R2 U R2 U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "U' R U R' U' R U' R' U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U R' U' R U' R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "R U2 R' U F' U' F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 11 - (R U F)",
+        "alg": "U F U R U' R' U R U' R' U R U' R2 F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 12",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 12 - (R U)",
+        "alg": "R U' R' U R U' R' U2 R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=IW2wvQ2nC2o",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 12 - (R U)",
+        "alg": "R' U2 R2 U R2 U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 12 - (R U)",
+        "alg": "U R U' R' U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 12 - (R U D)",
+        "alg": "R' D' R U2 R' D R2 U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 13",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 13 - (R U)",
+        "alg": "y' U R' U R U' R' U' R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Sjo7aOX6f8o",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 13 - (R U r M)",
+        "alg": "M' U' R U R' U2 R U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U' R' U R' F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U d)",
+        "alg": "d R' U R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "U R U' R' U R U' R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L)",
+        "alg": "y U L' U L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U F)",
+        "alg": "U F' U F U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U R' U' R' F R F' R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F D r)",
+        "alg": "R' D' r U r' D F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U D r)",
+        "alg": "R' D' r U r' D R U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F u)",
+        "alg": "U F2 u' R U' R' u F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U R' U' R' F R F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L F)",
+        "alg": "U2 L F' L2 U2 L F L' U2 L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R' F R F' U' R' F R F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L F f S)",
+        "alg": "y2 U F' U' L' U L S' L' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L F)",
+        "alg": "U2 F' L' U L U' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R' F R F' U' F' R U R' U' R' F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U L F)",
+        "alg": "F' U L' U' L U' F U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U R2 F R F2 U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U F)",
+        "alg": "F' U2 F U2 F' U' F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L l M)",
+        "alg": "y2 M U' L U L' U' L U2 l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L f)",
+        "alg": "y2 U f' L f U' f' L' f",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U2 R' U2 F' U2 F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "U R U' R' U R U' R' U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L)",
+        "alg": "y L' U L U' L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F r)",
+        "alg": "R F' r U R' U2 r' F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (U L F)",
+        "alg": "U F' U F U' y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U L)",
+        "alg": "U R U' R' U R U' R' y U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U F)",
+        "alg": "R U R' U R U' R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U M)",
+        "alg": "U R U' R' U R U' M' U R' U' M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U)",
+        "alg": "U y' R' U R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 13 - (R U L F)",
+        "alg": "U F' L F L' U' L' U L R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 14",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "U' R U' R' U R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=BwaDJAZaIpc",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "R U2 R' U2 R U R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U D)",
+        "alg": "U' R2 D R' U R D' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "U2 R2 U R' U R U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U D)",
+        "alg": "U' R2 D R' U R D' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "U' R U' R' U R U' R' U' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U F)",
+        "alg": "U' R' F R2 U R' U' R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U F)",
+        "alg": "F R' F' R U R U' R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L F)",
+        "alg": "y U' L' U L U' L' U L U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "U R U2 R' U R U2 R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U L)",
+        "alg": "y L' U2 L U2 y' R U2 R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U r M)",
+        "alg": "y' M U R' U' R U2 R' U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L F)",
+        "alg": "y L' U L U' L F' L' F L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U F r M)",
+        "alg": "y M' U r' F' r U2 r' F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U L F d)",
+        "alg": "R U R' d' L' U L F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U F)",
+        "alg": "R U R' U' R' F R F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L)",
+        "alg": "y2 U' L U' L' U L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L F)",
+        "alg": "y U' L' U L U' L' U L F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L F r)",
+        "alg": "y U' L' U L U' L' U L F' r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (R U)",
+        "alg": "R U' R' U R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 14 - (U L F)",
+        "alg": "y L' U2 L U2 F U2 F' U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 15",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 15 - (R U D)",
+        "alg": "R' D' R U' R' D R U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=m0Uve1y-8tE",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 15 - (U r M)",
+        "alg": "M U r U' r' U' M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "R U R' U2 R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "F' U F U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "U R' F R F' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "R U2 R' U R U R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "y' R2 F R F' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U S)",
+        "alg": "U S' R U R' S R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U r l)",
+        "alg": "l U r U' r' U' l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U L)",
+        "alg": "y L' U L U2 y' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L F)",
+        "alg": "y L' U L U2 F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L F)",
+        "alg": "F' U L' U L U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r)",
+        "alg": "U' r U' r' U' r U r' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F r)",
+        "alg": "U2 R' F' r U' r' F2 R2 U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L F M)",
+        "alg": "M U L F' L' U' M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "U y' R' U R y U2 R U2 R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "U2 R U R' U' R U2 R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L F l)",
+        "alg": "l U L F' L' U' l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r)",
+        "alg": "R r' U r U' r' U' r R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "y' R' U R U2 y R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L B)",
+        "alg": "y L2 B L B' L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F D)",
+        "alg": "R' D' R U' R' D F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U L)",
+        "alg": "y U L' U L y' U2 R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L l M)",
+        "alg": "y U' M' U' L' U l U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "R U' R' U' R U' R' U R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U L)",
+        "alg": "U R U' R' U2 y L' U L y' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "U R U2 R' U' R U2 R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "U F' U2 F U2 R U R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "R U2 R' U' R U' R' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L d)",
+        "alg": "y L' U L U' d' L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "U R U' R' U2 F' R U R' U' R' F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U l)",
+        "alg": "y l' U' l U' l' U2 l U l' U l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U L)",
+        "alg": "U2 R U R' y U L' U L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L)",
+        "alg": "y L' U L U2 y L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r)",
+        "alg": "r' R U R U R' U' r U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U D r)",
+        "alg": "U R U' R D r' U r D' R' U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r M)",
+        "alg": "M U R U R' U' r U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "R U2 R2 F R F' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F D)",
+        "alg": "F D R U R U' R2 D' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "y' U R' U R U2 y R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U F)",
+        "alg": "R U R' U2 R U' R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U l M)",
+        "alg": "y2 M' U l U' l' U' M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r M)",
+        "alg": "U2 M' U R U' r' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U f)",
+        "alg": "y' R' U R U2 f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U L F)",
+        "alg": "F' L' U' L U L' U L U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U)",
+        "alg": "R U' R U2 R2 U' R2 U' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (U F d)",
+        "alg": "F' U F U' d' F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 15 - (R U r M)",
+        "alg": "U' r U' r' U' r U M U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 16",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "R U' R' U2 F' U' F",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Rf5jEBMOUnc",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 16 - (R U)",
+        "alg": "R U' R' U2 y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U r M)",
+        "alg": "U M' U R U' r' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U F U R U' R' F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U F U R U' R' F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F M)",
+        "alg": "y M U' R' F R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U)",
+        "alg": "y' R' U' R U2 R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U d)",
+        "alg": "R U' R' U d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U' F R' F' R U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U S)",
+        "alg": "R U' R' S' R U2 R' S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U r l)",
+        "alg": "y r' U' l' U l U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U F R U R' U' F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U F R' F' R2 U' R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L)",
+        "alg": "y L' U' L U2 L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U B)",
+        "alg": "R2 B' R' B R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U L)",
+        "alg": "R U' R' U2 y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U r)",
+        "alg": "r U r' U r U2 r' U' r U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U)",
+        "alg": "U' R U2 R' U y' U R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F l)",
+        "alg": "l2 F' l' U l' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "R U R' U2 R U' R' U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U f S)",
+        "alg": "S U' f' U f U S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U D r M)",
+        "alg": "R' D' R U R' D R r U R' U' M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F D)",
+        "alg": "R' D' R U R' D R F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L F D)",
+        "alg": "y L D L' U L D' F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L D)",
+        "alg": "y L D L' U L D' L' U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U r)",
+        "alg": "U r R' U R U' r' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U l M)",
+        "alg": "y M U' l' U l U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F)",
+        "alg": "U R F R U R' U' F' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L)",
+        "alg": "y L' U2 L U' L' U' L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F f S)",
+        "alg": "R U' R' U2 S R' F R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U L)",
+        "alg": "U' R U' R' U2 y' R' U2 R U2 y2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U)",
+        "alg": "R U R' U2 R U' R' y' U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L)",
+        "alg": "y L' U2 L U L' U L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U B)",
+        "alg": "R U' B U' B' U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U r)",
+        "alg": "U r U' r' U2 r U r' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U L)",
+        "alg": "R U' R' y U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U r M)",
+        "alg": "y' M' U' r' U r U M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U L)",
+        "alg": "y U2 L' U' L y' U' R U' R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L F d)",
+        "alg": "d' L F' L' F U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U L l)",
+        "alg": "y L' x' U' l' U l U L x",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U r M)",
+        "alg": "U2 R U M' U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U r)",
+        "alg": "U R U2 R' r U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U L d)",
+        "alg": "R U' R' d' U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (R U F r d)",
+        "alg": "R U' R' d' U' r' F' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 16 - (U F l)",
+        "alg": "l F' U F' U' F2 l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 17",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 17 - (R U)",
+        "alg": "R U2 R' U' R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=ncxTAoW7jow",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 17 - (U L)",
+        "alg": "y2 L U2 L' U' L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 17 - (R U)",
+        "alg": "R U R' U' R U2 R' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 17 - (U L F)",
+        "alg": "y L F' L' F L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 18",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 18 - (R U)",
+        "alg": "y' R' U2 R U R' U' R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=NotJBG5dR6w",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 18 - (U L)",
+        "alg": "y L' U2 L U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (U F)",
+        "alg": "F' U2 F U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R' F R F' R U' R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Jhnm4pk86A4",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U)",
+        "alg": "R U2 R' y' R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U R' U' R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U L)",
+        "alg": "R U R' U' y L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F d)",
+        "alg": "F' U2 F d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "F R' F' R2 U' R' U R U2 R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U' R2 F R F' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U r)",
+        "alg": "R U2 R' U2 r U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U L)",
+        "alg": "y U L' U L U2 y2 R' U2 R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U' R' F' U' F R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U' R' F' U' F U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U R' U' R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U)",
+        "alg": "y' U R' U R U2 R' U2 R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U L)",
+        "alg": "y' U R' U R U2 R' U2 R y2 U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U f)",
+        "alg": "U2 f R U R' U' R U R' U' f' U' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U2 R' F' U' F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "U R U' R' U2 R U' R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U)",
+        "alg": "R U R' U' R U R' U' y' U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "U' F U R U' R' F' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U S)",
+        "alg": "U S R U2 R' U R U' R' U' S'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R' F R F' R U' R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U R' U' F' U F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "R U R' U' R U2 R' U F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (U L F)",
+        "alg": "U2 F' U' L' U2 L U L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (U L F)",
+        "alg": "U F' L' U' L U L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U L)",
+        "alg": "R U2 R' y L' U' L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 18 - (R U F)",
+        "alg": "U R U' R2 F R F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 19",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 19 - (R U)",
+        "alg": "U R U2 R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=EodPFBbDBME",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 19 - (R U F)",
+        "alg": "U R U2 R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U f d)",
+        "alg": "d f R2 f' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U)",
+        "alg": "R U' R' U R U' R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U)",
+        "alg": "R U' R U R' U R U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U f)",
+        "alg": "U y' f R2 f' U2 f R2 f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U f d)",
+        "alg": "d f R2 f' U2 f R2 f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U r f M)",
+        "alg": "U y' f R2 f' r' U' R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U r f d M)",
+        "alg": "d f R2 f' r' U' R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U f)",
+        "alg": "U y' f R2 f' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (R U F)",
+        "alg": "F' U F U R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 19 - (U L)",
+        "alg": "y2 U L U2 L' U L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 20",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "y' U' R' U2 R U' R' U R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Am2sBaR-xVs",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "U' R U' R2 F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L)",
+        "alg": "y U' L' U2 L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U F)",
+        "alg": "U' F' U2 F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "U' R U' R' F' U2 F R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "R U R' U2 R U R' U2 y' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "U' F' U2 F2 R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U r)",
+        "alg": "U' R U R' U r U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L d)",
+        "alg": "d' L' U2 L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U F r d)",
+        "alg": "d' r' F2 r2 U' r' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "y' U' R' U' F R' F' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "U2 R' U2 R U F R' F' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "R U' R' U' F' U2 F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "R U R' U2 R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L)",
+        "alg": "y L' U L U' L' U L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "y' R' U R U' R' U R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "R U' R' U' y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "R U' R' U' y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "y' U' R' U2 R2 y R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L)",
+        "alg": "U' y L' U2 L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U L F)",
+        "alg": "U' R U R' U F' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F d)",
+        "alg": "U' F' d U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L F d)",
+        "alg": "d' L' U2 L2 F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U d)",
+        "alg": "R U' R' U2 d R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "R U R' U2 R U' R' U' R' F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U F)",
+        "alg": "R U R' U2 R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (U L F)",
+        "alg": "F' U L' U L U' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U)",
+        "alg": "U' y' R' U2 R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 20 - (R U r M)",
+        "alg": "U' M' U R U2 R' U' R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 21",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 21 - (R U)",
+        "alg": "U2 R U R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=6M2nkaooAZk",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 21 - (R U)",
+        "alg": "R U' R' U2 R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=xgz0P4IQ0Z8",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U B)",
+        "alg": "R B U2 B' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U f)",
+        "alg": "y' f R' f' U2 f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U f)",
+        "alg": "U2 y' f R f' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U f)",
+        "alg": "y' f R' f' U2 f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U F)",
+        "alg": "y R' F R U2 R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U r)",
+        "alg": "r U' R' U2 R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U F)",
+        "alg": "y F R U2 R' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U F)",
+        "alg": "y F R U' R' U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U)",
+        "alg": "R U R' U R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (U L d)",
+        "alg": "y2 L y L U2 L' x' d' z",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (U L)",
+        "alg": "y2 L U' L' U2 L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U l)",
+        "alg": "U2 l U' R U l2 x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 21 - (R U F)",
+        "alg": "U2 R U R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 22",
+    "category": "Disconnected Pairs",
+    "algList": [
+      {
+        "name": "F2L 22 - (U r)",
+        "alg": "r U' r' U2 r U r'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=0IpO4zFYFoo",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 22 - (U L F)",
+        "alg": "F' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U)",
+        "alg": "y' U2 R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L)",
+        "alg": "y U2 L' U' L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U)",
+        "alg": "y' R' U R U2 R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U F)",
+        "alg": "U2 F' U' F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L F)",
+        "alg": "L F' L' U2 L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U F)",
+        "alg": "R2 U2 R2 F R F' R U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L F)",
+        "alg": "U2 F' L F' L' F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L)",
+        "alg": "y L' U L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U F)",
+        "alg": "F' U F U2 F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L d)",
+        "alg": "U' d' L' U' L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U)",
+        "alg": "y' U2 R' U' R U2 R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U F)",
+        "alg": "U2 F' U' F2 R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U d)",
+        "alg": "d U R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U)",
+        "alg": "U2 y' R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (U L r)",
+        "alg": "y U2 r' U L' U' r2 x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 22 - (R U F)",
+        "alg": "U2 R U R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 23",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 23 - (R U)",
+        "alg": "U R U' R' U' R U' R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=ZkLqXWiLFAg",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 23 - (R U)",
+        "alg": "R U R' U2 R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 23 - (R U)",
+        "alg": "U2 R2 U2 R' U' R U' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 23 - (R U D)",
+        "alg": "R U' R2 D' R U2 R' D R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 24",
+    "category": "Connected Pairs",
+    "algList": [
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "F U R U' R' F' R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=6HbnAQY-aVM",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' R' U' R U2 R' U' R U R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "U' R U R2 F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L)",
+        "alg": "y U' L' U L U L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L)",
+        "alg": "y U' L' U L U L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "R U R' U R U2 R' y' U R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' U' R' U R U R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L F)",
+        "alg": "y U' F' L F L' U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U r)",
+        "alg": "R U' R' U r U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U L F)",
+        "alg": "U F' L' U L F R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U S)",
+        "alg": "S' R U' R' S U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' U R U R' U R U2 R2 U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "R U R' U R U R' U' F R' F' R U",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "F' U' F R U' R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "R U R' U R U2 R' U F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U r)",
+        "alg": "r U R' U R U2 r' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L)",
+        "alg": "y L' U2 L U2 L' U' L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "U2 R U R' U' R U' R' y' U R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' R' U' R U' R' U2 R U2 R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' R' U2 R U' R' U R U R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F D)",
+        "alg": "U F R' F' D' R U R' D R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "R U2 R' y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L)",
+        "alg": "y L' U' L U2 L' U' L U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "y R' F2 R U R' F2 R U' R' F2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L)",
+        "alg": "y U2 L2 U2 L U L' U L2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U L)",
+        "alg": "R U2 R' y L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "F' U2 F R U' R' U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "U' R U' R' U' y' R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' R' U R U y R U' R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' R' U R U y R U' R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "R U R' U R U2 R' y' R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U d)",
+        "alg": "R U R' U R U2 R' d R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "R U2 R' F' U2 F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U L f)",
+        "alg": "y2 f R U R' U' f' L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "U F R' F' R2 U2 R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "U' F' U F U F' U F2 R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "U' R U' R' U' F' U' F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U r)",
+        "alg": "U' R U' R' U r U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U L)",
+        "alg": "U' R U' R' U' y L' U' L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U F)",
+        "alg": "U' F' U2 F U F' U F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U r)",
+        "alg": "r U r' U R U R' U' r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U d)",
+        "alg": "R U R' d R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "R U R' U R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U F)",
+        "alg": "R U R' U R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (R U)",
+        "alg": "y' U2 R2 U2 R U R' U R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U L F)",
+        "alg": "F' U L' U' L U' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 24 - (U F)",
+        "alg": "F' U' F U2 F' U' F U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 25",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 25 - (R U F)",
+        "alg": "U' R' F R F' R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=S9257JxJwZk",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 25 - (R U F)",
+        "alg": "R' F' R U R U' R' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 25 - (R U F)",
+        "alg": "U' F' R U R' U' R' F R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Lw0cHb3nT4o",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 25 - (R U F)",
+        "alg": "U' F' U F U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 26",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 26 - (R U F)",
+        "alg": "U R U' R' F R' F' R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=gr9h0xiXWjM",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 26 - (R U S)",
+        "alg": "R S' R' U R S R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 26 - (R U L)",
+        "alg": "U R U R' U' y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 26 - (R U F)",
+        "alg": "U R U' R' U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 27",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 27 - (R U)",
+        "alg": "R U' R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=JBYRStpmDL8",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 27 - (R U F)",
+        "alg": "F' U' F U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U f)",
+        "alg": "y' f R' f' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U r f M)",
+        "alg": "y' f R' f' r' U' R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U f)",
+        "alg": "y' f R' f' U f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (U L F)",
+        "alg": "y L' U' L U2 F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U F)",
+        "alg": "R U' R2 F R F'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=YaWkhs1cUj4",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U f)",
+        "alg": "y' R' U' R U2 f R' f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (U L F)",
+        "alg": "y L' U' L U F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U F)",
+        "alg": "F' U2 F R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U)",
+        "alg": "R U R' U' R U' R' U R U' R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (U L)",
+        "alg": "y2 L U' L' U L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U L)",
+        "alg": "y L' U' L y' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 27 - (R U)",
+        "alg": "y' R' U' R U y U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 28",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 28 - (R U F)",
+        "alg": "R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": true
+      },
+      {
+        "name": "F2L 28 - (U L)",
+        "alg": "y L' U L U' L' U L",
+        "youtubeUrl": "https://www.youtube.com/watch?v=_VWlb_5SrsI",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 28 - (U F)",
+        "alg": "F' U F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 28 - (R U)",
+        "alg": "y' R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 29",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 29 - (R U F)",
+        "alg": "R' F R F' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=EvCzppFMLCs",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 29 - (U L)",
+        "alg": "y L' U' L U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 29 - (R U)",
+        "alg": "y' R' U' R U R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 29 - (R F)",
+        "alg": "R' F R F' R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 30",
+    "category": "Corner In Slot",
+    "algList": [
+      {
+        "name": "F2L 30 - (R U)",
+        "alg": "R U R' U' R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=MDy2EhrraRE",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 30 - (R U F)",
+        "alg": "U' F R' F' R2 U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 30 - (R U)",
+        "alg": "U' R U2 R' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 30 - (R U F)",
+        "alg": "U2 F' U F R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 31",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "U' R' F R F' R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=YflQOzAiK5s",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 31 - (R U)",
+        "alg": "R U' R' U y' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "F' U F R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U L)",
+        "alg": "R U' R' U y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U2 R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U l)",
+        "alg": "R U' l U' R' U l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U' R' F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U' R' U2 F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (U F r)",
+        "alg": "y r' F r' F r U' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U' R' U F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U L)",
+        "alg": "R U2 R' y U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "F' U2 F U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U)",
+        "alg": "R U' R' y' R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "U R U2 R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U B)",
+        "alg": "R U' R B' R' B R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U S)",
+        "alg": "S' R U2 R' S U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "U F R' F' R F R' F' R2 U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F f)",
+        "alg": "U F R' F' R2 f R f' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R' F R F' U' R U' R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "y' R' U R' F R F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U L)",
+        "alg": "R U2 R' U2 y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U R' F' U F U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U)",
+        "alg": "y' R' U R y R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F D)",
+        "alg": "R' D' F' R U2 R U2 R2 F R U2 R2 D R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "R U2 R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U d)",
+        "alg": "R U' R' d R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F)",
+        "alg": "U' R' F R F' U' R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U F l)",
+        "alg": "l F' R U' R' U l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 31 - (R U L)",
+        "alg": "R U' R' y L' U2 L",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 32",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 32 - (R U)",
+        "alg": "U R U' R' U R U' R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=-xHjZYwAvWk",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 32 - (R U)",
+        "alg": "R U R' U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 32 - (R U)",
+        "alg": "R2 U R2 U R2 U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 32 - (R U F)",
+        "alg": "U' F R' F' R U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 33",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 33 - (R U)",
+        "alg": "U' R U' R' U2 R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=l49Oin4njnY",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 33 - (R U D)",
+        "alg": "y R' D R U' R' D' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U)",
+        "alg": "R U R' U' R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U)",
+        "alg": "U' R U' R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "U y L' U2 L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "U' y L' U' L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U F)",
+        "alg": "U' R U' R' U R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U F)",
+        "alg": "F' U2 F R U2 R' U R U' R' U R U' R' U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U F D)",
+        "alg": "U' F D F' U F D' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "y U' L' U' L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U F)",
+        "alg": "U' F' U' F U2 F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L d)",
+        "alg": "d' L' U' L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "y2 U' L U' L' U2 L U' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L D)",
+        "alg": "U L' U2 L D' L' U L D L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U F)",
+        "alg": "U R U' R' F' R U R' U' R' F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U F)",
+        "alg": "U R U' R' F' U F U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U r)",
+        "alg": "U r U' r' U r U r' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U)",
+        "alg": "U R U R' U R U R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U F)",
+        "alg": "U F' U2 F U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U D d)",
+        "alg": "d U2 R D R' U R D' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U F)",
+        "alg": "U R U R' U' R U' R' U' F' U' F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "y U L' U2 L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (U L)",
+        "alg": "y U L' U2 L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 33 - (R U)",
+        "alg": "y' U R' U2 R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 34",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "U R U R' U2 R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=1Zh-CRRe0E4",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "U' R U2 R' U R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=uLiLxtW2lko",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U D)",
+        "alg": "U R' D' R U' R' D R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L)",
+        "alg": "y U L' U L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "y' U R' U R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U D)",
+        "alg": "U' R' D' R U R' D R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L D)",
+        "alg": "L D' L' U L D L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U F)",
+        "alg": "U F' U F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L)",
+        "alg": "y2 U' L U2 L' U L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L F)",
+        "alg": "U F' U L' U L U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L F)",
+        "alg": "U y L' U L U' L F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U d)",
+        "alg": "d R' U R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U L)",
+        "alg": "R U R' U2 y L' U L U y' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "U R U' R' U R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U r)",
+        "alg": "U' R U2 R' U' r U' r' U' r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U r)",
+        "alg": "U' R U R' U' r U' R' U' R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U r)",
+        "alg": "U r U2 r' U2 r U r' U2 r U2 r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "R U' R' U2 R U2 R' U' R U' R' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U d)",
+        "alg": "d R' U R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U F)",
+        "alg": "U F' U F U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U F)",
+        "alg": "R U R' U2 R' F R F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U F)",
+        "alg": "R U R' U2 F' U' F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U)",
+        "alg": "y' R' U' R U R' U R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U L)",
+        "alg": "y L' U' L U L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (R U F r)",
+        "alg": "z' y2 R U' r' F R' F' r U z'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 34 - (U F)",
+        "alg": "U F' U F U F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 35",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 35 - (R U F)",
+        "alg": "U' R U R' U F' U' F",
+        "youtubeUrl": "https://www.youtube.com/watch?v=ZYv09SLzoKw",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 35 - (R U d)",
+        "alg": "U' R U R' d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 35 - (R U F)",
+        "alg": "U2 R U R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 35 - (R U)",
+        "alg": "U2 R U R' y' U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 36",
+    "category": "Edge In Slot",
+    "algList": [
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U F' U' F U' R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=cfa5NlJaxZ8",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U2 R' F R F' U2 R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=PXry0dwYwgE",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U u)",
+        "alg": "R2 u R U R' U' u' R' U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "R U R' U R U R' U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "R U R' U R U' R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U d)",
+        "alg": "d R' U' R d' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U D r)",
+        "alg": "R2 D r' U r D' R' U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "R U R' U R U R' U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U2 F' U F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "U y L' U' L U' F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "R U2 R' y' R' U R U' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L)",
+        "alg": "U y L' U' L U' y' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L)",
+        "alg": "y U L' U' L U' y' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U f d)",
+        "alg": "d R' U' R U' f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U f)",
+        "alg": "y' U R' U' R U' f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U F d)",
+        "alg": "U F' U' F d' F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U2 F' U' F U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "U2 y L' U' L U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "U2 y L' U L U F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "U2 y L' U' L F' L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L)",
+        "alg": "y U L' U' L y' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L l M)",
+        "alg": "y U' M' U' L' U l L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L d)",
+        "alg": "d' U' L' U L d R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "U R U R' U' y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U S)",
+        "alg": "S' R U2 R' S U2 R U R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L d)",
+        "alg": "R U R' U R U' R' d' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "U' R U R' y' U2 R' U' R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L)",
+        "alg": "R U R' U R U' R' U' y L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U r)",
+        "alg": "U' R U R' r U' R' U R U' R' U' R U' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U r)",
+        "alg": "U' R U R' r U' R' U R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U F r)",
+        "alg": "y U2 r' F' r U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L d)",
+        "alg": "R U' R' d' L' U L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "R U R' U R U' R' U' F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U d)",
+        "alg": "y' U R' U' R d' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "R U R' U R U' R' y' U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "y' U R' U' R U' y R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "F' U' F y U' L' U' L U2 F U2 F' U F U' F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U R U' R' U2 R U R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L d)",
+        "alg": "y U L' U' L d' L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "R' F R F' U2 R U2 R' U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (U L F)",
+        "alg": "U F' L F' L' F U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U L)",
+        "alg": "y' U R' U' R y' U' L U L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U F)",
+        "alg": "U R U' R' U2 R U R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "U y' R' U' R U' y R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 36 - (R U)",
+        "alg": "U y' R' U' R y U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 37",
+    "category": "Pieces In Slot",
+    "algList": [
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R2 U2 F R2 F' U2 R' U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=Yo29cluMUNc",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F' R U' R' U R U' R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U2 R' U R U2 R' U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U)",
+        "alg": "R U R' U2 R U2 R' U y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U)",
+        "alg": "R U2 R' U R U2 R' U y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F' R' U2 R2 U R2 U R",
+        "youtubeUrl": "https://www.youtube.com/watch?v=hnuvQDHvvOQ",
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U)",
+        "alg": "R U' R' U y' R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U d)",
+        "alg": "R U' R' d R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U)",
+        "alg": "R U' R' U y' R' U2 R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U L)",
+        "alg": "R U' R' y U L' U2 L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U r)",
+        "alg": "R U' R' r' U2 R2 U R2 U r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U r M)",
+        "alg": "M' U R U' r' R U' R' U R U' R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F r)",
+        "alg": "F R U' R' r U2 r' U r U' r' U2 F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U' R U2 F R2 F' U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U L F D)",
+        "alg": "L D R' F R F' R U' R' U D' L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U R' U' R U' R' F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "F' U' F U2 F' U2 F U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F' R U2 R' U2 R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U' R' F R' F' R U' R U' R' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U D M)",
+        "alg": "D' R U' R' D R' U R U R' U2 R2 U' M' U R' U' M",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F d)",
+        "alg": "R' F R F' d R' U2 R d' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' R U R' U R' F R F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U S)",
+        "alg": "S' R U2 R' S U R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U' R' U F' U2 F U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "F' U' F U R' U2 R2 U R2 U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (U M)",
+        "alg": "z M U' M U2 M' U' M' U' M' U2 M U' z'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U L F D)",
+        "alg": "D R U R' F R' F' R D' U L' U L U' L' U L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U r)",
+        "alg": "r U' r' R U R' U r U' r' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U' R' U F' U2 F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F D)",
+        "alg": "D' R U R' F R' F' R D y R U R' U' R U R' U' R U R' U'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U d)",
+        "alg": "U R U' R' U R U' R' U R U R' d U R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F d)",
+        "alg": "F R' F' R U' R U2 R' d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U f)",
+        "alg": "y' f R f' U' R U2 R2 U' R2 U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U L F)",
+        "alg": "R U R' U' F' U L' U2 L U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U R' U' R U2 R' U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (U F r M)",
+        "alg": "r U r' U2 M' U M F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "F' U F U' R U2 R' U2 R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U2 R U2 R' U F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U R' U' R U2 R' U' F R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F2 U' F U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F2 U' F U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' R U R' U' R U R' U2 R' F R F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U R' U' F' U' F U' R U R' U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (U F M)",
+        "alg": "F' M' F U' M U' M' F' M F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U f)",
+        "alg": "y' R' U R f R U R2 U' R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (U L l)",
+        "alg": "y2 L U' L' l' U2 L2 U L2 U l",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F' U2 R U R U' R2 U2 R F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "F' R' U2 R2 U R' U' R' U2 F R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R' F R F' R U R' U R' F R F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U F)",
+        "alg": "R U' R' U F' U2 F U F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U d)",
+        "alg": "R U' R' d R' U2 R U R' U2 R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 37 - (R U r)",
+        "alg": "r R U R' U' r' U2 R U R U' R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 38",
+    "category": "Pieces In Slot",
+    "algList": [
+      {
+        "name": "F2L 38 - (R U)",
+        "alg": "R U' R' U' R U R' U2 R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=ji7XpGGcrWs",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 38 - (R U)",
+        "alg": "R U R' U' R U2 R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U)",
+        "alg": "R2 U2 R' U' R U' R' U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U)",
+        "alg": "R U' R' U' R U R' U' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (U L F)",
+        "alg": "F' L' U2 L U' L' U2 L U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U F)",
+        "alg": "y F R U2 R' U' R U R' U2 F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (U L)",
+        "alg": "y L' U' L U2 L' U L U' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U F)",
+        "alg": "R U' R' U' R U R' U R' F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U F)",
+        "alg": "F R' F' R2 U2 R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U M)",
+        "alg": "R U' M' U R' U' M U R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U r)",
+        "alg": "r R U2 R' U' R U' r' U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (U L F)",
+        "alg": "y L' U L U' L' U2 L2 F' L' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (U F)",
+        "alg": "F' U2 F' U' F U' F' U2 F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U L)",
+        "alg": "x z' R U R' U R U2 R' L' U' L U' L' U2 L x'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U r)",
+        "alg": "R U' R' U' r U' r' U2 r U r' R U2 R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U F B r)",
+        "alg": "R U2 B2 r' U' r B' R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U F)",
+        "alg": "R' U' F R F' R' U R F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 38 - (R U D)",
+        "alg": "U R' D' R U' R' D R D' R' D R U R' D' R D",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 39",
+    "category": "Pieces In Slot",
+    "algList": [
+      {
+        "name": "F2L 39 - (R U)",
+        "alg": "R U' R' U R U2 R' U R U' R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=vq-vBqWFuec",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 39 - (R U)",
+        "alg": "R U2 R U R' U R U2 R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U)",
+        "alg": "R U R' U2 R U' R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U)",
+        "alg": "R U2 R' U R U' R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U L F)",
+        "alg": "F' L' U2 L U L' U' L U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U F)",
+        "alg": "y F R U2 R' U R U2 R' U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U L F)",
+        "alg": "y F' L F L2 U2 L U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U r M)",
+        "alg": "R U r' R U' R' U M' U' R U R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U r)",
+        "alg": "R U2 R' r U' r' U r R' U2 R U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U r)",
+        "alg": "R U2 r U R' U R U2 R' r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U r)",
+        "alg": "R U R' U2 R U' r' U R U R' U' R' r",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U L)",
+        "alg": "y L' U L U L' U' L U2 L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U F)",
+        "alg": "R U R' U' R U R' U' R' F R F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U F)",
+        "alg": "R U2 R' U R' F R2 U R' U' R' F' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U F)",
+        "alg": "R U' R' U R U2 R2 F R F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U D r)",
+        "alg": "R U R D r' U r D' R2 U2 R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U F)",
+        "alg": "R U R' U' R U R' U' F' U' F U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U L F S)",
+        "alg": "S' R F' L F U L U' L' R' S",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U F)",
+        "alg": "F' U F U F' U' F U2 F' U F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U L)",
+        "alg": "y L' U' L U L' U2 L U L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (R U D)",
+        "alg": "U D' R' D R U' R' D' R D R' D' R U R' D R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 39 - (U F)",
+        "alg": "F' U F U F' U' F U F' U2 F",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 40",
+    "category": "Pieces In Slot",
+    "algList": [
+      {
+        "name": "F2L 40 - (R U r)",
+        "alg": "r U' r' U2 r U r' R U R'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=u_RyH_2Kqhw",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 40 - (R U L F)",
+        "alg": "F' L' U2 L F R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 40 - (R U F)",
+        "alg": "R U' R' F R U R' U' F' R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 40 - (R U)",
+        "alg": "R U' R' U' R U' R' U y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "F2L 41",
+    "category": "Pieces In Slot",
+    "algList": [
+      {
+        "name": "F2L 41 - (R U r)",
+        "alg": "R U' R' r U' r' U2 r U r'",
+        "youtubeUrl": "https://www.youtube.com/watch?v=DpuAOiDiin4",
+        "isDefault": true
+      },
+      {
+        "name": "F2L 41 - (R U L F)",
+        "alg": "R U' R' F' L' U2 L F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F M)",
+        "alg": "R U R' U' y M U' R' F R U M'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U)",
+        "alg": "R U R' U' R U' R' U2 y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R U F R U R' U' F' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U)",
+        "alg": "R U' R' U2 y' R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L F)",
+        "alg": "R U' R' L F' L' U2 L F L'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U r M)",
+        "alg": "R U' M' U' r' U2 r U r'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R U R' F U R U' R' F' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U r M)",
+        "alg": "R U R' M' U R U' r' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L)",
+        "alg": "R U' R' y U2 L' U' L U' L' U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R U R' U' R U' R' U2 F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (U L F)",
+        "alg": "y L' F' U' L' U L F U L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L F)",
+        "alg": "y R' F R U2 R' F' R L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L F)",
+        "alg": "y F R U2 R' F' L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L)",
+        "alg": "R U R' U' R U' R' U2 y L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U S)",
+        "alg": "S' R U2 R' S R U' R' U' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U f)",
+        "alg": "R2 f R f' U' R' U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U)",
+        "alg": "R U R' U2 R U' R' y' U2 R' U2 R U2 R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L)",
+        "alg": "y L' U L U L' U L U' y' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (U L F)",
+        "alg": "y L' U L U L' U L U' F U F'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (U L F)",
+        "alg": "F' U F' U' L' U L F2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F B)",
+        "alg": "R B U2 B' R' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L d)",
+        "alg": "R U R' d' L' U2 L U L' U L U2 L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "y' R' U R' U' F' U F R2",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F d)",
+        "alg": "F' U F d R' U R d' R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R U R' U' R U R' U2 R U R' U' F' U' F",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R' F R F' U R U' R' U' R U' R' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (U L l)",
+        "alg": "y2 L U' L' l U' l' U2 l U l'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (U L l)",
+        "alg": "y l' U l U2 l' U' l L' U' L",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U d)",
+        "alg": "R U' R' U d R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "F R' F' R2 U' R' U2 y' R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U L)",
+        "alg": "y L' U L y' U' R U R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U d)",
+        "alg": "R U' R' d U R' U' R U' R' U R",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U f)",
+        "alg": "y' R' U R U R' U R U' f R f'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "R U R' F R U R' U' F' U R U' R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U F)",
+        "alg": "F' U F U' R U R' U R U R'",
+        "youtubeUrl": null,
+        "isDefault": false
+      },
+      {
+        "name": "F2L 41 - (R U d)",
+        "alg": "R U R' U' R U' R' U d R' U' R",
+        "youtubeUrl": null,
+        "isDefault": false
+      }
+    ]
+  }
+]
