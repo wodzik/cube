@@ -54,10 +54,30 @@ const ATTACK_CONFIG: SessionConfig = {
   inspectionSeconds: 15,
 };
 
-const ATTACK_GROUPS: { id: "oll" | "pll"; label: string }[] = [
+// Top-level pick: OLL and PLL are groups directly; "F2L" fans out into a
+// slot sub-picker (each slot is its own 41-case AlgGroup with independent
+// queue, stats, and session history).
+const ATTACK_TABS: { id: "oll" | "pll" | "f2l"; label: string }[] = [
   { id: "oll", label: "OLL" },
   { id: "pll", label: "PLL" },
+  { id: "f2l", label: "F2L" },
 ];
+
+const F2L_SLOTS: { id: AlgGroup; label: string; title: string }[] = [
+  { id: "f2l-front-right", label: "FR", title: "Front-right slot" },
+  { id: "f2l-front-left", label: "FL", title: "Front-left slot" },
+  { id: "f2l-back-right", label: "BR", title: "Back-right slot" },
+  { id: "f2l-back-left", label: "BL", title: "Back-left slot" },
+];
+
+const GROUP_LABELS: Partial<Record<AlgGroup, string>> = {
+  oll: "OLL",
+  pll: "PLL",
+  "f2l-front-right": "F2L Front-Right",
+  "f2l-front-left": "F2L Front-Left",
+  "f2l-back-right": "F2L Back-Right",
+  "f2l-back-left": "F2L Back-Left",
+};
 
 function invertAlg(alg: string): string {
   const moves = alg.trim().split(/\s+/).filter(Boolean);
@@ -77,7 +97,9 @@ function AttackPageInner() {
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
-  const [group, setGroup] = useState<"oll" | "pll">("oll");
+  const [group, setGroup] = useState<AlgGroup>("oll");
+  // Remembered so toggling away from F2L and back returns to the same slot.
+  const [f2lSlot, setF2lSlot] = useState<AlgGroup>("f2l-front-right");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
   const [queue, setQueue] = useState<string[]>(() => cases.map((c) => c.name));
   const [completed, setCompleted] = useState<{ caseName: string; timeMs: number }[]>([]);
@@ -199,18 +221,41 @@ function AttackPageInner() {
     <TrainerPanel
       header={
         <div className="flex items-center gap-1 w-full">
-          {ATTACK_GROUPS.map((g) => (
-            <button
-              key={g.id}
-              onClick={() => setGroup(g.id)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
-                group === g.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-              }`}
-              style={group === g.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-            >
-              {g.label}
-            </button>
-          ))}
+          {ATTACK_TABS.map((t) => {
+            const isActive = t.id === "f2l" ? group.startsWith("f2l-") : group === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setGroup(t.id === "f2l" ? f2lSlot : t.id)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+                  isActive ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                }`}
+                style={isActive ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+          {group.startsWith("f2l-") && (
+            <div className="flex items-center gap-0.5 ml-1 pl-2 border-l border-white/[0.08]">
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
+              {F2L_SLOTS.map((s) => (
+                <button
+                  key={s.id}
+                  title={s.title}
+                  onClick={() => {
+                    setF2lSlot(s.id);
+                    setGroup(s.id);
+                  }}
+                  className={`px-2 py-1 text-[11px] font-semibold rounded-lg transition-colors ${
+                    group === s.id ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
           <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono">
             {completed.length} / {cases.length}
           </span>
@@ -293,7 +338,7 @@ function AttackPageInner() {
           {history.length > 0 && (
             <div className="border-t border-gray-800">
               <div className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                Recent {group.toUpperCase()} attack sessions
+                Recent {GROUP_LABELS[group] ?? group} attack sessions
               </div>
               <div className="divide-y divide-gray-800/40">
                 {[...history]

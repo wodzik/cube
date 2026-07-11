@@ -1,8 +1,12 @@
 /**
- * Persistent storage for OLL/PLL Attack session results.
- * localStorage keys: attack_sessions_oll / attack_sessions_pll
+ * Persistent storage for Attack session results (OLL, PLL, and the four
+ * F2L slots — any AlgGroup the AttackPage offers).
+ * localStorage keys: attack_sessions_<group>, e.g. attack_sessions_oll,
+ * attack_sessions_f2l-front-right.
  * PURE FUNCTIONS — no React hooks.
  */
+
+import type { AlgGroup } from "../types/algorithm";
 
 export interface AttackCaseTime {
   caseName: string;
@@ -12,13 +16,13 @@ export interface AttackCaseTime {
 export interface AttackSession {
   id: string;
   date: number;
-  group: "oll" | "pll";
+  group: AlgGroup;
   /** Total session duration in ms (first case start -> last case complete). */
   totalMs: number;
   caseTimes: AttackCaseTime[];
 }
 
-function key(group: "oll" | "pll"): string {
+function key(group: AlgGroup): string {
   return `attack_sessions_${group}`;
 }
 
@@ -32,7 +36,7 @@ function readJson<T>(k: string, fallback: T): T {
   }
 }
 
-export function getAttackSessions(group: "oll" | "pll"): AttackSession[] {
+export function getAttackSessions(group: AlgGroup): AttackSession[] {
   return readJson<AttackSession[]>(key(group), []);
 }
 
