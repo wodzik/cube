@@ -1,13 +1,23 @@
-name: CI
+# CI + deploy in one pipeline: the site only deploys when tests and the
+# production build pass, and the build artifact is built ONCE and reused.
+#
+# ONE-TIME REPO SETUP (already done for this repo): GitHub Settings ->
+# Pages -> Build and deployment -> Source: "GitHub Actions". Without it the
+# deploy job fails with "Pages site not found".
+
+name: CI & Deploy
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -17,3 +27,27 @@ jobs:
         run: bun test
       - name: Type-check + production build
         run: bun run build
+      # Pages artifact only when this run can deploy (push/manual, not PRs).
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
