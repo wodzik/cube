@@ -20,11 +20,13 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
+import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
 import { STICKERING, CAMERA } from "../logic/algGroupConfig";
 import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
+import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { MoveSequenceDisplay } from "./MoveSequenceDisplay";
 import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisation";
 import { ConnectionPanel } from "./ConnectionPanel";
@@ -60,6 +62,7 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const [attemptsMs, setAttemptsMs] = useState<number[]>([]);
+  const moveBuffer = usePendingMoveBuffer(state.phase);
 
   const loadTarget = () => {
     reset();
@@ -67,6 +70,18 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
     cubeRef.current?.reset();
     const tokens = alg.trim().split(/\s+/).filter(Boolean);
     if (tokens.length > 0) cubeRef.current?.setSetupAlgorithm(invertSequence(tokens).join(" "), "");
+    // Replay moves made while the previous attempt was wrapping up — lets
+    // the variant be executed several times back-to-back without waiting
+    // for the reset delay. Stop at completion; any tail waits for the next
+    // reload.
+    const flushTarget = buildSequenceTarget(alg);
+    const delivered: string[] = [];
+    moveBuffer.flush((move, timestamp) => {
+      submitCubeMove(move, timestamp);
+      cubeRef.current?.addMove(move);
+      delivered.push(move);
+      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+    });
   };
 
   // Depend on `alg` only — reset/setTarget get a NEW identity from
@@ -81,6 +96,7 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
 
   const cube = useSmartCube({
     onMove: (move, timestamp) => {
+      if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
       cubeRef.current?.addMove(move);
     },
@@ -89,14 +105,14 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
   const displaySec = useAnimationTimer(state.startTime, state.endTime, state.phase === "active");
 
   // Record the attempt locally (never persisted) and reload for another go.
-  const notifiedRef = useRef(false);
+  // Guarded by attempt identity (endTime) — see TrainingPage's comment: a
+  // buffered replay can complete an attempt within one batched render.
+  const lastRecordedEndRef = useRef<number | null>(null);
   useEffect(() => {
-    if (state.phase !== "done") {
-      notifiedRef.current = false;
-      return;
-    }
-    if (notifiedRef.current || state.startTime === null || state.endTime === null) return;
-    notifiedRef.current = true;
+    if (state.phase !== "done") return;
+    if (state.startTime === null || state.endTime === null) return;
+    if (lastRecordedEndRef.current === state.endTime) return;
+    lastRecordedEndRef.current = state.endTime;
     setAttemptsMs((a) => [...a, state.endTime! - state.startTime!]);
     const timer = setTimeout(loadTarget, 1200);
     return () => clearTimeout(timer);

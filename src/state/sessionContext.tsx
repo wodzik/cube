@@ -21,7 +21,13 @@ export interface SessionContextValue {
    */
   submitCubeMove: (move: string, timestamp: number) => void;
   signalStart: (source: StartMethod) => void;
-  signalStop: (source: StopMethod) => void;
+  /**
+   * Optional timestamp for stop sources that know the precise moment the
+   * stop condition occurred (stage-solved detection fires from an effect
+   * AFTER the triggering move — the move's own hardware timestamp is the
+   * honest end time, not performance.now() at dispatch).
+   */
+  signalStop: (source: StopMethod, timestamp?: number) => void;
   signalSolved: () => void;
   startInspection: () => void;
   setTarget: (targetNotation: string) => void;
@@ -50,7 +56,7 @@ export function SessionProvider({
       state,
       submitCubeMove: (move, timestamp) => dispatch(actions.cubeMove(move, timestamp)),
       signalStart: (source) => dispatch(actions.startSignal(source, performance.now())),
-      signalStop: (source) => dispatch(actions.stopSignal(source, performance.now())),
+      signalStop: (source, timestamp) => dispatch(actions.stopSignal(source, timestamp ?? performance.now())),
       signalSolved: () => dispatch(actions.cubeSolved(performance.now())),
       startInspection: () => dispatch(actions.inspectionStart(performance.now())),
       setTarget: (targetNotation) => dispatch(actions.targetReady(targetNotation)),

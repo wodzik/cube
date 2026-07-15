@@ -30,6 +30,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, RotateCcw, ChevronRight } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
+import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
 import { getDefaultVariant, STICKERING, CAMERA } from "../logic/algGroupConfig";
 import { loadAlgGroup, recordAttempt, updateCase } from "../services/algorithmStore";
@@ -37,6 +38,7 @@ import { saveAttackSession, getAttackSessions, type AttackSession } from "../ser
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
+import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CaseListItem } from "../components/CaseListItem";
@@ -107,6 +109,7 @@ function AttackPageInner() {
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(group));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const moveBuffer = usePendingMoveBuffer(state.phase);
 
   useEffect(() => {
     const loaded = loadAlgGroup(group);
@@ -116,7 +119,8 @@ function AttackPageInner() {
     setSessionStartTime(null);
     setHistory(getAttackSessions(group));
     setExpandedSessionId(null);
-  }, [group]);
+    moveBuffer.clear(); // manual navigation — buffered moves belonged to the old group's queue
+  }, [group, moveBuffer]);
 
   const currentCase = useMemo(() => cases.find((c) => c.name === queue[0]) ?? null, [cases, queue]);
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
@@ -128,6 +132,18 @@ function AttackPageInner() {
     cubeRef.current?.reset();
     const inv = invertAlg(variant.alg);
     if (inv) cubeRef.current?.setSetupAlgorithm(inv, "");
+    // Moves that arrived while the previous case was completing (the queue
+    // advances over a render — a fast solver's first moves of the NEXT case
+    // can land in that gap) belong to this case: replay them, stopping if
+    // they complete it (any tail waits for the case after).
+    const flushTarget = buildSequenceTarget(variant.alg);
+    const delivered: string[] = [];
+    moveBuffer.flush((move, timestamp) => {
+      submitCubeMove(move, timestamp);
+      cubeRef.current?.addMove(move);
+      delivered.push(move);
+      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant?.id]);
 
@@ -137,9 +153,12 @@ function AttackPageInner() {
       // popup runs its own listener/session) — feeding them into the attack
       // underneath would advance it (or even start the session timer) unnoticed.
       if (editingCase) return;
+      if (sessionStartTime === null) setSessionStartTime(timestamp);
+      // Between a case completing and the next target arming, the session
+      // would DROP moves — capture them for replay instead.
+      if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
       cubeRef.current?.addMove(move);
-      if (sessionStartTime === null) setSessionStartTime(timestamp);
     },
   });
 
@@ -152,14 +171,15 @@ function AttackPageInner() {
     sessionStartTime !== null
   );
 
-  const notifiedRef = useRef(false);
+  // Guarded by attempt identity (endTime) — see TrainingPage's comment: a
+  // buffered replay can complete a case within one batched render, so a
+  // boolean re-armed by a non-"done" phase would miss it.
+  const lastRecordedEndRef = useRef<number | null>(null);
   useEffect(() => {
-    if (state.phase !== "done") {
-      notifiedRef.current = false;
-      return;
-    }
-    if (notifiedRef.current || !currentCase || !variant || state.startTime === null || state.endTime === null) return;
-    notifiedRef.current = true;
+    if (state.phase !== "done") return;
+    if (!currentCase || !variant || state.startTime === null || state.endTime === null) return;
+    if (lastRecordedEndRef.current === state.endTime) return;
+    lastRecordedEndRef.current = state.endTime;
 
     const timeMs = state.endTime - state.startTime;
     recordAttempt(group, currentCase.name, variant.id, { time: timeMs / 1000, hadErrors: false, source: "attack" });
@@ -200,6 +220,7 @@ function AttackPageInner() {
     setQueue(loaded.map((c) => c.name));
     setCompleted([]);
     setSessionStartTime(null);
+    moveBuffer.clear(); // fiddling after the session finished doesn't belong to the fresh queue
   }
 
   const progress = selectCurrentProgress(state);

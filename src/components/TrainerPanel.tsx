@@ -18,6 +18,7 @@ import type { ReactNode, RefObject } from "react";
 import { TrainLayout } from "./TrainLayout";
 import { MoveSequenceDisplay } from "./MoveSequenceDisplay";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
+import type { StickeringMaskOrbits } from "../types/cube";
 import { TimerDisplay } from "./TimerDisplay";
 import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
@@ -66,6 +67,7 @@ export interface TrainerPanelProps {
   cubeRef: RefObject<CubeVisualisationRef | null>;
   visualization?: VisualizationMode;
   stickering?: string;
+  stickeringMaskOrbits?: StickeringMaskOrbits;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -117,6 +119,7 @@ export function TrainerPanel({
   cubeRef,
   visualization = "PG3D",
   stickering,
+  stickeringMaskOrbits,
   background = "none",
   controlPanel = "none",
   dragInput = "auto",
@@ -185,6 +188,7 @@ export function TrainerPanel({
             ref={cubeRef}
             visualization={visualization}
             stickering={stickering}
+            stickeringMaskOrbits={stickeringMaskOrbits}
             background={background}
             controlPanel={controlPanel}
             dragInput={dragInput}

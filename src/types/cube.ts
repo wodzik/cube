@@ -74,5 +74,21 @@ export interface PhysicalMove {
 /** TwistyPlayer visualisation modes */
 export type VisualizationMode = "3D" | "2D" | "PG3D" | "experimental-2D-LL";
 
+/** One facelet's rendering in a piece-level stickering mask. */
+export type FaceletMask = "regular" | "dim" | "oriented" | "ignored" | "invisible";
+
+/**
+ * Piece-level stickering mask for TwistyPlayer's
+ * experimentalStickeringMaskOrbits — structurally compatible with cubing's
+ * (non-exported) StickeringMask type. Piece indices per orbit match
+ * logic/stageDetection/liveCubeState.ts's verified mapping, and the mask
+ * FOLLOWS pieces as they move — masking edge piece 0 keeps the UF edge
+ * highlighted wherever it currently is, which is exactly what a "watch these
+ * pieces" trainer view wants.
+ */
+export interface StickeringMaskOrbits {
+  orbits: Record<string, { pieces: ({ facelets: FaceletMask[] } | null)[] }>;
+}
+
 /** Facelet-level cube state — 6 faces × 9 stickers, used by the shared LiveCubeState (see logic/stageDetection). */
 export type FaceletState = Record<Face, Face[]>;

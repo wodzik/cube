@@ -25,12 +25,22 @@ describe("computeStageTimings", () => {
     expect(timings[1].moves).toEqual(["U", "R'"]);
   });
 
-  it("a stage completed by a run of identical moves collapses them for display (R,R -> R2)", () => {
+  it("a stage completed by a run of identical moves collapses them for display AND counting (R,R -> R2 = 1 move)", () => {
     const moves = [move("R", 100), move("R", 200)];
     const boundaries = [{ stage: "cross", moveIndex: 1, timestampMs: 200 }];
     const timings = computeStageTimings(["cross"], boundaries, moves);
-    expect(timings[0].moveCount).toBe(2);
+    // moveCount must always equal moves.length — a "cross — 2 moves: R2"
+    // label contradicts itself (same rule as SolveRecord.moveCount).
+    expect(timings[0].moveCount).toBe(1);
     expect(timings[0].moves).toEqual(["R2"]);
+  });
+
+  it("R,R' stays two counted moves — collapse is not algebraic cancellation", () => {
+    const moves = [move("R", 100), move("R'", 200), move("U", 300)];
+    const boundaries = [{ stage: "cross", moveIndex: 2, timestampMs: 300 }];
+    const timings = computeStageTimings(["cross"], boundaries, moves);
+    expect(timings[0].moveCount).toBe(3);
+    expect(timings[0].moves).toEqual(["R", "R'", "U"]);
   });
 
   it("a stage already solved before the solve started (moveIndex -1) contributes zero moves/time", () => {

@@ -22,7 +22,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
-import { computeSequenceProgress } from "../logic/sequenceTracker";
+import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
 import { getDefaultVariant, STICKERING, CAMERA } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
@@ -37,6 +37,7 @@ import {
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
+import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AlgorithmListView } from "../components/AlgorithmListView";
@@ -84,15 +85,24 @@ function TrainingPageInner() {
   const [group, setGroup] = useState<AlgGroup>("f2l-front-right");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
   const [caseIdx, setCaseIdx] = useState(0);
+  // Bumped on every auto-advance so the case-loading effect re-runs even
+  // when the NEXT case is the SAME case — with a single selected case,
+  // keying on variant.id alone never reloaded and the drill stalled after
+  // one attempt.
+  const [drillRound, setDrillRound] = useState(0);
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [jumpToCaseName, setJumpToCaseName] = useState<string | null>(null);
+  const moveBuffer = usePendingMoveBuffer(state.phase);
 
   const reload = () => setCases(loadAlgGroup(group));
 
   useEffect(() => {
     setCases(loadAlgGroup(group));
     setCaseIdx(0);
-  }, [group]);
+    // A manual navigation — moves buffered toward the auto-advanced case
+    // don't belong to the group the user just switched to.
+    moveBuffer.clear();
+  }, [group, moveBuffer]);
 
   const selectedCases = useMemo(() => cases.filter((c) => c.selected), [cases]);
 
@@ -112,6 +122,7 @@ function TrainingPageInner() {
       setCaseSelected(group, caseName, true);
       reload();
     }
+    moveBuffer.clear(); // manual jump — drop moves aimed at the auto-advanced case
     setJumpToCaseName(caseName);
   };
 
@@ -128,7 +139,8 @@ function TrainingPageInner() {
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
 
   // Load the case's algorithm as the target, and pre-set the cube to its
-  // scrambled state, whenever the case (or its variant) changes.
+  // scrambled state, whenever the case (or its variant) changes — or the
+  // drill advances to another round of the SAME case (drillRound).
   useEffect(() => {
     if (!variant) return;
     reset();
@@ -136,8 +148,20 @@ function TrainingPageInner() {
     cubeRef.current?.reset();
     const inv = invertAlg(variant.alg);
     if (inv) cubeRef.current?.setSetupAlgorithm(inv, "");
+    // Moves made while the previous attempt was finishing up (phase "done",
+    // e.g. chaining the next execution immediately) belong to THIS attempt —
+    // replay them now that the target is armed, stopping if they complete it
+    // (any tail beyond completion waits for the round after).
+    const flushTarget = buildSequenceTarget(variant.alg);
+    const delivered: string[] = [];
+    moveBuffer.flush((move, timestamp) => {
+      submitCubeMove(move, timestamp);
+      cubeRef.current?.addMove(move);
+      delivered.push(move);
+      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant?.id]);
+  }, [variant?.id, drillRound]);
 
   const cube = useSmartCube({
     onMove: (move, timestamp) => {
@@ -145,6 +169,10 @@ function TrainingPageInner() {
       // popup runs its own listener/session) — feeding them into the drill
       // underneath would advance/record the background case unnoticed.
       if (editingCase) return;
+      // Between an attempt completing and the next target arming, the
+      // session would DROP moves — capture them for replay instead (fast
+      // back-to-back executions used to desync here).
+      if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
       cubeRef.current?.addMove(move);
     },
@@ -165,14 +193,17 @@ function TrainingPageInner() {
   const currentCaseName = currentCase?.name;
   const variantId = variant?.id;
 
-  const notifiedRef = useRef(false);
+  // Guard by the attempt's IDENTITY (its endTime), not a boolean armed by a
+  // pass through a non-"done" phase: when a buffered replay completes a
+  // whole attempt inside one effect, React batches reset→setTarget→moves
+  // into a single render — the intermediate phases never render, so a
+  // boolean guard would swallow the second attempt entirely.
+  const lastRecordedEndRef = useRef<number | null>(null);
   useEffect(() => {
-    if (state.phase !== "done") {
-      notifiedRef.current = false;
-      return;
-    }
-    if (notifiedRef.current || !currentCase || !variant || state.startTime === null || state.endTime === null) return;
-    notifiedRef.current = true;
+    if (state.phase !== "done") return;
+    if (!currentCase || !variant || state.startTime === null || state.endTime === null) return;
+    if (lastRecordedEndRef.current === state.endTime) return;
+    lastRecordedEndRef.current = state.endTime;
 
     const finalProgress = state.target ? computeSequenceProgress(state.target, state.moveLog.map((m) => m.move)) : null;
 
@@ -185,6 +216,9 @@ function TrainingPageInner() {
 
     const timer = setTimeout(() => {
       setCaseIdx((i) => (i + 1) % Math.max(selectedCases.length, 1));
+      // Force the loading effect even when the next case is the same one
+      // (single-case drills / repeats in a short rotation).
+      setDrillRound((r) => r + 1);
     }, 1200);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -35,11 +35,13 @@ import { applyMoveToState, isFullySolved, isSlotSolved, type LiveCubeState } fro
 import type { StageDetector } from "./types";
 
 // Slot indices — see liveCubeState.ts doc comment for the verified mapping.
-const LEFT_BLOCK = { corners: [5, 6], edges: [7, 9, 11] }; // DLF, DBL / DL, FL, BL
-const RIGHT_BLOCK = { corners: [4, 7], edges: [5, 8, 10] }; // DFR, DRB / DR, FR, BR
+// Exported for the Roux case trainer (logic/trainer/rouxTargets.ts), which
+// reuses these piece sets and the offset machinery for its stop predicates.
+export const LEFT_BLOCK = { corners: [5, 6], edges: [7, 9, 11] }; // DLF, DBL / DL, FL, BL
+export const RIGHT_BLOCK = { corners: [4, 7], edges: [5, 8, 10] }; // DFR, DRB / DR, FR, BR
 const ALL_CORNER_SLOTS = [0, 1, 2, 3, 4, 5, 6, 7];
 
-function isBlockSolved(state: LiveCubeState, block: { corners: number[]; edges: number[] }): boolean {
+export function isBlockSolved(state: LiveCubeState, block: { corners: number[]; edges: number[] }): boolean {
   const corners = state.patternData.CORNERS;
   const edges = state.patternData.EDGES;
   return (
@@ -61,7 +63,7 @@ function allCornersSolved(state: LiveCubeState): boolean {
  * slots on a whole-cube-rotated state asks exactly "does x^k bring these
  * pieces home" — i.e. the subset is intact, just rotated about the axis.
  */
-function offsetStates(state: LiveCubeState): LiveCubeState[] {
+export function offsetStates(state: LiveCubeState): LiveCubeState[] {
   let s = state;
   const out = [s];
   for (let k = 1; k < 4; k++) {

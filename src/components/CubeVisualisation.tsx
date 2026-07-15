@@ -17,7 +17,7 @@
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { TwistyPlayer } from "cubing/twisty";
-import type { VisualizationMode } from "../types/cube";
+import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 
 export type { VisualizationMode };
 
@@ -31,6 +31,8 @@ export interface CubeVisualisationProps {
   hintFacelets?: "none" | "floating";
   /** Stickering scheme: "full" | "OLL" | "PLL" | "F2L" | etc. */
   stickering?: string;
+  /** Piece-level mask (overrides `stickering` when set) — e.g. "show only the 4 cross edges" (see types/cube.ts). */
+  stickeringMaskOrbits?: StickeringMaskOrbits;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -66,6 +68,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       visualization = "PG3D",
       hintFacelets = "none",
       stickering = "full",
+      stickeringMaskOrbits,
       background = "none",
       controlPanel = "none",
       dragInput = "auto",
@@ -100,7 +103,11 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.cameraLatitude = cameraLatitude;
       player.cameraLongitude = cameraLongitude;
       player.tempoScale = tempoScale;
-      player.experimentalStickering = stickering;
+      if (stickeringMaskOrbits) {
+        player.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
+      } else {
+        player.experimentalStickering = stickering;
+      }
 
       if (setupAlg) {
         player.experimentalSetupAlg = setupAlg;
@@ -125,8 +132,12 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
 
     useEffect(() => {
       if (!playerRef.current) return;
-      playerRef.current.experimentalStickering = stickering;
-    }, [stickering]);
+      if (stickeringMaskOrbits) {
+        playerRef.current.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
+      } else {
+        playerRef.current.experimentalStickering = stickering;
+      }
+    }, [stickering, stickeringMaskOrbits]);
 
     useEffect(() => {
       if (!playerRef.current) return;
@@ -158,6 +169,12 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
         if (!playerRef.current) return;
         playerRef.current.experimentalSetupAlg = setup;
         playerRef.current.alg = newAlg;
+        // Replacing the setup mid-animation (e.g. the trainer swapping in
+        // the next attempt's view right as the final solve move is still
+        // animating) can leave the timeline frozen before the end — the
+        // cube then LOOKS unsolved until the next move nudges it. Land on
+        // the final state explicitly.
+        playerRef.current.jumpToEnd({ flash: false });
       },
       setVisualization: (mode: VisualizationMode) => {
         if (!playerRef.current) return;

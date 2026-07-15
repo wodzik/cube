@@ -9,15 +9,17 @@ import { UpdateNotice } from "./components/UpdateNotice";
 const SolvePage = lazy(() => import("./pages/SolvePage"));
 const TrainingPage = lazy(() => import("./pages/TrainingPage"));
 const AttackPage = lazy(() => import("./pages/AttackPage"));
+const CaseTrainerPage = lazy(() => import("./pages/CaseTrainerPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 
-type Tab = "solve" | "training" | "attack" | "settings" | "debug";
+type Tab = "solve" | "training" | "attack" | "trainer" | "settings" | "debug";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
   { id: "training", label: "Training" },
   { id: "attack", label: "Attack" },
+  { id: "trainer", label: "Trainer" },
   { id: "debug", label: "Debug" },
   { id: "settings", label: "Settings" },
 ];
@@ -50,6 +52,7 @@ export default function App() {
           {tab === "solve" && <SolvePage />}
           {tab === "training" && <TrainingPage />}
           {tab === "attack" && <AttackPage />}
+          {tab === "trainer" && <CaseTrainerPage />}
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
         </Suspense>

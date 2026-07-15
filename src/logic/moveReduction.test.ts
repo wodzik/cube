@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { reduceMoves, simplifyMoveStack, collapseIdenticalMoves, areOppositeFaces } from "./moveReduction";
+import { reduceMoves, simplifyMoveStack, collapseIdenticalMoves, collapseToStm, areOppositeFaces } from "./moveReduction";
 
 describe("areOppositeFaces", () => {
   it("identifies opposite face pairs", () => {
@@ -133,5 +133,32 @@ describe("collapseIdenticalMoves", () => {
   it("handles empty and single move", () => {
     expect(collapseIdenticalMoves([])).toEqual([]);
     expect(collapseIdenticalMoves(["R"])).toEqual(["R"]);
+  });
+});
+
+describe("collapseToStm", () => {
+  it("merges opposite-face complementary pairs into slices (both orders)", () => {
+    expect(collapseToStm(["R", "L'"])).toEqual(["M"]);
+    expect(collapseToStm(["L'", "R"])).toEqual(["M"]);
+    expect(collapseToStm(["R'", "L"])).toEqual(["M'"]);
+    expect(collapseToStm(["R2", "L2"])).toEqual(["M2"]);
+    expect(collapseToStm(["U", "D'"])).toEqual(["E"]);
+    expect(collapseToStm(["B", "F'"])).toEqual(["S"]);
+  });
+
+  it("leaves non-complementary and non-opposite pairs alone", () => {
+    expect(collapseToStm(["R", "L"])).toEqual(["R", "L"]);
+    expect(collapseToStm(["R", "U'"])).toEqual(["R", "U'"]);
+    expect(collapseToStm(["R", "R'"])).toEqual(["R", "R'"]);
+  });
+
+  it("collapses identical runs first, then slices, then adjacent identical slices", () => {
+    expect(collapseToStm(["R", "R", "L2"])).toEqual(["M2"]);
+    expect(collapseToStm(["R", "L'", "R", "L'"])).toEqual(["M2"]);
+  });
+
+  it("counts a realistic Roux LSE fragment fairly", () => {
+    // physical M' U M (M' reported as R'+L, M as R+L')
+    expect(collapseToStm(["R'", "L", "U", "R", "L'"])).toEqual(["M'", "U", "M"]);
   });
 });

@@ -121,6 +121,22 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Dev-only escape hatch: inject a synthetic move exactly as if it came
+  // from hardware — lets headless tests and console debugging drive every
+  // move-consuming feature without a physical cube. Not compiled into
+  // production builds.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const w = window as unknown as { __nactSimulateMove?: (move: string) => number };
+    w.__nactSimulateMove = (move: string) => {
+      for (const listener of listenersRef.current) listener(move, performance.now());
+      return listenersRef.current.size;
+    };
+    return () => {
+      delete w.__nactSimulateMove;
+    };
+  }, []);
+
   const value = useMemo<SmartCubeContextValue>(
     () => ({ ...state, error, connect, disconnect, addMoveListener }),
     [state, error, connect, disconnect, addMoveListener]

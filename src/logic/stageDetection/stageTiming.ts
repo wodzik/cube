@@ -22,7 +22,15 @@ import type { StageBoundary } from "./types";
 
 export interface StageTiming {
   stage: string;
-  /** Raw (quarter-turn) move count performed during this stage; 0 if the stage was already solved before the solve started or hasn't been reached yet. */
+  /**
+   * COLLAPSED move count for this stage — always `moves.length`, so the
+   * number shown next to a stage matches the move list under it (R,R
+   * counts once as R2; R,R' stays 2). 0 if the stage was already solved
+   * before the solve started or hasn't been reached yet. This mirrors how
+   * SolveRecord.moveCount counts the whole solve (plan.md §6.4) — the raw
+   * quarter-turn count was previously exposed here, which made "cross —
+   * 8 moves: D R2 U2 B R U" style mismatches.
+   */
   moveCount: number;
   /** Display moves for this stage (e.g. R,R -> R2; R,R' stays separate). */
   moves: string[];
@@ -53,12 +61,13 @@ export function computeStageTimings(
       continue;
     }
 
-    const moveCount = Math.max(0, boundary.moveIndex - prevMoveIndex);
+    // Raw quarter-turn window — used for indexing/timing only, never displayed.
+    const rawMoveCount = Math.max(0, boundary.moveIndex - prevMoveIndex);
     let recognitionMs = 0;
     let executionMs = 0;
     let stageMoves: string[] = [];
 
-    if (moveCount > 0) {
+    if (rawMoveCount > 0) {
       const stageRawMoves = moves.slice(prevMoveIndex + 1, boundary.moveIndex + 1);
       stageMoves = collapseIdenticalMoves(stageRawMoves.map((m) => m.move));
       const firstMove = stageRawMoves[0];
@@ -69,12 +78,12 @@ export function computeStageTimings(
 
     timings.push({
       stage,
-      moveCount,
+      moveCount: stageMoves.length,
       moves: stageMoves,
       recognitionMs,
       executionMs,
       totalMs: boundary.timestampMs - prevTimestampMs,
-      startMoveIndex: moveCount > 0 ? prevMoveIndex + 1 : null,
+      startMoveIndex: rawMoveCount > 0 ? prevMoveIndex + 1 : null,
       endMoveIndex: boundary.moveIndex >= 0 ? boundary.moveIndex : null,
     });
 
