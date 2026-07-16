@@ -83,6 +83,7 @@ import {
 import { collapseToStm } from "../logic/moveReduction";
 import {
   generateCrossScramble,
+  generateF2LScramble,
   generateXCrossScramble,
   generateXXCrossScramble,
   generatePairScramble,
@@ -119,6 +120,7 @@ const LENGTH_STORAGE_KEYS: Record<TrainerType, string> = {
   xxcross: "nact_trainer_xxcross_length",
   pair: "nact_trainer_pair_length",
   eocross: "nact_trainer_eocross_length",
+  f2l: "nact_trainer_f2l_length", // unused (no optimal level) — kept for record-shape uniformity
   fb: "nact_trainer_fb_length",
   fs: "nact_trainer_fs_length",
   fbdr: "nact_trainer_fbdr_length",
@@ -132,6 +134,7 @@ const MIN_DEPTHS: Record<TrainerType, number> = {
   xxcross: 1,
   pair: 1,
   eocross: 1,
+  f2l: 1,
   fb: FB_LEVEL_RANGE.min,
   fs: FS_LEVEL_RANGE.min,
   fbdr: FBDR_LEVEL_RANGE.min,
@@ -145,6 +148,7 @@ const MAX_DEPTHS: Record<TrainerType, number> = {
   xxcross: TRAINER_MAX_DEPTHS["xxcross-adj"],
   pair: TRAINER_MAX_DEPTHS.pairing,
   eocross: TRAINER_MAX_DEPTHS.eocross,
+  f2l: 1,
   fb: FB_LEVEL_RANGE.max,
   fs: FS_LEVEL_RANGE.max,
   fbdr: FBDR_LEVEL_RANGE.max,
@@ -158,6 +162,7 @@ const DEFAULT_LENGTHS: Record<TrainerType, number> = {
   xxcross: 7,
   pair: 5,
   eocross: 6,
+  f2l: 1,
   fb: 6,
   fs: 4,
   fbdr: 5,
@@ -168,13 +173,15 @@ const DEFAULT_LENGTHS: Record<TrainerType, number> = {
 const OPTIMAL_SOLUTIONS_SHOWN = 8;
 const ROUX_TYPES: readonly TrainerType[] = ["fb", "fs", "fbdr", "ss", "cmll", "eolr"];
 
-type TrainerFamily = "cfop" | "roux";
+type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
   { id: "cfop", label: "CFOP", types: ["cross", "xcross", "xxcross", "pair", "eocross"] },
   { id: "roux", label: "Roux", types: ["fs", "fb", "fbdr", "ss", "cmll", "eolr"] },
+  { id: "f2l", label: "F2L", types: ["f2l"] },
 ];
-const familyOf = (type: TrainerType): TrainerFamily => (ROUX_TYPES.includes(type) ? "roux" : "cfop");
+const familyOf = (type: TrainerType): TrainerFamily =>
+  type === "f2l" ? "f2l" : ROUX_TYPES.includes(type) ? "roux" : "cfop";
 /** Which Roux types carry a front/back side dimension. */
 const SIDED_ROUX_TYPES = ["ss", "fs", "fbdr"] as const;
 type SidedRouxType = (typeof SIDED_ROUX_TYPES)[number];
@@ -195,6 +202,7 @@ const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "xxcross", label: "XXCross" },
   { id: "pair", label: "Pair" },
   { id: "eocross", label: "EOCross" },
+  { id: "f2l", label: "Pair to slot" },
   { id: "fs", label: "FS" },
   { id: "fb", label: "FB" },
   { id: "fbdr", label: "FB+DR" },
@@ -284,6 +292,7 @@ function CaseTrainerInner() {
   const lastTypeByFamilyRef = useRef<Record<TrainerFamily, TrainerType>>({
     cfop: family === "cfop" ? trainerType : "cross",
     roux: family === "roux" ? trainerType : "fb",
+    f2l: "f2l",
   });
   lastTypeByFamilyRef.current[family] = trainerType;
   const [lengths, setLengths] = useState<Record<TrainerType, number>>(() =>
@@ -362,6 +371,8 @@ function CaseTrainerInner() {
                   (SIDED_ROUX_TYPES as readonly string[]).includes(type) ? sidesNow[type as SidedRouxType] : "front",
                   snapshot
                 )
+              : type === "f2l"
+                ? await generateF2LScramble(slotNow, snapshot)
               : type === "cross"
                 ? await generateCrossScramble(len, TRAINER_FACE, snapshot)
                 : type === "xcross"
@@ -481,14 +492,14 @@ function CaseTrainerInner() {
   const retryAttempt = (a: TrainerRetryTarget) => {
     if (!kpuzzle) return;
     setSummary(null);
-    setInfo(`Retrying the same ${a.type} case (optimal ${a.optimalLength})`);
+    setInfo(a.type === "f2l" ? "Retrying the same F2L case" : `Retrying the same ${a.type} case (optimal ${a.optimalLength})`);
     void startNextAttempt(kpuzzle, a);
   };
 
   const canRetry = (a: TrainerRetryTarget & { targetGenerator?: string }) =>
     a.type === "cross"
       ? a.startCrossState !== undefined
-      : a.type === "fb" || a.type === "ss"
+      : a.type === "fb" || a.type === "ss" || a.type === "f2l"
         ? Boolean(a.targetGenerator)
         : Boolean(a.nativeTargetSolution);
 
@@ -551,7 +562,9 @@ function CaseTrainerInner() {
       case "eocross":
         return (s: LiveCubeState) =>
           isCrossSolvedOnFace(s, current.face) && s.patternData.EDGES.orientation.every((o) => o === 0);
-      case "xcross": {
+      case "xcross":
+      case "f2l": {
+        // Both targets: cross intact + the trained slot's pair inserted.
         const frame = XCROSS_SLOT_FRAMES[(current.slot as XCrossSlot) ?? "FR"];
         return (s: LiveCubeState) =>
           isCrossSolvedOnFace(s, current.face) &&
@@ -645,6 +658,7 @@ function CaseTrainerInner() {
     notifiedRef.current = true;
 
     const attemptScramble = current;
+    const isF2l = attemptScramble.type === "f2l";
     const solveMoves = state.moveLog.map((m) => m.move);
     const collapsed = collapseIdenticalMoves(solveMoves);
     // Roux verdicts count in STM: the solver's optimum treats M/E/S slices
@@ -666,7 +680,8 @@ function CaseTrainerInner() {
       moves: moveLog,
       moveCount: counted.length,
       optimalLength: attemptScramble.optimalLength,
-      overhead: counted.length - attemptScramble.optimalLength,
+      // f2l cases have no computed optimum — overhead is meaningless there.
+      overhead: isF2l ? 0 : counted.length - attemptScramble.optimalLength,
       hintUsed: hintUsedRef.current || undefined,
       startCrossState: attemptScramble.startCrossState,
       nativeTargetSolution: attemptScramble.nativeTargetSolution,
@@ -686,6 +701,7 @@ function CaseTrainerInner() {
       const len = attempt.optimalLength;
       if (
         ladderRef.current &&
+        t !== "f2l" && // no optimal level to climb
         t === cfg.trainerType &&
         len === cfg.targetLength &&
         len < MAX_DEPTHS[t]
@@ -744,9 +760,15 @@ function CaseTrainerInner() {
     }
   }, [summary, info, state.phase, state.moveLog.length]);
 
-  // CMLL is case-based (its "level" varies per case) — stats pool the whole type.
+  // CMLL is case-based (its "level" varies per case) and f2l has no level
+  // at all — those pool the whole type.
   const lengthAttempts = useMemo(
-    () => attempts.filter((a) => a.type === trainerType && (trainerType === "cmll" || a.targetLength === targetLength)),
+    () =>
+      attempts.filter(
+        (a) =>
+          a.type === trainerType &&
+          (trainerType === "cmll" || trainerType === "f2l" || a.targetLength === targetLength)
+      ),
     [attempts, trainerType, targetLength]
   );
   const optimalRate = lengthAttempts.length
@@ -755,6 +777,11 @@ function CaseTrainerInner() {
   const avgOverhead = lengthAttempts.length
     ? lengthAttempts.reduce((sum, a) => sum + a.overhead, 0) / lengthAttempts.length
     : null;
+  // f2l has no optimum — its aside shows move-count stats instead.
+  const avgMoves = lengthAttempts.length
+    ? lengthAttempts.reduce((sum, a) => sum + a.moveCount, 0) / lengthAttempts.length
+    : null;
+  const bestMoves = lengthAttempts.length ? Math.min(...lengthAttempts.map((a) => a.moveCount)) : null;
 
   // Same scope as the stats above: only the case being trained right now
   // (type + level; CMLL pools the whole type).
@@ -771,7 +798,9 @@ function CaseTrainerInner() {
 
   const attemptType = current?.type ?? trainerType;
   const activeHint =
-    attemptType === "cross"
+    attemptType === "f2l"
+      ? `Insert the ${current?.slot ?? slot} pair (cross stays)!`
+      : attemptType === "cross"
       ? "Solve the cross!"
       : attemptType === "eocross"
         ? "Solve the cross with all edges oriented!"
@@ -802,7 +831,9 @@ function CaseTrainerInner() {
         : state.phase === "active"
           ? activeHint
           : state.phase === "done"
-            ? `${moveCount} moves · optimal ${current?.optimalLength ?? "—"}`
+            ? attemptType === "f2l"
+              ? `${moveCount} moves`
+              : `${moveCount} moves · optimal ${current?.optimalLength ?? "—"}`
             : null;
 
   const isRouxType = ROUX_TYPES.includes(trainerType);
@@ -846,7 +877,7 @@ function CaseTrainerInner() {
               </button>
             ))}
           </div>
-          {(trainerType === "xcross" || trainerType === "pair") && (
+          {(trainerType === "xcross" || trainerType === "pair" || trainerType === "f2l") && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
               {XCROSS_SLOTS.map((s) => (
@@ -905,7 +936,7 @@ function CaseTrainerInner() {
               ))}
             </div>
           )}
-          {trainerType !== "cmll" && (
+          {trainerType !== "cmll" && trainerType !== "f2l" && (
           <div className="flex items-center gap-1 shrink-0">
             <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Optimal</span>
             {Array.from(
@@ -926,6 +957,7 @@ function CaseTrainerInner() {
           </div>
           )}
           <div className="ml-auto flex items-center gap-2 shrink-0">
+            {trainerType !== "f2l" && (
             <button
               onClick={toggleLadder}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
@@ -935,6 +967,7 @@ function CaseTrainerInner() {
             >
               <TrendingUp size={12} /> Ladder
             </button>
+            )}
             <button
               onClick={resync}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
@@ -980,7 +1013,7 @@ function CaseTrainerInner() {
         />
       }
       centerBottom={
-        (state.phase === "ready" || state.phase === "active") && current ? (
+        (state.phase === "ready" || state.phase === "active") && current && current.type !== "f2l" ? (
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <button
@@ -1026,7 +1059,9 @@ function CaseTrainerInner() {
       statsLabel={
         trainerType === "cmll"
           ? "CMLL"
-          : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
+          : trainerType === "f2l"
+            ? `F2L · ${slot} slot`
+            : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
       statsAside={
@@ -1037,7 +1072,21 @@ function CaseTrainerInner() {
             optimalSolutions={summary.optimalSolutions}
             onRetry={canRetry(summary.attempt) ? () => retryAttempt(summary.attempt) : undefined}
           />
-        ) : optimalRate !== null ? (
+        ) : trainerType === "f2l" && avgMoves !== null ? (
+          <div className="panel p-5 h-full flex flex-col justify-center gap-4">
+            <div>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg moves</p>
+              <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{avgMoves.toFixed(1)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Fewest moves</p>
+              <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{bestMoves}</p>
+            </div>
+            <p className="text-[11px] text-gray-600">
+              {lengthAttempts.length} {lengthAttempts.length === 1 ? "attempt" : "attempts"}
+            </p>
+          </div>
+        ) : trainerType !== "f2l" && optimalRate !== null ? (
           <div className="panel p-5 h-full flex flex-col justify-center gap-4">
             <div>
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Optimal rate</p>
@@ -1070,15 +1119,17 @@ function CaseTrainerInner() {
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>
                   <span className="text-xs font-mono tabular-nums text-gray-400 w-16 shrink-0">
-                    {a.moveCount}/{a.optimalLength}
+                    {a.type === "f2l" ? `${a.moveCount} mv` : `${a.moveCount}/${a.optimalLength}`}
                   </span>
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
-                      a.overhead <= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
-                    }`}
-                  >
-                    {a.overhead <= 0 ? "optimal" : `+${a.overhead}`}
-                  </span>
+                  {a.type !== "f2l" && (
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
+                        a.overhead <= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+                      }`}
+                    >
+                      {a.overhead <= 0 ? "optimal" : `+${a.overhead}`}
+                    </span>
+                  )}
                   {a.hintUsed && (
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-sky-500/15 text-sky-300">hint</span>
                   )}

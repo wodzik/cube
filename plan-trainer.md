@@ -392,6 +392,17 @@ per family and per-type side pickers (ss/fs/fbdr).
     when the user's STM prefix matches); retry stashes it in
     nativeTargetSolution. Detection: both blocks + all 8 corners
     (rouxStages piece sets), offset-tolerant. Stats pool the whole type.
+- **F2L pair trainer** — DONE (third family pill CFOP | Roux | F2L, type
+  "Pair to slot"): the trained slot's corner+edge are placed at uniformly
+  random positions/orientations anywhere except the cross (never both
+  solved in the slot — at least one twisted then), rest of the cube
+  near-solved (transposition/3-cycle occupant return + orientation-sum
+  repairs on the D layer — logic/trainer/f2lCase.ts, law invariants
+  unit-tested). No computed optimum: records only moves + time (overhead
+  0, no level dial / ladder / hint / reveal; aside shows avg + fewest
+  moves). Scramble = composeScramble with c = solution of the constructed
+  pattern; retry pins the whole state via targetGenerator. Detection =
+  xcross predicate (cross intact + slot inserted); xcross mask.
 - **Algorithm playback preview** — DONE: `AlgPlaybackModal` (TwistyPlayer
   with controlPanel "bottom-row" play/scrub controls, setup =
   inverse(alg), floating hint facelets, tempo 1×). Offered from four

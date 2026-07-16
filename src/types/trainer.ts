@@ -14,7 +14,19 @@ import type { XCrossSlot, XXCrossPair } from "../logic/trainer/xcrossFrames";
 import type { RouxSsSide } from "../logic/trainer/rouxTargets";
 
 /** Which sub-state the trainer drills. CFOP family: cross…eocross; Roux family: fs (first square), fb (first block), fbdr (FB + DR edge), ss (second square), cmll (last-layer corners, case-based), eolr (EO + LR edges). */
-export type TrainerType = "cross" | "xcross" | "xxcross" | "pair" | "eocross" | "fb" | "fs" | "fbdr" | "ss" | "cmll" | "eolr";
+export type TrainerType =
+  | "cross"
+  | "xcross"
+  | "xxcross"
+  | "pair"
+  | "eocross"
+  | "f2l"
+  | "fb"
+  | "fs"
+  | "fbdr"
+  | "ss"
+  | "cmll"
+  | "eolr";
 
 export interface TrainerAttempt {
   id: string;

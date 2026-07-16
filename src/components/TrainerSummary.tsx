@@ -24,6 +24,8 @@ interface TrainerSummaryProps {
 
 export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }: TrainerSummaryProps) {
   const [showSolutions, setShowSolutions] = useState(false);
+  // f2l cases carry no computed optimum — show plain move count, no verdict.
+  const hasOptimal = attempt.type !== "f2l";
   const isOptimal = attempt.overhead <= 0;
 
   // Non-optimal solve with a full solution list (cross — signalled by a
@@ -49,18 +51,20 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
         <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Last attempt</p>
         <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">{formatTimeMs(attempt.timeMs)}</p>
         <p className="text-sm text-gray-400 mt-1">
-          {attempt.moveCount} moves · optimal {attempt.optimalLength}
+          {attempt.moveCount} moves{hasOptimal && ` · optimal ${attempt.optimalLength}`}
         </p>
       </div>
 
       <div className="flex items-center gap-2">
-        <div
-          className={`px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide ${
-            isOptimal ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
-          }`}
-        >
-          {isOptimal ? "Optimal!" : `+${attempt.overhead} ${attempt.overhead === 1 ? "move" : "moves"} over optimal`}
-        </div>
+        {hasOptimal && (
+          <div
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide ${
+              isOptimal ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+            }`}
+          >
+            {isOptimal ? "Optimal!" : `+${attempt.overhead} ${attempt.overhead === 1 ? "move" : "moves"} over optimal`}
+          </div>
+        )}
         {attempt.hintUsed && (
           <div className="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-sky-500/15 text-sky-300">hint used</div>
         )}
