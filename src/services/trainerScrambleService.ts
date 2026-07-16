@@ -52,7 +52,7 @@ import {
   type XXCrossPair,
 } from "../logic/trainer/xcrossFrames";
 import { xcrossFunc, trainerFunc, pairingFunc } from "./or18TrainerWorkers";
-import { f2lCasePattern, sampleF2LCase } from "../logic/trainer/f2lCase";
+import { f2lCasePattern, sampleF2LPlacements } from "../logic/trainer/f2lCase";
 import { tokenize, composeScramble } from "./trainerCompose";
 import { invertSequence } from "../logic/moveParser";
 import type { Face } from "../logic/stageDetection/lastLayerShared";
@@ -101,6 +101,8 @@ export interface TrainerScramble {
   exampleSolutions?: string[];
   /** Face-turn generator of the whole target state — Roux types' retry pin (see rouxTrainerService). */
   targetGenerator?: string;
+  /** F2L multi-pair drills: ALL trained slots (detection + mask). `slot` holds the first for display compat. */
+  slots?: XCrossSlot[];
 }
 
 const MAX_GENERATION_RETRIES = 3;
@@ -343,18 +345,19 @@ export async function generatePairScramble(
 
 /**
  * F2L pair-insert trainer — unlike every other generator, the target state
- * is constructed DIRECTLY (f2lCase.ts samples where the slot's corner and
- * edge go; the rest of the cube stays near-solved) instead of sampled at an
- * exact solver depth, and no optimal length is computed (optimalLength 0 —
- * the trainer records only move count and time). The composition step is
- * shared: c = the case pattern's solution, so invert(c) generates the case.
+ * is constructed DIRECTLY (f2lCase.ts samples where each trained slot's
+ * corner and edge go; the rest of the cube stays near-solved) instead of
+ * sampled at an exact solver depth, and no optimal length is computed
+ * (optimalLength 0 — the trainer records only move count and time). The
+ * composition step is shared: c = the case pattern's solution, so
+ * invert(c) generates the case. 1–4 pairs (slots) per case.
  */
-export async function generateF2LScramble(slot: XCrossSlot, from?: KTransformation): Promise<TrainerScramble> {
+export async function generateF2LScramble(slots: readonly XCrossSlot[], from?: KTransformation): Promise<TrainerScramble> {
   const kpuzzle = await cube3x3x3.kpuzzle();
   const fromTransformation = from ?? kpuzzle.identityTransformation();
 
   for (let attempt = 0; attempt < MAX_GENERATION_RETRIES; attempt++) {
-    const pattern = f2lCasePattern(kpuzzle, slot, sampleF2LCase(slot));
+    const pattern = f2lCasePattern(kpuzzle, sampleF2LPlacements(slots));
     let c: string[];
     try {
       c = tokenize((await experimentalSolve3x3x3IgnoringCenters(pattern)).toString());
@@ -367,7 +370,8 @@ export async function generateF2LScramble(slot: XCrossSlot, from?: KTransformati
     return {
       type: "f2l",
       face: XCROSS_CROSS_FACE,
-      slot,
+      slot: slots[0],
+      slots: [...slots],
       optimalLength: 0,
       targetGenerator: invertSequence(c).join(" "),
       ...composed,
@@ -386,7 +390,7 @@ export async function generateF2LCaseView(slot: XCrossSlot): Promise<TrainerScra
   const kpuzzle = await cube3x3x3.kpuzzle();
 
   for (let attempt = 0; attempt < MAX_GENERATION_RETRIES; attempt++) {
-    const pattern = f2lCasePattern(kpuzzle, slot, sampleF2LCase(slot));
+    const pattern = f2lCasePattern(kpuzzle, sampleF2LPlacements([slot]));
     let solution: string[];
     try {
       solution = tokenize((await experimentalSolve3x3x3IgnoringCenters(pattern)).toString());
@@ -443,6 +447,8 @@ export interface TrainerRetryTarget {
   nativeTargetAppl?: string;
   /** Roux types' pin (handled by rouxTrainerService.regenerateRouxForTarget). */
   targetGenerator?: string;
+  /** F2L multi-pair drills: all trained slots. */
+  slots?: XCrossSlot[];
 }
 
 /**
@@ -488,6 +494,7 @@ export async function regenerateForTarget(target: TrainerRetryTarget, from?: KTr
       type: "f2l",
       face: XCROSS_CROSS_FACE,
       slot: target.slot,
+      slots: target.slots,
       optimalLength: 0,
       targetGenerator: target.targetGenerator,
       ...composed,

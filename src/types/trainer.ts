@@ -40,6 +40,8 @@ export interface TrainerAttempt {
   face: Face;
   /** Which F2L slot (xcross/pair), slot pair (xxcross), or SS side (roux ss) was targeted. */
   slot?: XCrossSlot | XXCrossPair | RouxSsSide;
+  /** F2L multi-pair drills: all trained slots (detection scope on retry, list display). */
+  slots?: XCrossSlot[];
   /** The requested difficulty — scrambles are generated with optimal == this. */
   targetLength: number;
   scramble: string;

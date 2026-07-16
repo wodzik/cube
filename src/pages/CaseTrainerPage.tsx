@@ -38,6 +38,7 @@ import { getCrossEngine, MAX_CROSS_DEPTH, type CrossMoveAnalysis } from "../logi
 import {
   crossStickeringMask,
   eocrossStickeringMask,
+  multiSlotStickeringMask,
   xcrossStickeringMask,
   xxcrossStickeringMask,
 } from "../logic/trainer/trainerMasks";
@@ -193,6 +194,16 @@ const F2L_SLOT_VIEW_LABELS: Record<XCrossSlot, XCrossSlot> = { FL: "FR", BL: "BR
 /** Letter slots ordered so their white-down labels read FR, BR, FL, BL. */
 const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 
+/** Random subset of n distinct slots for the multi-pair "From scramble" drill. */
+function sampleSlots(n: number): XCrossSlot[] {
+  const pool = [...XCROSS_SLOTS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, n);
+}
+
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
@@ -214,6 +225,7 @@ const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square",
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
 const BACK_STICKERS_STORAGE_KEY = "nact_trainer_back_stickers";
 const FLAT_VIEW_STORAGE_KEY = "nact_trainer_flat_view";
+const F2L_PAIRS_STORAGE_KEY = "nact_trainer_f2l_pairs";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
 const LADDER_THRESHOLD = 0.8;
@@ -276,6 +288,11 @@ function loadStoredPair(): XXCrossPair {
 function loadStoredSide(type: SidedRouxType): RouxSsSide {
   const raw = localStorage.getItem(SIDE_STORAGE_KEYS[type]) as RouxSsSide | null;
   return raw && ROUX_SS_SIDES.includes(raw) ? raw : "front";
+}
+
+function loadStoredF2LPairs(): number {
+  const raw = Number(localStorage.getItem(F2L_PAIRS_STORAGE_KEY));
+  return Number.isInteger(raw) && raw >= 1 && raw <= 4 ? raw : 1;
 }
 
 function loadStoredLength(type: TrainerType): number {
@@ -368,6 +385,8 @@ function CaseTrainerInner() {
   const [backStickers, setBackStickers] = useState(() => localStorage.getItem(BACK_STICKERS_STORAGE_KEY) === "true");
   /** F2L drills: show the flat unfolded-net view under the 3D cube. */
   const [flatView, setFlatView] = useState(() => localStorage.getItem(FLAT_VIEW_STORAGE_KEY) === "true");
+  /** "From scramble" F2L drill: how many pairs get scrambled (1 = the selected slot; 2–4 = random slots). */
+  const [f2lPairs, setF2lPairs] = useState<number>(loadStoredF2LPairs);
   /** Transient notice (e.g. ladder level-up) shown above the sequence bar until the next attempt starts. */
   const [info, setInfo] = useState<string | null>(null);
   /** Latched per attempt the moment a hint is revealed; recorded on the attempt. */
@@ -387,8 +406,8 @@ function CaseTrainerInner() {
   // setTarget gets a NEW identity on every session dispatch — its useMemo
   // keys on state — so going through refs keeps the "first scramble" effect
   // from re-firing after every single move).
-  const configRef = useRef({ trainerType, slot, pair, sides, targetLength });
-  configRef.current = { trainerType, slot, pair, sides, targetLength };
+  const configRef = useRef({ trainerType, slot, pair, sides, targetLength, f2lPairs });
+  configRef.current = { trainerType, slot, pair, sides, targetLength, f2lPairs };
   const setTargetRef = useRef(setTarget);
   setTargetRef.current = setTarget;
   const confirmManualSetupRef = useRef(confirmManualSetup);
@@ -419,7 +438,14 @@ function CaseTrainerInner() {
         // for — if the cube moved while the solver ran, regenerate from the
         // new state instead of handing out a stale path.
         for (let i = 0; i < 3; i++) {
-          const { trainerType: type, slot: slotNow, pair: pairNow, sides: sidesNow, targetLength: len } = configRef.current;
+          const {
+            trainerType: type,
+            slot: slotNow,
+            pair: pairNow,
+            sides: sidesNow,
+            targetLength: len,
+            f2lPairs: pairsNow,
+          } = configRef.current;
           const snapshot = physicalRef.current ?? kp.identityTransformation();
           const movesAtSnapshot = moveCounterRef.current;
           const generated = retryOf
@@ -436,7 +462,11 @@ function CaseTrainerInner() {
               : type === "f2l-case"
                 ? await generateF2LCaseView(slotNow)
               : type === "f2l"
-                ? await generateF2LScramble(slotNow, snapshot)
+                ? await generateF2LScramble(
+                    // 1 pair trains the selected slot; 2–4 train a random subset.
+                    pairsNow <= 1 ? [slotNow] : sampleSlots(pairsNow),
+                    snapshot
+                  )
               : type === "cross"
                 ? await generateCrossScramble(len, TRAINER_FACE, snapshot)
                 : type === "xcross"
@@ -589,6 +619,13 @@ function CaseTrainerInner() {
     localStorage.setItem(FLAT_VIEW_STORAGE_KEY, String(next));
   };
 
+  const changeF2lPairs = (n: number) => {
+    setF2lPairs(n);
+    localStorage.setItem(F2L_PAIRS_STORAGE_KEY, String(n));
+    configRef.current = { ...configRef.current, f2lPairs: n };
+    regenerate();
+  };
+
   /** Re-drill the exact case of a past attempt (fresh scramble, same target sub-state). */
   const retryAttempt = (a: TrainerRetryTarget) => {
     if (!kpuzzle) return;
@@ -666,12 +703,14 @@ function CaseTrainerInner() {
       case "xcross":
       case "f2l":
       case "f2l-case": {
-        // All three targets: cross intact + the trained slot's pair inserted.
-        const frame = XCROSS_SLOT_FRAMES[(current.slot as XCrossSlot) ?? "FR"];
+        // All three targets: cross intact + every trained slot's pair inserted.
+        const slotList = current.slots ?? [(current.slot as XCrossSlot) ?? "FR"];
+        const frames = slotList.map((sl) => XCROSS_SLOT_FRAMES[sl]);
         return (s: LiveCubeState) =>
           isCrossSolvedOnFace(s, current.face) &&
-          isSlotSolved(s.patternData.CORNERS, frame.cornerSlot) &&
-          isSlotSolved(s.patternData.EDGES, frame.edgeSlot);
+          frames.every(
+            (f) => isSlotSolved(s.patternData.CORNERS, f.cornerSlot) && isSlotSolved(s.patternData.EDGES, f.edgeSlot)
+          );
       }
       case "xxcross": {
         const frames = XXCROSS_PAIR_FRAMES[(current.slot as XXCrossPair) ?? "FR+BR"].slots.map(
@@ -733,6 +772,9 @@ function CaseTrainerInner() {
         return fbdrStickeringMask((current?.slot as RouxSsSide) ?? sides.fbdr);
       case "ss":
         return ssStickeringMask((current?.slot as RouxSsSide) ?? sides.ss);
+      case "f2l":
+      case "f2l-case":
+        return multiSlotStickeringMask(TRAINER_FACE, current?.slots ?? [(current?.slot as XCrossSlot) ?? slot]);
       default:
         return xcrossStickeringMask(TRAINER_FACE, (current?.slot as XCrossSlot) ?? slot);
     }
@@ -776,6 +818,7 @@ function CaseTrainerInner() {
       type: attemptScramble.type,
       face: attemptScramble.face,
       slot: attemptScramble.slot,
+      slots: attemptScramble.slots,
       targetLength: attemptScramble.optimalLength,
       scramble: attemptScramble.scramble,
       timeMs,
@@ -867,15 +910,22 @@ function CaseTrainerInner() {
   }, [summary, info, state.phase, state.moveLog.length, current]);
 
   // CMLL is case-based (its "level" varies per case) and f2l has no level
-  // at all — those pool the whole type.
+  // at all — those pool the whole type (the multi-pair drill pools per
+  // pair count: 1-pair and 3-pair solves aren't comparable).
   const lengthAttempts = useMemo(
     () =>
       attempts.filter(
         (a) =>
           a.type === trainerType &&
-          (trainerType === "cmll" || F2L_TYPES.includes(trainerType) || a.targetLength === targetLength)
+          (trainerType === "cmll"
+            ? true
+            : trainerType === "f2l"
+              ? (a.slots?.length ?? 1) === f2lPairs
+              : trainerType === "f2l-case"
+                ? true
+                : a.targetLength === targetLength)
       ),
-    [attempts, trainerType, targetLength]
+    [attempts, trainerType, targetLength, f2lPairs]
   );
   const optimalRate = lengthAttempts.length
     ? Math.round((lengthAttempts.filter((a) => a.overhead <= 0).length / lengthAttempts.length) * 100)
@@ -903,11 +953,13 @@ function CaseTrainerInner() {
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
 
   const attemptType = current?.type ?? trainerType;
-  /** F2L drills display white-down — translate a letter slot for the UI. */
-  const f2lDisplaySlot = F2L_SLOT_VIEW_LABELS[(current?.slot as XCrossSlot) ?? slot] ?? slot;
+  /** F2L drills display white-down — translate letter slots for the UI. */
+  const f2lDisplaySlots = (current?.slots ?? [(current?.slot as XCrossSlot) ?? slot])
+    .map((s) => F2L_SLOT_VIEW_LABELS[s] ?? s)
+    .join("+");
   const activeHint =
     F2L_TYPES.includes(attemptType)
-      ? `Insert the ${f2lDisplaySlot} pair (cross stays)!`
+      ? `Insert the ${f2lDisplaySlots} ${(current?.slots?.length ?? 1) > 1 ? "pairs" : "pair"} (cross stays)!`
       : attemptType === "cross"
       ? "Solve the cross!"
       : attemptType === "eocross"
@@ -988,7 +1040,27 @@ function CaseTrainerInner() {
               </button>
             ))}
           </div>
-          {(trainerType === "xcross" || trainerType === "pair" || F2L_TYPES.includes(trainerType)) && (
+          {trainerType === "f2l" && (
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Pairs</span>
+              {[1, 2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => changeF2lPairs(n)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold tabular-nums transition-all ${
+                    f2lPairs === n ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                  }`}
+                  style={f2lPairs === n ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          )}
+          {(trainerType === "xcross" ||
+            trainerType === "pair" ||
+            trainerType === "f2l-case" ||
+            (trainerType === "f2l" && f2lPairs === 1)) && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
               {(F2L_TYPES.includes(trainerType) ? F2L_SLOT_ORDER : XCROSS_SLOTS).map((s) => (
@@ -1196,7 +1268,9 @@ function CaseTrainerInner() {
         trainerType === "cmll"
           ? "CMLL"
           : F2L_TYPES.includes(trainerType)
-            ? `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot${trainerType === "f2l" ? " · from scramble" : ""}`
+            ? trainerType === "f2l" && f2lPairs > 1
+              ? `F2L · ${f2lPairs} pairs · from scramble`
+              : `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot${trainerType === "f2l" ? " · from scramble" : ""}`
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
@@ -1249,9 +1323,13 @@ function CaseTrainerInner() {
             <div className="divide-y divide-gray-800/40">
               {recentAttempts.map((a) => (
                 <div key={a.id} className="flex items-center gap-3 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 w-24 shrink-0">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 w-24 sm:w-40 shrink-0 truncate">
                     {a.type}
-                    {a.slot ? ` ${F2L_TYPES.includes(a.type) ? F2L_SLOT_VIEW_LABELS[a.slot as XCrossSlot] : a.slot}` : ""}
+                    {F2L_TYPES.includes(a.type)
+                      ? ` ${(a.slots ?? [a.slot as XCrossSlot]).map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")}`
+                      : a.slot
+                        ? ` ${a.slot}`
+                        : ""}
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>
                   <span className="text-xs font-mono tabular-nums text-gray-400 w-16 shrink-0">

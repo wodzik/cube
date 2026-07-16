@@ -97,6 +97,15 @@ export function xcrossStickeringMask(face: Face, slot: XCrossSlot): StickeringMa
   );
 }
 
+/** Cross edges + any number of trained slots' pairs (F2L multi-pair drills). */
+export function multiSlotStickeringMask(face: Face, slots: readonly XCrossSlot[]): StickeringMaskOrbits {
+  const frames = slots.map((s) => XCROSS_SLOT_FRAMES[s]);
+  return pieceMask(
+    new Set([...FACE_SLOTS[face].edgeSlots, ...frames.map((f) => f.edgeSlot)]),
+    new Set(frames.map((f) => f.cornerSlot))
+  );
+}
+
 /** Cross edges + both trained slots' pairs. */
 export function xxcrossStickeringMask(face: Face, pair: XXCrossPair): StickeringMaskOrbits {
   const [s1, s2] = XXCROSS_PAIR_FRAMES[pair].slots;
