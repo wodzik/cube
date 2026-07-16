@@ -19,16 +19,21 @@ import { X } from "lucide-react";
 import { CubeVisualisation } from "./CubeVisualisation";
 import { invertSequence } from "../logic/moveParser";
 import { parseDecoratedAlg } from "../data/academy";
+import type { StickeringMaskOrbits } from "../types/cube";
 
 interface AlgPlaybackModalProps {
   title: string;
   subtitle?: string;
   /** Display notation — may contain trigger parentheses. */
   alg: string;
+  /** Inherit the case's display mode: named stickering (Practice groups)… */
+  stickering?: string;
+  /** …or custom mask (Academy step views). Takes precedence over `stickering`. */
+  stickeringMaskOrbits?: StickeringMaskOrbits;
   onClose: () => void;
 }
 
-export function AlgPlaybackModal({ title, subtitle, alg, onClose }: AlgPlaybackModalProps) {
+export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringMaskOrbits, onClose }: AlgPlaybackModalProps) {
   const { plain, setup } = useMemo(() => {
     const { tokens } = parseDecoratedAlg(alg);
     return {
@@ -70,6 +75,8 @@ export function AlgPlaybackModal({ title, subtitle, alg, onClose }: AlgPlaybackM
             setupAlg={setup}
             setupAnchor="start"
             visualization="PG3D"
+            stickering={stickering}
+            stickeringMaskOrbits={stickeringMaskOrbits}
             controlPanel="bottom-row"
             hintFacelets="floating"
             tempoScale={1}

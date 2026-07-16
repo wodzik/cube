@@ -98,6 +98,7 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
           title={alg.name}
           subtitle={alg.description}
           alg={alg.alg}
+          stickeringMaskOrbits={stickeringMaskOrbits}
           onClose={() => setShowPlayback(false)}
         />
       )}

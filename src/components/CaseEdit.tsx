@@ -244,6 +244,7 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
           title={case_.name}
           subtitle={playbackVariant.name}
           alg={playbackVariant.alg}
+          stickering={STICKERING[group]}
           onClose={() => setPlaybackVariant(null)}
         />
       )}

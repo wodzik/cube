@@ -153,6 +153,7 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
           title={case_.name}
           subtitle={defaultVariant.name}
           alg={defaultVariant.alg}
+          stickering={STICKERING[group]}
           onClose={() => setShowPlayback(false)}
         />
       )}

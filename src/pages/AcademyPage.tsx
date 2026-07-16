@@ -198,6 +198,7 @@ function AcademyInner() {
         title={alg.name}
         subtitle={step.title}
         alg={alg.alg}
+        stickeringMaskOrbits={stepMask}
         onClose={() => setShowPlayback(false)}
       />
     )}
