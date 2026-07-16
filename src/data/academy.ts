@@ -101,14 +101,32 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
         "they become the corner permutation in step 3.",
       view: "oll-corners",
       algs: [
-        { id: "sexy1", name: "Sexy ×1", alg: "F (R U R' U') F'", required: true },
-        { id: "sexy2", name: "Sexy ×2", alg: "F (R U R' U') (R U R' U') F'", required: true },
-        { id: "sexy3", name: "Sexy ×3", alg: "F (R U R' U') (R U R' U') (R U R' U') F'", required: true },
-        { id: "sun", name: "Sun", alg: "R U R' U R U2 R'", required: true },
-        { id: "antisun", name: "Antisun", alg: "R U2 R' U' R U' R'", required: true },
+        {
+          id: "sexy1",
+          name: "Single sexy",
+          alg: "F (R U R' U') F'",
+          required: true,
+          description: "One sexy move inside F … F'. As a full OLL this is case 45.",
+        },
+        {
+          id: "sexy2",
+          name: "Double sexy",
+          alg: "F (R U R' U') (R U R' U') F'",
+          required: true,
+          description: "Two sexy moves inside F … F'. As a full OLL this is case 48.",
+        },
+        {
+          id: "sexy3",
+          name: "Triple sexy",
+          alg: "F (R U R' U') (R U R' U') (R U R' U') F'",
+          required: true,
+          description: "Three sexy moves inside F … F'. As a full OLL this is case 21.",
+        },
+        { id: "sun", name: "Sun", alg: "R U R' U R U2 R'", required: true, description: "The Sune (OLL 27)." },
+        { id: "antisun", name: "Antisun", alg: "R U2 R' U' R U' R'", required: true, description: "The Anti-Sune (OLL 26)." },
         {
           id: "block-a",
-          name: "A",
+          name: "A (OLL 33)",
           alg: "(R U R' U') (R' F R F')",
           required: true,
           description:
@@ -116,7 +134,7 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
         },
         {
           id: "block-b",
-          name: "B",
+          name: "B (OLL 37)",
           alg: "F R U' R' U' R U R' F'",
           required: true,
           description: "Building block — combined into A + B / B + A for corner permutation.",
