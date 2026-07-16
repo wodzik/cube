@@ -756,7 +756,9 @@ function CaseTrainerInner() {
     ? lengthAttempts.reduce((sum, a) => sum + a.overhead, 0) / lengthAttempts.length
     : null;
 
-  const recentAttempts = useMemo(() => [...attempts].reverse().slice(0, 30), [attempts]);
+  // Same scope as the stats above: only the case being trained right now
+  // (type + level; CMLL pools the whole type).
+  const recentAttempts = useMemo(() => [...lengthAttempts].reverse().slice(0, 30), [lengthAttempts]);
 
   function handleDeleteAttempt(id: string) {
     deleteTrainerAttempt(id);
