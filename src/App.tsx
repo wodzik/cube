@@ -10,16 +10,18 @@ const SolvePage = lazy(() => import("./pages/SolvePage"));
 const TrainingPage = lazy(() => import("./pages/TrainingPage"));
 const AttackPage = lazy(() => import("./pages/AttackPage"));
 const CaseTrainerPage = lazy(() => import("./pages/CaseTrainerPage"));
+const AcademyPage = lazy(() => import("./pages/AcademyPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 
-type Tab = "solve" | "training" | "attack" | "trainer" | "settings" | "debug";
+type Tab = "solve" | "training" | "attack" | "trainer" | "academy" | "settings" | "debug";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
-  { id: "training", label: "Training" },
+  { id: "training", label: "Practice" },
   { id: "attack", label: "Attack" },
   { id: "trainer", label: "Trainer" },
+  { id: "academy", label: "Academy" },
   { id: "debug", label: "Debug" },
   { id: "settings", label: "Settings" },
 ];
@@ -53,6 +55,7 @@ export default function App() {
           {tab === "training" && <TrainingPage />}
           {tab === "attack" && <AttackPage />}
           {tab === "trainer" && <CaseTrainerPage />}
+          {tab === "academy" && <AcademyPage />}
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
         </Suspense>

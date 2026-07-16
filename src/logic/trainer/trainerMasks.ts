@@ -43,6 +43,51 @@ export function crossStickeringMask(face: Face): StickeringMaskOrbits {
   return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set());
 }
 
+export type AcademyView = "oll-corners" | "oll" | "corners" | "full";
+
+/**
+ * Academy step views (see data/academy.ts). ALL of them are MASKS — even
+ * "full" — so a mounted player never has to switch from a mask back to a
+ * named stickering (which TwistyPlayer can't do, see CubeVisualisation).
+ *
+ *  - "oll":         replica of cubing.js's named "OLL" stickering: F2L dim,
+ *                   LL pieces show ONLY their primary (U-face) sticker —
+ *                   facelets [regular, ignored, …] — U center regular.
+ *  - "oll-corners": same, but LL edges fully blacked out — the
+ *                   orient-corners look (corner orientation only).
+ *  - "corners":     LL corners in FULL color (permutation visible), LL
+ *                   edges blacked out, F2L dim — the permute-corners look.
+ *  - "full":        plain cube.
+ */
+export function academyStepMask(view: AcademyView): StickeringMaskOrbits {
+  const U_PIECES = new Set([0, 1, 2, 3]);
+  const U_CENTER = 0;
+  const edge = (p: number): ("regular" | "ignored" | "dim")[] => {
+    if (view === "full") return ["regular", "regular"];
+    if (!U_PIECES.has(p)) return ["dim", "dim"];
+    if (view === "oll") return ["regular", "ignored"];
+    return ["ignored", "ignored"]; // oll-corners, corners
+  };
+  const corner = (p: number): ("regular" | "ignored" | "dim")[] => {
+    if (view === "full" || (view === "corners" && U_PIECES.has(p))) return ["regular", "regular", "regular"];
+    if (!U_PIECES.has(p)) return ["dim", "dim", "dim"];
+    return ["regular", "ignored", "ignored"]; // oll / oll-corners: primary sticker only
+  };
+  const center = (p: number): FaceletMask =>
+    view === "full" || p === U_CENTER ? "regular" : "dim";
+  return {
+    orbits: {
+      EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: edge(p) })) },
+      CORNERS: { pieces: Array.from({ length: 8 }, (_, p) => ({ facelets: corner(p) })) },
+      CENTERS: {
+        pieces: Array.from({ length: 6 }, (_, p) => ({
+          facelets: [center(p), center(p), center(p), center(p)],
+        })),
+      },
+    },
+  };
+}
+
 /** Cross edges + the trained slot's corner/edge pair (also used by the free-pair trainer). */
 export function xcrossStickeringMask(face: Face, slot: XCrossSlot): StickeringMaskOrbits {
   const frame = XCROSS_SLOT_FRAMES[slot];

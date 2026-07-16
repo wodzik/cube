@@ -50,6 +50,8 @@ export interface TrainerPanelProps {
   sequenceTrailing?: ReactNode;
   /** Rendered above the sequence bar — e.g. a "Next scramble" label while the previous solve's summary is still up (see SolvePage.tsx). */
   sequenceTop?: ReactNode;
+  /** Per-token prefix/suffix decorations (trigger parentheses) — see MoveSequenceDisplay. */
+  sequenceDecorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
 
   // ── Center column ──
   centerTop?: ReactNode;
@@ -106,6 +108,7 @@ export function TrainerPanel({
   errorLabel,
   sequenceTrailing,
   sequenceTop,
+  sequenceDecorations,
   centerTop,
   isInspecting = false,
   inspectionSecondsLeft = 0,
@@ -146,6 +149,7 @@ export function TrainerPanel({
                 <MoveSequenceDisplay
                   moves={moves}
                   progress={progress}
+                  decorations={sequenceDecorations}
                   onRefresh={onRefresh}
                   showRefresh={showRefresh}
                   maxErrors={maxErrors}

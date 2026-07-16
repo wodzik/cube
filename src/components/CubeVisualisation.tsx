@@ -31,7 +31,13 @@ export interface CubeVisualisationProps {
   hintFacelets?: "none" | "floating";
   /** Stickering scheme: "full" | "OLL" | "PLL" | "F2L" | etc. */
   stickering?: string;
-  /** Piece-level mask (overrides `stickering` when set) — e.g. "show only the 4 cross edges" (see types/cube.ts). */
+  /**
+   * Piece-level mask (overrides `stickering` when set) — e.g. "show only
+   * the 4 cross edges" (see types/cube.ts). TRAP: once a mask has been set
+   * on a player, assigning experimentalStickering does NOT clear it — a
+   * mounted player must stick to ONE channel (mask or named stickering)
+   * for its whole life, or be remounted.
+   */
   stickeringMaskOrbits?: StickeringMaskOrbits;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";

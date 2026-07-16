@@ -20,6 +20,8 @@ interface AlgCaseVisualisationProps {
   /** The solution algorithm — the visualisation shows the state BEFORE this is applied. */
   alg: string;
   stickering?: string;
+  /** Piece-level mask (overrides `stickering`) — see CubeVisualisation. */
+  stickeringMaskOrbits?: import("../types/cube").StickeringMaskOrbits;
   visualization?: VisualizationMode;
   cameraLatitude?: number;
   cameraLongitude?: number;
@@ -34,6 +36,7 @@ function invertAlg(algStr: string): string {
 export function AlgCaseVisualisation({
   alg,
   stickering = "full",
+  stickeringMaskOrbits,
   visualization = "experimental-2D-LL",
   cameraLatitude = 30,
   cameraLongitude = -30,
@@ -85,6 +88,7 @@ export function AlgCaseVisualisation({
           alg=""
           visualization={visualization}
           stickering={stickering}
+          stickeringMaskOrbits={stickeringMaskOrbits}
           background="none"
           controlPanel="none"
           dragInput="none"

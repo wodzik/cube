@@ -44,6 +44,13 @@ interface MoveSequenceDisplayProps {
   completeText?: string;
   errorLabel?: string;
   className?: string;
+  /**
+   * Per-token text rendered around a move (dim, outside the progress
+   * coloring) — used by the Academy to show trigger grouping like
+   * "F (R U R' U') F'": token 1 gets prefix "(", token 4 suffix ")".
+   * Keyed by token index in `moves`.
+   */
+  decorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
 }
 
 export function MoveSequenceDisplay({
@@ -62,6 +69,7 @@ export function MoveSequenceDisplay({
   completeText = "Complete!",
   errorLabel = "Undo:",
   className = "",
+  decorations,
 }: MoveSequenceDisplayProps) {
   const hasErrors = (progress?.correctionSequence.length ?? 0) > 0;
   const isComplete = progress?.isCompleted ?? false;
@@ -107,11 +115,16 @@ export function MoveSequenceDisplay({
 
           {moves.length > 0 && (
             <div className="scramble-moves">
-              {moves.map((move, index) => (
-                <span key={`${move}-${index}`} className={`scramble-move ${getMoveClass(index)}`}>
-                  {maskMoves ? "•" : move}
-                </span>
-              ))}
+              {moves.map((move, index) => {
+                const deco = decorations?.[index];
+                return (
+                  <span key={`${move}-${index}`} className="inline-flex items-center">
+                    {deco?.prefix && <span className="font-mono text-3xl font-black text-gray-300 select-none mr-0.5">{deco.prefix}</span>}
+                    <span className={`scramble-move ${getMoveClass(index)}`}>{maskMoves ? "•" : move}</span>
+                    {deco?.suffix && <span className="font-mono text-3xl font-black text-gray-300 select-none ml-0.5">{deco.suffix}</span>}
+                  </span>
+                );
+              })}
             </div>
           )}
 
