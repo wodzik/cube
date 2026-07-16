@@ -63,6 +63,15 @@
   @apply flex gap-1 p-1.5 rounded-2xl border border-white/5 bg-gray-900/70 backdrop-blur-xl shadow-[0_8px_30px_-8px_rgba(0,0,0,0.6)];
 }
 
+/* Header tab strip on phones: scrolls horizontally without showing a
+   scrollbar (the pill is wider than the viewport). */
+.nav-scroll {
+  scrollbar-width: none;
+}
+.nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .nav-tab {
   @apply relative px-5 py-2 text-sm font-semibold rounded-xl transition-all;
 }

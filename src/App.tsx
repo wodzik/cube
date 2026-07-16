@@ -33,21 +33,25 @@ export default function App() {
   return (
     <SmartCubeProvider>
       <div className="app-bg min-h-screen">
-        <header className="sticky top-0 z-50 h-16 flex items-center px-4 sm:px-6 border-b border-white/5 bg-gray-950/75 backdrop-blur-xl">
-          <div className="w-full max-w-7xl mx-auto grid grid-cols-[1fr_auto_1fr] items-center">
-            <span className="text-sm font-black tracking-[0.25em] text-gray-600 select-none">NACT</span>
-            <div className="nav-pill">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`nav-tab ${tab === t.id ? "nav-tab-active" : "nav-tab-inactive"}`}
-                >
-                  {t.label}
-                </button>
-              ))}
+        <header className="sticky top-0 z-50 h-16 flex items-center px-2 sm:px-6 border-b border-white/5 bg-gray-950/75 backdrop-blur-xl">
+          {/* Phones: brand hidden, the tab pill scrolls horizontally (it is
+              wider than the viewport). ≥sm: the original centered grid. */}
+          <div className="w-full max-w-7xl mx-auto flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">
+            <span className="hidden sm:block text-sm font-black tracking-[0.25em] text-gray-600 select-none">NACT</span>
+            <div className="min-w-0 flex-1 sm:flex-none overflow-x-auto nav-scroll">
+              <div className="nav-pill w-max mx-auto">
+                {TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`nav-tab ${tab === t.id ? "nav-tab-active" : "nav-tab-inactive"}`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <span />
+            <span className="hidden sm:block" />
           </div>
         </header>
         <Suspense fallback={null}>
