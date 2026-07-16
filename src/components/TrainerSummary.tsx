@@ -24,8 +24,8 @@ interface TrainerSummaryProps {
 
 export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }: TrainerSummaryProps) {
   const [showSolutions, setShowSolutions] = useState(false);
-  // f2l cases carry no computed optimum — show plain move count, no verdict.
-  const hasOptimal = attempt.type !== "f2l";
+  // F2L cases carry no computed optimum — show plain move count, no verdict.
+  const hasOptimal = !attempt.type.startsWith("f2l");
   const isOptimal = attempt.overhead <= 0;
 
   // Non-optimal solve with a full solution list (cross — signalled by a

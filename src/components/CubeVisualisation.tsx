@@ -152,6 +152,11 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
 
     useEffect(() => {
       if (!playerRef.current) return;
+      playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
+    }, [hintFacelets]);
+
+    useEffect(() => {
+      if (!playerRef.current) return;
       playerRef.current.cameraLatitude = cameraLatitude;
       playerRef.current.cameraLongitude = cameraLongitude;
     }, [cameraLatitude, cameraLongitude]);

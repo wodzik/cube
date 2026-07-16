@@ -73,6 +73,8 @@ export interface TrainerPanelProps {
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
+  /** Show translucent copies of the hidden faces' stickers (F2L back-sticker aid). */
+  hintFacelets?: "none" | "floating";
   cameraLatitude?: number;
   cameraLongitude?: number;
   cubeSetupAlg?: string;
@@ -126,6 +128,7 @@ export function TrainerPanel({
   background = "none",
   controlPanel = "none",
   dragInput = "auto",
+  hintFacelets,
   cameraLatitude,
   cameraLongitude,
   cubeSetupAlg,
@@ -196,6 +199,7 @@ export function TrainerPanel({
             background={background}
             controlPanel={controlPanel}
             dragInput={dragInput}
+            hintFacelets={hintFacelets}
             cameraLatitude={cameraLatitude}
             cameraLongitude={cameraLongitude}
             setupAlg={cubeSetupAlg}

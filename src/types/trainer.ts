@@ -21,6 +21,7 @@ export type TrainerType =
   | "pair"
   | "eocross"
   | "f2l"
+  | "f2l-case"
   | "fb"
   | "fs"
   | "fbdr"

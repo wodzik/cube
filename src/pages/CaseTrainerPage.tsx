@@ -83,6 +83,7 @@ import {
 import { collapseToStm } from "../logic/moveReduction";
 import {
   generateCrossScramble,
+  generateF2LCaseView,
   generateF2LScramble,
   generateXCrossScramble,
   generateXXCrossScramble,
@@ -121,6 +122,7 @@ const LENGTH_STORAGE_KEYS: Record<TrainerType, string> = {
   pair: "nact_trainer_pair_length",
   eocross: "nact_trainer_eocross_length",
   f2l: "nact_trainer_f2l_length", // unused (no optimal level) — kept for record-shape uniformity
+  "f2l-case": "nact_trainer_f2l_case_length", // unused, as above
   fb: "nact_trainer_fb_length",
   fs: "nact_trainer_fs_length",
   fbdr: "nact_trainer_fbdr_length",
@@ -135,6 +137,7 @@ const MIN_DEPTHS: Record<TrainerType, number> = {
   pair: 1,
   eocross: 1,
   f2l: 1,
+  "f2l-case": 1,
   fb: FB_LEVEL_RANGE.min,
   fs: FS_LEVEL_RANGE.min,
   fbdr: FBDR_LEVEL_RANGE.min,
@@ -149,6 +152,7 @@ const MAX_DEPTHS: Record<TrainerType, number> = {
   pair: TRAINER_MAX_DEPTHS.pairing,
   eocross: TRAINER_MAX_DEPTHS.eocross,
   f2l: 1,
+  "f2l-case": 1,
   fb: FB_LEVEL_RANGE.max,
   fs: FS_LEVEL_RANGE.max,
   fbdr: FBDR_LEVEL_RANGE.max,
@@ -163,6 +167,7 @@ const DEFAULT_LENGTHS: Record<TrainerType, number> = {
   pair: 5,
   eocross: 6,
   f2l: 1,
+  "f2l-case": 1,
   fb: 6,
   fs: 4,
   fbdr: 5,
@@ -172,16 +177,18 @@ const DEFAULT_LENGTHS: Record<TrainerType, number> = {
 };
 const OPTIMAL_SOLUTIONS_SHOWN = 8;
 const ROUX_TYPES: readonly TrainerType[] = ["fb", "fs", "fbdr", "ss", "cmll", "eolr"];
+/** Both F2L drills: no computed optimum, no level dial / ladder / hints. */
+const F2L_TYPES: readonly TrainerType[] = ["f2l-case", "f2l"];
 
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
   { id: "cfop", label: "CFOP", types: ["cross", "xcross", "xxcross", "pair", "eocross"] },
   { id: "roux", label: "Roux", types: ["fs", "fb", "fbdr", "ss", "cmll", "eolr"] },
-  { id: "f2l", label: "F2L", types: ["f2l"] },
+  { id: "f2l", label: "F2L", types: ["f2l-case", "f2l"] },
 ];
 const familyOf = (type: TrainerType): TrainerFamily =>
-  type === "f2l" ? "f2l" : ROUX_TYPES.includes(type) ? "roux" : "cfop";
+  F2L_TYPES.includes(type) ? "f2l" : ROUX_TYPES.includes(type) ? "roux" : "cfop";
 /** Which Roux types carry a front/back side dimension. */
 const SIDED_ROUX_TYPES = ["ss", "fs", "fbdr"] as const;
 type SidedRouxType = (typeof SIDED_ROUX_TYPES)[number];
@@ -192,6 +199,7 @@ const SIDE_STORAGE_KEYS: Record<SidedRouxType, string> = {
 };
 const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square", fbdr: "Solved FS" };
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
+const BACK_STICKERS_STORAGE_KEY = "nact_trainer_back_stickers";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
 const LADDER_THRESHOLD = 0.8;
@@ -202,7 +210,8 @@ const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "xxcross", label: "XXCross" },
   { id: "pair", label: "Pair" },
   { id: "eocross", label: "EOCross" },
-  { id: "f2l", label: "Pair to slot" },
+  { id: "f2l-case", label: "Case" },
+  { id: "f2l", label: "From scramble" },
   { id: "fs", label: "FS" },
   { id: "fb", label: "FB" },
   { id: "fbdr", label: "FB+DR" },
@@ -275,7 +284,7 @@ export default function CaseTrainerPage() {
 }
 
 function CaseTrainerInner() {
-  const { state, submitCubeMove, setTarget } = useSession();
+  const { state, submitCubeMove, setTarget, confirmManualSetup } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
 
   const [kpuzzle, setKpuzzle] = useState<KPuzzle | null>(null);
@@ -292,13 +301,15 @@ function CaseTrainerInner() {
   const lastTypeByFamilyRef = useRef<Record<TrainerFamily, TrainerType>>({
     cfop: family === "cfop" ? trainerType : "cross",
     roux: family === "roux" ? trainerType : "fb",
-    f2l: "f2l",
+    f2l: family === "f2l" ? trainerType : "f2l-case",
   });
   lastTypeByFamilyRef.current[family] = trainerType;
   const [lengths, setLengths] = useState<Record<TrainerType, number>>(() =>
     Object.fromEntries(TRAINER_TYPES.map((t) => [t.id, loadStoredLength(t.id)])) as Record<TrainerType, number>
   );
   const [current, setCurrent] = useState<TrainerScramble | null>(null);
+  const currentRef = useRef(current);
+  currentRef.current = current;
   const [basePattern, setBasePattern] = useState<LiveCubeState | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
@@ -311,6 +322,8 @@ function CaseTrainerInner() {
   const [revealed, setRevealed] = useState<string[] | null>(null);
   const [isRevealLoading, setIsRevealLoading] = useState(false);
   const [ladderEnabled, setLadderEnabled] = useState(() => localStorage.getItem(LADDER_STORAGE_KEY) === "true");
+  /** F2L drills: show translucent back-face stickers on the 3D view. */
+  const [backStickers, setBackStickers] = useState(() => localStorage.getItem(BACK_STICKERS_STORAGE_KEY) === "true");
   /** Transient notice (e.g. ladder level-up) shown above the sequence bar until the next attempt starts. */
   const [info, setInfo] = useState<string | null>(null);
   /** Latched per attempt the moment a hint is revealed; recorded on the attempt. */
@@ -334,6 +347,10 @@ function CaseTrainerInner() {
   configRef.current = { trainerType, slot, pair, sides, targetLength };
   const setTargetRef = useRef(setTarget);
   setTargetRef.current = setTarget;
+  const confirmManualSetupRef = useRef(confirmManualSetup);
+  confirmManualSetupRef.current = confirmManualSetup;
+  const phaseRef = useRef(state.phase);
+  phaseRef.current = state.phase;
 
   useEffect(() => {
     let cancelled = false;
@@ -371,6 +388,8 @@ function CaseTrainerInner() {
                   (SIDED_ROUX_TYPES as readonly string[]).includes(type) ? sidesNow[type as SidedRouxType] : "front",
                   snapshot
                 )
+              : type === "f2l-case"
+                ? await generateF2LCaseView(slotNow)
               : type === "f2l"
                 ? await generateF2LScramble(slotNow, snapshot)
               : type === "cross"
@@ -383,6 +402,21 @@ function CaseTrainerInner() {
                       ? await generatePairScramble(len, slotNow, snapshot)
                       : await generateEOCrossScramble(len, snapshot);
           if (generationSeqRef.current !== seq) return;
+          if (generated.type === "f2l-case") {
+            // Virtual case: the view shows the case itself (not the physical
+            // cube), detection replays the user's moves onto it, and there is
+            // no scramble — the session goes straight to "ready" (the empty
+            // performed-move log becomes the frozen empty target).
+            setCurrent(generated);
+            setBasePattern(kp.defaultPattern().applyAlg(generated.targetGenerator ?? ""));
+            cubeRef.current?.setSetupAlgorithm(generated.viewSetupAlg, "");
+            setTargetRef.current("");
+            confirmManualSetupRef.current();
+            setHint(null);
+            setRevealed(null);
+            hintUsedRef.current = false;
+            return;
+          }
           if (moveCounterRef.current !== movesAtSnapshot) continue;
           setCurrent(generated);
           setBasePattern(kp.defaultPattern().applyTransformation(snapshot));
@@ -472,6 +506,15 @@ function CaseTrainerInner() {
       if (physicalRef.current) physicalRef.current = physicalRef.current.applyMove(move);
       moveCounterRef.current++;
       submitCubeMove(move, timestamp);
+      // Virtual case mode: the view shows the CASE, not the physical cube —
+      // moves made after "done" (fiddling between attempts) must not distort
+      // it. Every other mode mirrors the physical cube unconditionally.
+      if (
+        currentRef.current?.type === "f2l-case" &&
+        (phaseRef.current === "done" || phaseRef.current === "idle")
+      ) {
+        return;
+      }
       cubeRef.current?.addMove(move);
     },
     [submitCubeMove]
@@ -488,18 +531,24 @@ function CaseTrainerInner() {
     localStorage.setItem(LADDER_STORAGE_KEY, String(next));
   };
 
+  const toggleBackStickers = () => {
+    const next = !backStickers;
+    setBackStickers(next);
+    localStorage.setItem(BACK_STICKERS_STORAGE_KEY, String(next));
+  };
+
   /** Re-drill the exact case of a past attempt (fresh scramble, same target sub-state). */
   const retryAttempt = (a: TrainerRetryTarget) => {
     if (!kpuzzle) return;
     setSummary(null);
-    setInfo(a.type === "f2l" ? "Retrying the same F2L case" : `Retrying the same ${a.type} case (optimal ${a.optimalLength})`);
+    setInfo(F2L_TYPES.includes(a.type) ? "Retrying the same F2L case" : `Retrying the same ${a.type} case (optimal ${a.optimalLength})`);
     void startNextAttempt(kpuzzle, a);
   };
 
   const canRetry = (a: TrainerRetryTarget & { targetGenerator?: string }) =>
     a.type === "cross"
       ? a.startCrossState !== undefined
-      : a.type === "fb" || a.type === "ss" || a.type === "f2l"
+      : a.type === "fb" || a.type === "ss" || F2L_TYPES.includes(a.type)
         ? Boolean(a.targetGenerator)
         : Boolean(a.nativeTargetSolution);
 
@@ -563,8 +612,9 @@ function CaseTrainerInner() {
         return (s: LiveCubeState) =>
           isCrossSolvedOnFace(s, current.face) && s.patternData.EDGES.orientation.every((o) => o === 0);
       case "xcross":
-      case "f2l": {
-        // Both targets: cross intact + the trained slot's pair inserted.
+      case "f2l":
+      case "f2l-case": {
+        // All three targets: cross intact + the trained slot's pair inserted.
         const frame = XCROSS_SLOT_FRAMES[(current.slot as XCrossSlot) ?? "FR"];
         return (s: LiveCubeState) =>
           isCrossSolvedOnFace(s, current.face) &&
@@ -658,7 +708,7 @@ function CaseTrainerInner() {
     notifiedRef.current = true;
 
     const attemptScramble = current;
-    const isF2l = attemptScramble.type === "f2l";
+    const isF2l = F2L_TYPES.includes(attemptScramble.type);
     const solveMoves = state.moveLog.map((m) => m.move);
     const collapsed = collapseIdenticalMoves(solveMoves);
     // Roux verdicts count in STM: the solver's optimum treats M/E/S slices
@@ -701,7 +751,7 @@ function CaseTrainerInner() {
       const len = attempt.optimalLength;
       if (
         ladderRef.current &&
-        t !== "f2l" && // no optimal level to climb
+        !F2L_TYPES.includes(t) && // no optimal level to climb
         t === cfg.trainerType &&
         len === cfg.targetLength &&
         len < MAX_DEPTHS[t]
@@ -751,14 +801,18 @@ function CaseTrainerInner() {
   }, [state.phase, state.endTime, state.moveLog, solveTimeMs, current, kpuzzle, startNextAttempt]);
 
   // Dismiss the verdict (and any transient notice) the moment the user
-  // starts performing the next scramble.
+  // starts performing the next scramble — or, in the scramble-less f2l-case
+  // mode (which skips "setup" entirely), the next attempt's first solve move.
   useEffect(() => {
     if (!summary && !info) return;
-    if (state.phase === "setup" && state.moveLog.length > 0) {
+    const started =
+      (state.phase === "setup" || (current?.type === "f2l-case" && state.phase === "active")) &&
+      state.moveLog.length > 0;
+    if (started) {
       setSummary(null);
       setInfo(null);
     }
-  }, [summary, info, state.phase, state.moveLog.length]);
+  }, [summary, info, state.phase, state.moveLog.length, current]);
 
   // CMLL is case-based (its "level" varies per case) and f2l has no level
   // at all — those pool the whole type.
@@ -767,7 +821,7 @@ function CaseTrainerInner() {
       attempts.filter(
         (a) =>
           a.type === trainerType &&
-          (trainerType === "cmll" || trainerType === "f2l" || a.targetLength === targetLength)
+          (trainerType === "cmll" || F2L_TYPES.includes(trainerType) || a.targetLength === targetLength)
       ),
     [attempts, trainerType, targetLength]
   );
@@ -798,7 +852,7 @@ function CaseTrainerInner() {
 
   const attemptType = current?.type ?? trainerType;
   const activeHint =
-    attemptType === "f2l"
+    F2L_TYPES.includes(attemptType)
       ? `Insert the ${current?.slot ?? slot} pair (cross stays)!`
       : attemptType === "cross"
       ? "Solve the cross!"
@@ -831,7 +885,7 @@ function CaseTrainerInner() {
         : state.phase === "active"
           ? activeHint
           : state.phase === "done"
-            ? attemptType === "f2l"
+            ? F2L_TYPES.includes(attemptType)
               ? `${moveCount} moves`
               : `${moveCount} moves · optimal ${current?.optimalLength ?? "—"}`
             : null;
@@ -843,7 +897,10 @@ function CaseTrainerInner() {
     ? engineNotReady
       ? `Preparing ${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} engine — first run builds tables…`
       : "Generating scramble…"
-    : (genError ?? undefined);
+    : (genError ??
+      (current?.type === "f2l-case"
+        ? "No scramble — recognise the case on the cube and solve it"
+        : undefined));
 
   return (
     <TrainerPanel
@@ -877,7 +934,7 @@ function CaseTrainerInner() {
               </button>
             ))}
           </div>
-          {(trainerType === "xcross" || trainerType === "pair" || trainerType === "f2l") && (
+          {(trainerType === "xcross" || trainerType === "pair" || F2L_TYPES.includes(trainerType)) && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
               {XCROSS_SLOTS.map((s) => (
@@ -936,7 +993,7 @@ function CaseTrainerInner() {
               ))}
             </div>
           )}
-          {trainerType !== "cmll" && trainerType !== "f2l" && (
+          {trainerType !== "cmll" && !F2L_TYPES.includes(trainerType) && (
           <div className="flex items-center gap-1 shrink-0">
             <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Optimal</span>
             {Array.from(
@@ -957,7 +1014,18 @@ function CaseTrainerInner() {
           </div>
           )}
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            {trainerType !== "f2l" && (
+            {F2L_TYPES.includes(trainerType) && (
+              <button
+                onClick={toggleBackStickers}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+                  backStickers ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+                }`}
+                title="Show translucent copies of the hidden faces' stickers"
+              >
+                <Eye size={12} /> Back stickers
+              </button>
+            )}
+            {!F2L_TYPES.includes(trainerType) && (
             <button
               onClick={toggleLadder}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
@@ -1013,7 +1081,7 @@ function CaseTrainerInner() {
         />
       }
       centerBottom={
-        (state.phase === "ready" || state.phase === "active") && current && current.type !== "f2l" ? (
+        (state.phase === "ready" || state.phase === "active") && current && !F2L_TYPES.includes(current.type) ? (
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <button
@@ -1053,14 +1121,15 @@ function CaseTrainerInner() {
       cubeRef={cubeRef}
       visualization="PG3D"
       stickeringMaskOrbits={stickeringMask}
+      hintFacelets={F2L_TYPES.includes(trainerType) && backStickers ? "floating" : "none"}
       cameraLatitude={isRouxView ? -25 : undefined}
       cameraLongitude={isRouxView ? -35 : undefined}
       timesMs={lengthAttempts.map((a) => a.timeMs)}
       statsLabel={
         trainerType === "cmll"
           ? "CMLL"
-          : trainerType === "f2l"
-            ? `F2L · ${slot} slot`
+          : F2L_TYPES.includes(trainerType)
+            ? `F2L · ${slot} slot${trainerType === "f2l" ? " · from scramble" : ""}`
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
@@ -1072,7 +1141,7 @@ function CaseTrainerInner() {
             optimalSolutions={summary.optimalSolutions}
             onRetry={canRetry(summary.attempt) ? () => retryAttempt(summary.attempt) : undefined}
           />
-        ) : trainerType === "f2l" && avgMoves !== null ? (
+        ) : F2L_TYPES.includes(trainerType) && avgMoves !== null ? (
           <div className="panel p-5 h-full flex flex-col justify-center gap-4">
             <div>
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg moves</p>
@@ -1086,7 +1155,7 @@ function CaseTrainerInner() {
               {lengthAttempts.length} {lengthAttempts.length === 1 ? "attempt" : "attempts"}
             </p>
           </div>
-        ) : trainerType !== "f2l" && optimalRate !== null ? (
+        ) : !F2L_TYPES.includes(trainerType) && optimalRate !== null ? (
           <div className="panel p-5 h-full flex flex-col justify-center gap-4">
             <div>
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Optimal rate</p>
@@ -1119,9 +1188,9 @@ function CaseTrainerInner() {
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>
                   <span className="text-xs font-mono tabular-nums text-gray-400 w-16 shrink-0">
-                    {a.type === "f2l" ? `${a.moveCount} mv` : `${a.moveCount}/${a.optimalLength}`}
+                    {F2L_TYPES.includes(a.type) ? `${a.moveCount} mv` : `${a.moveCount}/${a.optimalLength}`}
                   </span>
-                  {a.type !== "f2l" && (
+                  {!F2L_TYPES.includes(a.type) && (
                     <span
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
                         a.overhead <= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"

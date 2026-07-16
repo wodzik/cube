@@ -376,6 +376,37 @@ export async function generateF2LScramble(slot: XCrossSlot, from?: KTransformati
   throw new Error(`F2L scramble generation failed after ${MAX_GENERATION_RETRIES} attempts`);
 }
 
+/**
+ * F2L case-drill variant ("f2l-case"): NO scramble at all — the case is
+ * VIRTUAL. The view shows the constructed case directly (viewSetupAlg =
+ * its generator) regardless of the physical cube's state, and the page
+ * replays the user's moves onto it for detection. scramble stays "".
+ */
+export async function generateF2LCaseView(slot: XCrossSlot): Promise<TrainerScramble> {
+  const kpuzzle = await cube3x3x3.kpuzzle();
+
+  for (let attempt = 0; attempt < MAX_GENERATION_RETRIES; attempt++) {
+    const pattern = f2lCasePattern(kpuzzle, slot, sampleF2LCase(slot));
+    let solution: string[];
+    try {
+      solution = tokenize((await experimentalSolve3x3x3IgnoringCenters(pattern)).toString());
+    } catch {
+      continue;
+    }
+    const generator = invertSequence(solution).join(" ");
+    return {
+      type: "f2l-case",
+      face: XCROSS_CROSS_FACE,
+      slot,
+      scramble: "",
+      optimalLength: 0,
+      viewSetupAlg: generator,
+      targetGenerator: generator,
+    };
+  }
+  throw new Error(`F2L case generation failed after ${MAX_GENERATION_RETRIES} attempts`);
+}
+
 // ─── Retry (pinned target) + live hint ───
 
 function rotationFor(type: TrainerType, slot?: XCrossSlot | XXCrossPair | RouxSsSide): string {
@@ -431,6 +462,20 @@ export async function regenerateForTarget(target: TrainerRetryTarget, from?: KTr
   }
   const kpuzzle = await cube3x3x3.kpuzzle();
   const fromTransformation = from ?? kpuzzle.identityTransformation();
+
+  if (target.type === "f2l-case") {
+    // Virtual case — the stored generator IS the whole thing.
+    if (!target.targetGenerator) throw new Error("retry: f2l-case attempt has no stored target generator");
+    return {
+      type: "f2l-case",
+      face: XCROSS_CROSS_FACE,
+      slot: target.slot,
+      scramble: "",
+      optimalLength: 0,
+      viewSetupAlg: target.targetGenerator,
+      targetGenerator: target.targetGenerator,
+    };
+  }
 
   if (target.type === "f2l") {
     // The whole target state is pinned by its generator — recompose the
@@ -555,7 +600,7 @@ export async function optimalSolutionsFromCurrent(
   if (isRouxFamily(current.type)) {
     throw new Error("Roux solutions are handled by rouxTrainerService.rouxOptimalSolutions");
   }
-  if (current.type === "f2l") return []; // no solver for these cases — hints are hidden in the UI
+  if (current.type === "f2l" || current.type === "f2l-case") return []; // no solver for these cases — hints are hidden in the UI
   if (current.type === "cross") {
     if (current.startCrossState === undefined) return [];
     const engine = await getCrossEngine(current.face);
