@@ -11,9 +11,10 @@
  */
 
 import { useState } from "react";
-import { X, Star, Trash2, Plus, Check, RotateCcw, ExternalLink, Play } from "lucide-react";
+import { X, Star, Trash2, Plus, Check, RotateCcw, ExternalLink, Play, Video } from "lucide-react";
 import type { AlgorithmCase, AlgorithmVariant, AlgGroup } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
+import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { VariantTest } from "./VariantTest";
 import { formatTime } from "../logic/statistics";
 import { CAMERA, STICKERING, VISUALIZATION_MODE } from "../logic/algGroupConfig";
@@ -48,6 +49,8 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
   // above this modal) for the picked variant's CURRENT draft algorithm,
   // including unsaved edits.
   const [testingVariant, setTestingVariant] = useState<AlgorithmVariant | null>(null);
+  // "Show me how" — animated playback popup for the picked variant.
+  const [playbackVariant, setPlaybackVariant] = useState<AlgorithmVariant | null>(null);
 
   const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0];
   const previewAlg = editingId === defaultVariant?.id ? (editBuf.alg ?? defaultVariant.alg) : (defaultVariant?.alg ?? "");
@@ -162,6 +165,7 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
                 onClearTimes={() => clearTimes(v.id)}
                 onDelete={() => deleteVariant(v.id)}
                 onTest={() => setTestingVariant(v)}
+                onPlayback={() => setPlaybackVariant(v)}
               />
             ))}
 
@@ -234,6 +238,15 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
           onClose={() => setTestingVariant(null)}
         />
       )}
+
+      {playbackVariant && (
+        <AlgPlaybackModal
+          title={case_.name}
+          subtitle={playbackVariant.name}
+          alg={playbackVariant.alg}
+          onClose={() => setPlaybackVariant(null)}
+        />
+      )}
     </div>
   );
 }
@@ -255,6 +268,7 @@ interface VariantRowProps {
   onClearTimes: () => void;
   onDelete: () => void;
   onTest: () => void;
+  onPlayback: () => void;
 }
 
 function VariantRow({
@@ -272,6 +286,7 @@ function VariantRow({
   onClearTimes,
   onDelete,
   onTest,
+  onPlayback,
 }: VariantRowProps) {
   return (
     <div
@@ -360,6 +375,13 @@ function VariantRow({
           </div>
 
           <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              onClick={onPlayback}
+              className="p-1.5 text-gray-600 hover:text-white transition-colors"
+              title="Show how to perform this algorithm"
+            >
+              <Video size={13} />
+            </button>
             <button
               onClick={onTest}
               className="p-1.5 text-gray-600 hover:text-emerald-400 transition-colors"

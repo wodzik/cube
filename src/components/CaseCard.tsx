@@ -5,9 +5,11 @@
  * button, best/Ao5 stats, algorithm text, selection checkbox, edit button.
  */
 
-import { Minus, Bookmark, CheckCircle2, Pencil, Play } from "lucide-react";
+import { useState } from "react";
+import { Minus, Bookmark, CheckCircle2, Pencil, Play, Video } from "lucide-react";
 import type { AlgGroup, AlgorithmCase, AttemptSource, LearningStatus } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
+import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { STICKERING, VISUALIZATION_MODE, CAMERA, getDefaultVariant } from "../logic/algGroupConfig";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
 
@@ -43,6 +45,7 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
 
   const status: LearningStatus = defaultVariant?.learningStatus ?? "not-started";
   const meta = STATUS_META[status];
+  const [showPlayback, setShowPlayback] = useState(false);
 
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,6 +82,18 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
           {onSelect && (
             <button onClick={handleSelectClick} title="Practice this now" className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100" style={{ color: "var(--accent-bright)" }}>
               <Play size={12} fill="currentColor" />
+            </button>
+          )}
+          {defaultVariant && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPlayback(true);
+              }}
+              title="Show how to perform this algorithm"
+              className="p-1 rounded text-gray-600 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <Video size={12} />
             </button>
           )}
           <button onClick={handleStatusClick} title={`Status: ${meta.label} (click to advance)`} className={`p-1 rounded transition-colors ${meta.color}`}>
@@ -132,6 +147,15 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
           style={{ accentColor: "var(--accent)" }}
         />
       </div>
+
+      {showPlayback && defaultVariant && (
+        <AlgPlaybackModal
+          title={case_.name}
+          subtitle={defaultVariant.name}
+          alg={defaultVariant.alg}
+          onClose={() => setShowPlayback(false)}
+        />
+      )}
     </div>
   );
 }

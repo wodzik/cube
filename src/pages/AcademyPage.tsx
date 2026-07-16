@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -33,6 +33,7 @@ import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AcademyAlgCard } from "../components/AcademyAlgCard";
+import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
 import type { CubeVisualisationRef } from "../components/CubeVisualisation";
 import type { SessionConfig } from "../types/session";
 import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/academy";
@@ -85,6 +86,7 @@ function AcademyInner() {
   const [drillRound, setDrillRound] = useState(0);
   /** Session-scratch attempt times per alg id — never persisted. */
   const [attemptsMs, setAttemptsMs] = useState<Record<string, number[]>>({});
+  const [showPlayback, setShowPlayback] = useState(false);
 
   const step: AcademyStep = lesson.steps.find((s) => s.id === stepId) ?? lesson.steps[0];
   const stepMask = useMemo(() => academyStepMask(step.view), [step.view]);
@@ -190,6 +192,15 @@ function AcademyInner() {
         : null;
 
   return (
+    <>
+    {showPlayback && alg && (
+      <AlgPlaybackModal
+        title={alg.name}
+        subtitle={step.title}
+        alg={alg.alg}
+        onClose={() => setShowPlayback(false)}
+      />
+    )}
     <TrainerPanel
       header={
         <div className="flex items-center gap-1 w-full overflow-x-auto">
@@ -249,6 +260,13 @@ function AcademyInner() {
               {alg.required ? "required" : "nice to know"}
             </span>
             {alg.description && <p className="text-xs text-gray-500 max-w-md">{alg.description}</p>}
+            <button
+              onClick={() => setShowPlayback(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 mt-0.5 text-[11px] font-semibold text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+              title="Watch the algorithm performed move by move"
+            >
+              <Video size={12} /> Show me how
+            </button>
             <p className="text-[11px] text-gray-700 tabular-nums font-mono">
               {Math.min(drillIdx, Math.max(selectedAlgs.length - 1, 0)) + 1} / {selectedAlgs.length}
             </p>
@@ -316,5 +334,6 @@ function AcademyInner() {
         </div>
       }
     />
+    </>
   );
 }

@@ -6,8 +6,10 @@
  * curriculum weight instead (required / nice to know).
  */
 
-import { Play } from "lucide-react";
+import { useState } from "react";
+import { Play, Video } from "lucide-react";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
+import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { parseDecoratedAlg, type AcademyAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
 
@@ -22,6 +24,7 @@ interface AcademyAlgCardProps {
 
 export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelectedChange, onPractice }: AcademyAlgCardProps) {
   const plainAlg = parseDecoratedAlg(alg.alg).tokens.join(" ");
+  const [showPlayback, setShowPlayback] = useState(false);
 
   return (
     <div
@@ -47,6 +50,13 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
           >
             {alg.required ? "required" : "nice to know"}
           </span>
+          <button
+            onClick={() => setShowPlayback(true)}
+            title="Show how to perform this algorithm"
+            className="p-1 rounded text-gray-500 hover:text-white transition-colors"
+          >
+            <Video size={12} />
+          </button>
           <button
             onClick={onPractice}
             title="Practice this now"
@@ -82,6 +92,15 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
           style={{ accentColor: "var(--accent)" }}
         />
       </div>
+
+      {showPlayback && (
+        <AlgPlaybackModal
+          title={alg.name}
+          subtitle={alg.description}
+          alg={alg.alg}
+          onClose={() => setShowPlayback(false)}
+        />
+      )}
     </div>
   );
 }

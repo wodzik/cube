@@ -392,13 +392,12 @@ per family and per-type side pickers (ss/fs/fbdr).
     when the user's STM prefix matches); retry stashes it in
     nativeTargetSolution. Detection: both blocks + all 8 corners
     (rouxStages piece sets), offset-tolerant. Stats pool the whole type.
-- **Algorithm playback preview** (Academy + Practice): a button on an
-  algorithm card/drill opening a modal with an animated TwistyPlayer —
-  press play to watch the alg executed, or scrub it move by move.
-  Building blocks already exist: CubeVisualisation wraps TwistyPlayer
-  (controlPanel "bottom-row" enables its built-in play/scrub controls,
-  `setMoveIndex` scrubs programmatically); mount with
-  experimentalSetupAlg = inverse(alg) and alg = the algorithm.
+- **Algorithm playback preview** — DONE: `AlgPlaybackModal` (TwistyPlayer
+  with controlPanel "bottom-row" play/scrub controls, setup =
+  inverse(alg), floating hint facelets, tempo 1×). Offered from four
+  spots: the Academy drill's "Show me how" button, the Video icon on
+  Academy cards, on Practice/Attack case cards, and on each variant row
+  in CaseEdit (z-60, stacks above the edit modal).
 - XCross+Free Pair combo trainer, pseudo xcross / pseudo pair variants.
 - Advanced settings: move restrict, premove, center offsets.
 - Streamed multi-solution viewer (vendor or18's crossSolver) — currently
