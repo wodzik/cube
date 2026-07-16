@@ -46,6 +46,7 @@ import {
   XCROSS_SLOTS,
   XXCROSS_PAIRS,
   XXCROSS_PAIR_FRAMES,
+  conjugateFaceTurns,
   type XCrossSlot,
   type XXCrossPair,
 } from "../logic/trainer/xcrossFrames";
@@ -179,6 +180,18 @@ const OPTIMAL_SOLUTIONS_SHOWN = 8;
 const ROUX_TYPES: readonly TrainerType[] = ["fb", "fs", "fbdr", "ss", "cmll", "eolr"];
 /** Both F2L drills: no computed optimum, no level dial / ladder / hints. */
 const F2L_TYPES: readonly TrainerType[] = ["f2l-case", "f2l"];
+/**
+ * The F2L drills are DISPLAYED white-down (the way F2L is actually solved):
+ * the view appends a trailing z2 and every animated move is z2-conjugated
+ * (see the `view` helper). Detection, generation and stored attempts stay
+ * in the app's white-up LETTER frame — only what the user sees rotates.
+ * Slot letters therefore differ between the two frames: the letter-frame
+ * FL slot sits at front-right when white is down. This maps a letter slot
+ * to the label shown in the white-down view (its own inverse).
+ */
+const F2L_SLOT_VIEW_LABELS: Record<XCrossSlot, XCrossSlot> = { FL: "FR", BL: "BR", FR: "FL", BR: "BL" };
+/** Letter slots ordered so their white-down labels read FR, BR, FL, BL. */
+const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
@@ -289,15 +302,24 @@ function CaseTrainerInner() {
   const cubeRef = useRef<CubeVisualisationRef>(null);
   /** Auxiliary flat (unfolded-net) view — always mounted, kept in sync by fanning out every view call. */
   const flatCubeRef = useRef<CubeVisualisationRef>(null);
+  /** True while the attempt in view is an F2L drill — the view is then shown white-down (trailing z2). */
+  const viewRotatedRef = useRef(false);
+  const kpuzzleRef = useRef<KPuzzle | null>(null);
   const view = useMemo(
     () => ({
       setSetupAlgorithm: (setup: string, alg = "") => {
-        cubeRef.current?.setSetupAlgorithm(setup, alg);
-        flatCubeRef.current?.setSetupAlgorithm(setup, alg);
+        const s = viewRotatedRef.current ? `${setup} z2`.trim() : setup;
+        cubeRef.current?.setSetupAlgorithm(s, alg);
+        flatCubeRef.current?.setSetupAlgorithm(s, alg);
       },
       addMove: (move: string) => {
-        cubeRef.current?.addMove(move);
-        flatCubeRef.current?.addMove(move);
+        // With a trailing z2 in the setup, an appended token acts on the
+        // ROTATED frame — conjugate the letter-frame hardware move so the
+        // right physical face animates (see xcrossFrames.conjugateFaceTurns).
+        const kp = kpuzzleRef.current;
+        const m = viewRotatedRef.current && kp ? conjugateFaceTurns(kp, [move], "z2")[0] : move;
+        cubeRef.current?.addMove(m);
+        flatCubeRef.current?.addMove(m);
       },
       reset: () => {
         cubeRef.current?.reset();
@@ -379,6 +401,7 @@ function CaseTrainerInner() {
     cube3x3x3.kpuzzle().then((kp) => {
       if (cancelled) return;
       physicalRef.current = kp.identityTransformation();
+      kpuzzleRef.current = kp;
       setKpuzzle(kp);
     });
     return () => {
@@ -424,6 +447,7 @@ function CaseTrainerInner() {
                       ? await generatePairScramble(len, slotNow, snapshot)
                       : await generateEOCrossScramble(len, snapshot);
           if (generationSeqRef.current !== seq) return;
+          viewRotatedRef.current = F2L_TYPES.includes(generated.type);
           if (generated.type === "f2l-case") {
             // Virtual case: the view shows the case itself (not the physical
             // cube), detection replays the user's moves onto it, and there is
@@ -879,9 +903,11 @@ function CaseTrainerInner() {
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
 
   const attemptType = current?.type ?? trainerType;
+  /** F2L drills display white-down — translate a letter slot for the UI. */
+  const f2lDisplaySlot = F2L_SLOT_VIEW_LABELS[(current?.slot as XCrossSlot) ?? slot] ?? slot;
   const activeHint =
     F2L_TYPES.includes(attemptType)
-      ? `Insert the ${current?.slot ?? slot} pair (cross stays)!`
+      ? `Insert the ${f2lDisplaySlot} pair (cross stays)!`
       : attemptType === "cross"
       ? "Solve the cross!"
       : attemptType === "eocross"
@@ -965,7 +991,7 @@ function CaseTrainerInner() {
           {(trainerType === "xcross" || trainerType === "pair" || F2L_TYPES.includes(trainerType)) && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
-              {XCROSS_SLOTS.map((s) => (
+              {(F2L_TYPES.includes(trainerType) ? F2L_SLOT_ORDER : XCROSS_SLOTS).map((s) => (
                 <button
                   key={s}
                   onClick={() => changeSlot(s)}
@@ -974,7 +1000,7 @@ function CaseTrainerInner() {
                   }`}
                   style={slot === s ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {s}
+                  {F2L_TYPES.includes(trainerType) ? F2L_SLOT_VIEW_LABELS[s] : s}
                 </button>
               ))}
             </div>
@@ -1170,7 +1196,7 @@ function CaseTrainerInner() {
         trainerType === "cmll"
           ? "CMLL"
           : F2L_TYPES.includes(trainerType)
-            ? `F2L · ${slot} slot${trainerType === "f2l" ? " · from scramble" : ""}`
+            ? `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot${trainerType === "f2l" ? " · from scramble" : ""}`
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
@@ -1225,7 +1251,7 @@ function CaseTrainerInner() {
                 <div key={a.id} className="flex items-center gap-3 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 w-24 shrink-0">
                     {a.type}
-                    {a.slot ? ` ${a.slot}` : ""}
+                    {a.slot ? ` ${F2L_TYPES.includes(a.type) ? F2L_SLOT_VIEW_LABELS[a.slot as XCrossSlot] : a.slot}` : ""}
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>
                   <span className="text-xs font-mono tabular-nums text-gray-400 w-16 shrink-0">

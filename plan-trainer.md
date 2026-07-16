@@ -409,7 +409,13 @@ per family and per-type side pickers (ss/fs/fbdr).
   and detection replays the user's moves onto the case pattern (moves
   made in the done/idle gap are NOT mirrored to the view); **"From
   scramble"** (type "f2l") is the physical variant. Both get a "Back
-  stickers" toggle (TwistyPlayer hintFacelets floating, persisted).
+  stickers" toggle (TwistyPlayer hintFacelets floating, persisted) and a
+  "Flat view" toggle (always-mounted synced 2D net under the 3D cube).
+  Both drills DISPLAY white-down: the view appends a trailing z2 and every
+  animated hardware move is z2-conjugated (conjugateFaceTurns) — detection
+  / generation / records stay in the white-up letter frame, and slot
+  letters are relabeled for the UI (letter FL shows as FR etc.,
+  F2L_SLOT_VIEW_LABELS).
 - **Algorithm playback preview** — DONE: `AlgPlaybackModal` (TwistyPlayer
   with controlPanel "bottom-row" play/scrub controls, setup =
   inverse(alg), floating hint facelets, tempo 1×). Offered from four
