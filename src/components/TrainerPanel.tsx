@@ -75,6 +75,14 @@ export interface TrainerPanelProps {
   dragInput?: "auto" | "none";
   /** Show translucent copies of the hidden faces' stickers (F2L back-sticker aid). */
   hintFacelets?: "none" | "floating";
+  /**
+   * Ref for an auxiliary FLAT (unfolded-net "2D") view under the main cube.
+   * When provided the flat player is ALWAYS mounted — so it stays in sync
+   * with every imperative call the page fans out to it — and merely hidden
+   * via CSS while `showFlatView` is false.
+   */
+  flatCubeRef?: RefObject<CubeVisualisationRef | null>;
+  showFlatView?: boolean;
   cameraLatitude?: number;
   cameraLongitude?: number;
   cubeSetupAlg?: string;
@@ -129,6 +137,8 @@ export function TrainerPanel({
   controlPanel = "none",
   dragInput = "auto",
   hintFacelets,
+  flatCubeRef,
+  showFlatView = false,
   cameraLatitude,
   cameraLongitude,
   cubeSetupAlg,
@@ -190,23 +200,42 @@ export function TrainerPanel({
         </>
       }
       cube={
-        <div className="w-full max-w-90 lg:max-w-none aspect-square">
-          <CubeVisualisation
-            ref={cubeRef}
-            visualization={visualization}
-            stickering={stickering}
-            stickeringMaskOrbits={stickeringMaskOrbits}
-            background={background}
-            controlPanel={controlPanel}
-            dragInput={dragInput}
-            hintFacelets={hintFacelets}
-            cameraLatitude={cameraLatitude}
-            cameraLongitude={cameraLongitude}
-            setupAlg={cubeSetupAlg}
-            setupAnchor={cubeSetupAnchor}
-            alg={cubeAlg}
-            className="size-full"
-          />
+        <div className="w-full max-w-90 lg:max-w-none flex flex-col items-center">
+          <div className="w-full aspect-square">
+            <CubeVisualisation
+              ref={cubeRef}
+              visualization={visualization}
+              stickering={stickering}
+              stickeringMaskOrbits={stickeringMaskOrbits}
+              background={background}
+              controlPanel={controlPanel}
+              dragInput={dragInput}
+              hintFacelets={hintFacelets}
+              cameraLatitude={cameraLatitude}
+              cameraLongitude={cameraLongitude}
+              setupAlg={cubeSetupAlg}
+              setupAnchor={cubeSetupAnchor}
+              alg={cubeAlg}
+              className="size-full"
+            />
+          </div>
+          {flatCubeRef && (
+            <div className={`w-full h-48 sm:h-64 -mt-4 ${showFlatView ? "" : "hidden"}`}>
+              <CubeVisualisation
+                ref={flatCubeRef}
+                visualization="2D"
+                stickering={stickering}
+                stickeringMaskOrbits={stickeringMaskOrbits}
+                background="none"
+                controlPanel="none"
+                dragInput="none"
+                setupAlg={cubeSetupAlg}
+                setupAnchor={cubeSetupAnchor}
+                alg={cubeAlg}
+                className="size-full"
+              />
+            </div>
+          )}
         </div>
       }
       stats={

@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
+import { Eye, Grid3x3, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
 import { cube3x3x3 } from "cubing/puzzles";
 import type { KPuzzle, KTransformation } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
@@ -200,6 +200,7 @@ const SIDE_STORAGE_KEYS: Record<SidedRouxType, string> = {
 const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square", fbdr: "Solved FS" };
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
 const BACK_STICKERS_STORAGE_KEY = "nact_trainer_back_stickers";
+const FLAT_VIEW_STORAGE_KEY = "nact_trainer_flat_view";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
 const LADDER_THRESHOLD = 0.8;
@@ -286,6 +287,25 @@ export default function CaseTrainerPage() {
 function CaseTrainerInner() {
   const { state, submitCubeMove, setTarget, confirmManualSetup } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
+  /** Auxiliary flat (unfolded-net) view — always mounted, kept in sync by fanning out every view call. */
+  const flatCubeRef = useRef<CubeVisualisationRef>(null);
+  const view = useMemo(
+    () => ({
+      setSetupAlgorithm: (setup: string, alg = "") => {
+        cubeRef.current?.setSetupAlgorithm(setup, alg);
+        flatCubeRef.current?.setSetupAlgorithm(setup, alg);
+      },
+      addMove: (move: string) => {
+        cubeRef.current?.addMove(move);
+        flatCubeRef.current?.addMove(move);
+      },
+      reset: () => {
+        cubeRef.current?.reset();
+        flatCubeRef.current?.reset();
+      },
+    }),
+    []
+  );
 
   const [kpuzzle, setKpuzzle] = useState<KPuzzle | null>(null);
   const [trainerType, setTrainerType] = useState<TrainerType>(loadStoredType);
@@ -324,6 +344,8 @@ function CaseTrainerInner() {
   const [ladderEnabled, setLadderEnabled] = useState(() => localStorage.getItem(LADDER_STORAGE_KEY) === "true");
   /** F2L drills: show translucent back-face stickers on the 3D view. */
   const [backStickers, setBackStickers] = useState(() => localStorage.getItem(BACK_STICKERS_STORAGE_KEY) === "true");
+  /** F2L drills: show the flat unfolded-net view under the 3D cube. */
+  const [flatView, setFlatView] = useState(() => localStorage.getItem(FLAT_VIEW_STORAGE_KEY) === "true");
   /** Transient notice (e.g. ladder level-up) shown above the sequence bar until the next attempt starts. */
   const [info, setInfo] = useState<string | null>(null);
   /** Latched per attempt the moment a hint is revealed; recorded on the attempt. */
@@ -409,7 +431,7 @@ function CaseTrainerInner() {
             // performed-move log becomes the frozen empty target).
             setCurrent(generated);
             setBasePattern(kp.defaultPattern().applyAlg(generated.targetGenerator ?? ""));
-            cubeRef.current?.setSetupAlgorithm(generated.viewSetupAlg, "");
+            view.setSetupAlgorithm(generated.viewSetupAlg, "");
             setTargetRef.current("");
             confirmManualSetupRef.current();
             setHint(null);
@@ -420,7 +442,7 @@ function CaseTrainerInner() {
           if (moveCounterRef.current !== movesAtSnapshot) continue;
           setCurrent(generated);
           setBasePattern(kp.defaultPattern().applyTransformation(snapshot));
-          cubeRef.current?.setSetupAlgorithm(generated.viewSetupAlg, "");
+          view.setSetupAlgorithm(generated.viewSetupAlg, "");
           setTargetRef.current(generated.scramble);
           setHint(null);
           setRevealed(null);
@@ -496,7 +518,7 @@ function CaseTrainerInner() {
   const resync = () => {
     if (!kpuzzle) return;
     physicalRef.current = kpuzzle.identityTransformation();
-    cubeRef.current?.reset();
+    view.reset();
     setSummary(null);
     void startNextAttempt(kpuzzle);
   };
@@ -515,9 +537,9 @@ function CaseTrainerInner() {
       ) {
         return;
       }
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
     },
-    [submitCubeMove]
+    [submitCubeMove, view]
   );
 
   const cube = useSmartCube({ onMove: handleMove });
@@ -535,6 +557,12 @@ function CaseTrainerInner() {
     const next = !backStickers;
     setBackStickers(next);
     localStorage.setItem(BACK_STICKERS_STORAGE_KEY, String(next));
+  };
+
+  const toggleFlatView = () => {
+    const next = !flatView;
+    setFlatView(next);
+    localStorage.setItem(FLAT_VIEW_STORAGE_KEY, String(next));
   };
 
   /** Re-drill the exact case of a past attempt (fresh scramble, same target sub-state). */
@@ -1015,15 +1043,26 @@ function CaseTrainerInner() {
           )}
           <div className="ml-auto flex items-center gap-2 shrink-0">
             {F2L_TYPES.includes(trainerType) && (
-              <button
-                onClick={toggleBackStickers}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                  backStickers ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-                }`}
-                title="Show translucent copies of the hidden faces' stickers"
-              >
-                <Eye size={12} /> Back stickers
-              </button>
+              <>
+                <button
+                  onClick={toggleBackStickers}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+                    backStickers ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+                  }`}
+                  title="Show translucent copies of the hidden faces' stickers"
+                >
+                  <Eye size={12} /> Back stickers
+                </button>
+                <button
+                  onClick={toggleFlatView}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+                    flatView ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+                  }`}
+                  title="Show a flat unfolded view of the whole cube under the 3D one"
+                >
+                  <Grid3x3 size={12} /> Flat view
+                </button>
+              </>
             )}
             {!F2L_TYPES.includes(trainerType) && (
             <button
@@ -1073,9 +1112,9 @@ function CaseTrainerInner() {
           onSaveAsDNF={regenerate}
           onResetCube={() => {
             if (!current) return;
-            cubeRef.current?.reset();
-            cubeRef.current?.setSetupAlgorithm(current.viewSetupAlg, "");
-            state.moveLog.forEach((m) => cubeRef.current?.addMove(m.move));
+            view.reset();
+            view.setSetupAlgorithm(current.viewSetupAlg, "");
+            state.moveLog.forEach((m) => view.addMove(m.move));
           }}
           stopByCube
         />
@@ -1122,6 +1161,8 @@ function CaseTrainerInner() {
       visualization="PG3D"
       stickeringMaskOrbits={stickeringMask}
       hintFacelets={F2L_TYPES.includes(trainerType) && backStickers ? "floating" : "none"}
+      flatCubeRef={flatCubeRef}
+      showFlatView={F2L_TYPES.includes(trainerType) && flatView}
       cameraLatitude={isRouxView ? -25 : undefined}
       cameraLongitude={isRouxView ? -35 : undefined}
       timesMs={lengthAttempts.map((a) => a.timeMs)}
