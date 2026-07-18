@@ -49,6 +49,13 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 2048,
+    // No modulepreload hints for dynamic imports. Vite's preload helper
+    // touches `document` the moment a dep list is present — and cubing.js's
+    // search-worker entry (a regular chunk loaded INSIDE a module worker)
+    // dynamic-imports its solver with deps, crashing the worker in
+    // production ("document is not defined" -> no scrambles). Costs only
+    // the preload hint, not correctness: imports still resolve normally.
+    modulePreload: false,
   },
   optimizeDeps: {
     // cubing ships its own workers/wasm — pre-bundling breaks it.
