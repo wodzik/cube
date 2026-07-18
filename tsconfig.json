@@ -18,10 +18,14 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "smartcube-web-bluetooth": ["./node_modules/smartcube-web-bluetooth/src/index.ts"]
-    }
+    },
+    // TS 7 no longer auto-includes every node_modules/@types package —
+    // global types must be listed. web-bluetooth: relied on by
+    // smartcube-web-bluetooth's sources (compiled via the paths alias);
+    // node: its utils reference `process`; bun: bun:test in *.test.ts.
+    "types": ["web-bluetooth", "aes-js", "node", "bun"]
   },
   "include": ["src"]
 }
