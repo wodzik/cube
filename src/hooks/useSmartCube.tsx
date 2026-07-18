@@ -32,7 +32,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { connectSmartCube, type SmartCubeConnection } from "smartcube-web-bluetooth";
+import {
+  connectSmartCube,
+  getCachedMacForDevice,
+  type SmartCubeConnection,
+} from "smartcube-web-bluetooth";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
 
@@ -75,7 +79,26 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     setError(null);
     try {
-      const conn = await connectSmartCube();
+      // QiYi cubes need their MAC address for the encryption handshake.
+      // enableAddressSearch turns on the library's MAC probing (candidates
+      // derived from the device name) — the path that works when the browser
+      // exposes no advertisement data (desktop Chrome without the
+      // web-platform-features flag). The provider is the last-resort fallback:
+      // ask the user to type the MAC in manually.
+      const conn = await connectSmartCube({
+        enableAddressSearch: true,
+        macAddressProvider: async (device, isFallbackCall) => {
+          if (!isFallbackCall) return null;
+          const flagHint =
+            typeof device.watchAdvertisements !== "function"
+              ? "\n\nOn Chrome, automatic discovery may work if you enable\nchrome://flags/#enable-experimental-web-platform-features"
+              : "";
+          return window.prompt(
+            `Unable to determine cube MAC address.\nPlease enter it manually:${flagHint}`,
+            getCachedMacForDevice(device) ?? ""
+          );
+        },
+      });
       connectionRef.current = conn;
 
       setState({
