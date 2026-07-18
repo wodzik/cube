@@ -31,6 +31,22 @@ const LEGACY_F2L_KEYS: Record<Pref, string> = {
   flatView: "nact_trainer_flat_view",
 };
 
+// How far the hint stickers float from the cube, in Cube3D elevation units
+// (main stickers sit at 0.503; the library's "auto" default is 1.45). One
+// global value — the preferred distance is an aesthetic choice, not a
+// per-drill one.
+const ELEVATION_KEY = "nact_view_hint_elevation";
+export const DEFAULT_HINT_ELEVATION = 1.45;
+export const MIN_HINT_ELEVATION = 0.6;
+export const MAX_HINT_ELEVATION = 3;
+
+function loadElevation(): number {
+  const stored = Number(localStorage.getItem(ELEVATION_KEY));
+  return Number.isFinite(stored) && stored >= MIN_HINT_ELEVATION && stored <= MAX_HINT_ELEVATION
+    ? stored
+    : DEFAULT_HINT_ELEVATION;
+}
+
 function load(pref: Pref, bucket: Bucket): boolean {
   const stored = localStorage.getItem(KEYS[pref][bucket]);
   if (stored !== null) return stored === "true";
@@ -45,14 +61,18 @@ function load(pref: Pref, bucket: Bucket): boolean {
 export interface CaseViewPrefs {
   backStickers: boolean;
   flatView: boolean;
+  /** Distance of the floating hint stickers from the cube (Cube3D elevation units). */
+  hintElevation: number;
   toggleBackStickers: () => void;
   toggleFlatView: () => void;
+  setHintElevation: (value: number) => void;
 }
 
 export function useCaseViewPrefs(isF2l: boolean): CaseViewPrefs {
   const bucket: Bucket = isF2l ? "f2l" : "other";
   const [backStickers, setBackStickers] = useState(() => load("backStickers", bucket));
   const [flatView, setFlatView] = useState(() => load("flatView", bucket));
+  const [hintElevation, setHintElevationState] = useState(loadElevation);
 
   // Re-read when the page switches context (e.g. Practice going OLL -> F2L).
   useEffect(() => {
@@ -76,5 +96,10 @@ export function useCaseViewPrefs(isF2l: boolean): CaseViewPrefs {
     });
   }, [bucket]);
 
-  return { backStickers, flatView, toggleBackStickers, toggleFlatView };
+  const setHintElevation = useCallback((value: number) => {
+    localStorage.setItem(ELEVATION_KEY, String(value));
+    setHintElevationState(value);
+  }, []);
+
+  return { backStickers, flatView, hintElevation, toggleBackStickers, toggleFlatView, setHintElevation };
 }

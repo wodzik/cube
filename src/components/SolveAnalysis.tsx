@@ -183,7 +183,7 @@ export function SolveAnalysis({ record, onClose, onUseScramble, moveTargets, onM
                 ref={cubeRef}
                 setupAlg={record.scramble}
                 alg={playerAlg}
-                visualization="PG3D"
+                visualization="3D"
                 controlPanel="bottom-row"
                 className="size-full"
               />

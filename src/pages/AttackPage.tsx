@@ -319,9 +319,10 @@ function AttackPageInner() {
         </button>
       }
       cubeRef={cubeRef}
-      visualization="PG3D"
+      visualization="3D"
       stickering={STICKERING[group]}
       hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+      hintFaceletsElevation={viewPrefs.hintElevation}
       flatCubeRef={flatCubeRef}
       showFlatView={viewPrefs.flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}

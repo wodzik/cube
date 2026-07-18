@@ -75,6 +75,8 @@ export interface TrainerPanelProps {
   dragInput?: "auto" | "none";
   /** Show translucent copies of the hidden faces' stickers (F2L back-sticker aid). */
   hintFacelets?: "none" | "floating";
+  /** Distance of the floating hint stickers from the cube — see CubeVisualisation. */
+  hintFaceletsElevation?: number;
   /**
    * Ref for an auxiliary FLAT (unfolded-net "2D") view under the main cube.
    * When provided the flat player is ALWAYS mounted — so it stays in sync
@@ -132,13 +134,14 @@ export function TrainerPanel({
   controls,
   centerBottom,
   cubeRef,
-  visualization = "PG3D",
+  visualization = "3D",
   stickering,
   stickeringMaskOrbits,
   background = "none",
   controlPanel = "none",
   dragInput = "auto",
   hintFacelets,
+  hintFaceletsElevation,
   flatCubeRef,
   showFlatView = false,
   cubeToolbar,
@@ -214,6 +217,7 @@ export function TrainerPanel({
               controlPanel={controlPanel}
               dragInput={dragInput}
               hintFacelets={hintFacelets}
+              hintFaceletsElevation={hintFaceletsElevation}
               cameraLatitude={cameraLatitude}
               cameraLongitude={cameraLongitude}
               setupAlg={cubeSetupAlg}

@@ -286,9 +286,10 @@ function TrainingPageInner() {
         timerState={timerState}
         hintText={hintText}
         cubeRef={cubeRef}
-        visualization="PG3D"
+        visualization="3D"
         stickering={group ? STICKERING[group] : "full"}
         hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+        hintFaceletsElevation={viewPrefs.hintElevation}
         flatCubeRef={flatCubeRef}
         showFlatView={viewPrefs.flatView}
         cubeToolbar={<CaseViewToggles {...viewPrefs} />}

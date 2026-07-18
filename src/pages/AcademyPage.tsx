@@ -281,9 +281,10 @@ function AcademyInner() {
       timerState={timerState}
       hintText={hintText}
       cubeRef={cubeRef}
-      visualization="PG3D"
+      visualization="3D"
       stickeringMaskOrbits={stepMask}
       hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+      hintFaceletsElevation={viewPrefs.hintElevation}
       flatCubeRef={flatCubeRef}
       showFlatView={viewPrefs.flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}

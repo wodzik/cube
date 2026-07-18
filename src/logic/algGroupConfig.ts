@@ -17,15 +17,15 @@ export const STICKERING: Record<AlgGroup, string> = {
   "f2l-advanced": "F2L",
 };
 
-/** 2D last-layer view for OLL/PLL; full 3D for F2L. */
+/** 2D last-layer view for OLL/PLL; full 3D (Cube3D — supports hint facelet elevation) for F2L. */
 export const VISUALIZATION_MODE: Record<AlgGroup, VisualizationMode> = {
   oll: "experimental-2D-LL",
   pll: "experimental-2D-LL",
-  "f2l-front-right": "PG3D",
-  "f2l-front-left": "PG3D",
-  "f2l-back-right": "PG3D",
-  "f2l-back-left": "PG3D",
-  "f2l-advanced": "PG3D",
+  "f2l-front-right": "3D",
+  "f2l-front-left": "3D",
+  "f2l-back-right": "3D",
+  "f2l-back-left": "3D",
+  "f2l-advanced": "3D",
 };
 
 export const CAMERA: Record<AlgGroup, { latitude: number; longitude: number }> = {

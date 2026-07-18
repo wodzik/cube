@@ -74,7 +74,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
             alg={plain}
             setupAlg={setup}
             setupAnchor="start"
-            visualization="PG3D"
+            visualization="3D"
             stickering={stickering}
             stickeringMaskOrbits={stickeringMaskOrbits}
             controlPanel="bottom-row"

@@ -112,7 +112,7 @@ export default function DebugPage() {
         {showCube && (
           <div className="flex-none w-72 xl:w-96 border-r border-white/[0.06] flex items-center justify-center p-6">
             <div className="w-full aspect-square">
-              <CubeVisualisation ref={cubeRef} visualization="PG3D" background="none" controlPanel="none" dragInput="none" className="size-full" />
+              <CubeVisualisation ref={cubeRef} visualization="3D" background="none" controlPanel="none" dragInput="none" className="size-full" />
             </div>
           </div>
         )}

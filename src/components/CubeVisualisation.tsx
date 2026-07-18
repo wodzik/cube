@@ -10,7 +10,7 @@
  *
  * USAGE:
  *   const ref = useRef<CubeVisualisationRef>(null);
- *   <CubeVisualisation ref={ref} visualization="PG3D" />
+ *   <CubeVisualisation ref={ref} visualization="3D" />
  *   ref.current?.addMove("R");
  *   const solved = await ref.current?.isSolved();
  */
@@ -29,6 +29,12 @@ export interface CubeVisualisationProps {
   setupAnchor?: "start" | "end";
   visualization?: VisualizationMode;
   hintFacelets?: "none" | "floating";
+  /**
+   * Distance of floating hint stickers from the cube (Cube3D units: main
+   * stickers at 0.503, library default 1.45). Only the "3D" (Cube3D)
+   * visualization honours it — PG3D silently ignores it (cubing.js #415).
+   */
+  hintFaceletsElevation?: number;
   /** Stickering scheme: "full" | "OLL" | "PLL" | "F2L" | etc. */
   stickering?: string;
   /**
@@ -71,8 +77,9 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       alg = "",
       setupAlg,
       setupAnchor = "start",
-      visualization = "PG3D",
+      visualization = "3D",
       hintFacelets = "none",
+      hintFaceletsElevation,
       stickering = "full",
       stickeringMaskOrbits,
       background = "none",
@@ -105,6 +112,9 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.controlPanel = controlPanel as TwistyPlayer["controlPanel"];
       player.viewerLink = viewerLink as TwistyPlayer["viewerLink"];
       player.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
+      if (hintFaceletsElevation !== undefined) {
+        player.experimentalHintFaceletsElevation = hintFaceletsElevation;
+      }
       player.experimentalDragInput = dragInput as TwistyPlayer["experimentalDragInput"];
       player.cameraLatitude = cameraLatitude;
       player.cameraLongitude = cameraLongitude;
@@ -154,6 +164,11 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       if (!playerRef.current) return;
       playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
     }, [hintFacelets]);
+
+    useEffect(() => {
+      if (!playerRef.current || hintFaceletsElevation === undefined) return;
+      playerRef.current.experimentalHintFaceletsElevation = hintFaceletsElevation;
+    }, [hintFaceletsElevation]);
 
     useEffect(() => {
       if (!playerRef.current) return;

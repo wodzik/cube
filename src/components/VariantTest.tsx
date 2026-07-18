@@ -160,7 +160,7 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
             <div className="w-64 h-64 rounded-xl overflow-hidden bg-gray-950/50">
               <CubeVisualisation
                 ref={cubeRef}
-                visualization="PG3D"
+                visualization="3D"
                 stickering={STICKERING[group]}
                 cameraLatitude={CAMERA[group].latitude}
                 cameraLongitude={CAMERA[group].longitude}

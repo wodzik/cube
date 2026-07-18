@@ -5,9 +5,20 @@
  */
 
 import { Eye, Grid3x3 } from "lucide-react";
-import type { CaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import {
+  MAX_HINT_ELEVATION,
+  MIN_HINT_ELEVATION,
+  type CaseViewPrefs,
+} from "../hooks/useCaseViewPrefs";
 
-export function CaseViewToggles({ backStickers, flatView, toggleBackStickers, toggleFlatView }: CaseViewPrefs) {
+export function CaseViewToggles({
+  backStickers,
+  flatView,
+  hintElevation,
+  toggleBackStickers,
+  toggleFlatView,
+  setHintElevation,
+}: CaseViewPrefs) {
   return (
     <>
       <button
@@ -19,6 +30,19 @@ export function CaseViewToggles({ backStickers, flatView, toggleBackStickers, to
       >
         <Eye size={12} /> Back stickers
       </button>
+      {backStickers && (
+        <input
+          type="range"
+          min={MIN_HINT_ELEVATION}
+          max={MAX_HINT_ELEVATION}
+          step={0.05}
+          value={hintElevation}
+          onChange={(e) => setHintElevation(Number(e.target.value))}
+          className="w-20 accent-sky-400"
+          title="How far the back stickers float from the cube"
+          aria-label="Back sticker distance"
+        />
+      )}
       <button
         onClick={toggleFlatView}
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${

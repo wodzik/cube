@@ -1221,9 +1221,10 @@ function CaseTrainerInner() {
         ) : undefined
       }
       cubeRef={cubeRef}
-      visualization="PG3D"
+      visualization="3D"
       stickeringMaskOrbits={stickeringMask}
       hintFacelets={backStickers ? "floating" : "none"}
+      hintFaceletsElevation={viewPrefs.hintElevation}
       flatCubeRef={flatCubeRef}
       showFlatView={flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}

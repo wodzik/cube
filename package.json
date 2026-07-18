@@ -14,23 +14,23 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "cubing": "^0.51.0",
-    "lucide-react": "^0.564.0",
+    "cubing": "^0.63.3",
+    "lucide-react": "^1.25.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "recharts": "^3.7.0",
+    "recharts": "^3.9.2",
     "rxjs": "^7.8.1",
     "smartcube-web-bluetooth": "github:poliva/smartcube-web-bluetooth"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/aes-js": "^3.1.4",
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tailwindcss": "^4.0.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.5.4",
-    "vite": "^5.4.2"
+    "vite": "^8.1.5"
   }
 }
