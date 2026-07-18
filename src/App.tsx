@@ -1,6 +1,7 @@
 import { Suspense, lazy, useState } from "react";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { useWakeLock } from "./hooks/useWakeLock";
 import { UpdateNotice } from "./components/UpdateNotice";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
@@ -29,6 +30,7 @@ const TABS: { id: Tab; label: string }[] = [
 export default function App() {
   const [tab, setTab] = useState<Tab>("solve");
   const updateAvailable = useVersionCheck();
+  useWakeLock();
 
   return (
     <SmartCubeProvider>
