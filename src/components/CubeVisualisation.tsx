@@ -21,6 +21,25 @@ import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 
 export type { VisualizationMode };
 
+/**
+ * Camera distance that keeps floating hint stickers in frame.
+ *
+ * cubing.js fixes the 3x3 Cube3D camera at distance 6, tuned for the
+ * DEFAULT hint elevation (1.45) — raise the elevation and the stickers
+ * leave the canvas. Scale the distance with the scene's outermost extent:
+ * the cube spans ~1.5 half-units and hint stickers sit ~(elevation − 0.5)
+ * beyond the face, so extent grows as (1 + elevation) and 6 corresponds
+ * to the default's (1 + 1.45). Never zoom in closer than the default.
+ */
+const DEFAULT_CAMERA_DISTANCE = 6;
+const DEFAULT_HINT_ELEVATION = 1.45;
+function cameraDistanceFor(hintFacelets: "none" | "floating", elevation: number | undefined): number {
+  if (hintFacelets !== "floating" || elevation === undefined || elevation <= DEFAULT_HINT_ELEVATION) {
+    return DEFAULT_CAMERA_DISTANCE;
+  }
+  return (DEFAULT_CAMERA_DISTANCE * (1 + elevation)) / (1 + DEFAULT_HINT_ELEVATION);
+}
+
 export interface CubeVisualisationProps {
   /** Algorithm moves to display (applied after setup). */
   alg?: string;
@@ -114,6 +133,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
       if (hintFaceletsElevation !== undefined) {
         player.experimentalHintFaceletsElevation = hintFaceletsElevation;
+        player.cameraDistance = cameraDistanceFor(hintFacelets, hintFaceletsElevation);
       }
       player.experimentalDragInput = dragInput as TwistyPlayer["experimentalDragInput"];
       player.cameraLatitude = cameraLatitude;
@@ -168,7 +188,8 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (!playerRef.current || hintFaceletsElevation === undefined) return;
       playerRef.current.experimentalHintFaceletsElevation = hintFaceletsElevation;
-    }, [hintFaceletsElevation]);
+      playerRef.current.cameraDistance = cameraDistanceFor(hintFacelets, hintFaceletsElevation);
+    }, [hintFacelets, hintFaceletsElevation]);
 
     useEffect(() => {
       if (!playerRef.current) return;
