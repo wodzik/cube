@@ -1127,7 +1127,6 @@ function CaseTrainerInner() {
           </div>
           )}
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            <CaseViewToggles {...viewPrefs} />
             {!F2L_TYPES.includes(trainerType) && (
             <button
               onClick={toggleLadder}
@@ -1227,6 +1226,7 @@ function CaseTrainerInner() {
       hintFacelets={backStickers ? "floating" : "none"}
       flatCubeRef={flatCubeRef}
       showFlatView={flatView}
+      cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cameraLatitude={isRouxView ? -25 : undefined}
       cameraLongitude={isRouxView ? -35 : undefined}
       timesMs={lengthAttempts.map((a) => a.timeMs)}
