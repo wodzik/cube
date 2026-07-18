@@ -83,6 +83,8 @@ export interface TrainerPanelProps {
    */
   flatCubeRef?: RefObject<CubeVisualisationRef | null>;
   showFlatView?: boolean;
+  /** Rendered under the cube (below the flat view) — e.g. the back-stickers / flat-view toggles. */
+  cubeToolbar?: ReactNode;
   cameraLatitude?: number;
   cameraLongitude?: number;
   cubeSetupAlg?: string;
@@ -139,6 +141,7 @@ export function TrainerPanel({
   hintFacelets,
   flatCubeRef,
   showFlatView = false,
+  cubeToolbar,
   cameraLatitude,
   cameraLongitude,
   cubeSetupAlg,
@@ -235,6 +238,9 @@ export function TrainerPanel({
                 className="size-full"
               />
             </div>
+          )}
+          {cubeToolbar && (
+            <div className="mt-1 flex items-center justify-center gap-2">{cubeToolbar}</div>
           )}
         </div>
       }

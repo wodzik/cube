@@ -30,11 +30,13 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
 import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
+import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AcademyAlgCard } from "../components/AcademyAlgCard";
 import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
-import type { CubeVisualisationRef } from "../components/CubeVisualisation";
+import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
@@ -74,7 +76,8 @@ export default function AcademyPage() {
 
 function AcademyInner() {
   const { state, submitCubeMove, setTarget, reset } = useSession();
-  const cubeRef = useRef<CubeVisualisationRef>(null);
+  const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
+  const viewPrefs = useCaseViewPrefs(false);
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
@@ -133,15 +136,15 @@ function AcademyInner() {
     reset();
     const plain = decorated.tokens.join(" ");
     setTarget(plain);
-    cubeRef.current?.reset();
-    cubeRef.current?.setSetupAlgorithm(invertSequence(decorated.tokens).join(" "), "");
+    view.reset();
+    view.setSetupAlgorithm(invertSequence(decorated.tokens).join(" "), "");
     // Replay moves chained straight out of the previous round — stop at
     // completion, tail waits a round (see usePendingMoveBuffer).
     const flushTarget = buildSequenceTarget(plain);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
       delivered.push(move);
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
@@ -152,7 +155,7 @@ function AcademyInner() {
     onMove: (move, timestamp) => {
       if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
     },
   });
 
@@ -280,6 +283,10 @@ function AcademyInner() {
       cubeRef={cubeRef}
       visualization="PG3D"
       stickeringMaskOrbits={stepMask}
+      hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+      flatCubeRef={flatCubeRef}
+      showFlatView={viewPrefs.flatView}
+      cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cameraLatitude={35}
       cameraLongitude={30}
       cubeSetupAlg=""

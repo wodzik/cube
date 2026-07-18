@@ -38,11 +38,13 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
 import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
+import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AlgorithmListView } from "../components/AlgorithmListView";
 import { CaseEdit } from "../components/CaseEdit";
-import type { CubeVisualisationRef } from "../components/CubeVisualisation";
+import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 
@@ -79,10 +81,11 @@ export default function TrainingPage() {
 
 function TrainingPageInner() {
   const { state, submitCubeMove, setTarget, reset } = useSession();
-  const cubeRef = useRef<CubeVisualisationRef>(null);
+  const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
   const [group, setGroup] = useState<AlgGroup>("f2l-front-right");
+  const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"));
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
   const [caseIdx, setCaseIdx] = useState(0);
   // Bumped on every auto-advance so the case-loading effect re-runs even
@@ -145,9 +148,9 @@ function TrainingPageInner() {
     if (!variant) return;
     reset();
     setTarget(variant.alg);
-    cubeRef.current?.reset();
+    view.reset();
     const inv = invertAlg(variant.alg);
-    if (inv) cubeRef.current?.setSetupAlgorithm(inv, "");
+    if (inv) view.setSetupAlgorithm(inv, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —
     // replay them now that the target is armed, stopping if they complete it
@@ -156,7 +159,7 @@ function TrainingPageInner() {
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
       delivered.push(move);
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
@@ -174,7 +177,7 @@ function TrainingPageInner() {
       // back-to-back executions used to desync here).
       if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
     },
   });
 
@@ -285,6 +288,10 @@ function TrainingPageInner() {
         cubeRef={cubeRef}
         visualization="PG3D"
         stickering={group ? STICKERING[group] : "full"}
+        hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+        flatCubeRef={flatCubeRef}
+        showFlatView={viewPrefs.flatView}
+        cubeToolbar={<CaseViewToggles {...viewPrefs} />}
         cameraLatitude={group ? CAMERA[group].latitude : 20}
         cameraLongitude={group ? CAMERA[group].longitude : 20}
         cubeSetupAlg=""

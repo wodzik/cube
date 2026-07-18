@@ -39,11 +39,13 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
 import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
+import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CaseListItem } from "../components/CaseListItem";
 import { CaseEdit } from "../components/CaseEdit";
-import type { CubeVisualisationRef } from "../components/CubeVisualisation";
+import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 import { formatTimeMs } from "../logic/statistics";
@@ -96,10 +98,11 @@ export default function AttackPage() {
 
 function AttackPageInner() {
   const { state, submitCubeMove, setTarget, reset } = useSession();
-  const cubeRef = useRef<CubeVisualisationRef>(null);
+  const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
   const [group, setGroup] = useState<AlgGroup>("oll");
+  const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"));
   // Remembered so toggling away from F2L and back returns to the same slot.
   const [f2lSlot, setF2lSlot] = useState<AlgGroup>("f2l-front-right");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
@@ -129,9 +132,9 @@ function AttackPageInner() {
     if (!variant) return;
     reset();
     setTarget(variant.alg);
-    cubeRef.current?.reset();
+    view.reset();
     const inv = invertAlg(variant.alg);
-    if (inv) cubeRef.current?.setSetupAlgorithm(inv, "");
+    if (inv) view.setSetupAlgorithm(inv, "");
     // Moves that arrived while the previous case was completing (the queue
     // advances over a render — a fast solver's first moves of the NEXT case
     // can land in that gap) belong to this case: replay them, stopping if
@@ -140,7 +143,7 @@ function AttackPageInner() {
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
       delivered.push(move);
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
@@ -158,7 +161,7 @@ function AttackPageInner() {
       // would DROP moves — capture them for replay instead.
       if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
     },
   });
 
@@ -318,6 +321,10 @@ function AttackPageInner() {
       cubeRef={cubeRef}
       visualization="PG3D"
       stickering={STICKERING[group]}
+      hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+      flatCubeRef={flatCubeRef}
+      showFlatView={viewPrefs.flatView}
+      cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cameraLatitude={CAMERA[group].latitude}
       cameraLongitude={CAMERA[group].longitude}
       cubeSetupAlg=""

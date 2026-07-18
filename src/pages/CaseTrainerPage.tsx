@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Grid3x3, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
+import { Eye, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
 import { cube3x3x3 } from "cubing/puzzles";
 import type { KPuzzle, KTransformation } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
@@ -105,6 +105,8 @@ import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useStageSolvedDetection } from "../hooks/useStageSolvedDetection";
+import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import { CaseViewToggles } from "../components/CaseViewToggles";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { SolveControls } from "../components/SolveControls";
@@ -223,8 +225,6 @@ const SIDE_STORAGE_KEYS: Record<SidedRouxType, string> = {
 };
 const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square", fbdr: "Solved FS" };
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
-const BACK_STICKERS_STORAGE_KEY = "nact_trainer_back_stickers";
-const FLAT_VIEW_STORAGE_KEY = "nact_trainer_flat_view";
 const F2L_PAIRS_STORAGE_KEY = "nact_trainer_f2l_pairs";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
@@ -381,10 +381,9 @@ function CaseTrainerInner() {
   const [revealed, setRevealed] = useState<string[] | null>(null);
   const [isRevealLoading, setIsRevealLoading] = useState(false);
   const [ladderEnabled, setLadderEnabled] = useState(() => localStorage.getItem(LADDER_STORAGE_KEY) === "true");
-  /** F2L drills: show translucent back-face stickers on the 3D view. */
-  const [backStickers, setBackStickers] = useState(() => localStorage.getItem(BACK_STICKERS_STORAGE_KEY) === "true");
-  /** F2L drills: show the flat unfolded-net view under the 3D cube. */
-  const [flatView, setFlatView] = useState(() => localStorage.getItem(FLAT_VIEW_STORAGE_KEY) === "true");
+  /** Back stickers / flat view — shared app-wide prefs, F2L bucket defaults ON. */
+  const viewPrefs = useCaseViewPrefs(F2L_TYPES.includes(trainerType));
+  const { backStickers, flatView } = viewPrefs;
   /** "From scramble" F2L drill: how many pairs get scrambled (1 = the selected slot; 2–4 = random slots). */
   const [f2lPairs, setF2lPairs] = useState<number>(loadStoredF2LPairs);
   /** Transient notice (e.g. ladder level-up) shown above the sequence bar until the next attempt starts. */
@@ -605,18 +604,6 @@ function CaseTrainerInner() {
     const next = !ladderEnabled;
     setLadderEnabled(next);
     localStorage.setItem(LADDER_STORAGE_KEY, String(next));
-  };
-
-  const toggleBackStickers = () => {
-    const next = !backStickers;
-    setBackStickers(next);
-    localStorage.setItem(BACK_STICKERS_STORAGE_KEY, String(next));
-  };
-
-  const toggleFlatView = () => {
-    const next = !flatView;
-    setFlatView(next);
-    localStorage.setItem(FLAT_VIEW_STORAGE_KEY, String(next));
   };
 
   const changeF2lPairs = (n: number) => {
@@ -1140,28 +1127,7 @@ function CaseTrainerInner() {
           </div>
           )}
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            {F2L_TYPES.includes(trainerType) && (
-              <>
-                <button
-                  onClick={toggleBackStickers}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                    backStickers ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-                  }`}
-                  title="Show translucent copies of the hidden faces' stickers"
-                >
-                  <Eye size={12} /> Back stickers
-                </button>
-                <button
-                  onClick={toggleFlatView}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                    flatView ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-                  }`}
-                  title="Show a flat unfolded view of the whole cube under the 3D one"
-                >
-                  <Grid3x3 size={12} /> Flat view
-                </button>
-              </>
-            )}
+            <CaseViewToggles {...viewPrefs} />
             {!F2L_TYPES.includes(trainerType) && (
             <button
               onClick={toggleLadder}
@@ -1258,9 +1224,9 @@ function CaseTrainerInner() {
       cubeRef={cubeRef}
       visualization="PG3D"
       stickeringMaskOrbits={stickeringMask}
-      hintFacelets={F2L_TYPES.includes(trainerType) && backStickers ? "floating" : "none"}
+      hintFacelets={backStickers ? "floating" : "none"}
       flatCubeRef={flatCubeRef}
-      showFlatView={F2L_TYPES.includes(trainerType) && flatView}
+      showFlatView={flatView}
       cameraLatitude={isRouxView ? -25 : undefined}
       cameraLongitude={isRouxView ? -35 : undefined}
       timesMs={lengthAttempts.map((a) => a.timeMs)}

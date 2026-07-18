@@ -35,7 +35,9 @@ import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
-import type { CubeVisualisationRef } from "../components/CubeVisualisation";
+import { CaseViewToggles } from "../components/CaseViewToggles";
+import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
+import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import type { SessionConfig, StartMethod } from "../types/session";
 import type { SolveRecord, StoredSession } from "../types/solve";
 import { cfopStageDetector } from "../logic/stageDetection/cfopStages";
@@ -205,7 +207,8 @@ function SolvePageInner({
   onSessionsChanged,
 }: SolvePageInnerProps) {
   const { state, submitCubeMove, startInspection, setTarget, confirmManualSetup } = useSession();
-  const cubeRef = useRef<CubeVisualisationRef>(null);
+  const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
+  const viewPrefs = useCaseViewPrefs(false);
   const { generate, isGenerating, error: scrambleError } = useScrambleGenerator();
 
   // Custom scramble entry — paste/type your own instead of a random one.
@@ -291,9 +294,9 @@ function SolvePageInner({
   const handleMove = useCallback(
     (move: string, timestamp: number) => {
       submitCubeMove(move, timestamp);
-      cubeRef.current?.addMove(move);
+      view.addMove(move);
     },
-    [submitCubeMove]
+    [submitCubeMove, view]
   );
 
   const cube = useSmartCube({ onMove: handleMove });
@@ -319,8 +322,8 @@ function SolvePageInner({
   // Reset the 3D view whenever a new scramble is set.
   const targetNotation = state.targetNotation;
   useEffect(() => {
-    cubeRef.current?.reset();
-  }, [targetNotation]);
+    view.reset();
+  }, [targetNotation, view]);
 
   useEffect(() => {
     if (isPasteOpen) {
@@ -636,8 +639,8 @@ function SolvePageInner({
           onDiscard={startNextAttempt}
           onSaveAsDNF={startNextAttempt}
           onResetCube={() => {
-            cubeRef.current?.reset();
-            state.moveLog.forEach((m) => cubeRef.current?.addMove(m.move));
+            view.reset();
+            state.moveLog.forEach((m) => view.addMove(m.move));
           }}
           // No manual stop trigger (spacebar/timer) enabled -> Cancel can
           // only mean "give up", so skip the Discard/Save-as-DNF menu and
@@ -663,6 +666,10 @@ function SolvePageInner({
         ) : undefined
       }
       cubeRef={cubeRef}
+      hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
+      flatCubeRef={flatCubeRef}
+      showFlatView={viewPrefs.flatView}
+      cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cubeSetupAlg=""
       timesMs={sessionTimesMs}
       statsLabel="Session"
