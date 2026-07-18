@@ -77,7 +77,7 @@ export default function AcademyPage() {
 function AcademyInner() {
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
-  const viewPrefs = useCaseViewPrefs(false);
+  const viewPrefs = useCaseViewPrefs(false, "academy");
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
   const moveBuffer = usePendingMoveBuffer(state.phase);
 

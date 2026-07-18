@@ -102,7 +102,7 @@ function AttackPageInner() {
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
   const [group, setGroup] = useState<AlgGroup>("oll");
-  const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"));
+  const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"), "attack");
   // Remembered so toggling away from F2L and back returns to the same slot.
   const [f2lSlot, setF2lSlot] = useState<AlgGroup>("f2l-front-right");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));

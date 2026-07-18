@@ -208,7 +208,7 @@ function SolvePageInner({
 }: SolvePageInnerProps) {
   const { state, submitCubeMove, startInspection, setTarget, confirmManualSetup } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
-  const viewPrefs = useCaseViewPrefs(false);
+  const viewPrefs = useCaseViewPrefs(false, "solve");
   const { generate, isGenerating, error: scrambleError } = useScrambleGenerator();
 
   // Custom scramble entry — paste/type your own instead of a random one.

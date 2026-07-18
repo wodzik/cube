@@ -382,7 +382,7 @@ function CaseTrainerInner() {
   const [isRevealLoading, setIsRevealLoading] = useState(false);
   const [ladderEnabled, setLadderEnabled] = useState(() => localStorage.getItem(LADDER_STORAGE_KEY) === "true");
   /** Back stickers / flat view — shared app-wide prefs, F2L bucket defaults ON. */
-  const viewPrefs = useCaseViewPrefs(F2L_TYPES.includes(trainerType));
+  const viewPrefs = useCaseViewPrefs(F2L_TYPES.includes(trainerType), "trainer");
   const { backStickers, flatView } = viewPrefs;
   /** "From scramble" F2L drill: how many pairs get scrambled (1 = the selected slot; 2–4 = random slots). */
   const [f2lPairs, setF2lPairs] = useState<number>(loadStoredF2LPairs);
