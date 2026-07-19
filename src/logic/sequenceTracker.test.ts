@@ -107,6 +107,41 @@ describe("computeSequenceProgress — wrong move + repair", () => {
     expect(done.correctionSequence).toEqual([]);
   });
 
+  it("REGRESSION: a wrong same-axis move must not merge into the already-matched prefix and un-complete it", () => {
+    // Target's first block is the L2+R axis run. After completing it, a
+    // wrong L must stand alone as the correction — a cross-merge into the
+    // completed L2 would corrupt the match (the broken 7dcfcfb behavior:
+    // completed blocks flickered in and out as the wrong stack merged
+    // backwards through the axis corridor).
+    const target = buildSequenceTarget("L2 R U");
+    const progress = computeSequenceProgress(target, ["L2", "R", "L"]);
+    expect(progress.completedIndices).toEqual([0, 1]);
+    expect(progress.correctionSequence).toEqual(["L'"]);
+    const repaired = computeSequenceProgress(target, ["L2", "R", "L", "L'", "U"]);
+    expect(repaired.isCompleted).toBe(true);
+  });
+
+  it("REGRESSION: executing a target exactly, move by move, is never flagged wrong at any prefix", () => {
+    for (const seq of ["R' L2 U F2 R", "R U R' U'", "L2 R D' F", "R' U' F L2 B2"]) {
+      const target = buildSequenceTarget(seq);
+      const tokens = seq.split(" ");
+      for (let i = 1; i <= tokens.length; i++) {
+        const progress = computeSequenceProgress(target, tokens.slice(0, i));
+        expect(progress.correctionSequence).toEqual([]);
+        expect(progress.hadErrors).toBe(false);
+      }
+      expect(computeSequenceProgress(target, tokens).isCompleted).toBe(true);
+    }
+  });
+
+  it("correct moves made while a wrong axis stack stood are consumed once the stack cancels out", () => {
+    // Wrong L R L, then the user just continues with the correct U after
+    // repairing out of order — the U must complete the target.
+    const target = buildSequenceTarget("U");
+    const done = computeSequenceProgress(target, ["L", "R", "L", "L2", "R'", "U"]);
+    expect(done.isCompleted).toBe(true);
+  });
+
   it("a clean solve without any wrong move never sets hadErrors", () => {
     const target = buildSequenceTarget("R U");
     const progress = computeSequenceProgress(target, ["R", "U"]);

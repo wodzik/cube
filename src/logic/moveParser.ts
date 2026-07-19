@@ -415,25 +415,17 @@ export function physicalMovesToString(moves: PhysicalMove[]): string {
     .join(" ");
 }
 
-const REDUCE_FACE_OPPOSITES: Record<Face, Face> = {
-  U: "D", D: "U",
-  R: "L", L: "R",
-  F: "B", B: "F",
-};
-
 /**
- * Reduce physical moves by combining same-face moves, INCLUDING across
- * intervening opposite-face moves — turns of the same axis commute, so
- * L R L is the same physical state as L2 R and must reduce to it. This is
- * what lets a correction be performed in any order within an axis pair
- * (undoing L R L as R' L2, L2 R', or even L R' L — every partial step
- * cancels against the history no matter which face it touches first).
+ * Reduce physical moves by combining consecutive same-face moves.
  *
- * Invariant kept by the incremental build: inside a contiguous same-axis
- * run each face appears at most once (a second occurrence always finds its
- * partner over the backward walk and merges), so a cancelled-out move's
- * removal can never bring two mergeable moves together — one pass is
- * complete.
+ * DELIBERATELY adjacent-only: merging across intervening opposite-face
+ * moves would be sound for the raw cube state, but this reduction feeds
+ * sequenceTracker's block matcher, which consumes the list left-to-right
+ * against target blocks — a cross-merge can pull a new (wrong) move into
+ * an already-MATCHED part of the history and retroactively un-complete
+ * earlier blocks. Axis-commuting collapse is applied only to the wrong-move
+ * tail, where the match boundary protects the prefix — see
+ * sequenceTracker's reduceWrongTailAcrossOpposites.
  *
  * @param moves - Array of physical moves
  * @returns Reduced array
@@ -442,16 +434,18 @@ export function reducePhysicalMoves(moves: PhysicalMove[]): PhysicalMove[] {
   const result: PhysicalMove[] = [];
 
   for (const move of moves) {
-    // Walk back over commuting opposite-face moves to find a same-face partner.
-    let i = result.length - 1;
-    while (i >= 0 && result[i].face === REDUCE_FACE_OPPOSITES[move.face]) i--;
+    if (result.length === 0) {
+      result.push({ ...move });
+      continue;
+    }
 
-    if (i >= 0 && result[i].face === move.face) {
-      const newPower = (result[i].power + move.power) % 4;
+    const last = result[result.length - 1];
+    if (last.face === move.face) {
+      const newPower = (last.power + move.power) % 4;
       if (newPower === 0) {
-        result.splice(i, 1);
+        result.pop();
       } else {
-        result[i].power = newPower;
+        last.power = newPower;
       }
     } else {
       result.push({ ...move });

@@ -119,8 +119,23 @@ export function computeSequenceProgress(
     if (matchAgainstBlocks(blocks, prefix).wrongMoves.length > 0) hadErrors = true;
   }
 
-  const { blockIndex, completedAlgIndices, blockAccumulated, wrongMoves } =
-    matchAgainstBlocks(blocks, reducedUserMoves);
+  // Match, then canonicalize the WRONG-MOVE TAIL across commuting opposite
+  // faces (L R L ≡ L2 R) and re-match: repairs performed in any order
+  // within an axis pair cancel out, and once the tail cancels completely
+  // the moves after it (which may be correct ones performed while the
+  // wrong stack stood) get consumed normally. Only the tail is collapsed —
+  // never the matched prefix, so completed blocks can't retroactively
+  // un-complete. Terminates: each iteration strictly shrinks the tail.
+  let working = reducedUserMoves;
+  let match = matchAgainstBlocks(blocks, working);
+  for (;;) {
+    const consumed = working.slice(0, working.length - match.wrongMoves.length);
+    const tail = reduceWrongTailAcrossOpposites(match.wrongMoves);
+    if (tail.length === match.wrongMoves.length) break;
+    working = [...consumed, ...tail];
+    match = matchAgainstBlocks(blocks, working);
+  }
+  const { blockIndex, completedAlgIndices, blockAccumulated, wrongMoves } = match;
 
   const correctionSequence = buildCorrectionSequence(wrongMoves);
   hadErrors = hadErrors || correctionSequence.length > 0;
@@ -317,6 +332,33 @@ function groupByFace(
     entry.totalPower = (entry.totalPower + move.power) % 4;
   }
   return byFace;
+}
+
+/**
+ * Collapse same-face moves across intervening OPPOSITE-face moves — sound
+ * here because same-axis turns commute and the tail is a self-contained
+ * region (the match boundary stops it from merging into matched history).
+ * Turns a wrong stack of L R L into L2 R, and lets its repair arrive in any
+ * order (R' first, L2 first, or interleaved quarter turns), since each
+ * repair move finds its partner regardless of what sits between them.
+ */
+function reduceWrongTailAcrossOpposites(moves: PhysicalMove[]): PhysicalMove[] {
+  const result: PhysicalMove[] = [];
+  for (const move of moves) {
+    let i = result.length - 1;
+    while (i >= 0 && result[i].face === FACE_OPPOSITES[move.face]) i--;
+    if (i >= 0 && result[i].face === move.face) {
+      const newPower = (result[i].power + move.power) % 4;
+      if (newPower === 0) {
+        result.splice(i, 1);
+      } else {
+        result[i].power = newPower;
+      }
+    } else {
+      result.push({ ...move });
+    }
+  }
+  return result;
 }
 
 function buildCorrectionSequence(wrongMoves: PhysicalMove[]): string[] {
