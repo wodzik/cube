@@ -196,16 +196,6 @@ const F2L_SLOT_VIEW_LABELS: Record<XCrossSlot, XCrossSlot> = { FL: "FR", BL: "BR
 /** Letter slots ordered so their white-down labels read FR, BR, FL, BL. */
 const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 
-/** Random subset of n distinct slots for the multi-pair "From scramble" drill. */
-function sampleSlots(n: number): XCrossSlot[] {
-  const pool = [...XCROSS_SLOTS];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, n);
-}
-
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
@@ -225,7 +215,7 @@ const SIDE_STORAGE_KEYS: Record<SidedRouxType, string> = {
 };
 const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square", fbdr: "Solved FS" };
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
-const F2L_PAIRS_STORAGE_KEY = "nact_trainer_f2l_pairs";
+const F2L_SLOTS_STORAGE_KEY = "nact_trainer_f2l_slots";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
 const LADDER_THRESHOLD = 0.8;
@@ -290,9 +280,17 @@ function loadStoredSide(type: SidedRouxType): RouxSsSide {
   return raw && ROUX_SS_SIDES.includes(raw) ? raw : "front";
 }
 
-function loadStoredF2LPairs(): number {
-  const raw = Number(localStorage.getItem(F2L_PAIRS_STORAGE_KEY));
-  return Number.isInteger(raw) && raw >= 1 && raw <= 4 ? raw : 1;
+function loadStoredF2LSlots(): XCrossSlot[] {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(F2L_SLOTS_STORAGE_KEY) ?? "null");
+    if (Array.isArray(raw)) {
+      const valid = F2L_SLOT_ORDER.filter((s) => raw.includes(s));
+      if (valid.length > 0) return valid;
+    }
+  } catch {
+    /* fall through to default */
+  }
+  return [F2L_SLOT_ORDER[0]];
 }
 
 function loadStoredLength(type: TrainerType): number {
@@ -384,8 +382,8 @@ function CaseTrainerInner() {
   /** Back stickers / flat view — shared app-wide prefs, F2L bucket defaults ON. */
   const viewPrefs = useCaseViewPrefs(F2L_TYPES.includes(trainerType), "trainer");
   const { backStickers, flatView } = viewPrefs;
-  /** "From scramble" F2L drill: how many pairs get scrambled (1 = the selected slot; 2–4 = random slots). */
-  const [f2lPairs, setF2lPairs] = useState<number>(loadStoredF2LPairs);
+  /** "From scramble" F2L drill: WHICH slots get scrambled — pick any subset, all four = full F2L. */
+  const [f2lSlots, setF2lSlots] = useState<XCrossSlot[]>(loadStoredF2LSlots);
   /** Transient notice (e.g. ladder level-up) shown above the sequence bar until the next attempt starts. */
   const [info, setInfo] = useState<string | null>(null);
   /** Latched per attempt the moment a hint is revealed; recorded on the attempt. */
@@ -405,8 +403,8 @@ function CaseTrainerInner() {
   // setTarget gets a NEW identity on every session dispatch — its useMemo
   // keys on state — so going through refs keeps the "first scramble" effect
   // from re-firing after every single move).
-  const configRef = useRef({ trainerType, slot, pair, sides, targetLength, f2lPairs });
-  configRef.current = { trainerType, slot, pair, sides, targetLength, f2lPairs };
+  const configRef = useRef({ trainerType, slot, pair, sides, targetLength, f2lSlots });
+  configRef.current = { trainerType, slot, pair, sides, targetLength, f2lSlots };
   const setTargetRef = useRef(setTarget);
   setTargetRef.current = setTarget;
   const confirmManualSetupRef = useRef(confirmManualSetup);
@@ -443,7 +441,7 @@ function CaseTrainerInner() {
             pair: pairNow,
             sides: sidesNow,
             targetLength: len,
-            f2lPairs: pairsNow,
+            f2lSlots: f2lSlotsNow,
           } = configRef.current;
           const snapshot = physicalRef.current ?? kp.identityTransformation();
           const movesAtSnapshot = moveCounterRef.current;
@@ -461,11 +459,8 @@ function CaseTrainerInner() {
               : type === "f2l-case"
                 ? await generateF2LCaseView(slotNow)
               : type === "f2l"
-                ? await generateF2LScramble(
-                    // 1 pair trains the selected slot; 2–4 train a random subset.
-                    pairsNow <= 1 ? [slotNow] : sampleSlots(pairsNow),
-                    snapshot
-                  )
+                ? // Exactly the slots the user picked — one, a pair, or all four.
+                  await generateF2LScramble(f2lSlotsNow, snapshot)
               : type === "cross"
                 ? await generateCrossScramble(len, TRAINER_FACE, snapshot)
                 : type === "xcross"
@@ -606,10 +601,14 @@ function CaseTrainerInner() {
     localStorage.setItem(LADDER_STORAGE_KEY, String(next));
   };
 
-  const changeF2lPairs = (n: number) => {
-    setF2lPairs(n);
-    localStorage.setItem(F2L_PAIRS_STORAGE_KEY, String(n));
-    configRef.current = { ...configRef.current, f2lPairs: n };
+  const toggleF2lSlot = (s: XCrossSlot) => {
+    const next = f2lSlots.includes(s)
+      ? f2lSlots.filter((x) => x !== s)
+      : F2L_SLOT_ORDER.filter((x) => f2lSlots.includes(x) || x === s);
+    if (next.length === 0) return; // at least one slot stays selected
+    setF2lSlots(next);
+    localStorage.setItem(F2L_SLOTS_STORAGE_KEY, JSON.stringify(next));
+    configRef.current = { ...configRef.current, f2lSlots: next };
     regenerate();
   };
 
@@ -897,23 +896,22 @@ function CaseTrainerInner() {
   }, [summary, info, state.phase, state.moveLog.length, current]);
 
   // CMLL is case-based (its "level" varies per case) and f2l has no level
-  // at all — those pool the whole type (the multi-pair drill pools per
-  // pair count: 1-pair and 3-pair solves aren't comparable).
-  const lengthAttempts = useMemo(
-    () =>
-      attempts.filter(
-        (a) =>
-          a.type === trainerType &&
-          (trainerType === "cmll"
-            ? true
-            : trainerType === "f2l"
-              ? (a.slots?.length ?? 1) === f2lPairs
-              : trainerType === "f2l-case"
-                ? true
-                : a.targetLength === targetLength)
-      ),
-    [attempts, trainerType, targetLength, f2lPairs]
-  );
+  // at all — those pool the whole type (the from-scramble drill pools per
+  // slot SET: an FL-only solve and an FL+BL solve aren't comparable).
+  const lengthAttempts = useMemo(() => {
+    const selectedSet = [...f2lSlots].sort().join(",");
+    return attempts.filter(
+      (a) =>
+        a.type === trainerType &&
+        (trainerType === "cmll"
+          ? true
+          : trainerType === "f2l"
+            ? [...(a.slots ?? [a.slot as XCrossSlot])].sort().join(",") === selectedSet
+            : trainerType === "f2l-case"
+              ? true
+              : a.targetLength === targetLength)
+    );
+  }, [attempts, trainerType, targetLength, f2lSlots]);
   const optimalRate = lengthAttempts.length
     ? Math.round((lengthAttempts.filter((a) => a.overhead <= 0).length / lengthAttempts.length) * 100)
     : null;
@@ -1028,26 +1026,26 @@ function CaseTrainerInner() {
             ))}
           </div>
           {trainerType === "f2l" && (
+            // Multi-select: train exactly these slots — one, any pair, or
+            // all four (= full F2L). At least one always stays selected.
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Pairs</span>
-              {[1, 2, 3, 4].map((n) => (
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
+              {F2L_SLOT_ORDER.map((s) => (
                 <button
-                  key={n}
-                  onClick={() => changeF2lPairs(n)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold tabular-nums transition-all ${
-                    f2lPairs === n ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                  key={s}
+                  onClick={() => toggleF2lSlot(s)}
+                  title="Toggle this slot — selected slots get scrambled together"
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    f2lSlots.includes(s) ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
                   }`}
-                  style={f2lPairs === n ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  style={f2lSlots.includes(s) ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {n}
+                  {F2L_SLOT_VIEW_LABELS[s]}
                 </button>
               ))}
             </div>
           )}
-          {(trainerType === "xcross" ||
-            trainerType === "pair" ||
-            trainerType === "f2l-case" ||
-            (trainerType === "f2l" && f2lPairs === 1)) && (
+          {(trainerType === "xcross" || trainerType === "pair" || trainerType === "f2l-case") && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
               {(F2L_TYPES.includes(trainerType) ? F2L_SLOT_ORDER : XCROSS_SLOTS).map((s) => (
@@ -1235,9 +1233,9 @@ function CaseTrainerInner() {
         trainerType === "cmll"
           ? "CMLL"
           : F2L_TYPES.includes(trainerType)
-            ? trainerType === "f2l" && f2lPairs > 1
-              ? `F2L · ${f2lPairs} pairs · from scramble`
-              : `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot${trainerType === "f2l" ? " · from scramble" : ""}`
+            ? trainerType === "f2l"
+              ? `F2L · ${f2lSlots.map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")} · from scramble`
+              : `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot`
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
