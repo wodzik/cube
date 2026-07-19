@@ -337,6 +337,10 @@ function TrainingPageInner() {
                 reload();
               }}
               onClose={() => setEditingCase(null)}
+              onAutoSave={(updated) => {
+                updateCase(group, updated);
+                reload();
+              }}
               position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}
               onPrev={editIdx > 0 ? () => setEditingCase(cases[editIdx - 1]) : undefined}
               onNext={editIdx >= 0 && editIdx < cases.length - 1 ? () => setEditingCase(cases[editIdx + 1]) : undefined}

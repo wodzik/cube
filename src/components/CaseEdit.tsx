@@ -30,6 +30,14 @@ interface CaseEditProps {
   group: AlgGroup;
   onSave: (updated: AlgorithmCase) => void;
   onClose: () => void;
+  /**
+   * Persist WITHOUT closing the modal — the star (set-default) click saves
+   * immediately through this, so a changed default is never lost to a
+   * forgotten Save. Persists the current draft (committed edits + added
+   * variants), not just the flag: the starred variant may BE a just-added
+   * one, so the draft and the flag can't be split.
+   */
+  onAutoSave?: (updated: AlgorithmCase) => void;
   /** Jump to the previous case in the list (undefined = at the start). */
   onPrev?: () => void;
   /** Jump to the next case in the list (undefined = at the end). */
@@ -49,7 +57,7 @@ const EMPTY_FORM: NewVariantForm = { name: "", alg: "", youtubeUrl: "" };
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function CaseEdit({ case_, group, onSave, onClose, onPrev, onNext, position }: CaseEditProps) {
+export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, onNext, position }: CaseEditProps) {
   const [variants, setVariants] = useState<AlgorithmVariant[]>(() => structuredClone(case_.algList));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBuf, setEditBuf] = useState<Partial<AlgorithmVariant>>({});
@@ -87,7 +95,9 @@ export function CaseEdit({ case_, group, onSave, onClose, onPrev, onNext, positi
   const cleanPreviewAlg = previewAlg.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
 
   function setDefault(id: string) {
-    setVariants((vs) => vs.map((v) => ({ ...v, isDefault: v.id === id })));
+    const next = variants.map((v) => ({ ...v, isDefault: v.id === id }));
+    setVariants(next);
+    onAutoSave?.({ ...case_, algList: next });
   }
 
   function startEdit(v: AlgorithmVariant) {
@@ -392,7 +402,7 @@ function VariantRow({
         <div className="flex items-start gap-2 p-3">
           <button
             onClick={onSetDefault}
-            title={variant.isDefault ? "Default variant" : "Set as default"}
+            title={variant.isDefault ? "Default variant" : "Set as default (saves immediately)"}
             className={`mt-0.5 shrink-0 transition-colors ${variant.isDefault ? "text-amber-400" : "text-gray-700 hover:text-amber-500"}`}
           >
             <Star size={14} fill={variant.isDefault ? "currentColor" : "none"} />
