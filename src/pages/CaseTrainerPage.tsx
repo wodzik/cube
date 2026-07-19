@@ -457,7 +457,7 @@ function CaseTrainerInner() {
                   snapshot
                 )
               : type === "f2l-case"
-                ? await generateF2LCaseView(slotNow)
+                ? await generateF2LCaseView(f2lSlotsNow)
               : type === "f2l"
                 ? // Exactly the slots the user picked — one, a pair, or all four.
                   await generateF2LScramble(f2lSlotsNow, snapshot)
@@ -905,11 +905,9 @@ function CaseTrainerInner() {
         a.type === trainerType &&
         (trainerType === "cmll"
           ? true
-          : trainerType === "f2l"
+          : F2L_TYPES.includes(trainerType)
             ? [...(a.slots ?? [a.slot as XCrossSlot])].sort().join(",") === selectedSet
-            : trainerType === "f2l-case"
-              ? true
-              : a.targetLength === targetLength)
+            : a.targetLength === targetLength)
     );
   }, [attempts, trainerType, targetLength, f2lSlots]);
   const optimalRate = lengthAttempts.length
@@ -1025,7 +1023,7 @@ function CaseTrainerInner() {
               </button>
             ))}
           </div>
-          {trainerType === "f2l" && (
+          {F2L_TYPES.includes(trainerType) && (
             // Multi-select: train exactly these slots — one, any pair, or
             // all four (= full F2L). At least one always stays selected.
             <div className="flex items-center gap-1 shrink-0">
@@ -1045,10 +1043,10 @@ function CaseTrainerInner() {
               ))}
             </div>
           )}
-          {(trainerType === "xcross" || trainerType === "pair" || trainerType === "f2l-case") && (
+          {(trainerType === "xcross" || trainerType === "pair") && (
             <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
-              {(F2L_TYPES.includes(trainerType) ? F2L_SLOT_ORDER : XCROSS_SLOTS).map((s) => (
+              {XCROSS_SLOTS.map((s) => (
                 <button
                   key={s}
                   onClick={() => changeSlot(s)}
@@ -1057,7 +1055,7 @@ function CaseTrainerInner() {
                   }`}
                   style={slot === s ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {F2L_TYPES.includes(trainerType) ? F2L_SLOT_VIEW_LABELS[s] : s}
+                  {s}
                 </button>
               ))}
             </div>
@@ -1233,9 +1231,7 @@ function CaseTrainerInner() {
         trainerType === "cmll"
           ? "CMLL"
           : F2L_TYPES.includes(trainerType)
-            ? trainerType === "f2l"
-              ? `F2L · ${f2lSlots.map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")} · from scramble`
-              : `F2L · ${F2L_SLOT_VIEW_LABELS[slot]} slot`
+            ? `F2L · ${f2lSlots.map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")} · ${trainerType === "f2l" ? "from scramble" : "case"}`
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}

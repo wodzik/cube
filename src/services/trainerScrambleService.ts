@@ -386,11 +386,11 @@ export async function generateF2LScramble(slots: readonly XCrossSlot[], from?: K
  * its generator) regardless of the physical cube's state, and the page
  * replays the user's moves onto it for detection. scramble stays "".
  */
-export async function generateF2LCaseView(slot: XCrossSlot): Promise<TrainerScramble> {
+export async function generateF2LCaseView(slots: readonly XCrossSlot[]): Promise<TrainerScramble> {
   const kpuzzle = await cube3x3x3.kpuzzle();
 
   for (let attempt = 0; attempt < MAX_GENERATION_RETRIES; attempt++) {
-    const pattern = f2lCasePattern(kpuzzle, sampleF2LPlacements([slot]));
+    const pattern = f2lCasePattern(kpuzzle, sampleF2LPlacements(slots));
     let solution: string[];
     try {
       solution = tokenize((await experimentalSolve3x3x3IgnoringCenters(pattern)).toString());
@@ -401,7 +401,8 @@ export async function generateF2LCaseView(slot: XCrossSlot): Promise<TrainerScra
     return {
       type: "f2l-case",
       face: XCROSS_CROSS_FACE,
-      slot,
+      slot: slots[0],
+      slots: [...slots],
       scramble: "",
       optimalLength: 0,
       viewSetupAlg: generator,

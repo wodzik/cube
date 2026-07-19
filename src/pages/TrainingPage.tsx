@@ -20,6 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -45,6 +46,7 @@ import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AlgorithmListView } from "../components/AlgorithmListView";
 import { CaseEdit } from "../components/CaseEdit";
 import { CaseViewToggles } from "../components/CaseViewToggles";
+import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 
@@ -95,6 +97,8 @@ function TrainingPageInner() {
   const [drillRound, setDrillRound] = useState(0);
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [jumpToCaseName, setJumpToCaseName] = useState<string | null>(null);
+  /** "Show me how" playback for the CURRENT drill case — no need to open the edit modal. */
+  const [showPlayback, setShowPlayback] = useState(false);
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
   const reload = () => setCases(loadAlgGroup(group));
@@ -285,6 +289,17 @@ function TrainingPageInner() {
         timeMs={displaySec * 1000}
         timerState={timerState}
         hintText={hintText}
+        controls={
+          currentCase && variant ? (
+            <button
+              onClick={() => setShowPlayback(true)}
+              className="btn-secondary text-xs"
+              title="Watch this algorithm performed move by move"
+            >
+              <Video size={13} /> Show me how
+            </button>
+          ) : undefined
+        }
         cubeRef={cubeRef}
         visualization="3D"
         stickering={group ? STICKERING[group] : "full"}
@@ -320,6 +335,16 @@ function TrainingPageInner() {
           />
         }
       />
+
+      {showPlayback && currentCase && variant && (
+        <AlgPlaybackModal
+          title={currentCase.name}
+          subtitle={variant.name}
+          alg={variant.alg}
+          stickering={STICKERING[group]}
+          onClose={() => setShowPlayback(false)}
+        />
+      )}
 
       {editingCase &&
         (() => {

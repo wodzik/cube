@@ -59,7 +59,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
         className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
           <div className="min-w-0">
             <h2 className="text-white font-semibold text-base truncate">{title}</h2>
             {subtitle && <p className="text-gray-500 text-xs mt-0.5 truncate">{subtitle}</p>}
@@ -69,7 +69,10 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
           </button>
         </div>
 
-        <div className="w-full aspect-square min-h-0 bg-gray-950/50">
+        {/* max-h caps the square on short viewports — header + footer +
+            cube must fit in the card's 90vh, or the canvas spills out of
+            the modal. The player letterboxes inside a non-square box. */}
+        <div className="w-full aspect-square max-h-[55vh] min-h-48 bg-gray-950/50">
           <CubeVisualisation
             alg={plain}
             setupAlg={setup}
@@ -86,7 +89,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
           />
         </div>
 
-        <div className="px-5 py-4 border-t border-white/[0.06]">
+        <div className="px-5 py-4 border-t border-white/[0.06] shrink-0 overflow-y-auto">
           <p className="font-mono text-sm text-gray-200 break-words">{alg}</p>
           <p className="text-[11px] text-gray-600 mt-1.5">
             Press play or step through the moves with the controls under the cube. Drag the cube to change the view.
