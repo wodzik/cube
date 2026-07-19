@@ -27,7 +27,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, ChevronRight } from "lucide-react";
+import { GripVertical, RotateCcw, ChevronRight, Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -46,6 +46,7 @@ import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CaseListItem } from "../components/CaseListItem";
 import { CaseEdit } from "../components/CaseEdit";
 import { CaseViewToggles } from "../components/CaseViewToggles";
+import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 import { formatTimeMs } from "../logic/statistics";
@@ -138,6 +139,8 @@ function AttackPageInner() {
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(group));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  /** "Show me how" playback for the current queue case — no need to open the editor. */
+  const [showPlayback, setShowPlayback] = useState(false);
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
   useEffect(() => {
@@ -347,9 +350,20 @@ function AttackPageInner() {
       timerState={timerState}
       hintText={!finished && state.phase === "setup" ? "Make a move to start" : null}
       controls={
-        <button onClick={handleRestart} className="btn-secondary">
-          <RotateCcw size={13} /> Restart
-        </button>
+        <div className="flex items-center gap-2">
+          {currentCase && variant && (
+            <button
+              onClick={() => setShowPlayback(true)}
+              className="btn-secondary text-xs"
+              title="Watch this algorithm performed move by move"
+            >
+              <Video size={13} /> Show me how
+            </button>
+          )}
+          <button onClick={handleRestart} className="btn-secondary">
+            <RotateCcw size={13} /> Restart
+          </button>
+        </div>
       }
       cubeRef={cubeRef}
       visualization="3D"
@@ -440,6 +454,16 @@ function AttackPageInner() {
         </div>
       }
     />
+
+    {showPlayback && currentCase && variant && (
+      <AlgPlaybackModal
+        title={currentCase.name}
+        subtitle={variant.name}
+        alg={variant.alg}
+        stickering={STICKERING[group]}
+        onClose={() => setShowPlayback(false)}
+      />
+    )}
 
     {editingCase &&
       (() => {

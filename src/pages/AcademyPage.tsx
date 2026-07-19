@@ -51,6 +51,14 @@ const ACADEMY_CONFIG: SessionConfig = {
 
 const SELECTED_STORAGE_KEY = "nact_academy_selected";
 
+/**
+ * Session-scratch attempt times, module-scoped: Academy stats are
+ * deliberately never persisted, but the page unmounts on every tab switch
+ * — "session" means the app session, not one visit to the tab, so the
+ * times live here between mounts and reset only on a reload.
+ */
+let sessionAttemptsCache: Record<string, number[]> = {};
+
 /** Per-step selection, persisted; a step the user never touched defaults to its REQUIRED algs. */
 function loadSelected(): Record<string, string[]> {
   try {
@@ -87,8 +95,8 @@ function AcademyInner() {
   const [stored, setStored] = useState<Record<string, string[]>>(loadSelected);
   const [drillIdx, setDrillIdx] = useState(0);
   const [drillRound, setDrillRound] = useState(0);
-  /** Session-scratch attempt times per alg id — never persisted. */
-  const [attemptsMs, setAttemptsMs] = useState<Record<string, number[]>>({});
+  /** Session-scratch attempt times per alg id — never persisted (see sessionAttemptsCache). */
+  const [attemptsMs, setAttemptsMs] = useState<Record<string, number[]>>(() => sessionAttemptsCache);
   const [showPlayback, setShowPlayback] = useState(false);
 
   const step: AcademyStep = lesson.steps.find((s) => s.id === stepId) ?? lesson.steps[0];
@@ -171,7 +179,11 @@ function AcademyInner() {
     if (lastRecordedEndRef.current === state.endTime) return;
     lastRecordedEndRef.current = state.endTime;
     const timeMs = state.endTime - state.startTime;
-    setAttemptsMs((prev) => ({ ...prev, [alg.id]: [...(prev[alg.id] ?? []), timeMs] }));
+    setAttemptsMs((prev) => {
+      const next = { ...prev, [alg.id]: [...(prev[alg.id] ?? []), timeMs] };
+      sessionAttemptsCache = next;
+      return next;
+    });
     const timer = setTimeout(() => {
       setDrillIdx((i) => (i + 1) % Math.max(selectedAlgs.length, 1));
       setDrillRound((r) => r + 1);
