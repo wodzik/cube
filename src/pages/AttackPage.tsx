@@ -408,18 +408,27 @@ function AttackPageInner() {
       }
     />
 
-    {editingCase && (
-      <CaseEdit
-        case_={editingCase}
-        group={group}
-        onSave={(updated) => {
-          updateCase(group, updated);
-          setEditingCase(null);
-          setCases(loadAlgGroup(group));
-        }}
-        onClose={() => setEditingCase(null)}
-      />
-    )}
+    {editingCase &&
+      (() => {
+        const editIdx = cases.findIndex((c) => c.name === editingCase.name);
+        return (
+          <CaseEdit
+            // Remount on navigation — see TrainingPage's identical usage.
+            key={editingCase.name}
+            case_={editingCase}
+            group={group}
+            onSave={(updated) => {
+              updateCase(group, updated);
+              setEditingCase(null);
+              setCases(loadAlgGroup(group));
+            }}
+            onClose={() => setEditingCase(null)}
+            position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}
+            onPrev={editIdx > 0 ? () => setEditingCase(cases[editIdx - 1]) : undefined}
+            onNext={editIdx >= 0 && editIdx < cases.length - 1 ? () => setEditingCase(cases[editIdx + 1]) : undefined}
+          />
+        );
+      })()}
     </>
   );
 }

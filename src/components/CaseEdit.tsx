@@ -8,10 +8,16 @@
  *
  * onSave receives the fully updated AlgorithmCase — the caller persists it
  * via algorithmStore.updateCase().
+ *
+ * Prev/next navigation (header chevrons + ←/→ keys) jumps to the adjacent
+ * case in the caller's list. Like Cancel, it DISCARDS unsaved edits — the
+ * caller remounts this component (key= the case name) with the new case.
+ * Arrow keys are ignored while typing in an input or while a sub-modal
+ * (variant test / playback) is open.
  */
 
-import { useState } from "react";
-import { X, Star, Trash2, Plus, Check, RotateCcw, ExternalLink, Play, Video } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Star, Trash2, Plus, Check, ChevronLeft, ChevronRight, RotateCcw, ExternalLink, Play, Video } from "lucide-react";
 import type { AlgorithmCase, AlgorithmVariant, AlgGroup } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { AlgPlaybackModal } from "./AlgPlaybackModal";
@@ -24,6 +30,12 @@ interface CaseEditProps {
   group: AlgGroup;
   onSave: (updated: AlgorithmCase) => void;
   onClose: () => void;
+  /** Jump to the previous case in the list (undefined = at the start). */
+  onPrev?: () => void;
+  /** Jump to the next case in the list (undefined = at the end). */
+  onNext?: () => void;
+  /** Shown between the chevrons as "index+1/total". */
+  position?: { index: number; total: number };
 }
 
 interface NewVariantForm {
@@ -37,7 +49,7 @@ const EMPTY_FORM: NewVariantForm = { name: "", alg: "", youtubeUrl: "" };
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
+export function CaseEdit({ case_, group, onSave, onClose, onPrev, onNext, position }: CaseEditProps) {
   const [variants, setVariants] = useState<AlgorithmVariant[]>(() => structuredClone(case_.algList));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBuf, setEditBuf] = useState<Partial<AlgorithmVariant>>({});
@@ -51,6 +63,24 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
   const [testingVariant, setTestingVariant] = useState<AlgorithmVariant | null>(null);
   // "Show me how" — animated playback popup for the picked variant.
   const [playbackVariant, setPlaybackVariant] = useState<AlgorithmVariant | null>(null);
+
+  useEffect(() => {
+    if (!onPrev && !onNext) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (testingVariant || playbackVariant) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "ArrowLeft" && onPrev) {
+        e.preventDefault();
+        onPrev();
+      } else if (e.key === "ArrowRight" && onNext) {
+        e.preventDefault();
+        onNext();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onPrev, onNext, testingVariant, playbackVariant]);
 
   const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0];
   const previewAlg = editingId === defaultVariant?.id ? (editBuf.alg ?? defaultVariant.alg) : (defaultVariant?.alg ?? "");
@@ -127,9 +157,37 @@ export function CaseEdit({ case_, group, onSave, onClose }: CaseEditProps) {
             <h2 className="text-white font-semibold text-base">{case_.name}</h2>
             <p className="text-gray-500 text-xs mt-0.5">{case_.category}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-gray-200 transition-colors">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-0.5">
+            {(onPrev || onNext) && (
+              <>
+                <button
+                  onClick={onPrev}
+                  disabled={!onPrev}
+                  title="Previous algorithm (←)"
+                  className="p-1.5 text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                {position && (
+                  <span className="text-[10px] text-gray-600 font-mono tabular-nums select-none">
+                    {position.index + 1}/{position.total}
+                  </span>
+                )}
+                <button
+                  onClick={onNext}
+                  disabled={!onNext}
+                  title="Next algorithm (→)"
+                  className="p-1.5 text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                >
+                  <ChevronRight size={18} />
+                </button>
+                <div className="w-px h-5 bg-white/10 mx-1.5" />
+              </>
+            )}
+            <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-gray-200 transition-colors">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-1 overflow-hidden">

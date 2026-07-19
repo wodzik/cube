@@ -321,18 +321,28 @@ function TrainingPageInner() {
         }
       />
 
-      {editingCase && (
-        <CaseEdit
-          case_={editingCase}
-          group={group}
-          onSave={(updated) => {
-            updateCase(group, updated);
-            setEditingCase(null);
-            reload();
-          }}
-          onClose={() => setEditingCase(null)}
-        />
-      )}
+      {editingCase &&
+        (() => {
+          const editIdx = cases.findIndex((c) => c.name === editingCase.name);
+          return (
+            <CaseEdit
+              // Remount on navigation — CaseEdit's draft state is seeded once
+              // from case_, so a prev/next jump must start a fresh draft.
+              key={editingCase.name}
+              case_={editingCase}
+              group={group}
+              onSave={(updated) => {
+                updateCase(group, updated);
+                setEditingCase(null);
+                reload();
+              }}
+              onClose={() => setEditingCase(null)}
+              position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}
+              onPrev={editIdx > 0 ? () => setEditingCase(cases[editIdx - 1]) : undefined}
+              onNext={editIdx >= 0 && editIdx < cases.length - 1 ? () => setEditingCase(cases[editIdx + 1]) : undefined}
+            />
+          );
+        })()}
     </>
   );
 }
