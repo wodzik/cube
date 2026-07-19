@@ -75,6 +75,38 @@ describe("computeSequenceProgress — wrong move + repair", () => {
     expect(progress.hadErrors).toBe(true);
   });
 
+  it("collapses wrong moves across a commuting opposite face: L R L reads as L2 R, correction is 2 moves", () => {
+    const target = buildSequenceTarget("U");
+    const progress = computeSequenceProgress(target, ["L", "R", "L"]);
+    // L and R commute, so L R L ≡ L2 R — the repair must not ask for L' R' L'.
+    expect(progress.correctionSequence).toEqual(["R'", "L2"]);
+  });
+
+  it("accepts opposite-face corrections in ANY order: R' first…", () => {
+    const target = buildSequenceTarget("U");
+    const wrong = ["L", "R", "L"];
+    const afterR = computeSequenceProgress(target, [...wrong, "R'"]);
+    expect(afterR.correctionSequence).toEqual(["L2"]);
+    const done = computeSequenceProgress(target, [...wrong, "R'", "L2", "U"]);
+    expect(done.isCompleted).toBe(true);
+    expect(done.correctionSequence).toEqual([]);
+  });
+
+  it("…or L2 first…", () => {
+    const target = buildSequenceTarget("U");
+    const afterL2 = computeSequenceProgress(target, ["L", "R", "L", "L2"]);
+    expect(afterL2.correctionSequence).toEqual(["R'"]);
+    const done = computeSequenceProgress(target, ["L", "R", "L", "L2", "R'", "U"]);
+    expect(done.isCompleted).toBe(true);
+  });
+
+  it("…or interleaved L' R' L' quarter turns", () => {
+    const target = buildSequenceTarget("U");
+    const done = computeSequenceProgress(target, ["L", "R", "L", "L'", "R'", "L'", "U"]);
+    expect(done.isCompleted).toBe(true);
+    expect(done.correctionSequence).toEqual([]);
+  });
+
   it("a clean solve without any wrong move never sets hadErrors", () => {
     const target = buildSequenceTarget("R U");
     const progress = computeSequenceProgress(target, ["R", "U"]);

@@ -415,8 +415,25 @@ export function physicalMovesToString(moves: PhysicalMove[]): string {
     .join(" ");
 }
 
+const REDUCE_FACE_OPPOSITES: Record<Face, Face> = {
+  U: "D", D: "U",
+  R: "L", L: "R",
+  F: "B", B: "F",
+};
+
 /**
- * Reduce physical moves by combining consecutive same-face moves.
+ * Reduce physical moves by combining same-face moves, INCLUDING across
+ * intervening opposite-face moves — turns of the same axis commute, so
+ * L R L is the same physical state as L2 R and must reduce to it. This is
+ * what lets a correction be performed in any order within an axis pair
+ * (undoing L R L as R' L2, L2 R', or even L R' L — every partial step
+ * cancels against the history no matter which face it touches first).
+ *
+ * Invariant kept by the incremental build: inside a contiguous same-axis
+ * run each face appears at most once (a second occurrence always finds its
+ * partner over the backward walk and merges), so a cancelled-out move's
+ * removal can never bring two mergeable moves together — one pass is
+ * complete.
  *
  * @param moves - Array of physical moves
  * @returns Reduced array
@@ -425,18 +442,16 @@ export function reducePhysicalMoves(moves: PhysicalMove[]): PhysicalMove[] {
   const result: PhysicalMove[] = [];
 
   for (const move of moves) {
-    if (result.length === 0) {
-      result.push({ ...move });
-      continue;
-    }
+    // Walk back over commuting opposite-face moves to find a same-face partner.
+    let i = result.length - 1;
+    while (i >= 0 && result[i].face === REDUCE_FACE_OPPOSITES[move.face]) i--;
 
-    const last = result[result.length - 1];
-    if (last.face === move.face) {
-      const newPower = (last.power + move.power) % 4;
+    if (i >= 0 && result[i].face === move.face) {
+      const newPower = (result[i].power + move.power) % 4;
       if (newPower === 0) {
-        result.pop();
+        result.splice(i, 1);
       } else {
-        last.power = newPower;
+        result[i].power = newPower;
       }
     } else {
       result.push({ ...move });
