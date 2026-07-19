@@ -88,6 +88,32 @@ function invertAlg(alg: string): string {
   return moves.length === 0 ? "" : invertSequence(moves).join(" ");
 }
 
+/**
+ * User's preferred queue order, per group — captured on every drag and
+ * reapplied whenever the queue is (re)built. Stored as the full list of
+ * case names; cases added since the save are appended in default order,
+ * renamed/removed ones silently drop out.
+ */
+function orderStorageKey(group: AlgGroup): string {
+  return `nact_attack_order_${group}`;
+}
+
+function applyStoredOrder(group: AlgGroup, names: string[]): string[] {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(orderStorageKey(group)) ?? "null");
+    if (!Array.isArray(stored)) return names;
+    const known = stored.filter((n): n is string => typeof n === "string" && names.includes(n));
+    const rest = names.filter((n) => !known.includes(n));
+    return [...known, ...rest];
+  } catch {
+    return names;
+  }
+}
+
+function saveStoredOrder(group: AlgGroup, order: string[]) {
+  localStorage.setItem(orderStorageKey(group), JSON.stringify(order));
+}
+
 export default function AttackPage() {
   return (
     <SessionProvider config={ATTACK_CONFIG}>
@@ -106,7 +132,7 @@ function AttackPageInner() {
   // Remembered so toggling away from F2L and back returns to the same slot.
   const [f2lSlot, setF2lSlot] = useState<AlgGroup>("f2l-front-right");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
-  const [queue, setQueue] = useState<string[]>(() => cases.map((c) => c.name));
+  const [queue, setQueue] = useState<string[]>(() => applyStoredOrder(group, cases.map((c) => c.name)));
   const [completed, setCompleted] = useState<{ caseName: string; timeMs: number }[]>([]);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(group));
@@ -117,7 +143,7 @@ function AttackPageInner() {
   useEffect(() => {
     const loaded = loadAlgGroup(group);
     setCases(loaded);
-    setQueue(loaded.map((c) => c.name));
+    setQueue(applyStoredOrder(group, loaded.map((c) => c.name)));
     setCompleted([]);
     setSessionStartTime(null);
     setHistory(getAttackSessions(group));
@@ -213,14 +239,21 @@ function AttackPageInner() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      setQueue((items) => arrayMove(items, items.indexOf(active.id as string), items.indexOf(over.id as string)));
+      setQueue((items) => {
+        const next = arrayMove(items, items.indexOf(active.id as string), items.indexOf(over.id as string));
+        // Persist the FULL order: mid-session the queue is missing the
+        // already-completed cases — keep them at the front (in play order)
+        // so they don't vanish from the saved arrangement.
+        saveStoredOrder(group, [...completed.map((c) => c.caseName), ...next]);
+        return next;
+      });
     }
   }
 
   function handleRestart() {
     const loaded = loadAlgGroup(group);
     setCases(loaded);
-    setQueue(loaded.map((c) => c.name));
+    setQueue(applyStoredOrder(group, loaded.map((c) => c.name)));
     setCompleted([]);
     setSessionStartTime(null);
     moveBuffer.clear(); // fiddling after the session finished doesn't belong to the fresh queue
