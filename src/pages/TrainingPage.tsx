@@ -274,7 +274,7 @@ function TrainingPageInner() {
         centerTop={
           currentCase ? (
             <div className="flex flex-col items-center gap-1 text-center">
-              <h2 className="text-lg font-bold text-white">{currentCase.name}</h2>
+              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{currentCase.name}</h2>
               <p className="text-xs text-gray-500">{currentCase.category}</p>
               <p className="text-[11px] text-gray-700 tabular-nums font-mono">
                 {caseIdx + 1} / {selectedCases.length}

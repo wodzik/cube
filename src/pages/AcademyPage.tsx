@@ -255,7 +255,7 @@ function AcademyInner() {
       centerTop={
         alg ? (
           <div className="flex flex-col items-center gap-1 text-center">
-            <h2 className="text-lg font-bold text-white">{alg.name}</h2>
+            <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{alg.name}</h2>
             <span
               className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
                 alg.required ? "bg-emerald-500/15 text-emerald-300" : "bg-sky-500/15 text-sky-300"
