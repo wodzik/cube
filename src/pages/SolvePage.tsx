@@ -369,7 +369,18 @@ function SolvePageInner({
   // Live-ticking display values. useAnimationTimer already returns the
   // correct final value once both start/end are set (the "done" case), so
   // no separate static branch is needed for the main timer.
-  const displaySec = useAnimationTimer(state.startTime, state.endTime, state.phase === "active");
+  const rawDisplaySec = useAnimationTimer(state.startTime, state.endTime, state.phase === "active");
+  // The finished solve's time keeps showing on the BIG timer across the
+  // next scramble being armed (state.startTime/endTime null out the moment
+  // the fresh target lands, which would otherwise snap the timer to
+  // 0.000 before the solver has even looked away) — held until they
+  // actually move on: the first move of scrambling/setup, or starting the
+  // next solve via the timer/spacebar. `phase !== "active"` guards a solve
+  // that starts WITHOUT any scrambling move ever ticking (so summaryRecord
+  // is still non-null for the render where phase first flips to "active");
+  // matches the dismiss effect below exactly.
+  const holdingLastResult = summaryRecord !== null && state.phase !== "active";
+  const displaySec = summaryRecord && state.phase !== "active" ? summaryRecord.timeMs / 1000 : rawDisplaySec;
   const inspectionElapsedSec = useAnimationTimer(
     state.inspectionStartTime,
     null,
@@ -490,27 +501,32 @@ function SolvePageInner({
     startNextAttempt();
   }, [state.phase, solveTimeMs, state.startTime, state.endTime, state.moveLog, state.targetNotation, state.startedBy, state.endedBy, state.config.startMethod, state.config.stopMethod, moveCount, tps, startState, session.id, session.solveMethod, customScramblesSessionId, targetTokens, onSolved, startNextAttempt]);
 
-  // Dismiss the inline summary (and any open analysis modal) the moment the
-  // user starts mixing the auto-generated next scramble (first move of the
-  // new "setup" phase) — returns to the plain cube + scramble view.
+  // Dismiss the inline summary (and any open analysis modal, and the held
+  // timer display above) the moment the user moves on to the next attempt —
+  // either by starting to mix the auto-generated scramble (first move of
+  // the new "setup" phase) or by starting the solve itself (spacebar/BT
+  // timer, in case that ever fires with no scrambling move logged) —
+  // returns to the plain cube + scramble view.
   useEffect(() => {
     if (!summaryRecord && !analysisRecord) return;
-    if (state.phase === "setup" && state.moveLog.length > 0) {
+    if ((state.phase === "setup" && state.moveLog.length > 0) || state.phase === "active") {
       setSummaryRecord(null);
       setAnalysisRecord(null);
     }
   }, [summaryRecord, analysisRecord, state.phase, state.moveLog.length]);
 
   const timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" =
-    state.phase === "ready" && pressState !== "idle"
-      ? pressState
-      : state.phase === "inspecting"
-        ? "inspecting"
-        : state.phase === "active"
-          ? "solving"
-          : state.phase === "done"
-            ? "solved"
-            : "idle";
+    holdingLastResult
+      ? "solved"
+      : state.phase === "ready" && pressState !== "idle"
+        ? pressState
+        : state.phase === "inspecting"
+          ? "inspecting"
+          : state.phase === "active"
+            ? "solving"
+            : state.phase === "done"
+              ? "solved"
+              : "idle";
 
   const hintText =
     state.phase === "setup"
