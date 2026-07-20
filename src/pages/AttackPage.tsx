@@ -141,6 +141,18 @@ function AttackPageInner() {
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   /** "Show me how" playback for the current queue case — no need to open the editor. */
   const [showPlayback, setShowPlayback] = useState(false);
+  /**
+   * The just-completed session's result — shown as a "Session Complete!"
+   * banner WITHOUT blocking the next one: the queue refills and the first
+   * case arms immediately (see the completion effect below), so the app is
+   * ready to attack again right away. Cleared the moment the user actually
+   * starts that next attempt (phase -> "active"), same dismiss pattern as
+   * SolvePage's inline summary.
+   */
+  const [justFinished, setJustFinished] = useState<{
+    totalMs: number;
+    caseTimes: { caseName: string; timeMs: number }[];
+  } | null>(null);
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
   useEffect(() => {
@@ -196,12 +208,11 @@ function AttackPageInner() {
 
   // Attack measures the WHOLE session, not each case individually — the
   // timer runs continuously from the first move of the first case until the
-  // last case is completed, never resetting between cases.
-  const sessionElapsedSec = useAnimationTimer(
-    sessionStartTime,
-    state.phase === "done" && queue.length <= 1 ? state.endTime : null,
-    sessionStartTime !== null
-  );
+  // last case is completed, then resets to 0 the instant the queue refills
+  // (see the completion effect) so it's showing a fresh, ready-to-go 0.000
+  // rather than freezing on the finished total (that total lives in
+  // justFinished / the stats chart instead).
+  const sessionElapsedSec = useAnimationTimer(sessionStartTime, null, sessionStartTime !== null);
 
   // Guarded by attempt identity (endTime) — see TrainingPage's comment: a
   // buffered replay can complete a case within one batched render, so a
@@ -215,24 +226,44 @@ function AttackPageInner() {
 
     const timeMs = state.endTime - state.startTime;
     recordAttempt(group, currentCase.name, variant.id, { time: timeMs / 1000, hadErrors: false, source: "attack" });
-    setCases(loadAlgGroup(group));
+    const loadedCases = loadAlgGroup(group);
+    setCases(loadedCases);
 
     const newCompleted = [...completed, { caseName: currentCase.name, timeMs }];
     const newQueue = queue.slice(1);
-    setCompleted(newCompleted);
-    setQueue(newQueue);
 
-    if (newQueue.length === 0 && sessionStartTime !== null) {
-      saveAttackSession({
-        id: crypto.randomUUID(),
-        date: Date.now(),
-        group,
-        totalMs: state.endTime - sessionStartTime,
-        caseTimes: newCompleted,
-      });
-      setHistory(getAttackSessions(group));
+    if (newQueue.length > 0 || sessionStartTime === null) {
+      setCompleted(newCompleted);
+      setQueue(newQueue);
+      return;
     }
+
+    // Last case of the session just landed — save it, then immediately
+    // requeue so the next attack is armed right away (no manual Restart).
+    // The just-finished summary is shown separately and self-dismisses on
+    // the first move of the new attempt.
+    saveAttackSession({
+      id: crypto.randomUUID(),
+      date: Date.now(),
+      group,
+      totalMs: state.endTime - sessionStartTime,
+      caseTimes: newCompleted,
+    });
+    setHistory(getAttackSessions(group));
+    setJustFinished({ totalMs: state.endTime - sessionStartTime, caseTimes: newCompleted });
+    setQueue(applyStoredOrder(group, loadedCases.map((c) => c.name)));
+    setCompleted([]);
+    setSessionStartTime(null);
+    moveBuffer.clear(); // fiddling right after completion doesn't belong to the fresh queue
   }, [state.phase, state.startTime, state.endTime]);
+
+  // Dismiss the completion banner the moment the user actually starts the
+  // next attempt (attack/algorithm mode jumps straight setup -> active on
+  // the first move — there's no "setup phase with moves logged" middle
+  // state to key off, unlike SolvePage's scramble tracking).
+  useEffect(() => {
+    if (justFinished && state.phase === "active") setJustFinished(null);
+  }, [justFinished, state.phase]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -259,14 +290,16 @@ function AttackPageInner() {
     setQueue(applyStoredOrder(group, loaded.map((c) => c.name)));
     setCompleted([]);
     setSessionStartTime(null);
+    setJustFinished(null); // a manual restart makes the last summary stale
     moveBuffer.clear(); // fiddling after the session finished doesn't belong to the fresh queue
   }
 
   const progress = selectCurrentProgress(state);
   const targetTokens = variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : [];
-  const finished = queue.length === 0;
-  const totalSessionMs =
-    finished && sessionStartTime !== null && state.endTime !== null ? state.endTime - sessionStartTime : null;
+  // True only when the group genuinely has no cases to attack (e.g. every
+  // case deselected/deleted) — a finished session no longer lands here,
+  // since the completion effect refills the queue immediately.
+  const noCases = cases.length === 0;
 
   // "Attack times" tracks the full-execution total per past session
   // (oldest -> newest), not individual case times within the current run —
@@ -274,7 +307,7 @@ function AttackPageInner() {
   const sessionTotalsMs = useMemo(() => [...history].sort((a, b) => a.date - b.date).map((s) => s.totalMs), [history]);
 
   const timerState: "idle" | "solving" | "solved" =
-    finished ? "solved" : state.phase === "active" ? "solving" : "idle";
+    state.phase === "active" ? "solving" : "idle";
 
   return (
     <>
@@ -329,26 +362,29 @@ function AttackPageInner() {
       showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}
-      loadingText={finished ? "Session complete!" : undefined}
+      loadingText={noCases ? "No cases selected" : undefined}
       completeText="Algorithm complete!"
       centerTop={
-        finished ? (
-          <div className="flex flex-col items-center gap-1 text-center">
-            <p className="text-lg font-semibold text-emerald-400">Session Complete!</p>
-            {totalSessionMs !== null && (
-              <p className="text-xs text-gray-500 font-mono tabular-nums">Total: {formatTimeMs(totalSessionMs)}</p>
-            )}
-          </div>
-        ) : currentCase ? (
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{currentCase.name}</h2>
-            <p className="text-xs text-gray-500">{currentCase.category}</p>
-          </div>
-        ) : null
+        <div className="flex flex-col items-center gap-1 text-center">
+          {justFinished && (
+            <div className="flex flex-col items-center gap-0.5 mb-1">
+              <p className="text-sm font-semibold text-emerald-400">
+                Session complete! ({justFinished.caseTimes.length} case{justFinished.caseTimes.length === 1 ? "" : "s"})
+              </p>
+              <p className="text-xs text-gray-500 font-mono tabular-nums">Total: {formatTimeMs(justFinished.totalMs)}</p>
+            </div>
+          )}
+          {currentCase && (
+            <>
+              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{currentCase.name}</h2>
+              <p className="text-xs text-gray-500">{currentCase.category}</p>
+            </>
+          )}
+        </div>
       }
       timeMs={sessionElapsedSec * 1000}
       timerState={timerState}
-      hintText={!finished && state.phase === "setup" ? "Make a move to start" : null}
+      hintText={state.phase === "setup" ? "Make a move to start" : null}
       controls={
         <div className="flex items-center gap-2">
           {currentCase && variant && (
