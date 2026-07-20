@@ -195,14 +195,25 @@ export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100
     ao100: showAo100,
   });
   const [fullscreen, setFullscreen] = useState(false);
+  // The fullscreen chart fills nearly the whole viewport — ResponsiveContainer
+  // needs a concrete pixel height (percentage heights need a height-bounded
+  // flex ancestor, which fights with the modal's own padding/header math more
+  // than it's worth), so track viewport height directly and recompute on resize.
+  const [viewportHeight, setViewportHeight] = useState(() => (typeof window !== "undefined" ? window.innerHeight : 900));
 
   useEffect(() => {
     if (!fullscreen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setFullscreen(false);
     };
+    const onResize = () => setViewportHeight(window.innerHeight);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    onResize();
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+    };
   }, [fullscreen]);
 
   const toggle = (metric: Metric) => setVisible((v) => ({ ...v, [metric]: !v[metric] }));
@@ -246,11 +257,11 @@ export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100
 
       {fullscreen && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3"
           onClick={() => setFullscreen(false)}
         >
           <div
-            className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
+            className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-[97vw] h-[95vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
@@ -263,8 +274,8 @@ export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100
                 <X size={18} />
               </button>
             </div>
-            <div className="p-5 overflow-y-auto">
-              <ChartBody {...bodyProps} height={Math.min(560, Math.round((typeof window !== "undefined" ? window.innerHeight : 800) * 0.55))} />
+            <div className="flex-1 min-h-0 p-5 overflow-y-auto">
+              <ChartBody {...bodyProps} height={Math.max(280, viewportHeight * 0.95 - 64 - 40)} />
             </div>
           </div>
         </div>

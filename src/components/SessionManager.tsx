@@ -55,8 +55,15 @@ export function SessionPicker({ sessions, activeSessionId, onSwitch, onCreate, o
     const handleClick = (e: MouseEvent) => {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     window.addEventListener("mousedown", handleClick);
-    return () => window.removeEventListener("mousedown", handleClick);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("keydown", handleKey);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -239,6 +246,14 @@ export function SessionEditModal({ session, onClose, onSave }: SessionEditModalP
       solveMethod,
     });
   }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">

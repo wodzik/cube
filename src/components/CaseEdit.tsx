@@ -90,6 +90,27 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onPrev, onNext, testingVariant, playbackVariant]);
 
+  // Escape closes the innermost open thing first: a sub-modal handles its
+  // own Escape (skip here so ONE press doesn't close both at once); an
+  // in-progress inline edit/add form is cancelled rather than losing the
+  // whole case's draft; only then does Escape close this modal.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (testingVariant || playbackVariant) return;
+      if (editingId) {
+        cancelEdit();
+      } else if (showAddForm) {
+        setShowAddForm(false);
+        setNewForm(EMPTY_FORM);
+      } else {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [testingVariant, playbackVariant, editingId, showAddForm, onClose]);
+
   const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0];
   const previewAlg = editingId === defaultVariant?.id ? (editBuf.alg ?? defaultVariant.alg) : (defaultVariant?.alg ?? "");
   const cleanPreviewAlg = previewAlg.replace(/[()]/g, "").replace(/\s+/g, " ").trim();

@@ -161,6 +161,14 @@ export function SolveAnalysis({ record, onClose, onUseScramble, moveTargets, onM
   const boundaries = BOUNDARIES_BY_METHOD[method](record) ?? healedLbl ?? [];
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">

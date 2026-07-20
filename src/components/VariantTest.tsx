@@ -119,6 +119,14 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, state.startTime, state.endTime]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const progress = selectCurrentProgress(state);
   const tokens = alg.trim().split(/\s+/).filter(Boolean);
   const bestMs = attemptsMs.length > 0 ? Math.min(...attemptsMs) : null;
