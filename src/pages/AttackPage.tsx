@@ -296,6 +296,12 @@ function AttackPageInner() {
 
   const progress = selectCurrentProgress(state);
   const targetTokens = variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : [];
+  // `completed` itself resets to [] the instant the queue refills (it has
+  // to, so the NEW session's own progress starts counting from zero — see
+  // the completion effect). What's actually SHOWN (header counter + the
+  // per-case breakdown below the queue) keeps the just-finished session's
+  // results up instead, for exactly as long as justFinished is held.
+  const displayedCompleted = justFinished ? justFinished.caseTimes : completed;
   // True only when the group genuinely has no cases to attack (e.g. every
   // case deselected/deleted) — a finished session no longer lands here,
   // since the completion effect refills the queue immediately.
@@ -350,7 +356,7 @@ function AttackPageInner() {
             </div>
           )}
           <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono">
-            {completed.length} / {cases.length}
+            {displayedCompleted.length} / {cases.length}
           </span>
           <div className="shrink-0">
             <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
@@ -437,9 +443,9 @@ function AttackPageInner() {
               </div>
             </SortableContext>
           </DndContext>
-          {completed.length > 0 && (
+          {displayedCompleted.length > 0 && (
             <div className="divide-y divide-gray-800/40 border-t border-gray-800">
-              {[...completed].reverse().map((entry) => (
+              {[...displayedCompleted].reverse().map((entry) => (
                 <div key={entry.caseName} className="flex items-center gap-3 px-4 py-2 text-gray-600">
                   <span className="flex-1 text-xs truncate">{entry.caseName}</span>
                   <span className="text-xs font-mono tabular-nums">{formatTimeMs(entry.timeMs)}</span>
