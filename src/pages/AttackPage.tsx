@@ -141,6 +141,12 @@ function AttackPageInner() {
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   /** "Show me how" playback for the current queue case — no need to open the editor. */
   const [showPlayback, setShowPlayback] = useState(false);
+  // Bumped by Restart so the case-arming effect below re-runs even when the
+  // restarted queue's first case happens to be the SAME one already active
+  // (e.g. restarting right after a wrong move, before ever advancing) —
+  // keying only on variant?.id would otherwise skip re-arming, leaving the
+  // stale UNDO correction stack and the mid-mistake cube view in place.
+  const [restartToken, setRestartToken] = useState(0);
   /**
    * The just-completed session's result — shown as a "Session Complete!"
    * banner WITHOUT blocking the next one: the queue refills and the first
@@ -189,7 +195,7 @@ function AttackPageInner() {
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant?.id]);
+  }, [variant?.id, restartToken]);
 
   const cube = useSmartCube({
     onMove: (move, timestamp) => {
@@ -208,11 +214,13 @@ function AttackPageInner() {
 
   // Attack measures the WHOLE session, not each case individually — the
   // timer runs continuously from the first move of the first case until the
-  // last case is completed, then resets to 0 the instant the queue refills
-  // (see the completion effect) so it's showing a fresh, ready-to-go 0.000
-  // rather than freezing on the finished total (that total lives in
-  // justFinished / the stats chart instead).
-  const sessionElapsedSec = useAnimationTimer(sessionStartTime, null, sessionStartTime !== null);
+  // last case is completed. sessionStartTime nulls out the instant the
+  // queue refills (see the completion effect), which would otherwise snap
+  // this straight to 0.000 before the solver has even seen their total —
+  // held on the finished total instead (same lifetime as justFinished /
+  // the results list below) until they actually move on.
+  const rawSessionElapsedSec = useAnimationTimer(sessionStartTime, null, sessionStartTime !== null);
+  const sessionElapsedSec = justFinished ? justFinished.totalMs / 1000 : rawSessionElapsedSec;
 
   // Guarded by attempt identity (endTime) — see TrainingPage's comment: a
   // buffered replay can complete a case within one batched render, so a
@@ -292,6 +300,7 @@ function AttackPageInner() {
     setSessionStartTime(null);
     setJustFinished(null); // a manual restart makes the last summary stale
     moveBuffer.clear(); // fiddling after the session finished doesn't belong to the fresh queue
+    setRestartToken((t) => t + 1); // force a full re-arm (target, UNDO stack, cube view) even on a same-case restart
   }
 
   const progress = selectCurrentProgress(state);
@@ -313,7 +322,7 @@ function AttackPageInner() {
   const sessionTotalsMs = useMemo(() => [...history].sort((a, b) => a.date - b.date).map((s) => s.totalMs), [history]);
 
   const timerState: "idle" | "solving" | "solved" =
-    state.phase === "active" ? "solving" : "idle";
+    justFinished ? "solved" : state.phase === "active" ? "solving" : "idle";
 
   return (
     <>
