@@ -151,6 +151,32 @@ export async function generateCrossScramble(
 }
 
 /**
+ * Cross case-drill variant ("cross-case"): NO scramble at all — the case is
+ * VIRTUAL, same idea as F2L's "Case" mode (generateF2LCaseView). Samples a
+ * cross state at EXACTLY the requested optimal depth and builds the setup
+ * alg straight from solved. Unlike generateCrossScramble there's no R/A
+ * composition step to make the REST of the cube look like a plausible
+ * scramble — nothing outside the cross is ever shown (stickeringMask
+ * blacks it out), so whatever the setup alg's face turns happen to leave
+ * behind there is invisible and doesn't need to be random-looking.
+ */
+export async function generateCrossCaseView(face: Face, length: number): Promise<TrainerScramble> {
+  const engine = await getCrossEngine(face);
+  const x = engine.sampleStateAtDepth(length);
+  const solution = tokenize(engine.firstOptimalSolution(x));
+  const generator = invertSequence(solution).join(" ");
+  return {
+    type: "cross-case",
+    face,
+    scramble: "",
+    optimalLength: length,
+    viewSetupAlg: generator,
+    targetGenerator: generator,
+    startCrossState: x,
+  };
+}
+
+/**
  * WASM-engine composition step (see the xcross doc comment below for the
  * algebra): given the NATIVE-frame target generator inverse C₀ and the
  * calibrated conjugating rotation, produce the app-frame scramble from the
@@ -502,6 +528,25 @@ export async function regenerateForTarget(target: TrainerRetryTarget, from?: KTr
     };
   }
 
+  if (target.type === "cross-case") {
+    // Virtual case, same as f2l-case above — reproduce the exact same
+    // cross state, no composition with the physical cube needed.
+    if (target.startCrossState === undefined) throw new Error("retry: cross-case attempt has no stored state");
+    const engine = await getCrossEngine(XCROSS_CROSS_FACE);
+    const x = target.startCrossState;
+    const solution = tokenize(engine.firstOptimalSolution(x));
+    const generator = invertSequence(solution).join(" ");
+    return {
+      type: "cross-case",
+      face: XCROSS_CROSS_FACE,
+      scramble: "",
+      optimalLength: engine.distance(x),
+      viewSetupAlg: generator,
+      targetGenerator: generator,
+      startCrossState: x,
+    };
+  }
+
   const rot = rotationFor(target.type, target.slot);
 
   if (target.type === "cross") {
@@ -609,7 +654,7 @@ export async function optimalSolutionsFromCurrent(
     throw new Error("Roux solutions are handled by rouxTrainerService.rouxOptimalSolutions");
   }
   if (current.type === "f2l" || current.type === "f2l-case") return []; // no solver for these cases — hints are hidden in the UI
-  if (current.type === "cross") {
+  if (current.type === "cross" || current.type === "cross-case") {
     if (current.startCrossState === undefined) return [];
     const engine = await getCrossEngine(current.face);
     const idx = engine.stateAfter(movesSoFar, current.startCrossState);

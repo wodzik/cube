@@ -85,6 +85,7 @@ import {
 import { collapseToStm } from "../logic/moveReduction";
 import {
   generateCrossScramble,
+  generateCrossCaseView,
   generateF2LCaseView,
   generateF2LScramble,
   generateXCrossScramble,
@@ -121,6 +122,7 @@ const SLOT_STORAGE_KEY = "nact_trainer_xcross_slot";
 const PAIR_STORAGE_KEY = "nact_trainer_xxcross_pair";
 const LENGTH_STORAGE_KEYS: Record<TrainerType, string> = {
   cross: "nact_trainer_cross_length",
+  "cross-case": "nact_trainer_cross_case_length",
   xcross: "nact_trainer_xcross_length",
   xxcross: "nact_trainer_xxcross_length",
   pair: "nact_trainer_pair_length",
@@ -136,6 +138,7 @@ const LENGTH_STORAGE_KEYS: Record<TrainerType, string> = {
 };
 const MIN_DEPTHS: Record<TrainerType, number> = {
   cross: 1,
+  "cross-case": 1,
   xcross: 1,
   xxcross: 1,
   pair: 1,
@@ -151,6 +154,7 @@ const MIN_DEPTHS: Record<TrainerType, number> = {
 };
 const MAX_DEPTHS: Record<TrainerType, number> = {
   cross: MAX_CROSS_DEPTH,
+  "cross-case": MAX_CROSS_DEPTH,
   xcross: TRAINER_MAX_DEPTHS.xcross,
   xxcross: TRAINER_MAX_DEPTHS["xxcross-adj"],
   pair: TRAINER_MAX_DEPTHS.pairing,
@@ -166,6 +170,7 @@ const MAX_DEPTHS: Record<TrainerType, number> = {
 };
 const DEFAULT_LENGTHS: Record<TrainerType, number> = {
   cross: 5,
+  "cross-case": 5,
   xcross: 7,
   xxcross: 7,
   pair: 5,
@@ -199,7 +204,7 @@ const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
-  { id: "cfop", label: "CFOP", types: ["cross", "xcross", "xxcross", "pair", "eocross"] },
+  { id: "cfop", label: "CFOP", types: ["cross", "cross-case", "xcross", "xxcross", "pair", "eocross"] },
   { id: "roux", label: "Roux", types: ["fs", "fb", "fbdr", "ss", "cmll", "eolr"] },
   { id: "f2l", label: "F2L", types: ["f2l-case", "f2l"] },
 ];
@@ -222,6 +227,7 @@ const LADDER_THRESHOLD = 0.8;
 
 const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "cross", label: "Cross" },
+  { id: "cross-case", label: "Cross Case" },
   { id: "xcross", label: "XCross" },
   { id: "xxcross", label: "XXCross" },
   { id: "pair", label: "Pair" },
@@ -461,6 +467,8 @@ function CaseTrainerInner() {
               : type === "f2l"
                 ? // Exactly the slots the user picked — one, a pair, or all four.
                   await generateF2LScramble(f2lSlotsNow, snapshot)
+              : type === "cross-case"
+                ? await generateCrossCaseView(TRAINER_FACE, len)
               : type === "cross"
                 ? await generateCrossScramble(len, TRAINER_FACE, snapshot)
                 : type === "xcross"
@@ -472,7 +480,7 @@ function CaseTrainerInner() {
                       : await generateEOCrossScramble(len, snapshot);
           if (generationSeqRef.current !== seq) return;
           viewRotatedRef.current = F2L_TYPES.includes(generated.type);
-          if (generated.type === "f2l-case") {
+          if (generated.type === "f2l-case" || generated.type === "cross-case") {
             // Virtual case: the view shows the case itself (not the physical
             // cube), detection replays the user's moves onto it, and there is
             // no scramble — the session goes straight to "ready" (the empty
@@ -616,12 +624,18 @@ function CaseTrainerInner() {
   const retryAttempt = (a: TrainerRetryTarget) => {
     if (!kpuzzle) return;
     setSummary(null);
-    setInfo(F2L_TYPES.includes(a.type) ? "Retrying the same F2L case" : `Retrying the same ${a.type} case (optimal ${a.optimalLength})`);
+    setInfo(
+      F2L_TYPES.includes(a.type)
+        ? "Retrying the same F2L case"
+        : a.type === "cross-case"
+          ? `Retrying the same cross case (optimal ${a.optimalLength})`
+          : `Retrying the same ${a.type} case (optimal ${a.optimalLength})`
+    );
     void startNextAttempt(kpuzzle, a);
   };
 
   const canRetry = (a: TrainerRetryTarget & { targetGenerator?: string }) =>
-    a.type === "cross"
+    a.type === "cross" || a.type === "cross-case"
       ? a.startCrossState !== undefined
       : a.type === "fb" || a.type === "ss" || F2L_TYPES.includes(a.type)
         ? Boolean(a.targetGenerator)
@@ -682,6 +696,7 @@ function CaseTrainerInner() {
     if (!current) return null;
     switch (current.type) {
       case "cross":
+      case "cross-case":
         return (s: LiveCubeState) => isCrossSolvedOnFace(s, current.face);
       case "eocross":
         return (s: LiveCubeState) =>
@@ -741,6 +756,7 @@ function CaseTrainerInner() {
     const type = current?.type ?? trainerType;
     switch (type) {
       case "cross":
+      case "cross-case":
         return crossStickeringMask(TRAINER_FACE);
       case "eocross":
         return eocrossStickeringMask(TRAINER_FACE);
@@ -853,7 +869,10 @@ function CaseTrainerInner() {
       void startNextAttempt(kpuzzle);
     };
 
-    if (attemptScramble.type === "cross" && attemptScramble.startCrossState !== undefined) {
+    if (
+      (attemptScramble.type === "cross" || attemptScramble.type === "cross-case") &&
+      attemptScramble.startCrossState !== undefined
+    ) {
       const startCrossState = attemptScramble.startCrossState;
       void (async () => {
         const engine = await getCrossEngine(TRAINER_FACE);
@@ -886,9 +905,9 @@ function CaseTrainerInner() {
   // mode (which skips "setup" entirely), the next attempt's first solve move.
   useEffect(() => {
     if (!summary && !info) return;
+    const isVirtualCase = current?.type === "f2l-case" || current?.type === "cross-case";
     const started =
-      (state.phase === "setup" || (current?.type === "f2l-case" && state.phase === "active")) &&
-      state.moveLog.length > 0;
+      (state.phase === "setup" || (isVirtualCase && state.phase === "active")) && state.moveLog.length > 0;
     if (started) {
       setSummary(null);
       setInfo(null);
@@ -943,7 +962,7 @@ function CaseTrainerInner() {
   const activeHint =
     F2L_TYPES.includes(attemptType)
       ? `Insert the ${f2lDisplaySlots} ${(current?.slots?.length ?? 1) > 1 ? "pairs" : "pair"} (cross stays)!`
-      : attemptType === "cross"
+      : attemptType === "cross" || attemptType === "cross-case"
       ? "Solve the cross!"
       : attemptType === "eocross"
         ? "Solve the cross with all edges oriented!"
@@ -987,7 +1006,7 @@ function CaseTrainerInner() {
       ? `Preparing ${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} engine — first run builds tables…`
       : "Generating scramble…"
     : (genError ??
-      (current?.type === "f2l-case"
+      (current?.type === "f2l-case" || current?.type === "cross-case"
         ? "No scramble — recognise the case on the cube and solve it"
         : undefined));
 
