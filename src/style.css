@@ -148,7 +148,7 @@
 }
 
 .scramble-loading {
-  @apply text-gray-500 text-sm animate-pulse;
+  @apply text-gray-400 text-base font-medium animate-pulse;
 }
 
 .scramble-error-overlay {
