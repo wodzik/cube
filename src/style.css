@@ -148,7 +148,7 @@
 }
 
 .scramble-loading {
-  @apply text-gray-400 text-base font-medium animate-pulse;
+  @apply block w-full text-center text-gray-400 text-xl font-medium animate-pulse py-2;
 }
 
 .scramble-error-overlay {
