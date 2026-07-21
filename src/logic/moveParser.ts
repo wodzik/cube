@@ -139,12 +139,25 @@ export function createMoveStr(
  * "R" → "R'"
  * "R'" → "R"
  * "R2" → "R2"
+ *
+ * Strips "(" / ")" trigger-grouping decoration first, same as parseMove —
+ * callers that split a DISPLAY alg string ("U2 (R' U R) U' (S R S')") on
+ * whitespace instead of going through parseDecoratedAlg would otherwise
+ * hand this a token like "(R'" or "S')": the stray paren survives
+ * getMoveBase (only power suffixes are stripped there) and, worse, a
+ * trailing ")" hides the power suffix from getMovePower's .endsWith
+ * checks entirely — "S')" ends with ")", not "'", so it reads as power 1
+ * instead of 3. createMoveStr then can't resolve the mangled base and
+ * silently falls back to returning the move UNINVERTED — a setup
+ * algorithm built this way applies incorrectly (or partially), which is
+ * how a case can render as the solved cube instead of scrambled.
  */
 export function invertMove(move: string): string {
-  const base = getMoveBase(move);
-  const power = getMovePower(move);
+  const cleaned = move.replace(/[()[\]]/g, "");
+  const base = getMoveBase(cleaned);
+  const power = getMovePower(cleaned);
   const invPower = (4 - power) % 4;
-  return createMoveStr(base, invPower) ?? move;
+  return createMoveStr(base, invPower) ?? cleaned;
 }
 
 /**

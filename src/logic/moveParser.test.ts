@@ -37,11 +37,34 @@ describe("invertMove", () => {
     expect(invertMove("R'")).toBe("R");
     expect(invertMove("R2")).toBe("R2");
   });
+
+  it("strips trigger-grouping parens before inverting — the naive whitespace-split callers hand it raw", () => {
+    // A leading "(" survives getMoveBase's suffix-only stripping unless
+    // invertMove strips it itself first.
+    expect(invertMove("(R'")).toBe("R");
+    // A trailing ")" is worse: it hides the power suffix from
+    // getMovePower's .endsWith checks entirely, so "S')" used to read as
+    // power 1 instead of 3 and silently fail to invert (see file's
+    // regression test below for the real-world case this broke).
+    expect(invertMove("S')")).toBe("S");
+    expect(invertMove("R)")).toBe("R'");
+  });
 });
 
 describe("invertSequence", () => {
   it("inverts sequences", () => {
     expect(invertSequence(["R", "U", "F'"])).toEqual(["F", "U'", "R'"]);
+  });
+
+  it("REGRESSION: a naively whitespace-split decorated alg (parens still attached) inverts correctly", () => {
+    // The exact F2L Adv case that rendered as a solved cube instead of
+    // scrambled: TrainingPage/AttackPage/AlgCaseVisualisation's invertAlg
+    // splits "U2 (R' U R) U' (S R S')" on whitespace WITHOUT stripping
+    // parens first (parseDecoratedAlg does that properly; these callers
+    // don't) — every token invertSequence actually receives still carries
+    // its "(" / ")" decoration.
+    const decoratedTokens = "U2 (R' U R) U' (S R S')".split(/\s+/);
+    expect(invertSequence(decoratedTokens)).toEqual(["S", "R'", "S'", "U", "R'", "U'", "R", "U2"]);
   });
 });
 
