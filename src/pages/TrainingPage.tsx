@@ -20,11 +20,14 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Video, ChevronLeft, ListChecks } from "lucide-react";
+import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react";
+import { cube3x3x3 } from "cubing/puzzles";
+import type { KPuzzle } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence } from "../logic/moveParser";
+import { invertSequence, physicalRotationFor } from "../logic/moveParser";
+import { detectRotationFromPattern } from "../logic/trainer/driftRotation";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
 import {
@@ -81,6 +84,23 @@ function invertAlg(alg: string): string {
   return moves.length === 0 ? "" : invertSequence(moves).join(" ");
 }
 
+/**
+ * Per-group override for center-orientation tracking (localStorage key
+ * `nact_centers_tracking_${group}`) — "true"/"false" if the user has
+ * explicitly toggled it for this group, otherwise falls back to the
+ * group's own category (on for Roux, off elsewhere, since only Roux's
+ * M/E/S-heavy algorithms leave centers rotated).
+ */
+function trackingStorageKey(group: AlgGroup): string {
+  return `nact_centers_tracking_${group}`;
+}
+function loadTrackingEnabled(group: AlgGroup, defaultOn: boolean): boolean {
+  const raw = localStorage.getItem(trackingStorageKey(group));
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  return defaultOn;
+}
+
 export default function TrainingPage() {
   return (
     <SessionProvider config={TRAINING_CONFIG}>
@@ -115,6 +135,44 @@ function TrainingPageInner() {
   const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
+  // Center-orientation tracking (M/E/S-heavy Roux algorithms rotate U/F/D/B
+  // as a group even when correctly performed — see driftRotation.ts).
+  // Computed PURELY from completed algorithms' own known text via kpuzzle,
+  // never from live hardware-move accumulation (that approach shipped once,
+  // broke move recognition when the resulting rotated setup invited the
+  // user to regrip their physical cube, and was reverted).
+  const [kpuzzle, setKpuzzle] = useState<KPuzzle | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    cube3x3x3.kpuzzle().then((kp) => {
+      if (!cancelled) setKpuzzle(kp);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const [trackingEnabled, setTrackingEnabled] = useState(() => loadTrackingEnabled(group, groupMeta?.category === "Roux"));
+  const trackingEnabledRef = useRef(trackingEnabled);
+  trackingEnabledRef.current = trackingEnabled;
+  /** Net whole-cube rotation (e.g. "x2") accumulated from completed algorithms' own centers effect since the last Resync/group switch. */
+  const [accumulatedRotation, setAccumulatedRotation] = useState("");
+  const accumulatedRotationRef = useRef(accumulatedRotation);
+  accumulatedRotationRef.current = accumulatedRotation;
+
+  const toggleTracking = () => {
+    const next = !trackingEnabled;
+    setTrackingEnabled(next);
+    localStorage.setItem(trackingStorageKey(group), String(next));
+    setAccumulatedRotation("");
+    setDrillRound((r) => r + 1); // redisplay the current case immediately under the new setting
+  };
+
+  /** Declare the physical cube's orientation canonical again (Resync). */
+  const resyncOrientation = () => {
+    setAccumulatedRotation("");
+    setDrillRound((r) => r + 1); // force the current case's setup to redisplay without the (now-cleared) rotation
+  };
+
   const reload = () => {
     if (activeSubgroupId) setCases(getSubgroupCases(group, activeSubgroupId));
     else if (groupMeta?.hasSubgroups) setCases([]);
@@ -126,9 +184,12 @@ function TrainingPageInner() {
     const meta = getGroupMeta(group);
     setCases(meta?.hasSubgroups ? [] : loadAlgGroup(group));
     setCaseIdx(0);
+    setTrackingEnabled(loadTrackingEnabled(group, meta?.category === "Roux"));
+    setAccumulatedRotation("");
     // A manual navigation — moves buffered toward the auto-advanced case
     // don't belong to the group the user just switched to.
     moveBuffer.clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group, moveBuffer]);
 
   const openSubgroup = (subgroupId: string) => {
@@ -181,6 +242,14 @@ function TrainingPageInner() {
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
   const displayConfig = resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig, currentCase?.displayConfigOverride);
 
+  /** Rotation move (e.g. "x'") to apply to the VISUAL cube per algorithm-token index, once that token completes — empty for plain face turns. Only meaningful while trackingEnabled. */
+  const tokenRotations = useMemo(
+    () => (variant ? variant.alg.trim().split(/\s+/).filter(Boolean).map(physicalRotationFor) : []),
+    [variant?.id]
+  );
+  /** Highest completed-token index whose compensating rotation has already been applied to the view this attempt. */
+  const processedRotationIndexRef = useRef(-1);
+
   // Load the case's algorithm as the target, and pre-set the cube to its
   // scrambled state, whenever the case (or its variant) changes — or the
   // drill advances to another round of the SAME case (drillRound).
@@ -189,8 +258,11 @@ function TrainingPageInner() {
     reset();
     setTarget(variant.alg);
     view.reset();
+    processedRotationIndexRef.current = -1;
     const inv = invertAlg(variant.alg);
-    if (inv) view.setSetupAlgorithm(inv, "");
+    const drift = trackingEnabled ? accumulatedRotation : "";
+    const setupAlg = [drift, inv].filter(Boolean).join(" ");
+    if (setupAlg) view.setSetupAlgorithm(setupAlg, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —
     // replay them now that the target is armed, stopping if they complete it
@@ -258,6 +330,18 @@ function TrainingPageInner() {
     else recordAttempt(group, currentCase.name, variant.id, attempt);
     reload();
 
+    // Carry the just-completed algorithm's OWN net center rotation forward
+    // for the next case's setup. Derived purely from variant.alg's known
+    // text via kpuzzle (never from the raw moveLog — any wrong-move
+    // detours cancel with their own corrections, so the completed attempt's
+    // net effect always matches variant.alg's exactly, error or not) —
+    // deterministic, no dependency on live hardware-move accumulation.
+    if (trackingEnabledRef.current && kpuzzle) {
+      const rotatedPattern = kpuzzle.defaultPattern().applyAlg(`${accumulatedRotationRef.current} ${variant.alg}`.trim());
+      accumulatedRotationRef.current = detectRotationFromPattern(kpuzzle, rotatedPattern);
+      setAccumulatedRotation(accumulatedRotationRef.current);
+    }
+
     const timer = setTimeout(() => {
       setCaseIdx((i) => (i + 1) % Math.max(selectedCases.length, 1));
       // Force the loading effect even when the next case is the same one
@@ -272,6 +356,27 @@ function TrainingPageInner() {
   const moveCount = selectMoveCount(state);
   const targetTokens = variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : [];
 
+  // Live orientation correction: the physical smart cube reports M/E/S as
+  // their DECOMPOSED outer-face sub-moves (e.g. M' fires R' then L — see
+  // moveParser's SLICE_CONFIG), so the visual cube animates those literally
+  // and its centers never move, even though the real M'-slice turn just
+  // rotated them. The moment a slice/wide/rotation TOKEN in the known
+  // target completes (both its physical sub-moves landed), replay the
+  // compensating whole-cube rotation onto the view ONLY — never onto
+  // submitCubeMove/the target, which stay in raw hardware terms.
+  useEffect(() => {
+    if (!trackingEnabled || !progress) return;
+    let maxIdx = processedRotationIndexRef.current;
+    for (const idx of progress.completedIndices) {
+      if (idx <= processedRotationIndexRef.current) continue;
+      const rot = tokenRotations[idx];
+      if (rot) view.addMove(rot);
+      if (idx > maxIdx) maxIdx = idx;
+    }
+    processedRotationIndexRef.current = maxIdx;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress?.completedCount, trackingEnabled]);
+
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
 
@@ -283,6 +388,29 @@ function TrainingPageInner() {
         ? `${moveCount} moves`
         : null;
 
+  const orientationControls = (
+    <>
+      <button
+        onClick={toggleTracking}
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+          trackingEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+        }`}
+        title="Track cube orientation across algorithms with net whole-cube rotation (Roux M/E/S) and show the case setup rotated to match"
+      >
+        <Compass size={12} /> Centers
+      </button>
+      {trackingEnabled && (
+        <button
+          onClick={resyncOrientation}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
+          title="My physical cube's orientation is canonical again — reset tracking"
+        >
+          <RotateCcw size={12} /> Resync
+        </button>
+      )}
+    </>
+  );
+
   if (isSubgroupHome) {
     return (
       <>
@@ -291,7 +419,12 @@ function TrainingPageInner() {
             activeId={group}
             onSelect={setGroup}
             managementEnabled
-            rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
+            rightSlot={
+              <div className="flex items-center gap-2">
+                {orientationControls}
+                <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+              </div>
+            }
           />
         </div>
         <SubgroupGrid
@@ -314,7 +447,8 @@ function TrainingPageInner() {
               <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
                 <ChevronLeft size={13} /> {activeSubgroup.name}
               </button>
-              <div className="ml-auto shrink-0">
+              <div className="ml-auto flex items-center gap-2 shrink-0">
+                {orientationControls}
                 <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
               </div>
             </div>
@@ -324,7 +458,12 @@ function TrainingPageInner() {
                 activeId={group}
                 onSelect={setGroup}
                 managementEnabled
-                rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
+                rightSlot={
+                  <div className="flex items-center gap-2">
+                    {orientationControls}
+                    <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+                  </div>
+                }
               />
             </div>
           )
