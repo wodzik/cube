@@ -112,7 +112,9 @@ import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { SolveControls } from "../components/SolveControls";
 import { TrainerSummary } from "../components/TrainerSummary";
+import { AlgCaseVisualisation } from "../components/AlgCaseVisualisation";
 import type { CubeVisualisationRef } from "../components/CubeVisualisation";
+import type { StickeringMaskOrbits } from "../types/cube";
 import type { SessionConfig } from "../types/session";
 import type { TrainerAttempt, TrainerType } from "../types/trainer";
 
@@ -221,9 +223,9 @@ const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 type TrainerFamily = "cfop" | "roux" | "f2l";
 const FAMILY_STORAGE_KEY = "nact_trainer_family";
 const FAMILIES: { id: TrainerFamily; label: string; types: TrainerType[] }[] = [
-  { id: "cfop", label: "CFOP", types: ["cross", "cross-case", "xcross", "xxcross", "pair", "eocross"] },
-  { id: "roux", label: "Roux", types: ["fs", "fb", "fbdr", "ss", "cmll", "eolr"] },
+  { id: "cfop", label: "Cross+", types: ["cross", "cross-case", "xcross", "xxcross", "pair", "eocross"] },
   { id: "f2l", label: "F2L", types: ["f2l-case", "f2l"] },
+  { id: "roux", label: "Roux", types: ["fs", "fb", "fbdr", "ss", "cmll", "eolr"] },
 ];
 const familyOf = (type: TrainerType): TrainerFamily =>
   F2L_TYPES.includes(type) ? "f2l" : ROUX_TYPES.includes(type) ? "roux" : "cfop";
@@ -258,6 +260,57 @@ const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "cmll", label: "CMLL" },
   { id: "eolr", label: "EOLR" },
 ];
+
+/**
+ * Static piece-level mask for a type's tab icon — the exact same builders
+ * the live drill cube uses (see the `stickeringMask` memo below), just with
+ * fixed representative defaults (FR slot, FR+BR pair, front side) instead
+ * of whatever's currently selected, so every tab shows something sensible
+ * even before you've picked a slot for that type.
+ */
+function iconStickeringMask(type: TrainerType): StickeringMaskOrbits {
+  switch (type) {
+    case "cross":
+    case "cross-case":
+      return crossStickeringMask(TRAINER_FACE);
+    case "eocross":
+      return eocrossStickeringMask(TRAINER_FACE);
+    case "xxcross":
+      return xxcrossStickeringMask(TRAINER_FACE, "FR+BR");
+    case "fb":
+      return fbStickeringMask();
+    case "cmll":
+      return cmllStickeringMask();
+    case "eolr":
+      return eolrStickeringMask();
+    case "fs":
+      return fsStickeringMask("front");
+    case "fbdr":
+      return fbdrStickeringMask("front");
+    case "ss":
+      return ssStickeringMask("front");
+    case "f2l":
+    case "f2l-case":
+      return multiSlotStickeringMask(TRAINER_FACE, ["FR"]);
+    default:
+      return xcrossStickeringMask(TRAINER_FACE, "FR");
+  }
+}
+
+/** Small cube preview for a trainer-type tab — same idea as Practice's GroupTabIcon, but built from a static representative mask (procedurally-generated drills have no "representative algorithm" to preview). */
+function TrainerTypeIcon({ type }: { type: TrainerType }) {
+  const isRoux = ROUX_TYPES.includes(type);
+  return (
+    <AlgCaseVisualisation
+      alg=""
+      visualization="3D"
+      stickeringMaskOrbits={iconStickeringMask(type)}
+      cameraLatitude={isRoux ? -25 : 20}
+      cameraLongitude={isRoux ? -35 : 20}
+      className="size-full"
+    />
+  );
+}
 
 /** Which or18 WASM engine a type uses (null = pure-TS engines: cross / roux). */
 function engineKeyFor(type: TrainerType, pair: XXCrossPair): EngineKey | null {
@@ -1030,154 +1083,161 @@ function CaseTrainerInner() {
   return (
     <TrainerPanel
       header={
-        <div className="flex items-center gap-3 w-full overflow-x-auto">
-          <div className="flex items-center gap-0.5 shrink-0 rounded-xl bg-white/[0.03] p-0.5">
-            {FAMILIES.map((f) => (
+        <div className="w-full overflow-x-auto">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5 shrink-0 rounded-xl bg-white/[0.03] p-0.5">
+              {FAMILIES.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => changeFamily(f.id)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${
+                    family === f.id ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
+                  }`}
+                  style={family === f.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <div className="ml-auto flex items-center gap-2 shrink-0">
+              {!F2L_TYPES.includes(trainerType) && (
               <button
-                key={f.id}
-                onClick={() => changeFamily(f.id)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${
-                  family === f.id ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
+                onClick={toggleLadder}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+                  ladderEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
                 }`}
-                style={family === f.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                title={`Ladder mode: raise the optimal length automatically once ${LADDER_WINDOW} straight attempts are ≥${LADDER_THRESHOLD * 100}% optimal`}
               >
-                {f.label}
+                <TrendingUp size={12} /> Ladder
               </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {TRAINER_TYPES.filter((t) => familyOf(t.id) === family).map((t) => (
+              )}
               <button
-                key={t.id}
-                onClick={() => changeType(t.id)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
-                  trainerType === t.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                }`}
-                style={trainerType === t.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                onClick={resync}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
+                title="My physical cube is solved — restart state tracking from it"
               >
-                {t.label}
+                <RotateCcw size={12} /> Resync
               </button>
-            ))}
+              <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            </div>
           </div>
-          {F2L_TYPES.includes(trainerType) && (
-            // Multi-select: train exactly these slots — one, any pair, or
-            // all four (= full F2L). At least one always stays selected.
+          <div className="flex items-center gap-3 mt-1">
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
-              {F2L_SLOT_ORDER.map((s) => (
+              {TRAINER_TYPES.filter((t) => familyOf(t.id) === family).map((t) => (
                 <button
-                  key={s}
-                  onClick={() => toggleF2lSlot(s)}
-                  title="Toggle this slot — selected slots get scrambled together"
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    f2lSlots.includes(s) ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                  key={t.id}
+                  onClick={() => changeType(t.id)}
+                  className={`flex items-center gap-1.5 pl-1.5 pr-3 py-1 text-xs font-semibold rounded-xl transition-all ${
+                    trainerType === t.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
                   }`}
-                  style={f2lSlots.includes(s) ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  style={trainerType === t.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {F2L_SLOT_VIEW_LABELS[s]}
+                  <span className="w-5 h-5 rounded-md overflow-hidden shrink-0 bg-gray-950/40">
+                    <TrainerTypeIcon type={t.id} />
+                  </span>
+                  {t.label}
                 </button>
               ))}
             </div>
-          )}
-          {(trainerType === "xcross" || trainerType === "pair") && (
-            <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
-              {XCROSS_SLOTS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => changeSlot(s)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    slot === s ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                  }`}
-                  style={slot === s ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-                >
-                  {viewSlotLabel(s)}
-                </button>
-              ))}
-            </div>
-          )}
-          {trainerType === "xxcross" && (
-            <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
-              {XXCROSS_PAIRS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => changePair(p)}
-                  className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
-                    pair === p ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                  }`}
-                  style={pair === p ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-                >
-                  {viewSlotLabel(p)}
-                </button>
-              ))}
-            </div>
-          )}
-          {(SIDED_ROUX_TYPES as readonly string[]).includes(trainerType) && (
-            <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">
-                {SIDE_LABELS[trainerType as SidedRouxType]}
-              </span>
-              {ROUX_SS_SIDES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => changeSide(trainerType as SidedRouxType, s)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all ${
-                    sides[trainerType as SidedRouxType] === s
-                      ? "text-white bg-white/[0.08]"
-                      : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                  }`}
-                  style={
-                    sides[trainerType as SidedRouxType] === s
-                      ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" }
-                      : undefined
-                  }
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-          {trainerType !== "cmll" && !F2L_TYPES.includes(trainerType) && (
-          <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Optimal</span>
-            {Array.from(
-              { length: MAX_DEPTHS[trainerType] - MIN_DEPTHS[trainerType] + 1 },
-              (_, i) => i + MIN_DEPTHS[trainerType]
-            ).map((n) => (
-              <button
-                key={n}
-                onClick={() => changeLength(n)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold tabular-nums transition-all ${
-                  targetLength === n ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                }`}
-                style={targetLength === n ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-          )}
-          <div className="ml-auto flex items-center gap-2 shrink-0">
-            {!F2L_TYPES.includes(trainerType) && (
-            <button
-              onClick={toggleLadder}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                ladderEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-              }`}
-              title={`Ladder mode: raise the optimal length automatically once ${LADDER_WINDOW} straight attempts are ≥${LADDER_THRESHOLD * 100}% optimal`}
-            >
-              <TrendingUp size={12} /> Ladder
-            </button>
+            {F2L_TYPES.includes(trainerType) && (
+              // Multi-select: train exactly these slots — one, any pair, or
+              // all four (= full F2L). At least one always stays selected.
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
+                {F2L_SLOT_ORDER.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => toggleF2lSlot(s)}
+                    title="Toggle this slot — selected slots get scrambled together"
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      f2lSlots.includes(s) ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={f2lSlots.includes(s) ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {F2L_SLOT_VIEW_LABELS[s]}
+                  </button>
+                ))}
+              </div>
             )}
-            <button
-              onClick={resync}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-              title="My physical cube is solved — restart state tracking from it"
-            >
-              <RotateCcw size={12} /> Resync
-            </button>
-            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            {(trainerType === "xcross" || trainerType === "pair") && (
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
+                {XCROSS_SLOTS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => changeSlot(s)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      slot === s ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={slot === s ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {viewSlotLabel(s)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {trainerType === "xxcross" && (
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
+                {XXCROSS_PAIRS.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => changePair(p)}
+                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                      pair === p ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={pair === p ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {viewSlotLabel(p)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(SIDED_ROUX_TYPES as readonly string[]).includes(trainerType) && (
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">
+                  {SIDE_LABELS[trainerType as SidedRouxType]}
+                </span>
+                {ROUX_SS_SIDES.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => changeSide(trainerType as SidedRouxType, s)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all ${
+                      sides[trainerType as SidedRouxType] === s
+                        ? "text-white bg-white/[0.08]"
+                        : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={
+                      sides[trainerType as SidedRouxType] === s
+                        ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" }
+                        : undefined
+                    }
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            {trainerType !== "cmll" && !F2L_TYPES.includes(trainerType) && (
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Optimal</span>
+              {Array.from(
+                { length: MAX_DEPTHS[trainerType] - MIN_DEPTHS[trainerType] + 1 },
+                (_, i) => i + MIN_DEPTHS[trainerType]
+              ).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => changeLength(n)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold tabular-nums transition-all ${
+                    targetLength === n ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                  }`}
+                  style={targetLength === n ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            )}
           </div>
         </div>
       }
