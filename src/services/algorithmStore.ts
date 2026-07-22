@@ -36,6 +36,7 @@ import summerVariationJson from "../algs/summer-variation.json";
 import secondBlockLastSlotJson from "../algs/second-block-last-slot.json";
 import antiPllJson from "../algs/anti-pll.json";
 import edgesOfTheLastLayerJson from "../algs/edges-of-the-last-layer.json";
+import cornersLastSlotJson from "../algs/corners-last-slot.json";
 
 function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
@@ -95,6 +96,7 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   "second-block-last-slot": secondBlockLastSlotJson,
   "anti-pll": antiPllJson,
   "edges-of-the-last-layer": edgesOfTheLastLayerJson,
+  "corners-last-slot": cornersLastSlotJson,
 };
 
 function loadFromJson(group: AlgGroup): AlgorithmCase[] {

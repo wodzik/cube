@@ -1,0 +1,1579 @@
+[
+  {
+    "name": "CLS FDR00",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U R2 D R' U R D' R2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "u R2 U' R' U2 R' u' F R2 F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (13 ETM)",
+        "alg": "y' L R' U' R U L' R' U2 R U R' U' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (10 ETM)",
+        "alg": "U R2 U' R' U2 R' D' r U2 r' D",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (13 ETM)",
+        "alg": "y' L R' U' R U L' R' U2 R U R' U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR01",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U R' U2 R U' R' U R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' R' U R U R' U' R U2 R' U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "U R U2 R U R' U R U2 R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR02",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R' U R U2 R' U2 R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' R' U2 R U2 R' U2 R U R' U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR03",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' R' U R U R' U' R U R' U2 R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U R U R' U R2 U R' U R U2 R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR04",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U' R' U R U2 R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U2 R' U' R U R' U2 R U R' U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR05",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U2 R' U R U' R' U R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U R2 U2 R U R' U R2 U R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR06",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "y' R' U R U2 R' U R U2 R' U R U2 R' U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (15 ETM)",
+        "alg": "R U2 R' U R U' R' U R U' R' U' R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FDR07",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "R U2 R' U2 R2 D r' U2 r D' R' U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (15 ETM)",
+        "alg": "R U' R' U2 R U2 R' U R U' R' U2 R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (15 ETM)",
+        "alg": "y' R' U2 R U2 R' U' R U R' U2 R U2 R' U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU00",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "U D' R' D R U' R' D' R D",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "y R' D R U' R' D' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "D R D R' U' R D' R' D'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "y U R' D R U2 R' D' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "y U R' D R U2 R' D' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (11 ETM)",
+        "alg": "U' R' F' R U R U' R' F R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (11 ETM)",
+        "alg": "U R U' R' F' R U R' U' R' F R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU01",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U R' U2 R U' R' U2 R U' R' U2 R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "D R' U2 R U' R' U2 R U' R' U2 R D'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (15 ETM)",
+        "alg": "U' R U' R' U2 R U R' U' R U R' U' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (13 ETM)",
+        "alg": "R U2 R' U R' U2 R U R' U R2 U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU02",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U' R U' R' U' R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU03",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R' F R U R U' R' F' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "y R2 D R U' R' D' R U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (10 ETM)",
+        "alg": "U' R U' R' U L' U R U' R' L",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "y' U' R' U2 R U2 R' U' R U2 R' U2 R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "y R2 D R U' R' D' R U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "F' r U R U' r' F R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "R' D' L2 D R D' L2 D",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU04",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "U R' D' R U2 R' D R2 U' R' U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R U2 R' U2 R' U' R U' R' U2 R2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "y' U2 R' U2 R U' R' U2 R U2 R' U' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "M' U2 Lw U F2 U' F2 L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "M' U2 Lw U F2 U' F2 L'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU05",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U R U' R' U' R U R' U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U2 R' U R2 U2 R' U' R U' R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU06",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "U R U' R' U R' F' R U R U' R' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "D R' U2 R U' R' U' R D'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "y' U R' U2 R U' R' U' R y",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU07",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R2 U2 R2 U' R U R U2 R' U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU08",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (20 ETM)",
+        "alg": "R U R' U R U2 R' U2 R' F R F' R' F R F' R' F R F'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U' R2 U2 R U R' U R2 U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU09",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R' U' R U' R' U R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU10",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "y' U' R' U' R U2 R' U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U2 R U' R' U2 R U2 R' U' R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU11",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R F2 U2 R' U' R U' F2 R2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R' U R U' R U' R' U2 R U' R2 U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU12",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U' R U' R' U2 R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU13",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U' R U R' U R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU14",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U' R' U2 R U2 R' U2 R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU15",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U' R U2 R' U' R U' R2",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU16",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "R U' R' U R' U' R U' R' U2 R2 U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "U' R U' R' U2 R U' R2 U' R U' R' U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU17",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (10 ETM)",
+        "alg": "U L U' R U R' L' U R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (16 ETM)",
+        "alg": "U' R U' R' U' R U' R' U' R' F R U R U' R' F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (13 ETM)",
+        "alg": "U2 R U R' U2 R' U' R U' R' U2 R2 U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU18",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U2 R U2 R' U' R U' R' U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U L U' R U L' U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (13 ETM)",
+        "alg": "R U' R' U' R U R U2 R' U' R U' R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU19",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R' F R U2 L F L' U2 F'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "U R2 U R' U R U2 R' U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "R' F R U2 r U r' U2 F'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU20",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "U F' R U2 F U F' U R' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R' B2 U2 R U R' U B2 R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (13 ETM)",
+        "alg": "U' R U' R U' R' U R' U R' U R' U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU21",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U' R2 D' R U2 R' D R2 U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R U2 R2 U R' U2 R' U' R U' R U' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (15 ETM)",
+        "alg": "U2 x' R2 U' R' U R U' R' U R U' R' U R' x",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU22",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (10 ETM)",
+        "alg": "U' R U2 R' U F2 L' U' L U F2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U' R U' R' U' R' U' R2 U' R2 U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU23",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y U R' U2 R U' R' U R U R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU24",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U' R' U2 R U R' U' R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "U2 F' R U2 R' U' R U' R' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU25",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U R' U R U R' U' R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS FRU26",
+    "category": "Cross Color Facing Front",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U' R' U' R U' R' U R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD00",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "L' R U R' U' L R U2 R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (14 ETM)",
+        "alg": "U' R U' R' U R U' R2 F' R U R U' R' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (10 ETM)",
+        "alg": "U2 D' r U2 r' D R U2 R U R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "U2 R2 D R' U' R D' R2 U' R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "U2 R2 D R' U' R D' R2 U' R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD01",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R' U' R U R' U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "U2 R2 U2 R' U' R U' R' U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD02",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U2 R' U2 R U2 R' U' R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD03",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U R' U' R U2 R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U' R' U R U' R' U2 R U' R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD04",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R' U' R U R' U' R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD05",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "y' R' U2 R U' R' U R U' R' U' R y",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U' R2 U2 R' U' R U' R2 U' R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD06",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "R U' R' U2 R U' R' U2 R U' R' U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (15 ETM)",
+        "alg": "y' R' U2 R U' R' U R U' R' U R U R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFD07",
+    "category": "Trapped Corner",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "R U2 R' U2 R U R' U' R U2 R' U2 R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (15 ETM)",
+        "alg": "y' R' U R U2 R' U2 R U' R' U R U2 R' U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU00",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U R' D' R U' R' D R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "L D' L' U L D L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U2 R' D' R U2 R' D R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' R' D' R U R' D R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU01",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U2 R' U R U2 R' U R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R' D R' U2 R D' R' U2 R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU02",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "y' U R' U R U R' U2 R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "U F' R U R' U' R' F R U' R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU03",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "R U R' U' R' F' R U R U' R' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U R U2 R' U2 R U R' U2 R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "y' R D L2 D' R' D L2 D'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU04",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U2 R' U R U2 R' U2 R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "U R' U R D R' U R U D' R' U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "y M' U2 r' U' F2 U F2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU05",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U' R' U R U R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' R' U2 R U' R2 U2 R U R' U R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU06",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U' R U2 R' U R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU07",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "U2 R U R' U R2 U2 R' U' R U' R' U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U R2 U2 R2 U R' U' R' U2 R U' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU08",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "U2 R U' R2 U2 R U R' U R U' R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "U' R' D' R U R' D R2 U2 R' U' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "y' R' U R2 U2 R' U' R U' R2 U' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (20 ETM)",
+        "alg": "R U2 R' U' R U' R' U2 R' F R F' R' F R F' R' F R F'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU09",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U R' U' R U' R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' R' U' R U R' U R U' R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU10",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U R U R' U2 R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU11",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "U' R U' R' U R U F R' U R U' F' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y L' U L' F2 U2 L U L' U F2 L2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU12",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "y' U R' U R U2 R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU13",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U2 R U R' U' R U' R' U' R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU14",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U2 R' U R U2 R' U2 R U2 R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU15",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R' U R U2 R2 U' R U2 R' U' R2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "y' R' U R' U2 R U R' U R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU16",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U' L' U2 L U' R' U2 L' U L",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "y' R' U R U' R U R' U R U2 R2 U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU17",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "U' R U' R' U' R U R' U R U2 R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "y' U' L' U R' U' R L U' R' U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU18",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U2 R U R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "y' U' L' U R' U' L U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU19",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "y' U' R2 U' R U' R' U2 R U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "y L F' L' U2 R' F' R U2 F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU20",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "U' R' D' R U R' D U' R U' R' U2 R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "y' R F2 U2 R' U' R U' F2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU21",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U R' U R2 D R' U2 R D' R2 U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "y' R' U2 R2 U' R U2 R U R' U R' U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU22",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (14 ETM)",
+        "alg": "U L U' R U R' U' R U R' L' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "y U L' U2 L U' F2 R U R' U' F2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU23",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U R U' R' U' R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU24",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U' R' U2 R U R' U R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U R' U R U2 R' U' R U R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU25",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U2 R' U R U2 L U' R' U L'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U' R' U' R U' R' U' R U R' U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS RFU26",
+    "category": "Cross Color Facing Right",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U R' U R U R' U R U' R' U2 R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR00",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R2 U R2 U R2 U2 R2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U' R U' R' U R U2 R' U' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U2 R2 U2 R2 U' R2 U' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (12 ETM)",
+        "alg": "R' F R F' R' F R F' R' F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (12 ETM)",
+        "alg": "R' F R F' R' F R F' R' F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "y' R2 U' R2 U' R2 U2 R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR01",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "D R' U' R U R' U' R U' R' U R D'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U R' U' R U R' U' R U' R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR02",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U2 R U R' U2 R U R' U2 R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR03",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U' R' U R U R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U R U' R' U R U' R' U2 R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR04",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R2 U' R U' R' U2 R2 U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR05",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U R' U' R U2 R' U R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR06",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U2 R' U R U' R' U' R U' R' U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "y U2 R' U' R' D R U R' D' R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR07",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U' R' U R U' R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "R U R' U' R U R' U' R U R' U'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR08",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U' R' U' R U' R' U2 R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR09",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U' R U2 R' U' R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR10",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U R' U R U' R' U2 R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR11",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "U R' U R U' R2 U' R2 U2 R2 U' R U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "L' U2 R2 U2 R2 U' R2 U' R2 L",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR12",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U2 R' U R U R' U R U2 R' U' R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR13",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R U2 R' U2 R U' R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "U2 R U2 R' U2 R U' R' U R U' R' U",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR14",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "y' U' R' U R U' R' U R U' R' U' R U R' U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R' U R U R2 U2 R U R2 U R' U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR15",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U' R U R' U2 R U' R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR16",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' R' U' R U2 R' U2 R U2 R' U' R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR17",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (15 ETM)",
+        "alg": "U R U' R' U R U' R' U R U R' U' R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "y' R U' R' U' R2 U2 R' U' R2 U' R U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR18",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U' R U R' U' R U R' U R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR19",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U R' U' R U2 R' U2 R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "y' U' R' U' R U R' U2 R U2 R' U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR20",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U R' U' R U' R' U R U2 R' U' R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR21",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' R' U' R U R' U' R U R' U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "y' R' U' R U R' U' R U R' U' R U",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR22",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U R U2 R' U' R U2 R' U2 R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR23",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R' U2 R U2 R' U2 R U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR24",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' R' U R2 U R' U R U2 R2 U' R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR25",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U' R' U2 R U R' U2 R U2 R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "CLS UFR26",
+    "category": "Cross Color Facing Up",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "y' U2 R' U2 R U2 R' U R U' R' U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "y' U2 R' U2 R U2 R' U R U' R' U R U'",
+        "isDefault": false
+      }
+    ]
+  }
+]

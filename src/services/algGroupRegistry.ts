@@ -343,6 +343,8 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
   // Anti-PLL and EOLL are ZZ-method last-layer steps (not CFOP/Roux) — full PLL-style stickering, same reasoning as COLL.
   { id: "anti-pll", name: "Anti-PLL", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "edges-of-the-last-layer", name: "Edges of the Last Layer", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // Corners Last Slot (ZZ-CT/last-slot corner cases) — orientation only matters, OLL-style stickering.
+  { id: "corners-last-slot", name: "Corners Last Slot", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
@@ -474,6 +476,7 @@ const BUILT_IN_ORDER = [
   "coll",
   "anti-pll",
   "edges-of-the-last-layer",
+  "corners-last-slot",
   "f2l-advanced",
   "zbll",
 ];
