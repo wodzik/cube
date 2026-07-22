@@ -189,21 +189,32 @@ const ROUX_TYPES: readonly TrainerType[] = ["fb", "fs", "fbdr", "ss", "cmll", "e
 /** Both F2L drills: no computed optimum, no level dial / ladder / hints. */
 const F2L_TYPES: readonly TrainerType[] = ["f2l-case", "f2l"];
 /**
- * Drills DISPLAYED white-down (the way F2L/cross are actually solved on a
- * real cube): the view appends a trailing z2 and every animated move is
- * z2-conjugated (see the `view` helper). Detection, generation and stored
- * attempts stay in the app's white-up LETTER frame — only what the user
- * sees rotates. F2L's slot letters therefore differ between the two
- * frames (see F2L_SLOT_VIEW_LABELS below); cross has no slot concept, so
- * it's unaffected beyond the display flip itself.
+ * Drills DISPLAYED white-down (the way every one of these is actually
+ * solved on a real cube — cross and every cross-adjacent case: xcross,
+ * xxcross, pair, eocross; plus F2L): the view appends a trailing z2 and
+ * every animated move is z2-conjugated (see the `view` helper). Detection,
+ * generation and stored attempts stay in the app's white-up LETTER frame —
+ * only what the user sees rotates. Anything with a slot letter therefore
+ * differs between the two frames (see viewSlotLabel below); plain
+ * cross/eocross have no slot concept, so they're unaffected beyond the
+ * display flip itself.
  */
-const BOTTOM_UP_TYPES: readonly TrainerType[] = [...F2L_TYPES, "cross", "cross-case"];
+const BOTTOM_UP_TYPES: readonly TrainerType[] = [...F2L_TYPES, "cross", "cross-case", "xcross", "xxcross", "pair", "eocross"];
 /**
  * Slot letters differ between the two frames: the letter-frame FL slot
  * sits at front-right when white is down. This maps a letter slot to the
- * label shown in the white-down view (its own inverse).
+ * label shown in the white-down view (its own inverse) — F2L_SLOT_VIEW_LABELS
+ * itself is one-slot-in, one-slot-out; viewSlotLabel below also handles
+ * XXCross's compound "FR+BR"-style pair labels by remapping each half.
  */
 const F2L_SLOT_VIEW_LABELS: Record<XCrossSlot, XCrossSlot> = { FL: "FR", BL: "BR", FR: "FL", BR: "BL" };
+/** Remaps a raw letter-frame slot (or an XXCross "A+B" pair) to its white-down display label. Falls back to the input unchanged for anything not a recognised slot letter. */
+function viewSlotLabel(raw: string): string {
+  return raw
+    .split("+")
+    .map((s) => F2L_SLOT_VIEW_LABELS[s as XCrossSlot] ?? s)
+    .join("+");
+}
 /** Letter slots ordered so their white-down labels read FR, BR, FL, BL. */
 const F2L_SLOT_ORDER: readonly XCrossSlot[] = ["FL", "BL", "FR", "BR"];
 
@@ -973,9 +984,9 @@ function CaseTrainerInner() {
       : attemptType === "eocross"
         ? "Solve the cross with all edges oriented!"
         : attemptType === "pair"
-          ? `Form the ${current?.slot ?? slot} pair (cross stays)!`
+          ? `Form the ${viewSlotLabel(current?.slot ?? slot)} pair (cross stays)!`
           : attemptType === "xxcross"
-            ? `Solve the cross + ${current?.slot ?? pair} pairs!`
+            ? `Solve the cross + ${viewSlotLabel(current?.slot ?? pair)} pairs!`
             : attemptType === "fb"
               ? "Build the first block (left 1×2×3)!"
               : attemptType === "fs"
@@ -988,7 +999,7 @@ function CaseTrainerInner() {
                       ? "Recognize and solve the CMLL case!"
                       : attemptType === "eolr"
                         ? "Solve EOLR (orient edges, prepare UL/UR)!"
-                        : `Solve the cross + ${current?.slot ?? slot} pair!`;
+                        : `Solve the cross + ${viewSlotLabel(current?.slot ?? slot)} pair!`;
   const hintText =
     state.phase === "setup"
       ? summary
@@ -1080,7 +1091,7 @@ function CaseTrainerInner() {
                   }`}
                   style={slot === s ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {s}
+                  {viewSlotLabel(s)}
                 </button>
               ))}
             </div>
@@ -1097,7 +1108,7 @@ function CaseTrainerInner() {
                   }`}
                   style={pair === p ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {p}
+                  {viewSlotLabel(p)}
                 </button>
               ))}
             </div>
@@ -1314,7 +1325,7 @@ function CaseTrainerInner() {
                     {F2L_TYPES.includes(a.type)
                       ? ` ${(a.slots ?? [a.slot as XCrossSlot]).map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")}`
                       : a.slot
-                        ? ` ${a.slot}`
+                        ? ` ${viewSlotLabel(a.slot)}`
                         : ""}
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>

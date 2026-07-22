@@ -94,7 +94,7 @@ function TrainingPageInner() {
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
-  const [group, setGroup] = useState<AlgGroup>("f2l-front-right");
+  const [group, setGroup] = useState<AlgGroup>("f2l");
   const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"), "practice");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
   const [caseIdx, setCaseIdx] = useState(0);
