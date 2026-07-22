@@ -65,7 +65,7 @@ function buildZbllMeta(): AlgGroupMeta {
       cameraLatitude: 20,
       cameraLongitude: 20,
     },
-    category: "CFOP",
+    category: "Other",
     previewAlg: subgroups[0]?.previewAlg ?? "",
     hasSubgroups: true,
     // 472 cases is a lot for a flat Attack queue — no subgroup opts into
@@ -172,7 +172,7 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
       ...next[advIdx],
       name: next[advIdx].name === "F2L Adv" ? "Advanced F2L (J Perm)" : next[advIdx].name,
       availableInAttack: false,
-      category: "CFOP",
+      category: "Other",
     };
     changed = true;
   }
@@ -206,7 +206,7 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   const BUILT_IN_CATEGORY: Record<string, AlgCategory> = {
     f2l: "CFOP",
     "advanced-f2l": "CFOP",
-    zbll: "CFOP",
+    zbll: "Other",
     ...Object.fromEntries(BUILT_IN_SEED.map((s) => [s.id, s.category])),
   };
   next = next.map((g) => {
@@ -216,6 +216,19 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     changed = true;
     return { ...g, category };
   });
+
+  // One-time re-categorization: COLL, ZBLL, and Advanced F2L (J Perm)
+  // shipped in the tab-row split as CFOP — moved to Other shortly after.
+  // Only touches a group still sitting at that exact prior default, so a
+  // user's own re-categorization is left alone.
+  for (const id of ["coll", "zbll", "f2l-advanced"]) {
+    const i = next.findIndex((g) => g.id === id);
+    if (i >= 0 && next[i].category === "CFOP") {
+      next = [...next];
+      next[i] = { ...next[i], category: "Other" };
+      changed = true;
+    }
+  }
 
   // One-time curated-defaults backfill: Attack used to default every
   // (subgroup-less) group to available unless explicitly opted out. The new
@@ -315,7 +328,10 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
   { id: "oll", name: "OLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "pll", name: "PLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // COLL solves LL corner orientation+permutation together — full-info PLL-style stickering (same reason PLL needs it: permutation matters, not just orientation).
-  { id: "coll", name: "COLL", category: "CFOP", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "coll", name: "COLL", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // Anti-PLL and EOLL are ZZ-method last-layer steps (not CFOP/Roux) — full PLL-style stickering, same reasoning as COLL.
+  { id: "anti-pll", name: "Anti-PLL", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "edges-of-the-last-layer", name: "Edges of the Last Layer", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
@@ -363,7 +379,7 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
       cameraLongitude: 25,
     },
   },
-  { id: "f2l-advanced", name: "F2L Adv", category: "CFOP", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
+  { id: "f2l-advanced", name: "F2L Adv", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
 ];
 
 /**
@@ -435,7 +451,21 @@ function seedRegistry(): AlgGroupMeta[] {
 }
 
 /** Fixed display order for the built-ins — everything else (user-created groups) sorts after, in creation order. */
-const BUILT_IN_ORDER = ["f2l", "oll", "pll", "coll", "cmll", "winter-variation", "summer-variation", "second-block-last-slot", "f2l-advanced", "advanced-f2l", "zbll"];
+const BUILT_IN_ORDER = [
+  "f2l",
+  "oll",
+  "pll",
+  "cmll",
+  "winter-variation",
+  "summer-variation",
+  "second-block-last-slot",
+  "advanced-f2l",
+  "coll",
+  "anti-pll",
+  "edges-of-the-last-layer",
+  "f2l-advanced",
+  "zbll",
+];
 
 function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   // Array.prototype.sort is stable (ES2019+), so custom groups (index -1,

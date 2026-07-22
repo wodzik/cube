@@ -334,7 +334,7 @@ function AttackPageInner() {
   if (isSubgroupHome) {
     const attackSubgroups = (groupMeta?.subgroups ?? []).filter((sg) => sg.availableInAttack === true);
     return (
-      <div className="max-w-7xl mx-auto">
+      <>
         <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
           <GroupTabs
             activeId={group}
@@ -360,7 +360,7 @@ function AttackPageInner() {
             ))}
           </div>
         </div>
-      </div>
+      </>
     );
   }
 

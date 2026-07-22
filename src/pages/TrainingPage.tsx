@@ -285,7 +285,7 @@ function TrainingPageInner() {
 
   if (isSubgroupHome) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <>
         <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
           <GroupTabs
             activeId={group}
@@ -301,7 +301,7 @@ function TrainingPageInner() {
           onOpen={openSubgroup}
           onChange={reload}
         />
-      </div>
+      </>
     );
   }
 
