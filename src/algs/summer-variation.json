@@ -1,0 +1,579 @@
+[
+  {
+    "name": "SV 1",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U2 R' D' r U2 r' D R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "L R U' R' U L' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (10 ETM)",
+        "alg": "U2 R U R' U2 L U' R U R' L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "R U R D R' U2 R D' R' U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "R U R D R' U2 R D' R' U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (11 ETM)",
+        "alg": "R U' R' U' L' U2 R U R' U2 L",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 2",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "U2 R' D' R U R' D R U R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (14 ETM)",
+        "alg": "L' R U R' U L U R U2 L' U' L U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "R U R' U2 R U R' U R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "R U R' U R' U2 R U R' U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "R U R' U2 R U R' U R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (11 ETM)",
+        "alg": "R U r U R' U' r' F R F' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (11 ETM)",
+        "alg": "R U R' U R' U2 R U R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 3",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R D R' U R D' R' U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "U2 R L U' R' U' L' U' L U' L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "R U' R' U' R2 D R' U' R D' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "M x D L U L' D' L R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "M x D L U L' D' L R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (11 ETM)",
+        "alg": "R U' R' U' R2 D R' U' R D' R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 4",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (6 ETM)",
+        "alg": "U2 L R U' R' U L'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R' D' r U2 r' D R2 U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 5",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "R U2 R' U' R' F R U R U' R' F'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "L' U2 L U L' U L R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (10 ETM)",
+        "alg": "R U' L' U L U2 R' L' U L",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U2 L U F2 r U2 r' U' L'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 6",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' R' U' R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 7",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (40 ETM)",
+        "alg": "R U2 R' U R U' R' U R U' R' U R U' R' U R U' R' U R U' R' U R U' R' U R U' R' U R U' R' U R U' R' U",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "R U' U' U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (13 ETM)",
+        "alg": "B' D' B2 R' U' B U B2 R D R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (6 ETM)",
+        "alg": "y3 f3' l3' d3 z3' x3",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (5 ETM)",
+        "alg": "y' f3' l3' d3 z3' x3",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (3 ETM)",
+        "alg": "y' f3' l3' d3",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (3 ETM)",
+        "alg": "y' f3' R3' f3",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (3 ETM)",
+        "alg": "y' f R f'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (7 ETM)",
+        "alg": "L2 y2 R2 y2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 11 (27 ETM)",
+        "alg": "R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 12 (3 ETM)",
+        "alg": "y F U F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 13 (13 ETM)",
+        "alg": "B3 R3' U3' R3' B3 R2 B3' R3' U3' R2 U3 R3' B3'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 8",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (10 ETM)",
+        "alg": "R U M' U R' U' r' F R F'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U2 M' F' U2 F M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (10 ETM)",
+        "alg": "R U2 R' U' L' U R U' R' L",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "R U2 R' U' r' F R F' M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "R U2 R' U' r' F R F' M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (10 ETM)",
+        "alg": "R U2 R' U' L' U R U' R' L",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 9",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "R U' R' L' U R U' R' L U' R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "R U' R2 F R F' U' S' R U' R' S",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 10",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R' U' R U R' U R U2 R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "U2 R' D' R U' R' D R U' R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 11",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "M F R' F' r",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "L' R U R' U' L",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "R U2 R' U R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 12",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (12 ETM)",
+        "alg": "R U2 R' U F' R U2 R' U2 R' F R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R2 U R' U R' U' R2 U R' U' R U' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (13 ETM)",
+        "alg": "R U R' U R U2 R2 U' R2 U' R2 U2 R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 13",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (10 ETM)",
+        "alg": "U L' R U R' U R U' R' U2 L",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U2 R2 D' R U R' D R2 U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (15 ETM)",
+        "alg": "R U' R' U' R U' R' U' R U R' U R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 14",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "U2 L R U' R2 U L' U' R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "U2 L' R U R' U' L U2 R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 15",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U2 R' U R U' R' U R U2 R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 16",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U' R D R' U2 R D' R2",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 17",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U R2 U2 R U R' U R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 18",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U2 R D R' U' R D' R2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R U2 R' U R' D' R U' R' D R2 U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 19",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (10 ETM)",
+        "alg": "R U R2 F' r U R U' r' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U L' U' L' U R' U' L U L",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "R U' R' F' R U2 R' U2 R' F R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (12 ETM)",
+        "alg": "R U2 R' U' R' F' R U2 R U2 R' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 20",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U' R' U' R U R' U' R U' R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 21",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U' R2 U' R2 U' R2 U2 R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 22",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "R U R2 U' R U' R' U2 R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 23",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (13 ETM)",
+        "alg": "R U' R' U' R U' R2 U' R U' R' U2 R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (13 ETM)",
+        "alg": "R U2 R' U R U2 R2 U2 R U R' U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 24",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R' U R' U' R U' R' U2 R",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 25",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R D' R U' R' D R U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (15 ETM)",
+        "alg": "R U2 R' U R U' R' U R U' R' U R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (15 ETM)",
+        "alg": "R U' R' U' R U R' U' R U R' U' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "U' r' F R2 F' r U R' U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "SV 26",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "U' R U R D R' U R D' R2",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "SV 27",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "R' U L U' R2 U R' L'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U R' U' R U2 R' U' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "R U R' U2 R' U' R U' R' U2 R",
+        "isDefault": false
+      }
+    ]
+  }
+]

@@ -32,6 +32,8 @@ import f2lAdvancedJson from "../algs/f2l-advanced.json";
 import collJson from "../algs/coll.json";
 import cmllJson from "../algs/cmll.json";
 import winterVariationJson from "../algs/winter-variation.json";
+import summerVariationJson from "../algs/summer-variation.json";
+import secondBlockLastSlotJson from "../algs/second-block-last-slot.json";
 
 function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
@@ -87,6 +89,8 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   coll: collJson,
   cmll: cmllJson,
   "winter-variation": winterVariationJson,
+  "summer-variation": summerVariationJson,
+  "second-block-last-slot": secondBlockLastSlotJson,
 };
 
 function loadFromJson(group: AlgGroup): AlgorithmCase[] {

@@ -1,0 +1,2142 @@
+[
+  {
+    "name": "U UB",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U R U2 R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "r U' R' U2 M2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U R U B' R B R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "r U' R' U2 M R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (6 ETM)",
+        "alg": "U R U B' R B R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (12 ETM)",
+        "alg": "M R U R' U' R U R' U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (11 ETM)",
+        "alg": "R U' R' U' M U M2 U2 r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (7 ETM)",
+        "alg": "U L F2 L' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (6 ETM)",
+        "alg": "U R U2 R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (9 ETM)",
+        "alg": "r U M2 U r' U' r U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U UR",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U2 R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (12 ETM)",
+        "alg": "R U R' U' M R U R' U' r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "r U2 r' U' R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U UF",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "M' r U' r' U2 r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U' R' U' R U R' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "r U2 r' U' M' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U2 R2 U2 R' U' R U' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "r U2 r' U' M' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (11 ETM)",
+        "alg": "M U' M' U' R U R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "U2 M R U R' F' U' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (11 ETM)",
+        "alg": "U2 R U R' U' R U' R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (11 ETM)",
+        "alg": "R U R' U2 R U R' U' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (9 ETM)",
+        "alg": "U' R' U' R U' R' U2 R2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 11 (6 ETM)",
+        "alg": "M' F' L' U2 L F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 12 (11 ETM)",
+        "alg": "U R U' R' U' R U' R' U R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U UL",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' R' U2 R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U2 R U R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "R B U2 B' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (5 ETM)",
+        "alg": "U2 R B' R B R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (5 ETM)",
+        "alg": "R f R2 f' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (6 ETM)",
+        "alg": "U2 R U R2 F R F'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U FR",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U2 r U r' U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "R2 U R2 U R2 U2 R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (12 ETM)",
+        "alg": "R U R' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' r2 U' r2 U' r2 U r2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "U' r2 U' r2 U' r2 U r2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U DB",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' r' U2 r U r'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "U DF",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (6 ETM)",
+        "alg": "U2 r U r' F' U' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R U' R' U2 M' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "R U M' U R' U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "M2 U R U2 R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (10 ETM)",
+        "alg": "R U R' r U r' U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (10 ETM)",
+        "alg": "U' r U' r' R' F R F' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "U M' r U2 r' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (8 ETM)",
+        "alg": "R U' r' U2 M R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (12 ETM)",
+        "alg": "M' R U R' U' R U R' U' r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (8 ETM)",
+        "alg": "U2 r U r' U M R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 11 (7 ETM)",
+        "alg": "U2 r2 U2 R' U' R U' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 12 (8 ETM)",
+        "alg": "M2 U R U2 R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 13 (10 ETM)",
+        "alg": "M' r U' R U R' U R U2 R2",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U UBm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "r U' r' U2 r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "F' r' F2 r F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U2 F' U' F r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (6 ETM)",
+        "alg": "U2 R U R' F' U' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (6 ETM)",
+        "alg": "U2 R U R' F' U' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U URm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U r U2 r' U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "U' R U R2 F R F' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "U2 r U R' M' U M' r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "R U R' U R U R' U' r U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U UFm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "M' U R U2 R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "M' U R U2 R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "R' F R F' R U' R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "M U2 r U r' F' U' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U ULm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "r U' r' U2 M' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U' F' U2 F r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "U M' r U2 R' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "R U' r' U2 M' r U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U FRm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U2 R' U' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R' F R F' R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "R U' R' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "r U' r' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "R U' R B' R' B R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U DBm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "R U' R' U2 M R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R U' R' U2 M2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "M U R U2 R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U2 M' r U r' F' U' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "M U R U2 R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (9 ETM)",
+        "alg": "r U M' U r' U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "M U R U2 R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (10 ETM)",
+        "alg": "R U2 R' U' r M' U2 M U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "U DFm",
+    "category": "Corner on U facing up",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' B r2 B' r2 B'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U2 R U R' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "U' f U2 F' U2 f'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "R U' M' R' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "R U' M' R' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "M R U' r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "R U' r' M U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (7 ETM)",
+        "alg": "U' r' U r2 U' r2 U' r",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (6 ETM)",
+        "alg": "M2 F' r' F2 r F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (8 ETM)",
+        "alg": "r M2 U' r' U2 r U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UB",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (3 ETM)",
+        "alg": "l F R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UR",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U' R U' R' U R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U' M' U M2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U' M' U M R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UF",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "r U' r' U' r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U2 R U' R' U' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U M' U' M R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' M U' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "U' M U' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "U' R U R' U R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UL",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R' U2 R2 U R2 U R",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "R U' R' U R U' R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "r M' U2 M2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (6 ETM)",
+        "alg": "U2 M' U2 M R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "R U2 R' U2 R U2 R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (6 ETM)",
+        "alg": "M2 R U2 M2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (6 ETM)",
+        "alg": "M R U2 M' U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (7 ETM)",
+        "alg": "M U2 M2 U2 r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (6 ETM)",
+        "alg": "r M2 U2 M' U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (7 ETM)",
+        "alg": "M U2 M' U2 R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up FR",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U R U R' U2 R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R U2 R' U R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U R' D' R U' R' D R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U2 R' D' R U2 R' D R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "U' r U2 r' U R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "U F' U F U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "U' R' D' R U R' D R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up DB",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (4 ETM)",
+        "alg": "M' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (4 ETM)",
+        "alg": "R' r2 U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (4 ETM)",
+        "alg": "R M2 U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up DF",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "r U2 M' U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "R U2 M2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "U2 M U2 r U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UBm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "r U2 M2 U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "r' U2 R2 U R2 U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U2 M U2 M' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (6 ETM)",
+        "alg": "r M' U2 M' U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (6 ETM)",
+        "alg": "r M' U2 M' U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M' U2 M U2 r U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up URm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' R' U2 F' U' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U M U' M' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U' M' U' M U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "R U' R' U' r' R2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "R U' R' U' M R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up UFm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (3 ETM)",
+        "alg": "L F L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U r' D' r U' r' D r",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (3 ETM)",
+        "alg": "U' F' U F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (3 ETM)",
+        "alg": "U2 F' U2 F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (4 ETM)",
+        "alg": "F R' F' R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up ULm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U r U r' U2 r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U M' U M U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U2 F' L' U' L U2 F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' r U' r' U R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "U' r U' r' U R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up FRm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U2 F' U' F U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "U r U r' U2 M' r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "U2 R' F R F' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "R U M U' M2 U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "U2 R' F R F' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "R U M U' M2 U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "R U' M2 U' M' U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (7 ETM)",
+        "alg": "U F' U' F U' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (8 ETM)",
+        "alg": "r U' r' M U' r U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up DBm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (4 ETM)",
+        "alg": "R M U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (4 ETM)",
+        "alg": "M2 r U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (4 ETM)",
+        "alg": "M R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (4 ETM)",
+        "alg": "R2 r' U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (4 ETM)",
+        "alg": "R2 r' U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (4 ETM)",
+        "alg": "M R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Up DFm",
+    "category": "Corner on U oriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "R U2 M' U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U2 M2 U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "U2 M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' r U r' U R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UB",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M' U' M U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R U R' U' R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "U2 M U' L F' L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' R U R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M' U' M U' R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (5 ETM)",
+        "alg": "U2 M U' r U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UR",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (4 ETM)",
+        "alg": "R' F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (3 ETM)",
+        "alg": "U2 r U2 r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (3 ETM)",
+        "alg": "U2 R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UF",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "M U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U2 r U M U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U2 r U r' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "R' D' R U' R' D F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "F' U F U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U L F' L' U' M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (6 ETM)",
+        "alg": "M U r U' r' M",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UL",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' M U2 r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R U2 R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U' R U2 R' U' R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (5 ETM)",
+        "alg": "U r U2 M U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um FR",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U' R U' R' U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R U' R' U' R U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U r U r' U' r U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um DB",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' M2 U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U2 R U M2 U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (5 ETM)",
+        "alg": "U' M2 U' R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um DF",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (4 ETM)",
+        "alg": "U M' r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (4 ETM)",
+        "alg": "U M2 R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UBm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "M2 U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "M' U M2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "U' R U' R' U2 R M U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' R U' R' U F' U' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um URm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' M2 U2 r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U' M' U2 M2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U M' r U2 M U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "U' R U2 R' U F' U' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um UFm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U2 M2 U' r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U2 r U' M2 U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "M' U' R U R' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "U R U' R' U R U' R' U' F' U F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "U R U' R' U R U' R' U' F' U F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U' M2 U2 R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um ULm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "F' U' F",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (4 ETM)",
+        "alg": "U M R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (4 ETM)",
+        "alg": "U r' R2 U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um FRm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U2 R U M' U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U2 R U R' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "U' R U R' M' U2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U' R U R2 r U' r U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "U' R U R2 r U' r U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "U' R U R' U F' U' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (5 ETM)",
+        "alg": "U2 R U' M U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Um DBm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "U r U' r'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "Um DFm",
+    "category": "Corner on U misoriented",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' M U2 R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "U' M U' R U2 R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "D U",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "U' r U' M U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R' U' R' U' R' U R U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U' R' F R F' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U' F' R U R' U' R' F R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "R' F' R U R U' R' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "U' F' R U R' U' R' F R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "U' R' F R F' R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (9 ETM)",
+        "alg": "R' U' R' U' R' U R U R",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "D DB",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "R U M2 U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "r U M' U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "D DF",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "R U' M2 U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "D Um",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U r U2 r' U' r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U2 r U r' U r U2 r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U2 R U' R' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (5 ETM)",
+        "alg": "U' r U M2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (5 ETM)",
+        "alg": "U' r U M2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (6 ETM)",
+        "alg": "U M' r U' M U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "R U2 R' U' r' R2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (6 ETM)",
+        "alg": "U2 R U' R' L F L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (5 ETM)",
+        "alg": "U2 r U M U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (5 ETM)",
+        "alg": "U2 r U' M' U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "D FRm",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' M2 U2 M' U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R2 U2 F R2 F' U2 R' U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "R U M2 U2 M U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "R U M U2 M2 U R' M2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "R U M U2 M2 U R' M2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (10 ETM)",
+        "alg": "R U' R' r' U2 R2 U R2 U R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "R U M U2 M2 U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "D DBm",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "R U' M U R'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "D DFm",
+    "category": "Corner on D solved",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "R U M' U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R U M' U R' U' R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp U",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "R U2 B' R B R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "r U' R' U R U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "r U' R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (6 ETM)",
+        "alg": "R U' R2 F R F'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp FR",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (11 ETM)",
+        "alg": "R U R' U' R U2 R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R U' R' U2 M U' r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "R2 U2 R' U' R U' R' U2 R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "R U' R' U2 M U' r U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "R U' R' U' R U R' U2 R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp DB",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "r U' R' U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R U' R' U M2 R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "M2 U' R U' R' U R U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp DF",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "M2 U R U' R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "r U2 r' U' R U2 R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "r U' r' U2 r U' M U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "r U2 r' U' R U2 R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "M2 U R U' R2 F R F'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp Um",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "U R' F R F' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "U' r U' R' M' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U' R U' R' F' U' F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U' M' r U' R' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (8 ETM)",
+        "alg": "U R' F R F' R' F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "U' M' r U' R' U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "U' R U' R' U r' R2 U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (8 ETM)",
+        "alg": "U' R U' R' U M R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (10 ETM)",
+        "alg": "M' U' R U' R' U M R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (9 ETM)",
+        "alg": "U' R U' M' R' U M R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 11 (9 ETM)",
+        "alg": "U' R U' R' U M R U' M' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 12 (10 ETM)",
+        "alg": "L U' R U L' U M' U L' x'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 13 (8 ETM)",
+        "alg": "U M' U R U' R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 14 (9 ETM)",
+        "alg": "U M' U R U' R' U R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp FRm",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "R U' R' M2 U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R U' R U B U' B' R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "r U' r' M U r U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (12 ETM)",
+        "alg": "R U R' M' U R U R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "R U' R' M' U r M' U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp DBm",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U' R' U r U' r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "M' U' R U' R' U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "r U' r' U' R U' R' U2 R U' R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dp DFm",
+    "category": "Corner on D facing forward",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "M U R U' R' U R U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "M U R U' R2 F R F'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "R U' r' U2 M U' r U' r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm U",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "U' R U2 R' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (6 ETM)",
+        "alg": "U' R U' f R2 f' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U' M2 r U r' U' r U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm FR",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "r U r' U' R U2 M' U' R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "R U2 R U R' U R U2 R2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "r U r' U M2 U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "R U2 R' U R U' R' U R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "R U2 R' U R U' R' U R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (9 ETM)",
+        "alg": "r U r' U M' U2 R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm DB",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "r U r' U' r U r'",
+        "isDefault": true
+      }
+    ]
+  },
+  {
+    "name": "Dm DF",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "R U2 r' U2 r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "M2 U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (9 ETM)",
+        "alg": "M2 U' R U R' U' R U R'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm Um",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "U R U R' U' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (6 ETM)",
+        "alg": "U F' U F2 R' F' R",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "U' r U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (6 ETM)",
+        "alg": "U2 F' L' U2 L U' F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm FRm",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "r U r' U' M' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R2 B U B' U' R' U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "R U' R' F' r' F2 r F",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (9 ETM)",
+        "alg": "R U F R U R' U' F' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (9 ETM)",
+        "alg": "R U F R U R' U' F' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "R U' R' F' r' F2 r F",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm DBm",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "M' U' R U R' U' R U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R U2 R' M2 U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "r' R2 U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 11 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 12 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 13 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 14 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 15 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 16 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 17 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 18 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 19 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 20 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 21 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 22 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 23 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 24 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 25 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 26 (10 ETM)",
+        "alg": "M' U' R U R' U' R U R' U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 27 (8 ETM)",
+        "alg": "R U2 R' M' U2 R U R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 28 (8 ETM)",
+        "alg": "M R U2 r' U2 r U r'",
+        "isDefault": false
+      }
+    ]
+  },
+  {
+    "name": "Dm DFm",
+    "category": "Corner on D facing side",
+    "algList": [
+      {
+        "name": "Alg 1 (8 ETM)",
+        "alg": "M' r U r' U' r U r'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (8 ETM)",
+        "alg": "R M2 U R' U' r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (8 ETM)",
+        "alg": "R U2 R' U2 M R U R'",
+        "isDefault": false
+      }
+    ]
+  }
+]

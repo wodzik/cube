@@ -23,6 +23,7 @@ import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, Displa
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { loadAlgGroup, saveAlgGroup, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
 import { buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
+import { rouxBlocksStickeringMask } from "../logic/trainer/trainerMasks";
 import {
   applyRecordAttempt,
   applySetLearningStatus,
@@ -216,11 +217,9 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
-  // EDGES/CORNERS legend in lastLayerShared.ts). Hide the front/back
-  // D-edges (DF=4, DB=6 — they belong to neither block) and the
-  // front/back/top/bottom centers (only L/R centers anchor the blocks);
-  // no piece-group in maskPieceGroups.ts expresses "D-edges minus DF/DB"
-  // or per-center selection, so this is hand-built via rawOverride.
+  // EDGES/CORNERS legend in lastLayerShared.ts) — rouxBlocksStickeringMask
+  // hides the front/back D-edges and non-L/R centers; `true` also hides
+  // the top edges, since CMLL doesn't care where they end up.
   {
     id: "cmll",
     name: "CMLL",
@@ -228,25 +227,7 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
       stickering: {
         kind: "mask",
         pieceGroups: ["u-corners", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
-        rawOverride: {
-          orbits: {
-            EDGES: {
-              // 0=UF 1=UR 2=UB 3=UL 4=DF 5=DR 6=DB 7=DL 8=FR 9=FL 10=BR 11=BL
-              pieces: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => ({
-                facelets: [4, 6].includes(i) || i <= 3 ? ["ignored", "ignored"] : ["regular", "regular"],
-              })),
-            },
-            CORNERS: {
-              pieces: Array.from({ length: 8 }, () => ({ facelets: ["regular", "regular", "regular"] })),
-            },
-            CENTERS: {
-              // 0=U 1=L 2=F 3=R 4=B 5=D — only L/R stay visible (anchor the two Roux blocks).
-              pieces: [0, 1, 2, 3, 4, 5].map((i) => ({
-                facelets: i === 1 || i === 3 ? ["regular", "regular", "regular", "regular"] : ["dim", "dim", "dim", "dim"],
-              })),
-            },
-          },
-        },
+        rawOverride: rouxBlocksStickeringMask(true),
       },
       cardVisualization: "experimental-2D-LL",
       cubeVisualization: "3D",
@@ -255,6 +236,24 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
     },
   },
   { id: "winter-variation", name: "Winter Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // Summer Variation — same technique family and stickering as Winter Variation (both are single-canonical-slot Roux edge-orientation tricks).
+  { id: "summer-variation", name: "Summer Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // Second Block Last Slot: pairing the last second-block slot while tracking LL corners for CMLL. Unlike CMLL, the piece being solved comes down from the top layer, so top edges must stay visible — rouxBlocksStickeringMask(false) only hides what's irrelevant to Roux full stop (front/back D-edges, non-L/R centers).
+  {
+    id: "second-block-last-slot",
+    name: "Second Block Last Slot",
+    displayConfig: {
+      stickering: {
+        kind: "mask",
+        pieceGroups: ["u-edges", "u-corners", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
+        rawOverride: rouxBlocksStickeringMask(false),
+      },
+      cardVisualization: "3D",
+      cubeVisualization: "3D",
+      cameraLatitude: 20,
+      cameraLongitude: 25,
+    },
+  },
   { id: "f2l-advanced", name: "F2L Adv", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
 ];
 
@@ -325,7 +324,7 @@ function seedRegistry(): AlgGroupMeta[] {
 }
 
 /** Fixed display order for the built-ins — everything else (user-created groups) sorts after, in creation order. */
-const BUILT_IN_ORDER = ["f2l", "oll", "pll", "coll", "cmll", "winter-variation", "f2l-advanced", "advanced-f2l", "zbll"];
+const BUILT_IN_ORDER = ["f2l", "oll", "pll", "coll", "cmll", "winter-variation", "summer-variation", "second-block-last-slot", "f2l-advanced", "advanced-f2l", "zbll"];
 
 function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   // Array.prototype.sort is stable (ES2019+), so custom groups (index -1,
