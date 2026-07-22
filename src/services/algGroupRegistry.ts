@@ -178,6 +178,24 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     }
   }
 
+  // One-time fix-up: CMLL's mask originally only showed the top corners
+  // (everything else, including the already-built Roux blocks, greyed
+  // out). Widen it to BUILT_IN_SEED's current pieceGroups — but only if
+  // it's still exactly that original narrower set, so a user's own tweak
+  // to CMLL's mask is left alone.
+  const cmllIdx = next.findIndex((g) => g.id === "cmll");
+  if (cmllIdx >= 0) {
+    const cmllStickering = next[cmllIdx].displayConfig.stickering;
+    if (cmllStickering.kind === "mask" && cmllStickering.pieceGroups.length === 1 && cmllStickering.pieceGroups[0] === "u-corners") {
+      const seedCmll = BUILT_IN_SEED.find((s) => s.id === "cmll");
+      if (seedCmll) {
+        next = [...next];
+        next[cmllIdx] = { ...next[cmllIdx], displayConfig: { ...next[cmllIdx].displayConfig, stickering: seedCmll.displayConfig.stickering } };
+        changed = true;
+      }
+    }
+  }
+
   if (changed) writeRegistry(next);
   return next;
 }
@@ -188,12 +206,15 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   { id: "pll", name: "PLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // COLL solves LL corner orientation+permutation together — full-info PLL-style stickering (same reason PLL needs it: permutation matters, not just orientation).
   { id: "coll", name: "COLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
-  // CMLL (Roux) only cares about the 4 top corners — mask to just those (top edges + everything else greyed out), not a named scheme.
+  // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
+  // until L6E. Show everything EXCEPT the top edges — that includes both
+  // already-built Roux blocks (bottom corners+edges, all 4 F2L-style
+  // middle-slot pieces) fully colored, not just the corners being solved.
   {
     id: "cmll",
     name: "CMLL",
     displayConfig: {
-      stickering: { kind: "mask", pieceGroups: ["u-corners"] },
+      stickering: { kind: "mask", pieceGroups: ["u-corners", "d-edges", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"] },
       cardVisualization: "experimental-2D-LL",
       cubeVisualization: "3D",
       cameraLatitude: 20,

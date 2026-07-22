@@ -114,17 +114,20 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<TwistyPlayer | null>(null);
+    // Which of the two mutually-exclusive stickering channels the CURRENTLY
+    // mounted player is on — see the stickeringMaskOrbits doc comment above.
+    // Needed because switching channels requires tearing the player down and
+    // recreating it; a plain property assignment silently does nothing.
+    const stickeringChannelRef = useRef<"mask" | "named" | null>(null);
 
-    useEffect(() => {
-      if (!containerRef.current) return;
-
-      // Set all properties before appending to DOM — TwistyPlayer is a web
-      // component, so property assignment is equivalent to constructor
-      // options but avoids the constructor's stricter typing.
+    // Builds a fresh TwistyPlayer with every "set once, driven imperatively
+    // after that" prop applied — used both for the initial mount and for
+    // remounting when the stickering channel flips (see below). Reads props
+    // via closure, so it always reflects whatever's current when called.
+    function createPlayer(): TwistyPlayer {
       const player = new TwistyPlayer();
 
       player.puzzle = "3x3x3";
-      player.alg = alg;
       player.visualization = visualization as TwistyPlayer["visualization"];
       player.experimentalSetupAnchor = setupAnchor as TwistyPlayer["experimentalSetupAnchor"];
       player.background = background as TwistyPlayer["background"];
@@ -141,12 +144,10 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.tempoScale = tempoScale;
       if (stickeringMaskOrbits) {
         player.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
+        stickeringChannelRef.current = "mask";
       } else {
         player.experimentalStickering = stickering;
-      }
-
-      if (setupAlg) {
-        player.experimentalSetupAlg = setupAlg;
+        stickeringChannelRef.current = "named";
       }
 
       // Size must be set as inline style directly on the web component
@@ -154,6 +155,15 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       // shadow DOM.
       player.style.width = "100%";
       player.style.height = "100%";
+      return player;
+    }
+
+    useEffect(() => {
+      if (!containerRef.current) return;
+
+      const player = createPlayer();
+      player.alg = alg;
+      if (setupAlg) player.experimentalSetupAlg = setupAlg;
 
       playerRef.current = player;
       containerRef.current.appendChild(player);
@@ -167,12 +177,32 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     }, []);
 
     useEffect(() => {
-      if (!playerRef.current) return;
-      if (stickeringMaskOrbits) {
-        playerRef.current.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
-      } else {
-        playerRef.current.experimentalStickering = stickering;
+      const oldPlayer = playerRef.current;
+      if (!oldPlayer || !containerRef.current) return;
+
+      const wantsChannel = stickeringMaskOrbits ? "mask" : "named";
+      if (stickeringChannelRef.current === wantsChannel) {
+        // Same channel — a plain property update takes effect fine.
+        if (stickeringMaskOrbits) oldPlayer.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
+        else oldPlayer.experimentalStickering = stickering;
+        return;
       }
+
+      // Channel flip (mask <-> named): the old player is permanently stuck
+      // showing whichever channel it was first given, so swap in a fresh
+      // one instead. Can't carry over its current alg/setup — TwistyPlayer's
+      // `alg`/`experimentalSetupAlg` are write-only, reading them throws —
+      // but in practice this only fires when the caller is switching to a
+      // whole new group/case, which drives a fresh setSetupAlgorithm/reset
+      // through the imperative ref right after anyway (see TrainingPage's
+      // case-loading effect), so the momentary reset-to-blank here doesn't
+      // linger.
+      const newPlayer = createPlayer();
+      newPlayer.alg = alg;
+      if (setupAlg) newPlayer.experimentalSetupAlg = setupAlg;
+      containerRef.current.replaceChild(newPlayer, oldPlayer);
+      oldPlayer.remove();
+      playerRef.current = newPlayer;
     }, [stickering, stickeringMaskOrbits]);
 
     useEffect(() => {
