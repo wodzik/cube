@@ -22,7 +22,7 @@ import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
-import { STICKERING, CAMERA } from "../logic/algGroupConfig";
+import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
@@ -32,7 +32,7 @@ import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisatio
 import { ConnectionPanel } from "./ConnectionPanel";
 import { TimerDisplay } from "./TimerDisplay";
 import type { SessionConfig } from "../types/session";
-import type { AlgGroup } from "../types/algorithm";
+import type { DisplayConfig } from "../types/algorithm";
 
 const TEST_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -46,7 +46,7 @@ interface VariantTestProps {
   caseName: string;
   variantName: string;
   alg: string;
-  group: AlgGroup;
+  displayConfig: DisplayConfig;
   onClose: () => void;
 }
 
@@ -58,7 +58,7 @@ export function VariantTest(props: VariantTestProps) {
   );
 }
 
-function VariantTestInner({ caseName, variantName, alg, group, onClose }: VariantTestProps) {
+function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }: VariantTestProps) {
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const [attemptsMs, setAttemptsMs] = useState<number[]>([]);
@@ -169,9 +169,9 @@ function VariantTestInner({ caseName, variantName, alg, group, onClose }: Varian
               <CubeVisualisation
                 ref={cubeRef}
                 visualization="3D"
-                stickering={STICKERING[group]}
-                cameraLatitude={CAMERA[group].latitude}
-                cameraLongitude={CAMERA[group].longitude}
+                cameraLatitude={displayConfig.cameraLatitude}
+                cameraLongitude={displayConfig.cameraLongitude}
+                {...resolveStickeringProps(displayConfig.stickering)}
                 setupAlg=""
                 className="size-full"
               />

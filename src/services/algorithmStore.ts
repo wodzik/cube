@@ -11,7 +11,16 @@
  */
 
 import type { AlgGroup, AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus } from "../types/algorithm";
-import { computeVariantStatsAttempts } from "../logic/statistics";
+import {
+  applyRecordAttempt,
+  applySetLearningStatus,
+  applyClearVariantTimes,
+  applyUpdateCase,
+  applyAddCase,
+  applyDeleteCase,
+  applySetCaseSelected,
+  applySetSelectedBatch,
+} from "../logic/caseMutations";
 
 import ollJson from "../algs/formatted_oll.json";
 import pllJson from "../algs/formatted_pll.json";
@@ -25,14 +34,14 @@ function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
 }
 
-interface RawVariant {
+export interface RawVariant {
   name: string;
   alg: string;
   isDefault: boolean;
   youtubeUrl?: string | null;
 }
 
-interface RawCase {
+export interface RawCase {
   name: string;
   category: string;
   subcategory?: string;
@@ -75,18 +84,29 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
 };
 
 function loadFromJson(group: AlgGroup): AlgorithmCase[] {
-  const raw = JSON_SOURCES[group] as RawCase[];
+  const raw = JSON_SOURCES[group] as RawCase[] | undefined;
+  return raw ? raw.map((c, i) => hydrateCase(c, i, group)) : [];
+}
+
+/** Hydrate a portable RawCase[] (hand-authored or imported) into full AlgorithmCase[] — same pipeline the bundled JSON files go through. Exported for algGroupRegistry's import. */
+export function hydrateCasesFromRaw(raw: RawCase[], group: AlgGroup): AlgorithmCase[] {
   return raw.map((c, i) => hydrateCase(c, i, group));
 }
 
 // ─── Public API ───
 
+/**
+ * A group id is either one of the 7 built-ins (bundled JSON as the initial
+ * source of truth) or any user-created id (algGroupRegistry.createGroup) —
+ * for those there is no bundled JSON, a localStorage miss just means "brand
+ * new, no cases yet".
+ */
 export function loadAlgGroup(group: AlgGroup): AlgorithmCase[] {
   try {
     const raw = localStorage.getItem(storageKey(group));
     if (raw) return JSON.parse(raw) as AlgorithmCase[];
   } catch {
-    // fall through to JSON import
+    // fall through to JSON import / empty
   }
   const cases = loadFromJson(group);
   saveAlgGroup(group, cases);
@@ -104,66 +124,41 @@ export function resetAlgGroup(group: AlgGroup): void {
 
 // ─── Mutations ───
 
-function recalcStats(variant: AlgorithmVariant): AlgorithmVariant {
-  const stats = computeVariantStatsAttempts(variant.times);
-  return { ...variant, ...stats };
-}
-
 export function recordAttempt(group: AlgGroup, caseName: string, variantId: string, attempt: AlgorithmAttempt): void {
-  const cases = loadAlgGroup(group);
-  const ci = cases.findIndex((c) => c.name === caseName);
-  if (ci < 0) return;
-  const vi = cases[ci].algList.findIndex((v) => v.id === variantId);
-  if (vi < 0) return;
-  cases[ci].algList[vi] = recalcStats({
-    ...cases[ci].algList[vi],
-    times: [...cases[ci].algList[vi].times, attempt],
-  });
-  saveAlgGroup(group, cases);
+  saveAlgGroup(group, applyRecordAttempt(loadAlgGroup(group), caseName, variantId, attempt));
 }
 
 export function setLearningStatus(group: AlgGroup, caseName: string, variantId: string, status: LearningStatus): void {
-  const cases = loadAlgGroup(group);
-  const ci = cases.findIndex((c) => c.name === caseName);
-  if (ci < 0) return;
-  const vi = cases[ci].algList.findIndex((v) => v.id === variantId);
-  if (vi < 0) return;
-  cases[ci].algList[vi] = { ...cases[ci].algList[vi], learningStatus: status };
-  saveAlgGroup(group, cases);
+  saveAlgGroup(group, applySetLearningStatus(loadAlgGroup(group), caseName, variantId, status));
 }
 
 export function clearVariantTimes(group: AlgGroup, caseName: string, variantId: string): void {
-  const cases = loadAlgGroup(group);
-  const ci = cases.findIndex((c) => c.name === caseName);
-  if (ci < 0) return;
-  const vi = cases[ci].algList.findIndex((v) => v.id === variantId);
-  if (vi < 0) return;
-  cases[ci].algList[vi] = recalcStats({ ...cases[ci].algList[vi], times: [] });
-  saveAlgGroup(group, cases);
+  saveAlgGroup(group, applyClearVariantTimes(loadAlgGroup(group), caseName, variantId));
 }
 
 /** Replace a full case (used by CaseEdit after editing variants). */
 export function updateCase(group: AlgGroup, updated: AlgorithmCase): void {
-  const cases = loadAlgGroup(group);
-  const ci = cases.findIndex((c) => c.name === updated.name);
-  if (ci >= 0) {
-    cases[ci] = updated;
-    saveAlgGroup(group, cases);
-  }
+  saveAlgGroup(group, applyUpdateCase(loadAlgGroup(group), updated));
+}
+
+/** Append a brand-new case — the "add algorithm" primitive (no equivalent existed before). Rejects a duplicate name. */
+export function addCase(group: AlgGroup, newCase: AlgorithmCase): boolean {
+  const next = applyAddCase(loadAlgGroup(group), newCase);
+  if (!next) return false;
+  saveAlgGroup(group, next);
+  return true;
+}
+
+/** Remove a whole case (all its variants) from a group. */
+export function deleteCase(group: AlgGroup, caseName: string): void {
+  saveAlgGroup(group, applyDeleteCase(loadAlgGroup(group), caseName));
 }
 
 export function setCaseSelected(group: AlgGroup, caseName: string, selected: boolean): void {
-  const cases = loadAlgGroup(group);
-  const ci = cases.findIndex((c) => c.name === caseName);
-  if (ci < 0) return;
-  cases[ci] = { ...cases[ci], selected };
-  saveAlgGroup(group, cases);
+  saveAlgGroup(group, applySetCaseSelected(loadAlgGroup(group), caseName, selected));
 }
 
 /** Bulk-set selected on multiple cases (all cases if caseNames is omitted). */
 export function setSelectedBatch(group: AlgGroup, selected: boolean, caseNames?: string[]): void {
-  const cases = loadAlgGroup(group);
-  const nameSet = caseNames ? new Set(caseNames) : null;
-  const updated = cases.map((c) => (!nameSet || nameSet.has(c.name) ? { ...c, selected } : c));
-  saveAlgGroup(group, updated);
+  saveAlgGroup(group, applySetSelectedBatch(loadAlgGroup(group), selected, caseNames));
 }

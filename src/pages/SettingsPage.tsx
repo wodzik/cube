@@ -9,20 +9,9 @@
 
 import { useRef, useState } from "react";
 import { RotateCcw, Trash2, Download, Upload, CheckCircle2 } from "lucide-react";
-import type { AlgGroup } from "../types/algorithm";
-import { resetAlgGroup } from "../services/algorithmStore";
+import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 
-const ALG_GROUPS: AlgGroup[] = [
-  "f2l-front-right",
-  "f2l-front-left",
-  "f2l-back-right",
-  "f2l-back-left",
-  "f2l-advanced",
-  "oll",
-  "pll",
-];
-
-const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_"];
+const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_", "nact_alg_groups"];
 
 function allNactKeys(): string[] {
   const keys: string[] = [];
@@ -116,12 +105,14 @@ export default function SettingsPage() {
       <Section title="Algorithm progress">
         <SettingsRow
           title="Reset all algorithm progress"
-          description="Clears learning status and recorded times for every F2L/OLL/PLL case, reloads from defaults."
+          description="Clears learning status and recorded times for every built-in F2L/OLL/PLL case, reloads from defaults. Custom groups are left alone."
           last
           action={
             <button
               onClick={() => {
-                ALG_GROUPS.forEach(resetAlgGroup);
+                listGroups()
+                  .filter((g) => g.isBuiltIn)
+                  .forEach((g) => resetBuiltInGroup(g.id));
                 flash("Algorithm progress reset.");
               }}
               className="btn-danger"

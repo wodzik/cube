@@ -10,14 +10,16 @@
  */
 
 import { Pencil, Play } from "lucide-react";
-import type { AlgGroup, AlgorithmCase, AttemptSource } from "../types/algorithm";
+import type { AlgorithmCase, AttemptSource, DisplayConfig } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
-import { STICKERING, VISUALIZATION_MODE, CAMERA, getDefaultVariant } from "../logic/algGroupConfig";
+import { getDefaultVariant } from "../logic/algGroupConfig";
+import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
 
 export interface CaseListItemProps {
   case_: AlgorithmCase;
-  group: AlgGroup;
+  /** The group's (or subgroup's) resolved display config — merged here with the case's own Advanced override, if any. */
+  groupDisplayConfig: DisplayConfig;
   /** Training and Attack track stats separately — which one's PB/Avg/Ao5 to show. */
   statsSource: AttemptSource;
   /** Highlight the row (e.g. currently active case). */
@@ -30,9 +32,10 @@ export interface CaseListItemProps {
   className?: string;
 }
 
-export function CaseListItem({ case_, group, statsSource, isActive, left, right, onEdit, onSelect, className = "" }: CaseListItemProps) {
+export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive, left, right, onEdit, onSelect, className = "" }: CaseListItemProps) {
   const defV = getDefaultVariant(case_);
   const stats = defV ? computeVariantStatsForSource(defV.times, statsSource) : null;
+  const displayConfig: DisplayConfig = { ...groupDisplayConfig, ...case_.displayConfigOverride };
 
   return (
     <div
@@ -53,10 +56,10 @@ export function CaseListItem({ case_, group, statsSource, isActive, left, right,
       >
         <AlgCaseVisualisation
           alg={defV?.alg ?? ""}
-          stickering={STICKERING[group]}
-          visualization={VISUALIZATION_MODE[group]}
-          cameraLatitude={CAMERA[group].latitude}
-          cameraLongitude={CAMERA[group].longitude}
+          visualization={displayConfig.cardVisualization}
+          cameraLatitude={displayConfig.cameraLatitude}
+          cameraLongitude={displayConfig.cameraLongitude}
+          {...resolveStickeringProps(displayConfig.stickering)}
           className="size-full"
         />
       </div>

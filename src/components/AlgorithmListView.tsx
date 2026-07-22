@@ -15,9 +15,10 @@
  */
 
 import { useState, useMemo } from "react";
-import { Eye, EyeOff, CheckSquare, Square, LayoutGrid, List, Minus, Bookmark, CheckCircle2 } from "lucide-react";
-import type { AlgGroup, AlgorithmCase, LearningStatus } from "../types/algorithm";
+import { Eye, EyeOff, CheckSquare, Square, LayoutGrid, List, Minus, Bookmark, CheckCircle2, Plus } from "lucide-react";
+import type { AlgGroup, AlgorithmCase, DisplayConfig, LearningStatus } from "../types/algorithm";
 import { getDefaultVariant } from "../logic/algGroupConfig";
+import { getGroupMeta, resolveDisplayConfig } from "../services/algGroupRegistry";
 import { CaseCard } from "./CaseCard";
 import { CaseListItem } from "./CaseListItem";
 
@@ -34,6 +35,10 @@ export interface AlgorithmListViewProps {
   onEdit: (case_: AlgorithmCase) => void;
   /** Jump straight to practicing a case now (play button / clicking its name). */
   onPractice?: (case_: AlgorithmCase) => void;
+  /** Add a brand-new case to this group. */
+  onAddCase?: () => void;
+  /** A subgroup's own override, layered on top of the group's display config (undefined when not scoped to a subgroup). */
+  displayConfigOverride?: Partial<DisplayConfig>;
 }
 
 const STATUS_LABELS: Record<StatusFilter, string> = {
@@ -68,8 +73,22 @@ const STATUS_COLOR: Record<LearningStatus, string> = {
   learned: "text-emerald-400 hover:text-emerald-300",
 };
 
-export function AlgorithmListView({ group, cases, onStatusChange, onSelectedChange, onSelectAll, onEdit, onPractice }: AlgorithmListViewProps) {
+export function AlgorithmListView({
+  group,
+  cases,
+  onStatusChange,
+  onSelectedChange,
+  onSelectAll,
+  onEdit,
+  onPractice,
+  onAddCase,
+  displayConfigOverride,
+}: AlgorithmListViewProps) {
   const allCategories = useMemo(() => Array.from(new Set(cases.map((c) => c.category))), [cases]);
+  const groupDisplayConfig = useMemo(
+    () => resolveDisplayConfig(getGroupMeta(group), displayConfigOverride),
+    [group, displayConfigOverride]
+  );
 
   const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -187,6 +206,11 @@ export function AlgorithmListView({ group, cases, onStatusChange, onSelectedChan
             <button onClick={() => onSelectAll(!allSelected, filteredNames)} className="btn-secondary py-0.5 text-[11px]">
               {allSelected ? "Deselect all" : "Select all"}
             </button>
+            {onAddCase && (
+              <button onClick={onAddCase} className="btn-secondary py-0.5 text-[11px]">
+                <Plus size={11} /> New case
+              </button>
+            )}
 
             <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5">
               <button
@@ -217,7 +241,7 @@ export function AlgorithmListView({ group, cases, onStatusChange, onSelectedChan
               <CaseCard
                 key={c.name}
                 case_={c}
-                group={group}
+                groupDisplayConfig={groupDisplayConfig}
                 statsSource="training"
                 onStatusChange={(status) => {
                   const v = getDefaultVariant(c);
@@ -239,7 +263,7 @@ export function AlgorithmListView({ group, cases, onStatusChange, onSelectedChan
               <CaseListItem
                 key={c.name}
                 case_={c}
-                group={group}
+                groupDisplayConfig={groupDisplayConfig}
                 statsSource="training"
                 onEdit={() => onEdit(c)}
                 onSelect={onPractice ? () => onPractice(c) : undefined}

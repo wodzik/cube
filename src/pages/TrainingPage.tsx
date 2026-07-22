@@ -20,12 +20,12 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Video } from "lucide-react";
+import { Video, ChevronLeft } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
-import { getDefaultVariant, STICKERING, CAMERA } from "../logic/algGroupConfig";
+import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
 import {
   loadAlgGroup,
@@ -34,7 +34,22 @@ import {
   setCaseSelected,
   setSelectedBatch,
   updateCase,
+  addCase,
+  deleteCase,
 } from "../services/algorithmStore";
+import {
+  getGroupMeta,
+  resolveDisplayConfig,
+  resolveStickeringProps,
+  getSubgroupCases,
+  recordSubgroupAttempt,
+  setSubgroupLearningStatus,
+  updateSubgroupCase,
+  addSubgroupCase,
+  deleteSubgroupCase,
+  setSubgroupCaseSelected,
+  setSubgroupSelectedBatch,
+} from "../services/algGroupRegistry";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMaskMoves } from "../hooks/useMaskMoves";
@@ -45,8 +60,11 @@ import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AlgorithmListView } from "../components/AlgorithmListView";
 import { CaseEdit } from "../components/CaseEdit";
+import { CaseAddModal } from "../components/CaseAddModal";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
+import { GroupTabs } from "../components/GroupTabs";
+import { SubgroupGrid } from "../components/SubgroupGrid";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 
@@ -57,16 +75,6 @@ const TRAINING_CONFIG: SessionConfig = {
   useInspection: false,
   inspectionSeconds: 15,
 };
-
-const GROUPS: { id: AlgGroup; label: string }[] = [
-  { id: "f2l-front-right", label: "F2L FR" },
-  { id: "f2l-front-left", label: "F2L FL" },
-  { id: "f2l-back-right", label: "F2L BR" },
-  { id: "f2l-back-left", label: "F2L BL" },
-  { id: "f2l-advanced", label: "F2L Adv" },
-  { id: "oll", label: "OLL" },
-  { id: "pll", label: "PLL" },
-];
 
 function invertAlg(alg: string): string {
   const moves = alg.trim().split(/\s+/).filter(Boolean);
@@ -99,17 +107,43 @@ function TrainingPageInner() {
   const [jumpToCaseName, setJumpToCaseName] = useState<string | null>(null);
   /** "Show me how" playback for the CURRENT drill case — no need to open the edit modal. */
   const [showPlayback, setShowPlayback] = useState(false);
+  const [showCaseAdd, setShowCaseAdd] = useState(false);
+  /** When the active group hasSubgroups: null = browsing the folder grid, set = drilled into one subgroup's own case list. */
+  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(null);
+  const groupMeta = getGroupMeta(group);
+  const activeSubgroup = groupMeta?.hasSubgroups ? groupMeta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
+  const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
-  const reload = () => setCases(loadAlgGroup(group));
+  const reload = () => {
+    if (activeSubgroupId) setCases(getSubgroupCases(group, activeSubgroupId));
+    else if (groupMeta?.hasSubgroups) setCases([]);
+    else setCases(loadAlgGroup(group));
+  };
 
   useEffect(() => {
-    setCases(loadAlgGroup(group));
+    setActiveSubgroupId(null);
+    const meta = getGroupMeta(group);
+    setCases(meta?.hasSubgroups ? [] : loadAlgGroup(group));
     setCaseIdx(0);
     // A manual navigation — moves buffered toward the auto-advanced case
     // don't belong to the group the user just switched to.
     moveBuffer.clear();
   }, [group, moveBuffer]);
+
+  const openSubgroup = (subgroupId: string) => {
+    setActiveSubgroupId(subgroupId);
+    setCases(getSubgroupCases(group, subgroupId));
+    setCaseIdx(0);
+    moveBuffer.clear();
+  };
+
+  const backToFolders = () => {
+    setActiveSubgroupId(null);
+    setCases([]);
+    setCaseIdx(0);
+    moveBuffer.clear();
+  };
 
   const selectedCases = useMemo(() => cases.filter((c) => c.selected), [cases]);
 
@@ -126,7 +160,8 @@ function TrainingPageInner() {
     const target = cases.find((c) => c.name === caseName);
     if (!target) return;
     if (!target.selected) {
-      setCaseSelected(group, caseName, true);
+      if (activeSubgroupId) setSubgroupCaseSelected(group, activeSubgroupId, caseName, true);
+      else setCaseSelected(group, caseName, true);
       reload();
     }
     moveBuffer.clear(); // manual jump — drop moves aimed at the auto-advanced case
@@ -144,6 +179,7 @@ function TrainingPageInner() {
 
   const currentCase = selectedCases[caseIdx] ?? null;
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
+  const displayConfig = resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig, currentCase?.displayConfigOverride);
 
   // Load the case's algorithm as the target, and pre-set the cube to its
   // scrambled state, whenever the case (or its variant) changes — or the
@@ -213,12 +249,13 @@ function TrainingPageInner() {
     lastRecordedEndRef.current = state.endTime;
 
     const finalProgress = state.target ? computeSequenceProgress(state.target, state.moveLog.map((m) => m.move)) : null;
-
-    recordAttempt(group, currentCase.name, variant.id, {
+    const attempt = {
       time: (state.endTime - state.startTime) / 1000,
       hadErrors: finalProgress?.hadErrors ?? false,
-      source: "training",
-    });
+      source: "training" as const,
+    };
+    if (activeSubgroupId) recordSubgroupAttempt(group, activeSubgroupId, currentCase.name, variant.id, attempt);
+    else recordAttempt(group, currentCase.name, variant.id, attempt);
     reload();
 
     const timer = setTimeout(() => {
@@ -229,7 +266,7 @@ function TrainingPageInner() {
     }, 1200);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.phase, state.startTime, state.endTime, currentCaseName, variantId, group]);
+  }, [state.phase, state.startTime, state.endTime, currentCaseName, variantId, group, activeSubgroupId]);
 
   const progress = selectCurrentProgress(state);
   const moveCount = selectMoveCount(state);
@@ -246,23 +283,38 @@ function TrainingPageInner() {
         ? `${moveCount} moves`
         : null;
 
+  if (isSubgroupHome) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-1 w-full overflow-x-auto px-4 sm:px-6 py-4">
+          <GroupTabs activeId={group} onSelect={setGroup} managementEnabled />
+          <div className="ml-auto shrink-0">
+            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+          </div>
+        </div>
+        <SubgroupGrid
+          groupId={group}
+          groupDisplayConfig={resolveDisplayConfig(groupMeta)}
+          subgroups={groupMeta?.subgroups ?? []}
+          onOpen={openSubgroup}
+          onChange={reload}
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       <TrainerPanel
         header={
           <div className="flex items-center gap-1 w-full overflow-x-auto">
-            {GROUPS.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => setGroup(g.id)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all shrink-0 ${
-                  group === g.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
-                }`}
-                style={group === g.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-              >
-                {g.label}
+            {activeSubgroup ? (
+              <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
+                <ChevronLeft size={13} /> {activeSubgroup.name}
               </button>
-            ))}
+            ) : (
+              <GroupTabs activeId={group} onSelect={setGroup} managementEnabled />
+            )}
             <div className="ml-auto shrink-0">
               <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
             </div>
@@ -301,15 +353,15 @@ function TrainingPageInner() {
           ) : undefined
         }
         cubeRef={cubeRef}
-        visualization="3D"
-        stickering={group ? STICKERING[group] : "full"}
+        visualization={displayConfig.cubeVisualization}
+        {...resolveStickeringProps(displayConfig.stickering)}
         hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
         hintFaceletsElevation={viewPrefs.hintElevation}
         flatCubeRef={flatCubeRef}
         showFlatView={viewPrefs.flatView}
         cubeToolbar={<CaseViewToggles {...viewPrefs} />}
-        cameraLatitude={group ? CAMERA[group].latitude : 20}
-        cameraLongitude={group ? CAMERA[group].longitude : 20}
+        cameraLatitude={displayConfig.cameraLatitude}
+        cameraLongitude={displayConfig.cameraLongitude}
         cubeSetupAlg=""
         timesMs={attemptsForSource(variant?.times ?? [], "training").map((t) => t.time * 1000)}
         statsLabel={currentCase ? `Times — ${currentCase.name}` : "Statistics"}
@@ -318,20 +370,25 @@ function TrainingPageInner() {
           <AlgorithmListView
             group={group}
             cases={cases}
+            displayConfigOverride={activeSubgroup?.displayConfig}
             onStatusChange={(caseName, variantId, status) => {
-              setLearningStatus(group, caseName, variantId, status);
+              if (activeSubgroupId) setSubgroupLearningStatus(group, activeSubgroupId, caseName, variantId, status);
+              else setLearningStatus(group, caseName, variantId, status);
               reload();
             }}
             onSelectedChange={(caseName, selected) => {
-              setCaseSelected(group, caseName, selected);
+              if (activeSubgroupId) setSubgroupCaseSelected(group, activeSubgroupId, caseName, selected);
+              else setCaseSelected(group, caseName, selected);
               reload();
             }}
             onSelectAll={(selected, caseNames) => {
-              setSelectedBatch(group, selected, caseNames);
+              if (activeSubgroupId) setSubgroupSelectedBatch(group, activeSubgroupId, selected, caseNames);
+              else setSelectedBatch(group, selected, caseNames);
               reload();
             }}
             onEdit={(case_) => setEditingCase(case_)}
             onPractice={(case_) => practiceNow(case_.name)}
+            onAddCase={() => setShowCaseAdd(true)}
           />
         }
       />
@@ -341,8 +398,23 @@ function TrainingPageInner() {
           title={currentCase.name}
           subtitle={variant.name}
           alg={variant.alg}
-          stickering={STICKERING[group]}
+          {...resolveStickeringProps(displayConfig.stickering)}
           onClose={() => setShowPlayback(false)}
+        />
+      )}
+
+      {showCaseAdd && (
+        <CaseAddModal
+          groupId={group}
+          existingCategories={Array.from(new Set(cases.map((c) => c.category)))}
+          onSave={(newCase) => {
+            const added = activeSubgroupId ? addSubgroupCase(group, activeSubgroupId, newCase) : addCase(group, newCase);
+            if (!added) return;
+            reload();
+            setShowCaseAdd(false);
+            setEditingCase(newCase);
+          }}
+          onClose={() => setShowCaseAdd(false)}
         />
       )}
 
@@ -356,14 +428,23 @@ function TrainingPageInner() {
               key={editingCase.name}
               case_={editingCase}
               group={group}
+              groupDisplayConfig={resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig)}
               onSave={(updated) => {
-                updateCase(group, updated);
+                if (activeSubgroupId) updateSubgroupCase(group, activeSubgroupId, updated);
+                else updateCase(group, updated);
                 setEditingCase(null);
                 reload();
               }}
               onClose={() => setEditingCase(null)}
               onAutoSave={(updated) => {
-                updateCase(group, updated);
+                if (activeSubgroupId) updateSubgroupCase(group, activeSubgroupId, updated);
+                else updateCase(group, updated);
+                reload();
+              }}
+              onDelete={() => {
+                if (activeSubgroupId) deleteSubgroupCase(group, activeSubgroupId, editingCase.name);
+                else deleteCase(group, editingCase.name);
+                setEditingCase(null);
                 reload();
               }}
               position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}

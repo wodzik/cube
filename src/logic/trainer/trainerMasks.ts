@@ -12,7 +12,8 @@ import { FACE_SLOTS, type Face } from "../stageDetection/lastLayerShared";
 import { XXCROSS_PAIR_FRAMES, XCROSS_SLOT_FRAMES, type XCrossSlot, type XXCrossPair } from "./xcrossFrames";
 import type { FaceletMask, StickeringMaskOrbits } from "../../types/cube";
 
-function pieceMask(
+/** Exported for logic/maskPieceGroups.ts — the Practice group mask picker composes piece-groups the same way. */
+export function pieceMask(
   visibleEdges: Set<number>,
   visibleCorners: Set<number>,
   /** Edges rendered orientation-only (EO trainers) instead of ignored. */

@@ -7,10 +7,11 @@
 
 import { useState } from "react";
 import { Minus, Bookmark, CheckCircle2, Pencil, Play, Video } from "lucide-react";
-import type { AlgGroup, AlgorithmCase, AttemptSource, LearningStatus } from "../types/algorithm";
+import type { AlgorithmCase, AttemptSource, DisplayConfig, LearningStatus } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { AlgPlaybackModal } from "./AlgPlaybackModal";
-import { STICKERING, VISUALIZATION_MODE, CAMERA, getDefaultVariant } from "../logic/algGroupConfig";
+import { getDefaultVariant } from "../logic/algGroupConfig";
+import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
 
 interface StatusMeta {
@@ -28,7 +29,8 @@ const STATUS_META: Record<LearningStatus, StatusMeta> = {
 
 export interface CaseCardProps {
   case_: AlgorithmCase;
-  group: AlgGroup;
+  /** The group's (or subgroup's) resolved display config — merged here with the case's own Advanced override, if any. */
+  groupDisplayConfig: DisplayConfig;
   /** Training and Attack track stats separately — which one's PB/Avg/Ao5 to show. */
   statsSource: AttemptSource;
   onStatusChange: (status: LearningStatus) => void;
@@ -38,10 +40,11 @@ export interface CaseCardProps {
   onSelect?: () => void;
 }
 
-export function CaseCard({ case_, group, statsSource, onStatusChange, onSelectedChange, onEdit, onSelect }: CaseCardProps) {
+export function CaseCard({ case_, groupDisplayConfig, statsSource, onStatusChange, onSelectedChange, onEdit, onSelect }: CaseCardProps) {
   const defaultVariant = getDefaultVariant(case_);
   const cleanAlg = defaultVariant?.alg.replace(/[()]/g, "").replace(/\s+/g, " ").trim() ?? "";
   const stats = defaultVariant ? computeVariantStatsForSource(defaultVariant.times, statsSource) : null;
+  const displayConfig: DisplayConfig = { ...groupDisplayConfig, ...case_.displayConfigOverride };
 
   const status: LearningStatus = defaultVariant?.learningStatus ?? "not-started";
   const meta = STATUS_META[status];
@@ -113,10 +116,10 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
         <div className="w-full aspect-square">
           <AlgCaseVisualisation
             alg={cleanAlg}
-            stickering={STICKERING[group]}
-            visualization={VISUALIZATION_MODE[group]}
-            cameraLatitude={CAMERA[group].latitude}
-            cameraLongitude={CAMERA[group].longitude}
+            visualization={displayConfig.cardVisualization}
+            cameraLatitude={displayConfig.cameraLatitude}
+            cameraLongitude={displayConfig.cameraLongitude}
+            {...resolveStickeringProps(displayConfig.stickering)}
             className="size-full"
           />
         </div>
@@ -153,7 +156,7 @@ export function CaseCard({ case_, group, statsSource, onStatusChange, onSelected
           title={case_.name}
           subtitle={defaultVariant.name}
           alg={defaultVariant.alg}
-          stickering={STICKERING[group]}
+          {...resolveStickeringProps(displayConfig.stickering)}
           onClose={() => setShowPlayback(false)}
         />
       )}

@@ -17,17 +17,20 @@
  */
 
 import { useEffect, useState } from "react";
-import { X, Star, Trash2, Plus, Check, ChevronLeft, ChevronRight, RotateCcw, ExternalLink, Play, Video } from "lucide-react";
-import type { AlgorithmCase, AlgorithmVariant, AlgGroup } from "../types/algorithm";
+import { X, Star, Trash2, Plus, Check, ChevronLeft, ChevronRight, RotateCcw, ExternalLink, Play, Video, ChevronDown } from "lucide-react";
+import type { AlgorithmCase, AlgorithmVariant, AlgGroup, DisplayConfig } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { VariantTest } from "./VariantTest";
+import { DisplayConfigFields } from "./DisplayConfigFields";
 import { formatTime } from "../logic/statistics";
-import { CAMERA, STICKERING, VISUALIZATION_MODE } from "../logic/algGroupConfig";
+import { resolveStickeringProps } from "../services/algGroupRegistry";
 
 interface CaseEditProps {
   case_: AlgorithmCase;
   group: AlgGroup;
+  /** The group's (or subgroup's) resolved display config — the baseline this case's Advanced section can override. */
+  groupDisplayConfig: DisplayConfig;
   onSave: (updated: AlgorithmCase) => void;
   onClose: () => void;
   /**
@@ -38,6 +41,8 @@ interface CaseEditProps {
    * one, so the draft and the flag can't be split.
    */
   onAutoSave?: (updated: AlgorithmCase) => void;
+  /** Deletes the whole case (not just a variant). Omit to hide the affordance. */
+  onDelete?: () => void;
   /** Jump to the previous case in the list (undefined = at the start). */
   onPrev?: () => void;
   /** Jump to the next case in the list (undefined = at the end). */
@@ -57,7 +62,7 @@ const EMPTY_FORM: NewVariantForm = { name: "", alg: "", youtubeUrl: "" };
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, onNext, position }: CaseEditProps) {
+export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, onAutoSave, onDelete, onPrev, onNext, position }: CaseEditProps) {
   const [variants, setVariants] = useState<AlgorithmVariant[]>(() => structuredClone(case_.algList));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBuf, setEditBuf] = useState<Partial<AlgorithmVariant>>({});
@@ -65,6 +70,11 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
   const [newForm, setNewForm] = useState<NewVariantForm>(EMPTY_FORM);
   const [confirmClearId, setConfirmClearId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmDeleteCase, setConfirmDeleteCase] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(Boolean(case_.displayConfigOverride));
+  const [overrideEnabled, setOverrideEnabled] = useState(Boolean(case_.displayConfigOverride));
+  const [overrideDraft, setOverrideDraft] = useState<DisplayConfig>(() => ({ ...groupDisplayConfig, ...case_.displayConfigOverride }));
+  const resolvedConfig: DisplayConfig = overrideEnabled ? overrideDraft : groupDisplayConfig;
   // "Try before you set as default" — opens the VariantTest popup (stacked
   // above this modal) for the picked variant's CURRENT draft algorithm,
   // including unsaved edits.
@@ -118,7 +128,7 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
   function setDefault(id: string) {
     const next = variants.map((v) => ({ ...v, isDefault: v.id === id }));
     setVariants(next);
-    onAutoSave?.({ ...case_, algList: next });
+    onAutoSave?.({ ...case_, algList: next, displayConfigOverride: overrideEnabled ? overrideDraft : undefined });
   }
 
   function startEdit(v: AlgorithmVariant) {
@@ -177,7 +187,7 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
   }
 
   function handleSave() {
-    onSave({ ...case_, algList: variants });
+    onSave({ ...case_, algList: variants, displayConfigOverride: overrideEnabled ? overrideDraft : undefined });
   }
 
   return (
@@ -226,10 +236,10 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
             <div className="w-36 h-36 rounded-xl overflow-hidden bg-gray-950/50">
               <AlgCaseVisualisation
                 alg={cleanPreviewAlg}
-                stickering={STICKERING[group]}
-                visualization={VISUALIZATION_MODE[group]}
-                cameraLatitude={CAMERA[group].latitude}
-                cameraLongitude={CAMERA[group].longitude}
+                visualization={resolvedConfig.cubeVisualization}
+                cameraLatitude={resolvedConfig.cameraLatitude}
+                cameraLongitude={resolvedConfig.cameraLongitude}
+                {...resolveStickeringProps(resolvedConfig.stickering)}
                 className="size-full"
               />
             </div>
@@ -305,16 +315,62 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
                 <Plus size={14} /> Add variant
               </button>
             )}
+
+            <div className="border-t border-white/[0.06] pt-3">
+              <button
+                onClick={() => setAdvancedOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                <ChevronDown size={12} className={`transition-transform ${advancedOpen ? "" : "-rotate-90"}`} />
+                Advanced{overrideEnabled ? " (overriding group display)" : ""}
+              </button>
+
+              {advancedOpen && (
+                <div className="mt-2 border border-white/10 rounded-xl p-3 space-y-3">
+                  <label className="flex items-center gap-2 text-xs text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={overrideEnabled}
+                      onChange={(e) => setOverrideEnabled(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded cursor-pointer"
+                      style={{ accentColor: "var(--accent)" }}
+                    />
+                    Override this case's display (e.g. mask specific slots, different camera)
+                  </label>
+                  {overrideEnabled && <DisplayConfigFields config={overrideDraft} onChange={setOverrideDraft} />}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-white/[0.06]">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors">
-            Cancel
-          </button>
-          <button onClick={handleSave} className="btn-primary">
-            <Check size={14} /> Save
-          </button>
+        <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-white/[0.06]">
+          <div>
+            {onDelete && (
+              <button
+                onClick={() => {
+                  if (!confirmDeleteCase) {
+                    setConfirmDeleteCase(true);
+                    return;
+                  }
+                  onDelete();
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl transition-colors ${
+                  confirmDeleteCase ? "text-red-400 bg-red-500/10" : "text-gray-500 hover:text-red-400"
+                }`}
+              >
+                <Trash2 size={14} /> {confirmDeleteCase ? "Click again to delete case" : "Delete case"}
+              </button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors">
+              Cancel
+            </button>
+            <button onClick={handleSave} className="btn-primary">
+              <Check size={14} /> Save
+            </button>
+          </div>
         </div>
       </div>
 
@@ -323,7 +379,7 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
           caseName={case_.name}
           variantName={testingVariant.name}
           alg={testingVariant.alg.replace(/[()]/g, "")}
-          group={group}
+          displayConfig={resolvedConfig}
           onClose={() => setTestingVariant(null)}
         />
       )}
@@ -333,7 +389,7 @@ export function CaseEdit({ case_, group, onSave, onClose, onAutoSave, onPrev, on
           title={case_.name}
           subtitle={playbackVariant.name}
           alg={playbackVariant.alg}
-          stickering={STICKERING[group]}
+          {...resolveStickeringProps(resolvedConfig.stickering)}
           onClose={() => setPlaybackVariant(null)}
         />
       )}
