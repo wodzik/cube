@@ -33,7 +33,7 @@ import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
 import { isCrossSolvedOnFace, type Face } from "../logic/stageDetection/lastLayerShared";
-import { isSlotSolved, type LiveCubeState } from "../logic/stageDetection/liveCubeState";
+import { isSlotSolved, applyMoveToState, type LiveCubeState } from "../logic/stageDetection/liveCubeState";
 import { getCrossEngine, MAX_CROSS_DEPTH, type CrossMoveAnalysis } from "../logic/trainer/crossEngine";
 import {
   crossStickeringMask,
@@ -822,6 +822,16 @@ function CaseTrainerInner() {
   }, [current, kpuzzle]);
   useStageSolvedDetection(stagePredicate, basePattern);
 
+  // Live-updated cube state (scramble + every move performed so far in this
+  // attempt) — used only by EOCross's per-edge good/bad coloring below. A
+  // handful of moves at most, so refolding from basePattern on every change
+  // is cheap; no need for the incremental-walker complexity
+  // useStageSolvedDetection uses internally for its own (timing-critical) purpose.
+  const livePattern = useMemo(() => {
+    if (!basePattern) return null;
+    return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), basePattern);
+  }, [basePattern, state.moveLog]);
+
   const stickeringMask = useMemo(() => {
     const type = current?.type ?? trainerType;
     switch (type) {
@@ -829,7 +839,7 @@ function CaseTrainerInner() {
       case "cross-case":
         return crossStickeringMask(TRAINER_FACE);
       case "eocross":
-        return eocrossStickeringMask(TRAINER_FACE);
+        return eocrossStickeringMask(TRAINER_FACE, livePattern ?? undefined);
       case "xxcross":
         return xxcrossStickeringMask(TRAINER_FACE, (current?.slot as XXCrossPair) ?? pair);
       case "fb":
@@ -850,7 +860,7 @@ function CaseTrainerInner() {
       default:
         return xcrossStickeringMask(TRAINER_FACE, (current?.slot as XCrossSlot) ?? slot);
     }
-  }, [current, trainerType, slot, pair, sides]);
+  }, [current, trainerType, slot, pair, sides, livePattern]);
 
   // Roux blocks live on the L/D faces — tilt the camera so they're visible.
   const isRouxView = ROUX_TYPES.includes(current?.type ?? trainerType);

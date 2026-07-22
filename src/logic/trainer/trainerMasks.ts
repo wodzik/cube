@@ -10,6 +10,7 @@
 
 import { FACE_SLOTS, type Face } from "../stageDetection/lastLayerShared";
 import { XXCROSS_PAIR_FRAMES, XCROSS_SLOT_FRAMES, type XCrossSlot, type XXCrossPair } from "./xcrossFrames";
+import type { LiveCubeState } from "../stageDetection/liveCubeState";
 import type { FaceletMask, StickeringMaskOrbits } from "../../types/cube";
 
 /** Exported for logic/maskPieceGroups.ts — the Practice group mask picker composes piece-groups the same way. */
@@ -144,9 +145,33 @@ export function rouxBlocksStickeringMask(hideTopCorners: boolean): StickeringMas
   };
 }
 
-/** Cross edges in full color; every other edge orientation-only. */
-export function eocrossStickeringMask(face: Face): StickeringMaskOrbits {
+/**
+ * Cross edges in full color; every other edge orientation-only. Without
+ * `liveState`, "orientation-only" is cubing.js's single static teal marker
+ * (its "oriented" facelet colors every masked piece identically, regardless
+ * of whether it's actually flipped correctly right now — see FaceletMask) —
+ * used as a fallback for callers with no live cube state (e.g. a tab icon).
+ * With `liveState`, each non-cross edge is colored per its ACTUAL current
+ * orientation: teal ("oriented") if good, tan ("experimentalOriented2", the
+ * other fixed marker color cubing.js exposes) if it still needs flipping —
+ * real per-piece feedback, recomputed by the caller after every move.
+ */
+export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): StickeringMaskOrbits {
   const crossEdges = new Set(FACE_SLOTS[face].edgeSlots);
-  const others = new Set(Array.from({ length: 12 }, (_, i) => i).filter((i) => !crossEdges.has(i)));
-  return pieceMask(crossEdges, new Set(), others);
+  if (!liveState) {
+    const others = new Set(Array.from({ length: 12 }, (_, i) => i).filter((i) => !crossEdges.has(i)));
+    return pieceMask(crossEdges, new Set(), others);
+  }
+  const orientation = liveState.patternData.EDGES.orientation;
+  const edge = (p: number): FaceletMask => {
+    if (crossEdges.has(p)) return "regular";
+    return orientation[p] === 0 ? "oriented" : "experimentalOriented2";
+  };
+  return {
+    orbits: {
+      EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },
+      CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["ignored", "ignored", "ignored"] })) },
+      CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })) },
+    },
+  };
 }

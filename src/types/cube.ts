@@ -74,8 +74,14 @@ export interface PhysicalMove {
 /** TwistyPlayer visualisation modes */
 export type VisualizationMode = "3D" | "2D" | "PG3D" | "experimental-2D-LL";
 
-/** One facelet's rendering in a piece-level stickering mask. */
-export type FaceletMask = "regular" | "dim" | "oriented" | "ignored" | "invisible";
+/**
+ * One facelet's rendering in a piece-level stickering mask. "oriented" and
+ * "experimentalOriented2" are cubing.js's two distinct fixed marker colors
+ * (teal / tan) — not derived from the piece's real color, and not dynamic on
+ * their own; a caller who wants to show live good/bad orientation state
+ * (e.g. EOCross) picks between the two per piece, per move, itself.
+ */
+export type FaceletMask = "regular" | "dim" | "oriented" | "experimentalOriented2" | "ignored" | "invisible";
 
 /**
  * Piece-level stickering mask for TwistyPlayer's
