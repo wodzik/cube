@@ -1273,6 +1273,7 @@ function CaseTrainerInner() {
       progress={progress}
       showRefresh
       onRefresh={regenerate}
+      loading={isGenerating}
       loadingText={loadingText}
       sequenceTop={
         info || (summary && state.phase === "setup") ? (

@@ -40,6 +40,14 @@ interface MoveSequenceDisplayProps {
   totalErrorCount?: number;
   onReset?: () => void;
   showErrorCount?: boolean;
+  /**
+   * Force the loading overlay even when `moves` is non-empty — without this,
+   * a regenerating scramble/algorithm keeps showing the PREVIOUS (stale)
+   * tokens looking perfectly normal, inviting someone to start performing
+   * an about-to-be-replaced sequence. Dims the stale tokens behind a
+   * spinner + loadingText instead of just swapping them out blind.
+   */
+  loading?: boolean;
   loadingText?: string;
   completeText?: string;
   errorLabel?: string;
@@ -65,6 +73,7 @@ export function MoveSequenceDisplay({
   totalErrorCount = 0,
   onReset,
   showErrorCount = false,
+  loading = false,
   loadingText,
   completeText = "Complete!",
   errorLabel = "Undo:",
@@ -74,7 +83,10 @@ export function MoveSequenceDisplay({
   const hasErrors = (progress?.correctionSequence.length ?? 0) > 0;
   const isComplete = progress?.isCompleted ?? false;
   const tooManyErrors = maxErrors > 0 && (progress?.correctionSequence.length ?? 0) >= maxErrors;
-  const isLoading = moves.length === 0 && loadingText !== undefined;
+  const showLoadingOverlay = loadingText !== undefined && (loading || moves.length === 0);
+  // Distinct from showLoadingOverlay: only true when there ARE stale moves
+  // underneath to dim (vs. the very first load, nothing to overlay onto).
+  const dimStaleMoves = showLoadingOverlay && moves.length > 0;
 
   const repairAlgorithm =
     progress && progress.correctionSequence.length > 0 ? progress.correctionSequence.join(" ") : null;
@@ -90,11 +102,15 @@ export function MoveSequenceDisplay({
   const showErrorIndicator = hasErrors && !tooManyErrors && repairAlgorithm;
 
   return (
-    <div className={`scramble-card ${className}`}>
-      <div className="scramble-layout">
+    <div className={`scramble-card ${className} ${showLoadingOverlay && moves.length === 0 ? "min-h-16" : ""}`}>
+      {showLoadingOverlay && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-gray-950/70 backdrop-blur-sm">
+          <RefreshCw size={16} className="text-gray-500 animate-spin" />
+          <span className="text-sm font-medium text-gray-400">{loadingText}</span>
+        </div>
+      )}
+      <div className={`scramble-layout ${dimStaleMoves ? "opacity-30 blur-[1px] pointer-events-none select-none" : ""}`}>
         <div className="scramble-display">
-          {isLoading && <span className="scramble-loading">{loadingText}</span>}
-
           {tooManyErrors && (
             <div className="scramble-error-overlay">
               <span className="error-text">Too many errors!</span>

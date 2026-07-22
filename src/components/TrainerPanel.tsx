@@ -38,6 +38,8 @@ export interface TrainerPanelProps {
   maxErrors?: number;
   totalErrorCount?: number;
   onReset?: () => void;
+  /** Force the scramble/algorithm loading overlay even while `moves` still shows the previous (stale) sequence — see MoveSequenceDisplay. */
+  loading?: boolean;
   loadingText?: string;
   completeText?: string;
   /** Show the eye icon that toggles maskMoves. */
@@ -121,6 +123,7 @@ export function TrainerPanel({
   maxErrors,
   totalErrorCount,
   onReset,
+  loading,
   loadingText,
   completeText,
   showMaskToggle,
@@ -183,6 +186,7 @@ export function TrainerPanel({
                   maxErrors={maxErrors}
                   totalErrorCount={totalErrorCount}
                   onReset={onReset}
+                  loading={loading}
                   loadingText={loadingText}
                   completeText={completeText}
                   showMaskToggle={showMaskToggle}
