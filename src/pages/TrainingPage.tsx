@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Video, ChevronLeft } from "lucide-react";
+import { Video, ChevronLeft, ListChecks } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -369,6 +369,14 @@ function TrainingPageInner() {
         flatCubeRef={flatCubeRef}
         showFlatView={viewPrefs.flatView}
         cubeToolbar={<CaseViewToggles {...viewPrefs} />}
+        cubeOverlay={
+          !currentCase ? (
+            <div className="flex flex-col items-center gap-2 px-6 text-center">
+              <ListChecks size={20} className="text-gray-500" />
+              <span className="text-sm font-medium text-gray-400">Select cases below to begin practicing</span>
+            </div>
+          ) : undefined
+        }
         cameraLatitude={displayConfig.cameraLatitude}
         cameraLongitude={displayConfig.cameraLongitude}
         cubeSetupAlg=""
