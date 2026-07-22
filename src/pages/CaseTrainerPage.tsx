@@ -822,15 +822,24 @@ function CaseTrainerInner() {
   }, [current, kpuzzle]);
   useStageSolvedDetection(stagePredicate, basePattern);
 
-  // Live-updated cube state (scramble + every move performed so far in this
-  // attempt) — used only by EOCross's per-edge good/bad coloring below. A
-  // handful of moves at most, so refolding from basePattern on every change
-  // is cheap; no need for the incremental-walker complexity
-  // useStageSolvedDetection uses internally for its own (timing-critical) purpose.
+  // Live-updated cube state (scramble + every solve move performed so far)
+  // — used only by EOCross's per-edge good/bad coloring below. basePattern
+  // is the PRE-scramble snapshot (see startNextAttempt), so the scramble
+  // itself has to be folded on first — moveLog does NOT include it: the
+  // reducer resets moveLog to just the new move the instant the
+  // scramble-tracking phase ("setup") completes (handleFirstFreeSolveMove),
+  // same as useStageSolvedDetection's own walker above assumes. Skipping
+  // that step (as an earlier version of this did) silently used the
+  // PRE-scramble state instead, which happened to still produce a
+  // plausible-looking but wrong pattern. A handful of moves at most, so
+  // refolding from scratch on every change is cheap.
   const livePattern = useMemo(() => {
     if (!basePattern) return null;
-    return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), basePattern);
-  }, [basePattern, state.moveLog]);
+    const scrambleTokens = state.targetNotation.trim().split(/\s+/).filter(Boolean);
+    const scrambled = scrambleTokens.reduce((s, m) => applyMoveToState(s, m), basePattern);
+    if (state.phase !== "active" && state.phase !== "done") return scrambled;
+    return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), scrambled);
+  }, [basePattern, state.targetNotation, state.moveLog, state.phase]);
 
   const stickeringMask = useMemo(() => {
     const type = current?.type ?? trainerType;

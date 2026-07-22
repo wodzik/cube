@@ -152,9 +152,10 @@ export function rouxBlocksStickeringMask(hideTopCorners: boolean): StickeringMas
  * of whether it's actually flipped correctly right now — see FaceletMask) —
  * used as a fallback for callers with no live cube state (e.g. a tab icon).
  * With `liveState`, each non-cross edge is colored per its ACTUAL current
- * orientation: teal ("oriented") if good, tan ("experimentalOriented2", the
- * other fixed marker color cubing.js exposes) if it still needs flipping —
- * real per-piece feedback, recomputed by the caller after every move.
+ * orientation: teal ("oriented") if good, salmon-pink ("mystery", the
+ * closest to red among cubing.js's other fixed marker colors) if it still
+ * needs flipping — real per-piece feedback, recomputed by the caller after
+ * every move.
  */
 export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): StickeringMaskOrbits {
   const crossEdges = new Set(FACE_SLOTS[face].edgeSlots);
@@ -165,7 +166,7 @@ export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): St
   const orientation = liveState.patternData.EDGES.orientation;
   const edge = (p: number): FaceletMask => {
     if (crossEdges.has(p)) return "regular";
-    return orientation[p] === 0 ? "oriented" : "experimentalOriented2";
+    return orientation[p] === 0 ? "oriented" : "mystery";
   };
   return {
     orbits: {
