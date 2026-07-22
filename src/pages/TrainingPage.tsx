@@ -20,9 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Video, ChevronLeft, ListChecks, RotateCcw } from "lucide-react";
-import { cube3x3x3 } from "cubing/puzzles";
-import type { KPuzzle, KTransformation } from "cubing/kpuzzle";
+import { Video, ChevronLeft, ListChecks } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -58,7 +56,6 @@ import { useMaskMoves } from "../hooks/useMaskMoves";
 import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
 import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
-import { detectDriftRotation } from "../logic/trainer/driftRotation";
 import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AlgorithmListView } from "../components/AlgorithmListView";
@@ -113,27 +110,6 @@ function TrainingPageInner() {
   const [showCaseAdd, setShowCaseAdd] = useState(false);
   /** When the active group hasSubgroups: null = browsing the folder grid, set = drilled into one subgroup's own case list. */
   const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(null);
-
-  // Physical cube orientation tracking — M-slice-heavy Roux algorithms (and
-  // others) can rotate the U/F/D/B centers as a group even when correctly
-  // performed, leaving the user's real cube's centers "drifted" from
-  // canonical. Every hardware move is accumulated here (never reset except
-  // via Resync) so each new case's displayed setup can be shown in whatever
-  // orientation the real cube is currently in, instead of always assuming
-  // canonical white-up/green-front and forcing a regrip.
-  const [kpuzzle, setKpuzzle] = useState<KPuzzle | null>(null);
-  const physicalRef = useRef<KTransformation | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    cube3x3x3.kpuzzle().then((kp) => {
-      if (cancelled) return;
-      physicalRef.current = kp.identityTransformation();
-      setKpuzzle(kp);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const groupMeta = getGroupMeta(group);
   const activeSubgroup = groupMeta?.hasSubgroups ? groupMeta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
   const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
@@ -167,14 +143,6 @@ function TrainingPageInner() {
     setCases([]);
     setCaseIdx(0);
     moveBuffer.clear();
-  };
-
-  /** Declare the physical cube solved (canonical orientation) again — recovery for drift/tracking loss. */
-  const resyncCube = () => {
-    if (!kpuzzle) return;
-    physicalRef.current = kpuzzle.identityTransformation();
-    moveBuffer.clear();
-    setDrillRound((r) => r + 1);
   };
 
   const selectedCases = useMemo(() => cases.filter((c) => c.selected), [cases]);
@@ -222,9 +190,7 @@ function TrainingPageInner() {
     setTarget(variant.alg);
     view.reset();
     const inv = invertAlg(variant.alg);
-    const drift = kpuzzle && physicalRef.current ? detectDriftRotation(kpuzzle, physicalRef.current) : "";
-    const setupAlg = [drift, inv].filter(Boolean).join(" ");
-    if (setupAlg) view.setSetupAlgorithm(setupAlg, "");
+    if (inv) view.setSetupAlgorithm(inv, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —
     // replay them now that the target is armed, stopping if they complete it
@@ -238,14 +204,10 @@ function TrainingPageInner() {
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant?.id, drillRound, kpuzzle]);
+  }, [variant?.id, drillRound]);
 
   const cube = useSmartCube({
     onMove: (move, timestamp) => {
-      // Tracked unconditionally — even moves made while the edit modal is
-      // open are real turns of the user's physical cube, so orientation
-      // drift must still follow them.
-      if (physicalRef.current) physicalRef.current = physicalRef.current.applyMove(move);
       // While the edit modal is open, moves belong to IT (its VariantTest
       // popup runs its own listener/session) — feeding them into the drill
       // underneath would advance/record the background case unnoticed.
@@ -329,18 +291,7 @@ function TrainingPageInner() {
             activeId={group}
             onSelect={setGroup}
             managementEnabled
-            rightSlot={
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={resyncCube}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-                  title="My physical cube is solved — restart orientation tracking from it"
-                >
-                  <RotateCcw size={12} /> Resync
-                </button>
-                <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
-              </div>
-            }
+            rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
           />
         </div>
         <SubgroupGrid
@@ -363,14 +314,7 @@ function TrainingPageInner() {
               <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
                 <ChevronLeft size={13} /> {activeSubgroup.name}
               </button>
-              <div className="ml-auto flex items-center gap-2 shrink-0">
-                <button
-                  onClick={resyncCube}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-                  title="My physical cube is solved — restart orientation tracking from it"
-                >
-                  <RotateCcw size={12} /> Resync
-                </button>
+              <div className="ml-auto shrink-0">
                 <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
               </div>
             </div>
@@ -380,18 +324,7 @@ function TrainingPageInner() {
                 activeId={group}
                 onSelect={setGroup}
                 managementEnabled
-                rightSlot={
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={resyncCube}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-                      title="My physical cube is solved — restart orientation tracking from it"
-                    >
-                      <RotateCcw size={12} /> Resync
-                    </button>
-                    <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
-                  </div>
-                }
+                rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
               />
             </div>
           )
