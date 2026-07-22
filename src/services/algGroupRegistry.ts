@@ -230,6 +230,17 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     }
   }
 
+  // Same idea for Winter/Summer Variation, which shipped as Roux — moved to
+  // Other (they don't fit CFOP/Roux specifically, same reasoning as COLL/ZBLL/J-Perm above).
+  for (const id of ["winter-variation", "summer-variation"]) {
+    const i = next.findIndex((g) => g.id === id);
+    if (i >= 0 && next[i].category === "Roux") {
+      next = [...next];
+      next[i] = { ...next[i], category: "Other" };
+      changed = true;
+    }
+  }
+
   // One-time curated-defaults backfill: Attack used to default every
   // (subgroup-less) group to available unless explicitly opted out. The new
   // default is the reverse — only OLL/PLL start available — so anything that
@@ -356,9 +367,9 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
       cameraLongitude: 20,
     },
   },
-  { id: "winter-variation", name: "Winter Variation", category: "Roux", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "winter-variation", name: "Winter Variation", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Summer Variation — same technique family and stickering as Winter Variation (both are single-canonical-slot Roux edge-orientation tricks).
-  { id: "summer-variation", name: "Summer Variation", category: "Roux", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "summer-variation", name: "Summer Variation", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Second Block Last Slot: same view as CMLL, but with the top layer
   // hidden entirely (`true`) — the top corners are still scrambled at
   // this stage, so showing them would be misleading, not helpful.
