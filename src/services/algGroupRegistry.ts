@@ -35,6 +35,7 @@ import {
 } from "../logic/caseMutations";
 import zbllJson from "../algs/zbll.json";
 import advancedF2lJson from "../algs/advanced-f2l.json";
+import vlsJson from "../algs/vls.json";
 
 const REGISTRY_KEY = "nact_alg_groups";
 
@@ -138,6 +139,27 @@ function buildAdvancedF2LMeta(): AlgGroupMeta {
   };
 }
 
+/** VLS (Valk's Last Slot — last F2L slot + partial edge orientation, front-right slot only per subgroup, same single-canonical-slot convention as Winter/Summer Variation). Subgroups are which edges are still misoriented after the insert. */
+function buildVlsMeta(): AlgGroupMeta {
+  const subgroups: AlgSubgroup[] = (vlsJson as { subgroups: RawSubgroup[] }).subgroups.map((sg) => ({
+    id: sg.id,
+    name: sg.name,
+    previewAlg: sg.previewAlg,
+    cases: hydrateCasesFromRaw(sg.cases, sg.id),
+  }));
+  return {
+    id: "vls",
+    name: "VLS",
+    isBuiltIn: true,
+    // Combined F2L-slot + edge-orientation view, same reasoning as Winter/Summer Variation's OLL-style stickering.
+    displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 },
+    category: "Other",
+    previewAlg: subgroups[0]?.previewAlg ?? "",
+    hasSubgroups: true,
+    subgroups,
+  };
+}
+
 /** Built-ins added after initial release don't exist in an already-seeded registry — inject/migrate them once, self-healing, same idea as migrateDisplayConfig above. */
 function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   let next = groups;
@@ -158,6 +180,11 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
 
   if (!next.some((g) => g.id === "advanced-f2l")) {
     next = [...next, buildAdvancedF2LMeta()];
+    changed = true;
+  }
+
+  if (!next.some((g) => g.id === "vls")) {
+    next = [...next, buildVlsMeta()];
     changed = true;
   }
 
@@ -477,6 +504,7 @@ const BUILT_IN_ORDER = [
   "anti-pll",
   "edges-of-the-last-layer",
   "corners-last-slot",
+  "vls",
   "f2l-advanced",
   "zbll",
 ];
@@ -511,6 +539,8 @@ export function resetBuiltInGroup(id: string): void {
     updateGroupMeta(id, { subgroups: buildZbllMeta().subgroups });
   } else if (id === "advanced-f2l") {
     updateGroupMeta(id, { subgroups: buildAdvancedF2LMeta().subgroups });
+  } else if (id === "vls") {
+    updateGroupMeta(id, { subgroups: buildVlsMeta().subgroups });
   } else if (id === "f2l") {
     F2L_SLOT_IDS.forEach(resetAlgGroup);
     updateGroupMeta(id, { subgroups: buildF2LMeta().subgroups });
