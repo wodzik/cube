@@ -29,6 +29,9 @@ import f2lFrontLeftJson from "../algs/f2l-front-left.json";
 import f2lBackRightJson from "../algs/f2l-back-right.json";
 import f2lBackLeftJson from "../algs/f2l-back-left.json";
 import f2lAdvancedJson from "../algs/f2l-advanced.json";
+import collJson from "../algs/coll.json";
+import cmllJson from "../algs/cmll.json";
+import winterVariationJson from "../algs/winter-variation.json";
 
 function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
@@ -81,6 +84,9 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   "f2l-back-right": f2lBackRightJson,
   "f2l-back-left": f2lBackLeftJson,
   "f2l-advanced": f2lAdvancedJson,
+  coll: collJson,
+  cmll: cmllJson,
+  "winter-variation": winterVariationJson,
 };
 
 function loadFromJson(group: AlgGroup): AlgorithmCase[] {

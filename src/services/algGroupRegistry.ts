@@ -166,6 +166,18 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     changed = true;
   }
 
+  // Any other flat built-in added after initial release (e.g. COLL/CMLL/
+  // Winter Variation) — append whichever of BUILT_IN_SEED isn't in the
+  // registry yet. BUILT_IN_SEED is declared further down this module but
+  // this function's body only runs when called (via listGroups()), by
+  // which point the whole module has finished initializing.
+  for (const seed of BUILT_IN_SEED) {
+    if (!next.some((g) => g.id === seed.id)) {
+      next = [...next, { id: seed.id, name: seed.name, isBuiltIn: true, displayConfig: seed.displayConfig, hasSubgroups: false }];
+      changed = true;
+    }
+  }
+
   if (changed) writeRegistry(next);
   return next;
 }
@@ -174,6 +186,21 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
 const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[] = [
   { id: "oll", name: "OLL", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "pll", name: "PLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // COLL solves LL corner orientation+permutation together — full-info PLL-style stickering (same reason PLL needs it: permutation matters, not just orientation).
+  { id: "coll", name: "COLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // CMLL (Roux) only cares about the 4 top corners — mask to just those (top edges + everything else greyed out), not a named scheme.
+  {
+    id: "cmll",
+    name: "CMLL",
+    displayConfig: {
+      stickering: { kind: "mask", pieceGroups: ["u-corners"] },
+      cardVisualization: "experimental-2D-LL",
+      cubeVisualization: "3D",
+      cameraLatitude: 20,
+      cameraLongitude: 20,
+    },
+  },
+  { id: "winter-variation", name: "Winter Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "f2l-advanced", name: "F2L Adv", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
 ];
 
@@ -244,7 +271,7 @@ function seedRegistry(): AlgGroupMeta[] {
 }
 
 /** Fixed display order for the built-ins — everything else (user-created groups) sorts after, in creation order. */
-const BUILT_IN_ORDER = ["f2l", "oll", "pll", "f2l-advanced", "advanced-f2l", "zbll"];
+const BUILT_IN_ORDER = ["f2l", "oll", "pll", "coll", "cmll", "winter-variation", "f2l-advanced", "advanced-f2l", "zbll"];
 
 function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   // Array.prototype.sort is stable (ES2019+), so custom groups (index -1,
