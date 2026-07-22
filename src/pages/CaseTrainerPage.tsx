@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
+import { Eye, Lightbulb, RefreshCw, Repeat2, RotateCcw, Trash2, TrendingUp } from "lucide-react";
 import { cube3x3x3 } from "cubing/puzzles";
 import type { KPuzzle, KTransformation } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
@@ -1320,6 +1320,18 @@ function CaseTrainerInner() {
       flatCubeRef={flatCubeRef}
       showFlatView={flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}
+      cubeOverlay={
+        // Without this the cube keeps showing the PREVIOUS type's stale
+        // scramble/mask while a new one generates — most noticeable (and
+        // most misleading) on the first-ever use of a type, when it can sit
+        // for a couple of seconds building the or18 WASM engine's tables.
+        isGenerating ? (
+          <div className="flex flex-col items-center gap-2 px-6 text-center">
+            <RefreshCw size={20} className="text-gray-500 animate-spin" />
+            <span className="text-sm font-medium text-gray-400">{loadingText}</span>
+          </div>
+        ) : undefined
+      }
       cameraLatitude={isRouxView ? -25 : undefined}
       cameraLongitude={isRouxView ? -35 : undefined}
       timesMs={lengthAttempts.map((a) => a.timeMs)}

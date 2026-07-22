@@ -87,6 +87,14 @@ export interface TrainerPanelProps {
   showFlatView?: boolean;
   /** Rendered under the cube (below the flat view) — e.g. the back-stickers / flat-view toggles. */
   cubeToolbar?: ReactNode;
+  /**
+   * Rendered as a full-cover overlay directly on top of the cube (dimming
+   * it) — e.g. a "Preparing engine…" state while a trainer regenerates for
+   * a newly-picked type. Without this the cube keeps showing the PREVIOUS
+   * type's scramble/mask (stale, sometimes actively misleading) until the
+   * new one is ready, since the cube itself has no other loading affordance.
+   */
+  cubeOverlay?: ReactNode;
   cameraLatitude?: number;
   cameraLongitude?: number;
   cubeSetupAlg?: string;
@@ -145,6 +153,7 @@ export function TrainerPanel({
   flatCubeRef,
   showFlatView = false,
   cubeToolbar,
+  cubeOverlay,
   cameraLatitude,
   cameraLongitude,
   cubeSetupAlg,
@@ -207,7 +216,7 @@ export function TrainerPanel({
       }
       cube={
         <div className="w-full max-w-90 lg:max-w-none flex flex-col items-center">
-          <div className="w-full aspect-square">
+          <div className="relative w-full aspect-square">
             <CubeVisualisation
               ref={cubeRef}
               visualization={visualization}
@@ -225,6 +234,11 @@ export function TrainerPanel({
               alg={cubeAlg}
               className="size-full"
             />
+            {cubeOverlay && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-gray-950/70 backdrop-blur-sm">
+                {cubeOverlay}
+              </div>
+            )}
           </div>
           {flatCubeRef && (
             <div className={`w-full h-48 sm:h-64 -mt-4 ${showFlatView ? "" : "hidden"}`}>
