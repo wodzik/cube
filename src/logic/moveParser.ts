@@ -441,30 +441,6 @@ export function finalOrientationAfterAlg(alg: string, initialOrientation?: Orien
 }
 
 /**
- * The whole-cube PHYSICAL rotation a single move token implies, as a
- * standard rotation move string (e.g. "x'", "y2") — "" for a plain face
- * turn, which has no rotation component.
- *
- * decomposeMove's rotation.power is in the INTERNAL "code" convention
- * documented above applyRotation (code-x/z match physical x/z directly,
- * code-y is physical y' — see algToPhysicalMoves docstring) for slice/wide
- * tokens specifically; a literal rotation token (x/y/z in the alg text) is
- * already physical. Verified exhaustively: physicalMoves + this rotation,
- * applied in sequence, reproduces the original token's exact effect for
- * all of M/M'/M2/E/E'/E2/S/S'/S2, all 12 wide-move variants, and x/y/z/'/2.
- */
-export function physicalRotationFor(move: string): string {
-  const parsed = parseMove(move);
-  const decomp = decomposeMove(move);
-  if (!decomp.rotation) return "";
-  let power = decomp.rotation.power;
-  if ((parsed?.isWide || parsed?.isSlice) && decomp.rotation.axis === "y") {
-    power = (4 - power) % 4;
-  }
-  return createMoveStr(decomp.rotation.axis, power) ?? "";
-}
-
-/**
  * Convert physical moves back to a string representation.
  *
  * @param moves - Array of physical moves

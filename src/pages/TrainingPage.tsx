@@ -24,7 +24,7 @@ import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence, physicalRotationFor, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
+import { invertSequence, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 import { rotationStringForOrientation } from "../logic/trainer/driftRotation";
 import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
@@ -243,13 +243,10 @@ function TrainingPageInner() {
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
   const displayConfig = resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig, currentCase?.displayConfigOverride);
 
-  /** Rotation move (e.g. "x'") to apply to the VISUAL cube per algorithm-token index, once that token completes — empty for plain face turns. Only meaningful while trackingEnabled. */
-  const tokenRotations = useMemo(
-    () => (variant ? variant.alg.trim().split(/\s+/).filter(Boolean).map(physicalRotationFor) : []),
-    [variant?.id]
-  );
-  /** Highest completed-token index whose compensating rotation has already been applied to the view this attempt. */
-  const processedRotationIndexRef = useRef(-1);
+  /** The algorithm's own tokens, exactly as written — fed to the view one at a time as each completes (see the animation effect below), never the raw decomposed hardware sub-moves. */
+  const algTokens = useMemo(() => (variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : []), [variant?.id]);
+  /** Highest completed-token index already animated onto the view this attempt. */
+  const animatedTokenIndexRef = useRef(-1);
 
   // Load the case's algorithm as the target, and pre-set the cube to its
   // scrambled state, whenever the case (or its variant) changes — or the
@@ -260,7 +257,7 @@ function TrainingPageInner() {
     const initialOrientation = trackingEnabled ? accumulatedOrientation : undefined;
     setTarget(variant.alg, initialOrientation);
     view.reset();
-    processedRotationIndexRef.current = -1;
+    animatedTokenIndexRef.current = -1;
     const inv = invertAlg(variant.alg);
     const drift = trackingEnabled ? rotationStringForOrientation(accumulatedOrientation) : "";
     const setupAlg = [drift, inv].filter(Boolean).join(" ");
@@ -275,7 +272,6 @@ function TrainingPageInner() {
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
-      view.addMove(move);
       delivered.push(move);
       return !computeSequenceProgress(flushTarget, delivered).isCompleted;
     });
@@ -293,7 +289,9 @@ function TrainingPageInner() {
       // back-to-back executions used to desync here).
       if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
-      view.addMove(move);
+      // The VISUAL cube is driven separately, by logical token completion
+      // (see the effect below) — NOT by forwarding this raw hardware move
+      // directly. See that effect's comment for why.
     },
   });
 
@@ -362,26 +360,41 @@ function TrainingPageInner() {
   const moveCount = selectMoveCount(state);
   const targetTokens = variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : [];
 
-  // Live orientation correction: the physical smart cube reports M/E/S as
-  // their DECOMPOSED outer-face sub-moves (e.g. M' fires R' then L — see
-  // moveParser's SLICE_CONFIG), so the visual cube animates those literally
-  // and its centers never move, even though the real M'-slice turn just
-  // rotated them. The moment a slice/wide/rotation TOKEN in the known
-  // target completes (both its physical sub-moves landed), replay the
-  // compensating whole-cube rotation onto the view ONLY — never onto
-  // submitCubeMove/the target, which stay in raw hardware terms.
+  // Drive the VISUAL cube by completed LOGICAL TOKENS, never by forwarding
+  // raw hardware moves directly (as the onMove handler used to). Two
+  // reasons, both confirmed by direct kpuzzle verification:
+  //  1. The physical smart cube reports M/E/S as their DECOMPOSED
+  //     outer-face sub-moves (e.g. M' fires R' then L — see moveParser's
+  //     SLICE_CONFIG) — animating those literally moves the WRONG pieces
+  //     (a real R/L turn, not a slice turn) and never touches centers.
+  //  2. An earlier fix animated the raw sub-moves AND separately inserted
+  //     a compensating rotation once each token completed — this looked
+  //     right for a single isolated token, but the recognition fix (that
+  //     the SAME token's compensating rotation was already needed for)
+  //     means EVERY SUBSEQUENT token's raw hardware letter is ALSO already
+  //     computed relative to the shifted frame (see algToPhysicalMoves) —
+  //     so applying that shifted letter on top of an ALREADY explicitly
+  //     rotated view double-counts the shift, corrupting the display more
+  //     with every slice/wide token (verified live: a fully, correctly
+  //     recognized "2 Top 2 Bot" left the cube visibly NOT solved).
+  // Feeding the algorithm's own token text directly sidesteps both: it's
+  // exactly what kpuzzle's own move definitions do (verified — trivially
+  // correct, no decomposition/recomposition involved), so it can't diverge
+  // from the target's own true effect no matter how many tokens chain.
+  // Applies UNCONDITIONALLY (not gated by the Centers toggle) — this is a
+  // general animation-correctness fix, not cross-case orientation tracking.
   useEffect(() => {
-    if (!trackingEnabled || !progress) return;
-    let maxIdx = processedRotationIndexRef.current;
+    if (!progress) return;
+    let maxIdx = animatedTokenIndexRef.current;
     for (const idx of progress.completedIndices) {
-      if (idx <= processedRotationIndexRef.current) continue;
-      const rot = tokenRotations[idx];
-      if (rot) view.addMove(rot);
+      if (idx <= animatedTokenIndexRef.current) continue;
+      const token = algTokens[idx];
+      if (token) view.addMove(token);
       if (idx > maxIdx) maxIdx = idx;
     }
-    processedRotationIndexRef.current = maxIdx;
+    animatedTokenIndexRef.current = maxIdx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress?.completedCount, trackingEnabled]);
+  }, [progress?.completedCount]);
 
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
