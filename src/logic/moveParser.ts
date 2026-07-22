@@ -355,17 +355,30 @@ export function decomposeMove(move: string): DecompositionResult {
  * @param initialOrientation - Starting orientation (default: identity)
  * @returns Array of physical moves with face, power, and original token index
  */
-export function algToPhysicalMoves(
+/** Identity hardware↔logical face mapping — no orientation shift yet. */
+export function identityOrientation(): Orientation {
+  return { U: "U" as Face, D: "D" as Face, F: "F" as Face, B: "B" as Face, R: "R" as Face, L: "L" as Face };
+}
+
+/**
+ * Shared core of algToPhysicalMoves — also returns the FINAL orientation
+ * after all tokens, needed to carry the hardware-frame shift forward across
+ * a target boundary (e.g. into the NEXT algorithm's own setTarget call), so
+ * a solver who doesn't regrip between back-to-back algorithms still gets
+ * correctly recognized: without this, a net-nonzero rotation left by one
+ * algorithm's own M/wide/rotation content (verified: NOT guaranteed to
+ * cancel to identity by an algorithm's own end) would silently desync the
+ * next algorithm's letter→hardware mapping, which always assumes a fresh
+ * identity frame otherwise.
+ */
+function walkAlgOrientation(
   alg: string,
   initialOrientation?: Orientation
-): PhysicalMove[] {
+): { physicalMoves: PhysicalMove[]; orientation: Orientation } {
   const tokens = alg.trim().split(/\s+/).filter(Boolean);
   const result: PhysicalMove[] = [];
 
-  let orientation: Orientation = initialOrientation ?? {
-    U: "U" as Face, D: "D" as Face, F: "F" as Face,
-    B: "B" as Face, R: "R" as Face, L: "L" as Face,
-  };
+  let orientation: Orientation = initialOrientation ?? identityOrientation();
 
   // Applied only after wide moves — see docstring for why pure rotations are excluded.
   const applyRotation = (axis: Rotation, times: number) => {
@@ -412,7 +425,19 @@ export function algToPhysicalMoves(
     }
   }
 
-  return result;
+  return { physicalMoves: result, orientation };
+}
+
+export function algToPhysicalMoves(
+  alg: string,
+  initialOrientation?: Orientation
+): PhysicalMove[] {
+  return walkAlgOrientation(alg, initialOrientation).physicalMoves;
+}
+
+/** The hardware-frame orientation left behind after alg, starting from initialOrientation (identity by default) — see walkAlgOrientation. */
+export function finalOrientationAfterAlg(alg: string, initialOrientation?: Orientation): Orientation {
+  return walkAlgOrientation(alg, initialOrientation).orientation;
 }
 
 /**

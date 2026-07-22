@@ -1,4 +1,5 @@
 import type { SessionConfig, StartMethod, StopMethod } from "../types/session";
+import type { Orientation } from "../types/cube";
 
 export enum ActionType {
   CONFIGURE = "CONFIGURE",
@@ -15,7 +16,11 @@ export enum ActionType {
 
 export type SessionAction =
   | { type: ActionType.CONFIGURE; config: SessionConfig }
-  | { type: ActionType.TARGET_READY; targetNotation: string }
+  // initialOrientation: carries a hardware-frame shift forward across a
+  // target boundary (e.g. from one algorithm's own net M/wide/rotation
+  // content into the NEXT one) — see moveParser's finalOrientationAfterAlg.
+  // Undefined defaults to identity, matching all prior behavior.
+  | { type: ActionType.TARGET_READY; targetNotation: string; initialOrientation?: Orientation }
   | { type: ActionType.CUBE_MOVE; move: string; timestamp: number }
   | { type: ActionType.START_SIGNAL; source: StartMethod; timestamp: number }
   | { type: ActionType.STOP_SIGNAL; source: StopMethod; timestamp: number }
@@ -27,7 +32,11 @@ export type SessionAction =
 
 export const actions = {
   configure: (config: SessionConfig): SessionAction => ({ type: ActionType.CONFIGURE, config }),
-  targetReady: (targetNotation: string): SessionAction => ({ type: ActionType.TARGET_READY, targetNotation }),
+  targetReady: (targetNotation: string, initialOrientation?: Orientation): SessionAction => ({
+    type: ActionType.TARGET_READY,
+    targetNotation,
+    initialOrientation,
+  }),
   cubeMove: (move: string, timestamp: number): SessionAction => ({ type: ActionType.CUBE_MOVE, move, timestamp }),
   startSignal: (source: StartMethod, timestamp: number): SessionAction => ({ type: ActionType.START_SIGNAL, source, timestamp }),
   stopSignal: (source: StopMethod, timestamp: number): SessionAction => ({ type: ActionType.STOP_SIGNAL, source, timestamp }),

@@ -9,6 +9,7 @@ import { sessionReducer } from "./sessionReducer";
 import { actions } from "./sessionActions";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionConfig, SessionState, StartMethod, StopMethod } from "../types/session";
+import type { Orientation } from "../types/cube";
 
 export interface SessionContextValue {
   state: SessionState;
@@ -30,7 +31,8 @@ export interface SessionContextValue {
   signalStop: (source: StopMethod, timestamp?: number) => void;
   signalSolved: () => void;
   startInspection: () => void;
-  setTarget: (targetNotation: string) => void;
+  /** initialOrientation: see sessionActions.targetReady — carries a hardware-frame shift into this target, so a solver who doesn't regrip between back-to-back algorithms is still recognized correctly. */
+  setTarget: (targetNotation: string, initialOrientation?: Orientation) => void;
   /** Solve mode, "setup" phase only: declare scrambling done regardless of exact-match — see ActionType.MANUAL_SETUP_DONE. */
   confirmManualSetup: () => void;
   configure: (config: SessionConfig) => void;
@@ -59,7 +61,7 @@ export function SessionProvider({
       signalStop: (source, timestamp) => dispatch(actions.stopSignal(source, timestamp ?? performance.now())),
       signalSolved: () => dispatch(actions.cubeSolved(performance.now())),
       startInspection: () => dispatch(actions.inspectionStart(performance.now())),
-      setTarget: (targetNotation) => dispatch(actions.targetReady(targetNotation)),
+      setTarget: (targetNotation, initialOrientation) => dispatch(actions.targetReady(targetNotation, initialOrientation)),
       confirmManualSetup: () => dispatch(actions.manualSetupDone()),
       configure: (nextConfig) => dispatch(actions.configure(nextConfig)),
       reset: () => dispatch(actions.reset()),

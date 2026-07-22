@@ -29,7 +29,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
     // algorithm (algorithm/attack mode). Same action either way: from the
     // reducer's point of view a scramble IS just a target sequence.
     case ActionType.TARGET_READY: {
-      const target = buildSequenceTarget(action.targetNotation);
+      const target = buildSequenceTarget(action.targetNotation, action.initialOrientation);
       return {
         ...state,
         phase: "setup",

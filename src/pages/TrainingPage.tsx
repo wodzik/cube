@@ -21,13 +21,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react";
-import { cube3x3x3 } from "cubing/puzzles";
-import type { KPuzzle } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence, physicalRotationFor } from "../logic/moveParser";
-import { detectRotationFromPattern } from "../logic/trainer/driftRotation";
+import { invertSequence, physicalRotationFor, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
+import { rotationStringForOrientation } from "../logic/trainer/driftRotation";
+import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
 import {
@@ -137,39 +136,41 @@ function TrainingPageInner() {
 
   // Center-orientation tracking (M/E/S-heavy Roux algorithms rotate U/F/D/B
   // as a group even when correctly performed — see driftRotation.ts).
-  // Computed PURELY from completed algorithms' own known text via kpuzzle,
-  // never from live hardware-move accumulation (that approach shipped once,
-  // broke move recognition when the resulting rotated setup invited the
-  // user to regrip their physical cube, and was reverted).
-  const [kpuzzle, setKpuzzle] = useState<KPuzzle | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    cube3x3x3.kpuzzle().then((kp) => {
-      if (!cancelled) setKpuzzle(kp);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Computed PURELY from completed algorithms' own known text (moveParser's
+  // finalOrientationAfterAlg — pure math, no kpuzzle, no live hardware-move
+  // accumulation: an earlier version inferred orientation from accumulated
+  // hardware moves, which is fragile since this page never verifies actual
+  // cube state, and was reverted after it broke move recognition).
+  //
+  // Feeds TWO things: (1) the DISPLAY — the accumulated Orientation is
+  // converted to a rotation alg string and prepended to each new case's
+  // setup, so the shown picture matches wherever the physical cube's
+  // centers actually are; (2) the SESSION'S OWN target — passed as
+  // setTarget's initialOrientation, so the NEXT algorithm's own letters are
+  // resolved against the hardware frame the previous algorithm left behind.
+  // Without (2), a solver who doesn't regrip between back-to-back
+  // algorithms gets misrecognized: e.g. "M M' M'" nets to one M' (leaves
+  // the frame x-shifted), and the following algorithm's own "U" would
+  // otherwise be checked against a fresh identity frame that no longer
+  // matches physical reality.
   const [trackingEnabled, setTrackingEnabled] = useState(() => loadTrackingEnabled(group, groupMeta?.category === "Roux"));
   const trackingEnabledRef = useRef(trackingEnabled);
   trackingEnabledRef.current = trackingEnabled;
-  /** Net whole-cube rotation (e.g. "x2") accumulated from completed algorithms' own centers effect since the last Resync/group switch. */
-  const [accumulatedRotation, setAccumulatedRotation] = useState("");
-  const accumulatedRotationRef = useRef(accumulatedRotation);
-  accumulatedRotationRef.current = accumulatedRotation;
+  const [accumulatedOrientation, setAccumulatedOrientation] = useState<Orientation>(identityOrientation);
+  const accumulatedOrientationRef = useRef(accumulatedOrientation);
+  accumulatedOrientationRef.current = accumulatedOrientation;
 
   const toggleTracking = () => {
     const next = !trackingEnabled;
     setTrackingEnabled(next);
     localStorage.setItem(trackingStorageKey(group), String(next));
-    setAccumulatedRotation("");
+    setAccumulatedOrientation(identityOrientation());
     setDrillRound((r) => r + 1); // redisplay the current case immediately under the new setting
   };
 
   /** Declare the physical cube's orientation canonical again (Resync). */
   const resyncOrientation = () => {
-    setAccumulatedRotation("");
+    setAccumulatedOrientation(identityOrientation());
     setDrillRound((r) => r + 1); // force the current case's setup to redisplay without the (now-cleared) rotation
   };
 
@@ -185,7 +186,7 @@ function TrainingPageInner() {
     setCases(meta?.hasSubgroups ? [] : loadAlgGroup(group));
     setCaseIdx(0);
     setTrackingEnabled(loadTrackingEnabled(group, meta?.category === "Roux"));
-    setAccumulatedRotation("");
+    setAccumulatedOrientation(identityOrientation());
     // A manual navigation — moves buffered toward the auto-advanced case
     // don't belong to the group the user just switched to.
     moveBuffer.clear();
@@ -256,18 +257,21 @@ function TrainingPageInner() {
   useEffect(() => {
     if (!variant) return;
     reset();
-    setTarget(variant.alg);
+    const initialOrientation = trackingEnabled ? accumulatedOrientation : undefined;
+    setTarget(variant.alg, initialOrientation);
     view.reset();
     processedRotationIndexRef.current = -1;
     const inv = invertAlg(variant.alg);
-    const drift = trackingEnabled ? accumulatedRotation : "";
+    const drift = trackingEnabled ? rotationStringForOrientation(accumulatedOrientation) : "";
     const setupAlg = [drift, inv].filter(Boolean).join(" ");
     if (setupAlg) view.setSetupAlgorithm(setupAlg, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —
     // replay them now that the target is armed, stopping if they complete it
-    // (any tail beyond completion waits for the round after).
-    const flushTarget = buildSequenceTarget(variant.alg);
+    // (any tail beyond completion waits for the round after). Must use the
+    // SAME initialOrientation as the real target above, or this check would
+    // silently disagree with what the session actually armed.
+    const flushTarget = buildSequenceTarget(variant.alg, initialOrientation);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
@@ -330,16 +334,18 @@ function TrainingPageInner() {
     else recordAttempt(group, currentCase.name, variant.id, attempt);
     reload();
 
-    // Carry the just-completed algorithm's OWN net center rotation forward
-    // for the next case's setup. Derived purely from variant.alg's known
-    // text via kpuzzle (never from the raw moveLog — any wrong-move
-    // detours cancel with their own corrections, so the completed attempt's
-    // net effect always matches variant.alg's exactly, error or not) —
-    // deterministic, no dependency on live hardware-move accumulation.
-    if (trackingEnabledRef.current && kpuzzle) {
-      const rotatedPattern = kpuzzle.defaultPattern().applyAlg(`${accumulatedRotationRef.current} ${variant.alg}`.trim());
-      accumulatedRotationRef.current = detectRotationFromPattern(kpuzzle, rotatedPattern);
-      setAccumulatedRotation(accumulatedRotationRef.current);
+    // Carry the just-completed algorithm's OWN net hardware-frame shift
+    // forward — both for the next case's setup display AND (critically) for
+    // setTarget's initialOrientation, so the next algorithm's own letters
+    // are resolved against wherever this one left the frame, not a fresh
+    // identity assumption. Derived purely from variant.alg's known text
+    // (never from the raw moveLog — any wrong-move detours cancel with
+    // their own corrections, so a completed attempt's net effect always
+    // matches variant.alg's exactly, error or not) — deterministic, no
+    // dependency on live hardware-move accumulation.
+    if (trackingEnabledRef.current) {
+      accumulatedOrientationRef.current = finalOrientationAfterAlg(variant.alg, accumulatedOrientationRef.current);
+      setAccumulatedOrientation(accumulatedOrientationRef.current);
     }
 
     const timer = setTimeout(() => {
