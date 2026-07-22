@@ -822,23 +822,32 @@ function CaseTrainerInner() {
   }, [current, kpuzzle]);
   useStageSolvedDetection(stagePredicate, basePattern);
 
-  // Live-updated cube state (scramble + every solve move performed so far)
-  // — used only by EOCross's per-edge good/bad coloring below. basePattern
-  // is the PRE-scramble snapshot (see startNextAttempt), so the scramble
-  // itself has to be folded on first — moveLog does NOT include it: the
-  // reducer resets moveLog to just the new move the instant the
-  // scramble-tracking phase ("setup") completes (handleFirstFreeSolveMove),
-  // same as useStageSolvedDetection's own walker above assumes. Skipping
-  // that step (as an earlier version of this did) silently used the
-  // PRE-scramble state instead, which happened to still produce a
-  // plausible-looking but wrong pattern. A handful of moves at most, so
-  // refolding from scratch on every change is cheap.
+  // Live-updated cube state (every physical move performed so far, from
+  // whatever basePattern was at attempt-generation) — used only by
+  // EOCross's per-edge good/bad coloring below. What moveLog actually
+  // CONTAINS is phase-dependent, per the reducer (sessionReducer.ts):
+  //  - "setup"/"ready": moveLog accumulates every scramble-tracking move
+  //    performed so far (reset to [] at TARGET_READY, not reset again until
+  //    the first solve move) — i.e. it already reflects the REAL physical
+  //    progress through the scramble, not the theoretical end state. The
+  //    cube visualisation itself (view.addMove, see handleMove above) is
+  //    ALWAYS live regardless of phase, so the mask needs to match it here.
+  //  - "active"/"done": moveLog was just reset to only the solve's own
+  //    moves (handleFirstFreeSolveMove) — the scramble itself has to be
+  //    folded onto basePattern explicitly first, same as
+  //    useStageSolvedDetection's own walker above does.
+  // Get this wrong (as two earlier versions of this did) and the colors
+  // either silently ignore your actual progress through the scramble, or
+  // land on a plausible-looking but wrong pattern once solving starts. A
+  // handful of moves at most, so refolding from scratch on every change is cheap.
   const livePattern = useMemo(() => {
     if (!basePattern) return null;
-    const scrambleTokens = state.targetNotation.trim().split(/\s+/).filter(Boolean);
-    const scrambled = scrambleTokens.reduce((s, m) => applyMoveToState(s, m), basePattern);
-    if (state.phase !== "active" && state.phase !== "done") return scrambled;
-    return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), scrambled);
+    if (state.phase === "active" || state.phase === "done") {
+      const scrambleTokens = state.targetNotation.trim().split(/\s+/).filter(Boolean);
+      const scrambled = scrambleTokens.reduce((s, m) => applyMoveToState(s, m), basePattern);
+      return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), scrambled);
+    }
+    return state.moveLog.reduce((s, m) => applyMoveToState(s, m.move), basePattern);
   }, [basePattern, state.targetNotation, state.moveLog, state.phase]);
 
   const stickeringMask = useMemo(() => {
