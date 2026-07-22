@@ -25,7 +25,6 @@ import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
-import { rotationStringForOrientation } from "../logic/trainer/driftRotation";
 import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
@@ -135,24 +134,24 @@ function TrainingPageInner() {
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
   // Center-orientation tracking (M/E/S-heavy Roux algorithms rotate U/F/D/B
-  // as a group even when correctly performed — see driftRotation.ts).
-  // Computed PURELY from completed algorithms' own known text (moveParser's
+  // as a group even when correctly performed). Computed PURELY from
+  // completed algorithms' own known text (moveParser's
   // finalOrientationAfterAlg — pure math, no kpuzzle, no live hardware-move
   // accumulation: an earlier version inferred orientation from accumulated
   // hardware moves, which is fragile since this page never verifies actual
   // cube state, and was reverted after it broke move recognition).
   //
-  // Feeds TWO things: (1) the DISPLAY — the accumulated Orientation is
-  // converted to a rotation alg string and prepended to each new case's
-  // setup, so the shown picture matches wherever the physical cube's
-  // centers actually are; (2) the SESSION'S OWN target — passed as
-  // setTarget's initialOrientation, so the NEXT algorithm's own letters are
-  // resolved against the hardware frame the previous algorithm left behind.
-  // Without (2), a solver who doesn't regrip between back-to-back
-  // algorithms gets misrecognized: e.g. "M M' M'" nets to one M' (leaves
-  // the frame x-shifted), and the following algorithm's own "U" would
-  // otherwise be checked against a fresh identity frame that no longer
-  // matches physical reality.
+  // Feeds ONLY the SESSION'S target — passed as setTarget's
+  // initialOrientation, so the NEXT algorithm's own letters are resolved
+  // against the hardware frame the previous algorithm left behind. Without
+  // this, a solver who doesn't regrip between back-to-back algorithms gets
+  // misrecognized: e.g. "M M' M'" nets to one M' (leaves the frame
+  // x-shifted), and the following algorithm's own "U" would otherwise be
+  // checked against a fresh identity frame that no longer matches physical
+  // reality. Deliberately does NOT feed the DISPLAY (the case setup shown
+  // is always canonical — see the case-loading effect below) — an earlier
+  // version also rotated the setup to match, but that broke the mask
+  // overlay's alignment and showed a different picture than the case card.
   const [trackingEnabled, setTrackingEnabled] = useState(() => loadTrackingEnabled(group, groupMeta?.category === "Roux"));
   const trackingEnabledRef = useRef(trackingEnabled);
   trackingEnabledRef.current = trackingEnabled;
@@ -258,10 +257,17 @@ function TrainingPageInner() {
     setTarget(variant.alg, initialOrientation);
     view.reset();
     animatedTokenIndexRef.current = -1;
+    // Always the case's own canonical setup, matching the case card and
+    // giving the user a CONSISTENT picture to recognize the pattern from —
+    // never rotated by accumulated drift. That drift is real (the user's
+    // physical cube's centers may not be canonical), but it belongs ONLY in
+    // setTarget's initialOrientation above (recognizing their un-regripped
+    // moves correctly); rotating the SETUP too made the mask overlay (which
+    // assumes a canonical setup — see trainerMasks.ts) render misaligned,
+    // and the drill's whole point is recognizing the pattern, not mirroring
+    // whatever orientation the physical cube happens to be in right now.
     const inv = invertAlg(variant.alg);
-    const drift = trackingEnabled ? rotationStringForOrientation(accumulatedOrientation) : "";
-    const setupAlg = [drift, inv].filter(Boolean).join(" ");
-    if (setupAlg) view.setSetupAlgorithm(setupAlg, "");
+    if (inv) view.setSetupAlgorithm(inv, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —
     // replay them now that the target is armed, stopping if they complete it
