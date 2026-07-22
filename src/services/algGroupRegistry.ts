@@ -204,6 +204,29 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     }
   }
 
+  // One-time fix-up: Second Block Last Slot originally shipped with the top
+  // layer fully visible (on the theory the incoming piece needed tracking).
+  // It should instead match CMLL with the top corners also hidden (that
+  // piece is still scrambled at this stage). Only upgrades a group still at
+  // that exact original pieceGroups default.
+  const sblsIdx = next.findIndex((g) => g.id === "second-block-last-slot");
+  if (sblsIdx >= 0) {
+    const sblsStickering = next[sblsIdx].displayConfig.stickering;
+    const atOriginalDefault =
+      sblsStickering.kind === "mask" &&
+      sblsStickering.pieceGroups.length === 7 &&
+      sblsStickering.pieceGroups.includes("u-edges") &&
+      sblsStickering.pieceGroups.includes("u-corners");
+    if (atOriginalDefault) {
+      const seedSbls = BUILT_IN_SEED.find((s) => s.id === "second-block-last-slot");
+      if (seedSbls) {
+        next = [...next];
+        next[sblsIdx] = { ...next[sblsIdx], displayConfig: { ...next[sblsIdx].displayConfig, stickering: seedSbls.displayConfig.stickering } };
+        changed = true;
+      }
+    }
+  }
+
   if (changed) writeRegistry(next);
   return next;
 }
@@ -218,8 +241,9 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
   // EDGES/CORNERS legend in lastLayerShared.ts) — rouxBlocksStickeringMask
-  // hides the front/back D-edges and non-L/R centers; `true` also hides
-  // the top edges, since CMLL doesn't care where they end up.
+  // always hides the top edges and front/back D-edges plus non-L/R
+  // centers; `false` keeps the top CORNERS visible, since those are
+  // CMLL's actual target.
   {
     id: "cmll",
     name: "CMLL",
@@ -227,7 +251,7 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
       stickering: {
         kind: "mask",
         pieceGroups: ["u-corners", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
-        rawOverride: rouxBlocksStickeringMask(true),
+        rawOverride: rouxBlocksStickeringMask(false),
       },
       cardVisualization: "experimental-2D-LL",
       cubeVisualization: "3D",
@@ -238,15 +262,17 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   { id: "winter-variation", name: "Winter Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Summer Variation — same technique family and stickering as Winter Variation (both are single-canonical-slot Roux edge-orientation tricks).
   { id: "summer-variation", name: "Summer Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
-  // Second Block Last Slot: pairing the last second-block slot while tracking LL corners for CMLL. Unlike CMLL, the piece being solved comes down from the top layer, so top edges must stay visible — rouxBlocksStickeringMask(false) only hides what's irrelevant to Roux full stop (front/back D-edges, non-L/R centers).
+  // Second Block Last Slot: same view as CMLL, but with the top layer
+  // hidden entirely (`true`) — the top corners are still scrambled at
+  // this stage, so showing them would be misleading, not helpful.
   {
     id: "second-block-last-slot",
     name: "Second Block Last Slot",
     displayConfig: {
       stickering: {
         kind: "mask",
-        pieceGroups: ["u-edges", "u-corners", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
-        rawOverride: rouxBlocksStickeringMask(false),
+        pieceGroups: ["d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
+        rawOverride: rouxBlocksStickeringMask(true),
       },
       cardVisualization: "3D",
       cubeVisualization: "3D",

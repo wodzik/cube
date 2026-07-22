@@ -120,21 +120,23 @@ export function xxcrossStickeringMask(face: Face, pair: XXCrossPair): Stickering
 
 /**
  * Roux "both blocks built" view — used by CMLL and the Roux-specific
- * Practice groups (Second Block Last Slot). Hides the front/back D-layer
- * edges (DF=4, DB=6 — they belong to neither the left nor right block) and
- * every center except L/R (the two that anchor the visible blocks).
- * `hideTopEdges` additionally hides the 4 U-layer edges (0-3) — right for
- * CMLL, where edge position is irrelevant, but wrong for anything that
- * tracks a piece coming down from the top layer (e.g. the last F2L slot).
+ * Practice groups (Second Block Last Slot). Always hides the front/back
+ * D-layer edges (DF=4, DB=6 — they belong to neither the left nor right
+ * block) and every center except L/R (the two that anchor the visible
+ * blocks). The 4 U-layer edges (0-3) are always hidden too — edge position
+ * is never relevant to either group. `hideTopCorners` additionally hides
+ * the 4 U-layer corners: CMLL keeps them (they're its actual target), but
+ * Second Block Last Slot hides them too — that piece is still scrambled at
+ * this stage, so showing it would be misleading, not helpful.
  */
-export function rouxBlocksStickeringMask(hideTopEdges: boolean): StickeringMaskOrbits {
-  const hiddenEdges = new Set([4, 6, ...(hideTopEdges ? [0, 1, 2, 3] : [])]);
-  const edge = (p: number): FaceletMask => (hiddenEdges.has(p) ? "ignored" : "regular");
+export function rouxBlocksStickeringMask(hideTopCorners: boolean): StickeringMaskOrbits {
+  const edge = (p: number): FaceletMask => ([0, 1, 2, 3, 4, 6].includes(p) ? "ignored" : "regular");
+  const corner = (p: number): FaceletMask => (hideTopCorners && p <= 3 ? "ignored" : "regular");
   const center = (p: number): FaceletMask => (p === 1 || p === 3 ? "regular" : "dim");
   return {
     orbits: {
       EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },
-      CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["regular", "regular", "regular"] })) },
+      CORNERS: { pieces: Array.from({ length: 8 }, (_, p) => ({ facelets: [corner(p), corner(p), corner(p)] })) },
       CENTERS: {
         pieces: Array.from({ length: 6 }, (_, p) => ({ facelets: [center(p), center(p), center(p), center(p)] })),
       },
