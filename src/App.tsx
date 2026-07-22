@@ -19,9 +19,9 @@ type Tab = "solve" | "training" | "attack" | "trainer" | "academy" | "settings" 
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
-  { id: "training", label: "Practice" },
-  { id: "attack", label: "Attack" },
-  { id: "trainer", label: "Trainer" },
+  { id: "training", label: "Drill Algorithms" },
+  { id: "trainer", label: "Skill Trainers" },
+  { id: "attack", label: "Time Attack" },
   { id: "academy", label: "Academy" },
   { id: "debug", label: "Debug" },
   { id: "settings", label: "Settings" },
