@@ -24,11 +24,11 @@ interface SubgroupGridProps {
 export function SubgroupGrid({ groupId, groupDisplayConfig, subgroups, onOpen, onChange }: SubgroupGridProps) {
   const [editing, setEditing] = useState<AlgSubgroup | "new" | null>(null);
 
-  const handleSave = (name: string, previewAlg: string, displayConfig?: Partial<DisplayConfig>) => {
+  const handleSave = (name: string, previewAlg: string, availableInAttack: boolean, displayConfig?: Partial<DisplayConfig>) => {
     if (editing === "new") {
-      addSubgroup(groupId, { id: crypto.randomUUID(), name, previewAlg, displayConfig });
+      addSubgroup(groupId, { id: crypto.randomUUID(), name, previewAlg, availableInAttack, displayConfig });
     } else if (editing) {
-      updateSubgroupMeta(groupId, editing.id, { name, previewAlg, displayConfig });
+      updateSubgroupMeta(groupId, editing.id, { name, previewAlg, availableInAttack, displayConfig });
     }
     onChange();
     setEditing(null);

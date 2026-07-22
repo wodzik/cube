@@ -16,7 +16,7 @@ interface SubgroupSettingsModalProps {
   subgroup?: AlgSubgroup;
   /** The parent group's resolved display config — the baseline this subgroup's override can layer onto. */
   groupDisplayConfig: DisplayConfig;
-  onSave: (name: string, previewAlg: string, displayConfigOverride?: Partial<DisplayConfig>) => void;
+  onSave: (name: string, previewAlg: string, availableInAttack: boolean, displayConfigOverride?: Partial<DisplayConfig>) => void;
   onDelete?: () => void;
   onClose: () => void;
 }
@@ -27,6 +27,7 @@ const inputClass =
 export function SubgroupSettingsModal({ subgroup, groupDisplayConfig, onSave, onDelete, onClose }: SubgroupSettingsModalProps) {
   const [name, setName] = useState(subgroup?.name ?? "");
   const [previewAlg, setPreviewAlg] = useState(subgroup?.previewAlg ?? "");
+  const [availableInAttack, setAvailableInAttack] = useState(subgroup?.availableInAttack ?? false);
   const [overrideEnabled, setOverrideEnabled] = useState(Boolean(subgroup?.displayConfig));
   const [overrideDraft, setOverrideDraft] = useState<DisplayConfig>(() => ({ ...groupDisplayConfig, ...subgroup?.displayConfig }));
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -82,6 +83,17 @@ export function SubgroupSettingsModal({ subgroup, groupDisplayConfig, onSave, on
             <p className="text-[11px] text-gray-600 mt-1">A representative case for this folder — shown on its card, same way a case card previews an algorithm.</p>
           </div>
 
+          <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-white/[0.06] pt-4">
+            <input
+              type="checkbox"
+              checked={availableInAttack}
+              onChange={(e) => setAvailableInAttack(e.target.checked)}
+              className="w-3.5 h-3.5 rounded cursor-pointer"
+              style={{ accentColor: "var(--accent)" }}
+            />
+            Available in Attack
+          </label>
+
           <div className="border-t border-white/[0.06] pt-3">
             <label className="flex items-center gap-2 text-xs text-gray-300">
               <input
@@ -125,7 +137,7 @@ export function SubgroupSettingsModal({ subgroup, groupDisplayConfig, onSave, on
               Cancel
             </button>
             <button
-              onClick={() => canSave && onSave(name.trim(), previewAlg.trim(), overrideEnabled ? overrideDraft : undefined)}
+              onClick={() => canSave && onSave(name.trim(), previewAlg.trim(), availableInAttack, overrideEnabled ? overrideDraft : undefined)}
               disabled={!canSave}
               className="btn-primary"
             >

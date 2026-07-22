@@ -332,17 +332,25 @@ function AttackPageInner() {
     justFinished ? "solved" : state.phase === "active" ? "solving" : "idle";
 
   if (isSubgroupHome) {
+    const attackSubgroups = (groupMeta?.subgroups ?? []).filter((sg) => sg.availableInAttack === true);
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-1 w-full overflow-x-auto px-4 sm:px-6 py-4">
-          <GroupTabs activeId={group} onSelect={setGroup} attackContext />
-          <div className="ml-auto shrink-0">
-            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
-          </div>
+        <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
+          <GroupTabs
+            activeId={group}
+            onSelect={setGroup}
+            attackContext
+            rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
+          />
         </div>
         <div className="px-4 sm:px-6 pb-10">
+          {attackSubgroups.length === 0 && (
+            <p className="text-sm text-gray-600">
+              No subgroups of {groupMeta?.name} are available in Attack yet — enable one from its settings on the Practice tab.
+            </p>
+          )}
           <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
-            {(groupMeta?.subgroups ?? []).map((sg) => (
+            {attackSubgroups.map((sg) => (
               <SubgroupCard
                 key={sg.id}
                 subgroup={sg}
@@ -360,21 +368,35 @@ function AttackPageInner() {
     <>
     <TrainerPanel
       header={
-        <div className="flex items-center gap-1 w-full overflow-x-auto">
-          {activeSubgroup ? (
+        activeSubgroup ? (
+          <div className="flex items-center gap-1 w-full overflow-x-auto">
             <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
               <ChevronLeft size={13} /> {activeSubgroup.name}
             </button>
-          ) : (
-            <GroupTabs activeId={group} onSelect={setGroup} attackContext />
-          )}
-          <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono shrink-0">
-            {displayedCompleted.length} / {cases.length}
-          </span>
-          <div className="shrink-0">
-            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono shrink-0">
+              {displayedCompleted.length} / {cases.length}
+            </span>
+            <div className="shrink-0">
+              <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-full overflow-x-auto">
+            <GroupTabs
+              activeId={group}
+              onSelect={setGroup}
+              attackContext
+              rightSlot={
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 tabular-nums font-mono shrink-0">
+                    {displayedCompleted.length} / {cases.length}
+                  </span>
+                  <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+                </div>
+              }
+            />
+          </div>
+        )
       }
       moves={targetTokens}
       progress={progress}

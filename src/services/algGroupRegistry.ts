@@ -19,7 +19,7 @@
  * PURE FUNCTIONS — no React hooks.
  */
 
-import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, DisplayConfig, LearningStatus, StickeringConfig } from "../types/algorithm";
+import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, DisplayConfig, LearningStatus, StickeringConfig, AlgCategory } from "../types/algorithm";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { loadAlgGroup, saveAlgGroup, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
 import { buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
@@ -65,11 +65,12 @@ function buildZbllMeta(): AlgGroupMeta {
       cameraLatitude: 20,
       cameraLongitude: 20,
     },
+    category: "CFOP",
     previewAlg: subgroups[0]?.previewAlg ?? "",
     hasSubgroups: true,
+    // 472 cases is a lot for a flat Attack queue — no subgroup opts into
+    // Attack by default (see AlgSubgroup.availableInAttack), user-toggleable per pattern.
     subgroups,
-    // 472 cases is a lot for a flat Attack queue — off by default, user-toggleable.
-    availableInAttack: false,
   };
 }
 
@@ -94,17 +95,25 @@ function buildF2LMeta(): AlgGroupMeta {
   const subgroups: AlgSubgroup[] = F2L_SLOT_IDS.map((oldId) => {
     const cases = loadAlgGroup(oldId);
     const previewAlg = cases[0]?.algList.find((v) => v.isDefault)?.alg ?? cases[0]?.algList[0]?.alg ?? "";
-    return { id: oldId.replace("f2l-", ""), name: F2L_SLOT_LABELS[oldId], previewAlg, cases };
+    const id = oldId.replace("f2l-", "");
+    return {
+      id,
+      name: F2L_SLOT_LABELS[oldId],
+      previewAlg,
+      cases,
+      // Front Right is Attack's curated default (see AlgSubgroup.availableInAttack) — the other 3 slots are off until the user opts them in.
+      ...(id === "front-right" ? { availableInAttack: true } : {}),
+    };
   });
   return {
     id: "f2l",
     name: "F2L",
     isBuiltIn: true,
     displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 },
+    category: "CFOP",
     previewAlg: subgroups[0]?.previewAlg ?? "",
     hasSubgroups: true,
     subgroups,
-    availableInAttack: true,
   };
 }
 
@@ -121,11 +130,11 @@ function buildAdvancedF2LMeta(): AlgGroupMeta {
     name: "Advanced F2L",
     isBuiltIn: true,
     displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 },
+    category: "CFOP",
     previewAlg: subgroups[0]?.previewAlg ?? "",
     hasSubgroups: true,
+    // 216 cases, uncertain fit for a timed queue — no subgroup opts into Attack by default, user-toggleable per slot.
     subgroups,
-    // 216 cases, uncertain fit for a timed queue — off by default, user-toggleable.
-    availableInAttack: false,
   };
 }
 
@@ -157,12 +166,13 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   // this one as its origin (J Perm's algorithm sheet). Only touches it if the
   // name is still exactly the old default, so a user's own rename is left alone.
   const advIdx = next.findIndex((g) => g.id === "f2l-advanced");
-  if (advIdx >= 0 && (next[advIdx].name === "F2L Adv" || next[advIdx].availableInAttack === undefined)) {
+  if (advIdx >= 0 && (next[advIdx].name === "F2L Adv" || next[advIdx].availableInAttack === undefined || next[advIdx].category === undefined)) {
     next = [...next];
     next[advIdx] = {
       ...next[advIdx],
       name: next[advIdx].name === "F2L Adv" ? "Advanced F2L (J Perm)" : next[advIdx].name,
       availableInAttack: false,
+      category: "CFOP",
     };
     changed = true;
   }
@@ -174,10 +184,79 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   // which point the whole module has finished initializing.
   for (const seed of BUILT_IN_SEED) {
     if (!next.some((g) => g.id === seed.id)) {
-      next = [...next, { id: seed.id, name: seed.name, isBuiltIn: true, displayConfig: seed.displayConfig, hasSubgroups: false }];
+      next = [
+        ...next,
+        {
+          id: seed.id,
+          name: seed.name,
+          isBuiltIn: true,
+          displayConfig: seed.displayConfig,
+          category: seed.category,
+          hasSubgroups: false,
+          ...(seed.availableInAttack !== undefined ? { availableInAttack: seed.availableInAttack } : {}),
+        },
+      ];
       changed = true;
     }
   }
+
+  // One-time backfill: `category` didn't exist before the CFOP/Roux/Other
+  // tab-row split — fill it in for every built-in still missing it (custom
+  // groups default to "Other" purely by being undefined, no migration needed).
+  const BUILT_IN_CATEGORY: Record<string, AlgCategory> = {
+    f2l: "CFOP",
+    "advanced-f2l": "CFOP",
+    zbll: "CFOP",
+    ...Object.fromEntries(BUILT_IN_SEED.map((s) => [s.id, s.category])),
+  };
+  next = next.map((g) => {
+    if (!g.isBuiltIn || g.category !== undefined) return g;
+    const category = BUILT_IN_CATEGORY[g.id];
+    if (!category) return g;
+    changed = true;
+    return { ...g, category };
+  });
+
+  // One-time curated-defaults backfill: Attack used to default every
+  // (subgroup-less) group to available unless explicitly opted out. The new
+  // default is the reverse — only OLL/PLL start available — so anything that
+  // was relying on the old implicit default needs pinning to false now, but
+  // ONLY if it was never actually touched (still undefined), so a user's own
+  // explicit opt-in is never overwritten.
+  for (const id of ["coll", "cmll", "winter-variation", "summer-variation", "second-block-last-slot"]) {
+    const i = next.findIndex((g) => g.id === id);
+    if (i >= 0 && next[i].availableInAttack === undefined) {
+      next = [...next];
+      next[i] = { ...next[i], availableInAttack: false };
+      changed = true;
+    }
+  }
+
+  // Same idea for F2L's subgroups specifically: an F2L group that predates
+  // per-subgroup Attack availability has every subgroup at undefined — pin
+  // Front Right (Attack's curated default) to true. Skipped once any
+  // subgroup has an explicit value (fresh seeds already set this; a user's
+  // own choice is left alone).
+  const f2lIdx = next.findIndex((g) => g.id === "f2l");
+  if (f2lIdx >= 0 && next[f2lIdx].subgroups?.every((s) => s.availableInAttack === undefined)) {
+    next = [...next];
+    next[f2lIdx] = {
+      ...next[f2lIdx],
+      subgroups: next[f2lIdx].subgroups!.map((s) => (s.id === "front-right" ? { ...s, availableInAttack: true } : s)),
+    };
+    changed = true;
+  }
+
+  // Custom (non-built-in) subgroup groups predate per-subgroup Attack
+  // availability entirely — their subgroups are all still undefined, which
+  // under the OLD group-level semantics meant "available". Preserve that
+  // instead of silently hiding a user's existing group from Attack.
+  next = next.map((g) => {
+    if (g.isBuiltIn || !g.hasSubgroups || !g.subgroups?.length) return g;
+    if (!g.subgroups.every((s) => s.availableInAttack === undefined)) return g;
+    changed = true;
+    return { ...g, subgroups: g.subgroups.map((s) => ({ ...s, availableInAttack: true })) };
+  });
 
   // One-time fix-ups: CMLL's mask has been widened twice — first from
   // "top corners only" to "everything except top edges" (7 piece-groups,
@@ -232,11 +311,11 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
 }
 
 /** The built-in groups that shipped with the app, and their original hardcoded display config (was algGroupConfig.ts). Cards get the compact 2D-last-layer grid for OLL/PLL; the cube preview always defaults to 3D. F2L's 4 slots and ZBLL/Advanced F2L are added separately (see ensureBuiltInExtras) since they need subgroups. */
-const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[] = [
-  { id: "oll", name: "OLL", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
-  { id: "pll", name: "PLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; category: AlgCategory; availableInAttack?: boolean }[] = [
+  { id: "oll", name: "OLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "pll", name: "PLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // COLL solves LL corner orientation+permutation together — full-info PLL-style stickering (same reason PLL needs it: permutation matters, not just orientation).
-  { id: "coll", name: "COLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "coll", name: "COLL", category: "CFOP", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
@@ -247,6 +326,8 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   {
     id: "cmll",
     name: "CMLL",
+    category: "Roux",
+    availableInAttack: false,
     displayConfig: {
       stickering: {
         kind: "mask",
@@ -259,15 +340,17 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
       cameraLongitude: 20,
     },
   },
-  { id: "winter-variation", name: "Winter Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "winter-variation", name: "Winter Variation", category: "Roux", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Summer Variation — same technique family and stickering as Winter Variation (both are single-canonical-slot Roux edge-orientation tricks).
-  { id: "summer-variation", name: "Summer Variation", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "summer-variation", name: "Summer Variation", category: "Roux", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Second Block Last Slot: same view as CMLL, but with the top layer
   // hidden entirely (`true`) — the top corners are still scrambled at
   // this stage, so showing them would be misleading, not helpful.
   {
     id: "second-block-last-slot",
     name: "Second Block Last Slot",
+    category: "Roux",
+    availableInAttack: false,
     displayConfig: {
       stickering: {
         kind: "mask",
@@ -280,7 +363,7 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
       cameraLongitude: 25,
     },
   },
-  { id: "f2l-advanced", name: "F2L Adv", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
+  { id: "f2l-advanced", name: "F2L Adv", category: "CFOP", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
 ];
 
 /**
@@ -343,7 +426,9 @@ function seedRegistry(): AlgGroupMeta[] {
     name: g.name,
     isBuiltIn: true,
     displayConfig: g.displayConfig,
+    category: g.category,
     hasSubgroups: false,
+    ...(g.availableInAttack !== undefined ? { availableInAttack: g.availableInAttack } : {}),
   }));
   writeRegistry(groups);
   return groups;
@@ -417,7 +502,8 @@ export function createGroup(
   name: string,
   displayConfig: DisplayConfig = DEFAULT_DISPLAY_CONFIG,
   hasSubgroups = false,
-  previewAlg = ""
+  previewAlg = "",
+  category: AlgCategory = "Other"
 ): string {
   const groups = listGroups();
   const id = uniqueGroupId(name, groups);
@@ -426,6 +512,7 @@ export function createGroup(
     name: name.trim() || id,
     isBuiltIn: false,
     displayConfig,
+    category,
     previewAlg,
     hasSubgroups,
     ...(hasSubgroups ? { subgroups: [] } : {}),
@@ -575,6 +662,7 @@ interface GroupExportFile {
   formatVersion: 1;
   name: string;
   displayConfig: DisplayConfig;
+  category?: AlgCategory;
   hasSubgroups: boolean;
   cases?: AlgorithmCase[];
   subgroups?: AlgSubgroup[];
@@ -588,6 +676,7 @@ export function exportGroup(id: string): string {
     formatVersion: 1,
     name: meta.name,
     displayConfig: meta.displayConfig,
+    category: meta.category,
     hasSubgroups: meta.hasSubgroups,
     ...(meta.hasSubgroups ? { subgroups: meta.subgroups ?? [] } : { cases: loadAlgGroup(id) }),
   };
@@ -597,13 +686,15 @@ export function exportGroup(id: string): string {
 /**
  * Import a group from a JSON string (either this app's own export format, or
  * a bare `RawCase[]` array like the bundled built-in files' shape — treated
- * as a flat, no-subgroups group named after `fallbackName`).
+ * as a flat, no-subgroups group named after `fallbackName`). `fallbackCategory`
+ * is used for both: the bare-array case always needs it, and the export-file
+ * case falls back to it only when the file predates the category field.
  */
-export function importGroup(json: string, fallbackName: string): string {
+export function importGroup(json: string, fallbackName: string, fallbackCategory: AlgCategory = "Other"): string {
   const parsed: unknown = JSON.parse(json);
 
   if (Array.isArray(parsed)) {
-    const id = createGroup(fallbackName);
+    const id = createGroup(fallbackName, undefined, false, "", fallbackCategory);
     saveAlgGroup(id, hydrateCasesFromRaw(parsed as RawCase[], id));
     return id;
   }
@@ -620,6 +711,7 @@ export function importGroup(json: string, fallbackName: string): string {
     name: file.name,
     isBuiltIn: false,
     displayConfig,
+    category: file.category ?? fallbackCategory,
     hasSubgroups: file.hasSubgroups,
     ...(file.hasSubgroups ? { subgroups: file.subgroups ?? [] } : {}),
   };

@@ -44,6 +44,14 @@ export interface DisplayConfig {
 }
 
 /**
+ * The 3 top-level folders the group-tab row is organized into, purely to
+ * keep the tab row readable as the group count grows — not a general
+ * user-extensible taxonomy. Undefined (on old data / not explicitly picked)
+ * is treated as "Other".
+ */
+export type AlgCategory = "CFOP" | "Roux" | "Other";
+
+/**
  * A clickable folder inside a group (e.g. ZBLL grouped by top-layer
  * pattern) — its own display config and its own case list. The folder
  * card's preview is rendered the exact same way a case card is: apply
@@ -55,6 +63,14 @@ export interface AlgSubgroup {
   previewAlg: string;
   displayConfig?: Partial<DisplayConfig>;
   cases: AlgorithmCase[];
+  /**
+   * Whether THIS subgroup is offered as an Attack queue. Opt-in: undefined
+   * (the default for every subgroup) means NOT available — unlike the
+   * group-level flag below, which defaults to available. For a group with
+   * subgroups, Attack availability lives here, per-subgroup, not on the
+   * parent group — a "F2L" tab as a whole isn't a queue, one of its slots is.
+   */
+  availableInAttack?: boolean;
 }
 
 /** Registry entry describing one group — see services/algGroupRegistry.ts. */
@@ -64,12 +80,19 @@ export interface AlgGroupMeta {
   /** One of the 7 originally-hardcoded groups — kept around mostly so "delete" can refuse them. */
   isBuiltIn: boolean;
   displayConfig: DisplayConfig;
+  /** Which of the 3 tab-row folders this group's tab appears under. Undefined = "Other". */
+  category?: AlgCategory;
   /** Setup algorithm for this group's own card preview (tab icon, folder-grid view of a parent group) — same mechanism as a case/subgroup card. Blank = solved-cube icon. */
   previewAlg?: string;
   hasSubgroups: boolean;
   /** Present only when hasSubgroups. Cases for a subgroup-less group stay in the existing alg_group_{id} store. */
   subgroups?: AlgSubgroup[];
-  /** Whether this group is offered as an Attack queue. Undefined defaults to true — large/complex sets (ZBLL, Advanced F2L) default it false instead, but it's always user-toggleable per group. */
+  /**
+   * Whether this (subgroup-less) group is offered as an Attack queue.
+   * Undefined defaults to true — large/complex sets (ZBLL, Advanced F2L)
+   * default it false instead, but it's always user-toggleable per group.
+   * MEANINGLESS when hasSubgroups — see AlgSubgroup.availableInAttack.
+   */
   availableInAttack?: boolean;
 }
 

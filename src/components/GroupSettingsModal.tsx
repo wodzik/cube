@@ -9,13 +9,24 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Trash2, Download } from "lucide-react";
-import type { AlgGroupMeta, DisplayConfig } from "../types/algorithm";
+import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { DisplayConfigFields } from "./DisplayConfigFields";
+
+const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
 
 interface GroupSettingsModalProps {
   /** undefined = creating a new group. */
   group?: AlgGroupMeta;
-  onSave: (name: string, displayConfig: DisplayConfig, hasSubgroups: boolean, previewAlg: string, availableInAttack: boolean) => void;
+  /** Which category tab was open when "New group" was clicked — the sensible starting point for a fresh group. */
+  defaultCategory: AlgCategory;
+  onSave: (
+    name: string,
+    displayConfig: DisplayConfig,
+    hasSubgroups: boolean,
+    previewAlg: string,
+    availableInAttack: boolean,
+    category: AlgCategory
+  ) => void;
   onDelete?: () => void;
   onExport?: () => void;
   onClose: () => void;
@@ -32,9 +43,10 @@ const DEFAULT_DISPLAY_CONFIG: DisplayConfig = {
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose }: GroupSettingsModalProps) {
+export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, onExport, onClose }: GroupSettingsModalProps) {
   const [name, setName] = useState(group?.name ?? "");
   const [config, setConfig] = useState<DisplayConfig>(group?.displayConfig ?? DEFAULT_DISPLAY_CONFIG);
+  const [category, setCategory] = useState<AlgCategory>(group?.category ?? defaultCategory);
   const [hasSubgroups, setHasSubgroups] = useState(group?.hasSubgroups ?? false);
   const [previewAlg, setPreviewAlg] = useState(group?.previewAlg ?? "");
   const [availableInAttack, setAvailableInAttack] = useState(group?.availableInAttack ?? true);
@@ -95,6 +107,25 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
             </p>
           </div>
 
+          <div className="border-t border-white/[0.06] pt-4">
+            <p className="text-xs font-semibold text-gray-400 mb-1.5">Category</p>
+            <div className="flex gap-1.5">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCategory(c)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                    category === c ? "text-white bg-white/[0.1]" : "text-gray-500 bg-white/[0.02] hover:text-gray-300 hover:bg-white/[0.05]"
+                  }`}
+                  style={category === c ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {!group && (
             <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-white/[0.06] pt-4">
               <input
@@ -108,16 +139,23 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
             </label>
           )}
 
-          <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-white/[0.06] pt-4">
-            <input
-              type="checkbox"
-              checked={availableInAttack}
-              onChange={(e) => setAvailableInAttack(e.target.checked)}
-              className="w-3.5 h-3.5 rounded cursor-pointer"
-              style={{ accentColor: "var(--accent)" }}
-            />
-            Available in Attack
-          </label>
+          {!hasSubgroups && (
+            <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-white/[0.06] pt-4">
+              <input
+                type="checkbox"
+                checked={availableInAttack}
+                onChange={(e) => setAvailableInAttack(e.target.checked)}
+                className="w-3.5 h-3.5 rounded cursor-pointer"
+                style={{ accentColor: "var(--accent)" }}
+              />
+              Available in Attack
+            </label>
+          )}
+          {hasSubgroups && (
+            <p className="text-[11px] text-gray-600 border-t border-white/[0.06] pt-4">
+              Attack availability is set per subgroup — open a subgroup's own settings (the gear on its folder card) to opt it in.
+            </p>
+          )}
 
           {!hasSubgroups && <DisplayConfigFields config={config} onChange={setConfig} />}
         </div>
@@ -154,7 +192,7 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
               Cancel
             </button>
             <button
-              onClick={() => canSave && onSave(name.trim(), config, hasSubgroups, previewAlg.trim(), availableInAttack)}
+              onClick={() => canSave && onSave(name.trim(), config, hasSubgroups, previewAlg.trim(), availableInAttack, category)}
               disabled={!canSave}
               className="btn-primary"
             >

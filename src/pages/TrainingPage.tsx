@@ -286,11 +286,13 @@ function TrainingPageInner() {
   if (isSubgroupHome) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-1 w-full overflow-x-auto px-4 sm:px-6 py-4">
-          <GroupTabs activeId={group} onSelect={setGroup} managementEnabled />
-          <div className="ml-auto shrink-0">
-            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
-          </div>
+        <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
+          <GroupTabs
+            activeId={group}
+            onSelect={setGroup}
+            managementEnabled
+            rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
+          />
         </div>
         <SubgroupGrid
           groupId={group}
@@ -307,18 +309,25 @@ function TrainingPageInner() {
     <>
       <TrainerPanel
         header={
-          <div className="flex items-center gap-1 w-full overflow-x-auto">
-            {activeSubgroup ? (
+          activeSubgroup ? (
+            <div className="flex items-center gap-1 w-full overflow-x-auto">
               <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
                 <ChevronLeft size={13} /> {activeSubgroup.name}
               </button>
-            ) : (
-              <GroupTabs activeId={group} onSelect={setGroup} managementEnabled />
-            )}
-            <div className="ml-auto shrink-0">
-              <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+              <div className="ml-auto shrink-0">
+                <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <GroupTabs
+                activeId={group}
+                onSelect={setGroup}
+                managementEnabled
+                rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
+              />
+            </div>
+          )
         }
         moves={targetTokens}
         progress={progress}

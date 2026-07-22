@@ -8,7 +8,7 @@
  * live there); Attack renders the same tabs read-only.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus, Upload, Settings } from "lucide-react";
 import {
   listGroups,
@@ -20,7 +20,7 @@ import {
   resolveDisplayConfig,
   resolveStickeringProps,
 } from "../services/algGroupRegistry";
-import type { AlgGroupMeta, DisplayConfig } from "../types/algorithm";
+import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { GroupSettingsModal } from "./GroupSettingsModal";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 
@@ -28,8 +28,21 @@ interface GroupTabsProps {
   activeId: string;
   onSelect: (id: string) => void;
   managementEnabled?: boolean;
-  /** Attack-mode filtering: only show groups with availableInAttack !== false (per-group setting, editable via GroupSettingsModal — defaults to true unless a group explicitly opts out). */
+  /** Attack-mode filtering: for a subgroup-less group, only show it with availableInAttack !== false; for a group with subgroups, only show it when at least one subgroup opts in (see AlgSubgroup.availableInAttack). */
   attackContext?: boolean;
+  /** Rendered at the end of the top (category) row — e.g. the connect-cube panel, so it doesn't end up misaligned against a now-two-row tab block. */
+  rightSlot?: React.ReactNode;
+}
+
+/** Fixed display order — not a general user-extensible taxonomy, just the 3 folders the group-tab row is split into. */
+const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
+
+function groupCategory(g: AlgGroupMeta | undefined): AlgCategory {
+  return g?.category ?? "Other";
+}
+
+function isAttackAvailable(g: AlgGroupMeta): boolean {
+  return g.hasSubgroups ? (g.subgroups ?? []).some((s) => s.availableInAttack === true) : g.availableInAttack !== false;
 }
 
 function downloadJson(filename: string, json: string): void {
@@ -42,19 +55,30 @@ function downloadJson(filename: string, json: string): void {
   URL.revokeObjectURL(url);
 }
 
-export function GroupTabs({ activeId, onSelect, managementEnabled = false, attackContext = false }: GroupTabsProps) {
+export function GroupTabs({ activeId, onSelect, managementEnabled = false, attackContext = false, rightSlot }: GroupTabsProps) {
   const [allGroups, setAllGroups] = useState<AlgGroupMeta[]>(() => listGroups());
-  const groups = attackContext ? allGroups.filter((g) => g.availableInAttack !== false) : allGroups;
+  const groups = attackContext ? allGroups.filter(isAttackAvailable) : allGroups;
+  const categories = attackContext ? CATEGORIES.filter((c) => groups.some((g) => groupCategory(g) === c)) : CATEGORIES;
+  const [selectedCategory, setSelectedCategory] = useState<AlgCategory>(() => groupCategory(allGroups.find((g) => g.id === activeId)));
   const [settingsFor, setSettingsFor] = useState<AlgGroupMeta | "new" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  // The active group can change from outside a category-tab click (a fresh
+  // page mount, a group getting deleted and falling back to another one) —
+  // keep the category row in sync with wherever activeId actually landed.
+  useEffect(() => {
+    const cat = groupCategory(allGroups.find((g) => g.id === activeId));
+    setSelectedCategory((prev) => (prev === cat ? prev : cat));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   const refresh = () => setAllGroups(listGroups());
 
   const handleImportFile = async (file: File) => {
     try {
       const text = await file.text();
-      const id = importGroup(text, file.name.replace(/\.json$/i, ""));
+      const id = importGroup(text, file.name.replace(/\.json$/i, ""), selectedCategory);
       refresh();
       onSelect(id);
       setImportError(null);
@@ -83,24 +107,57 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
     displayConfig: DisplayConfig,
     hasSubgroups: boolean,
     previewAlg: string,
-    availableInAttack: boolean
+    availableInAttack: boolean,
+    category: AlgCategory
   ) => {
     if (settingsFor === "new") {
-      const id = createGroup(name, displayConfig, hasSubgroups, previewAlg);
-      updateGroupMeta(id, { availableInAttack });
+      const id = createGroup(name, displayConfig, hasSubgroups, previewAlg, category);
+      // availableInAttack is meaningless for a subgroup-having group — see AlgSubgroup.availableInAttack.
+      if (!hasSubgroups) updateGroupMeta(id, { availableInAttack });
       refresh();
       onSelect(id);
     } else if (settingsFor) {
-      updateGroupMeta(settingsFor.id, { name, displayConfig, previewAlg, availableInAttack });
+      const patch: Partial<AlgGroupMeta> = { name, displayConfig, previewAlg, category };
+      if (!settingsFor.hasSubgroups) patch.availableInAttack = availableInAttack;
+      updateGroupMeta(settingsFor.id, patch);
       refresh();
     }
     setSettingsFor(null);
   };
 
+  const visibleGroups = groups.filter((g) => groupCategory(g) === selectedCategory);
+
   return (
     <>
       <div className="flex items-center gap-1 shrink-0">
-        {groups.map((g) => (
+        {categories.map((c) => (
+          <button
+            key={c}
+            onClick={() => {
+              setSelectedCategory(c);
+              // The active group stays selected across a category switch
+              // (so its content keeps showing while you browse), UNLESS
+              // it isn't even in the category you just switched to — then
+              // jump to that category's first group instead of leaving a
+              // stale, unrelated group's content on screen with no visible
+              // tab to explain it.
+              if (groupCategory(allGroups.find((g) => g.id === activeId)) !== c) {
+                const first = groups.find((g) => groupCategory(g) === c);
+                if (first) onSelect(first.id);
+              }
+            }}
+            className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors shrink-0 ${
+              selectedCategory === c ? "text-white bg-white/[0.08]" : "text-gray-600 hover:text-gray-300 hover:bg-white/[0.03]"
+            }`}
+          >
+            {c}
+          </button>
+        ))}
+        {rightSlot && <div className="ml-auto shrink-0">{rightSlot}</div>}
+      </div>
+
+      <div className="flex items-center gap-1 shrink-0 mt-1">
+        {visibleGroups.map((g) => (
           <div key={g.id} className="relative group/tab shrink-0">
             <button
               onClick={() => onSelect(g.id)}
@@ -130,6 +187,10 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
             )}
           </div>
         ))}
+
+        {visibleGroups.length === 0 && !managementEnabled && (
+          <p className="text-xs text-gray-600 py-1">No {attackContext ? "Attack-enabled " : ""}groups in {selectedCategory}.</p>
+        )}
 
         {managementEnabled && (
           <div className="flex items-center gap-0.5 ml-1 pl-2 border-l border-white/[0.08] shrink-0">
@@ -167,6 +228,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
       {settingsFor && (
         <GroupSettingsModal
           group={settingsFor === "new" ? undefined : settingsFor}
+          defaultCategory={selectedCategory}
           onSave={handleSaveSettings}
           onDelete={
             settingsFor !== "new" && !settingsFor.isBuiltIn ? () => handleDelete((settingsFor as AlgGroupMeta).id) : undefined
