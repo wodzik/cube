@@ -10,7 +10,7 @@
  * PURE FUNCTIONS — no React hooks.
  */
 
-import type { AlgGroup, AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus } from "../types/algorithm";
+import type { AlgGroup, AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus, DisplayConfig } from "../types/algorithm";
 import {
   applyRecordAttempt,
   applySetLearningStatus,
@@ -37,6 +37,7 @@ import secondBlockLastSlotJson from "../algs/second-block-last-slot.json";
 import antiPllJson from "../algs/anti-pll.json";
 import edgesOfTheLastLayerJson from "../algs/edges-of-the-last-layer.json";
 import cornersLastSlotJson from "../algs/corners-last-slot.json";
+import eo4aJson from "../algs/eo4a.json";
 
 function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
@@ -54,6 +55,8 @@ export interface RawCase {
   category: string;
   subcategory?: string;
   algList: RawVariant[];
+  /** Bundled equivalent of AlgorithmCase's "Advanced" per-case override — e.g. EO4A's precomputed per-case good/bad edge mask. */
+  displayConfigOverride?: Partial<DisplayConfig>;
 }
 
 function hydrateVariant(raw: RawVariant, caseIdx: number, variantIdx: number, group: AlgGroup): AlgorithmVariant {
@@ -78,6 +81,7 @@ function hydrateCase(raw: RawCase, caseIdx: number, group: AlgGroup): AlgorithmC
     category: raw.category,
     subcategory: raw.subcategory,
     algList: raw.algList.map((v, i) => hydrateVariant(v, caseIdx, i, group)),
+    displayConfigOverride: raw.displayConfigOverride,
   };
 }
 
@@ -97,6 +101,7 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   "anti-pll": antiPllJson,
   "edges-of-the-last-layer": edgesOfTheLastLayerJson,
   "corners-last-slot": cornersLastSlotJson,
+  eo4a: eo4aJson,
 };
 
 function loadFromJson(group: AlgGroup): AlgorithmCase[] {

@@ -372,6 +372,39 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
   { id: "edges-of-the-last-layer", name: "Edges of the Last Layer", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Corners Last Slot (ZZ-CT/last-slot corner cases) — orientation only matters, OLL-style stickering.
   { id: "corners-last-slot", name: "Corners Last Slot", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  // EO4A (Roux L6E edge orientation — see LSE_EDGES in rouxTargets.ts: UF UR
+  // UB UL DF DB, the 6 edges left after F2L blocks + CMLL). Every bundled
+  // case carries its OWN precomputed displayConfigOverride (see
+  // src/algs/eo4a.json) showing that exact case's actual good/bad edges —
+  // this group-level mask is just the fallback for a hand-added case
+  // without one: all 6 LSE edges shown oriented (no info), blocks/corners dimmed.
+  {
+    id: "eo4a",
+    name: "EO4A",
+    category: "Roux",
+    availableInAttack: false,
+    displayConfig: {
+      stickering: {
+        kind: "mask",
+        pieceGroups: [],
+        rawOverride: {
+          orbits: {
+            EDGES: {
+              pieces: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => ({
+                facelets: [0, 1, 2, 3, 4, 6].includes(i) ? ["oriented", "oriented"] : ["dim", "dim"],
+              })),
+            },
+            CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["dim", "dim", "dim"] })) },
+            CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })) },
+          },
+        },
+      },
+      cardVisualization: "3D",
+      cubeVisualization: "3D",
+      cameraLatitude: 20,
+      cameraLongitude: 20,
+    },
+  },
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
   // until L6E. Show the top corners plus both already-built Roux blocks
   // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
@@ -496,6 +529,7 @@ const BUILT_IN_ORDER = [
   "oll",
   "pll",
   "cmll",
+  "eo4a",
   "winter-variation",
   "summer-variation",
   "second-block-last-slot",

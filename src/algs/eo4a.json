@@ -1,0 +1,2183 @@
+[
+  {
+    "name": "All 6",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (9 ETM)",
+        "alg": "r U' r' U' M U r U R'",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "M U M' U' M U' M' U2 M' U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (11 ETM)",
+        "alg": "M U M U M' U M U2 M U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (11 ETM)",
+        "alg": "M U' M' U' M U' M' U2 M' U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (11 ETM)",
+        "alg": "M U' M' U' M U' M' U2 M' U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (9 ETM)",
+        "alg": "R U' r' U' M' U r U r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (9 ETM)",
+        "alg": "l U' l' U' M' U l U L'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (11 ETM)",
+        "alg": "M U M U M' U M U2 M U M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "2 Top 2 Bot",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U' M' U2 M U2 M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "M U M U2 M U2 M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M U2 M U2 M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "M U' M' U2 M' U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U M' U2 M' U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U M' U2 M U2 M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Bottom 2",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U M' U' M U M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (10 ETM)",
+        "alg": "r U R' U' M U R U' R' M2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M' U' M U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "M U' M' U M U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U' M' U' M U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U M U' M' U M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "M U M' U M U' M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Top 2 Front 2",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (3 ETM)",
+        "alg": "M U M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (3 ETM)",
+        "alg": "M U' M' y2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (3 ETM)",
+        "alg": "M U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (3 ETM)",
+        "alg": "M U M' y2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (3 ETM)",
+        "alg": "M U M' y2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (10 ETM)",
+        "alg": "R' U' F U R F R U' R' F' U",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (4 ETM)",
+        "alg": "y' S' U' S y",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (3 ETM)",
+        "alg": "M' U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (4 ETM)",
+        "alg": "y S' U S' y'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 10 (14 ETM)",
+        "alg": "S R U R' U' R' U' R' U R S' M' U2 M' U2",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "4 Top",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U M U2 M U2 M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (11 ETM)",
+        "alg": "M U R U R' U' M2 U R U' r'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M U2 M' U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "M U' M U2 M U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U' M U2 M U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U' M U2 M' U2 M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "M U M U2 M' U2 M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "2 Top Opp",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U M U' M' U M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "r U R' U' M U R U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M U' M' U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (13 ETM)",
+        "alg": "R' U' r U' r U r2 U r U' r U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U' M U' M' U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (13 ETM)",
+        "alg": "R' U' r U' r U r2 U r U' r U' R'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "M U M U M' U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (12 ETM)",
+        "alg": "U2 M' U' M' U' M' U2 M U' M U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (7 ETM)",
+        "alg": "M U' M U M' U' M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "2 Top Adj",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U M U2 M U' M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (7 ETM)",
+        "alg": "M U M U2 M' U M U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M U2 M U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "M U M U2 M U M U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U' M U2 M U M U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (9 ETM)",
+        "alg": "R U R' U' M' U R U' r' U2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "M' U M U2 M' U M U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 8 (9 ETM)",
+        "alg": "M U M' U2 M U M2 U M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 9 (7 ETM)",
+        "alg": "M' U' M U2 M' U' M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "1 Top 1 Bot",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (7 ETM)",
+        "alg": "M U M' U M U M",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (9 ETM)",
+        "alg": "M U M U2 M' U M U2 M2 U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U' M' U2 M U' M U",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (7 ETM)",
+        "alg": "M U' M' U' M U' M'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (7 ETM)",
+        "alg": "M U' M' U' M U' M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (7 ETM)",
+        "alg": "M U' M U' M' U' M y2",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 7 (7 ETM)",
+        "alg": "M U M U M' U M y2",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "2 Top Adj 2 Bot",
+    "category": "",
+    "algList": [
+      {
+        "name": "Alg 1 (5 ETM)",
+        "alg": "M U M U M2",
+        "isDefault": true
+      },
+      {
+        "name": "Alg 2 (5 ETM)",
+        "alg": "M U' M U' M2 U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 3 (7 ETM)",
+        "alg": "M U M' U' M' U M",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 4 (8 ETM)",
+        "alg": "U M U M U M U M U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 5 (5 ETM)",
+        "alg": "M U' M U' M2 U'",
+        "isDefault": false
+      },
+      {
+        "name": "Alg 6 (8 ETM)",
+        "alg": "U' M U' M U' M U' M",
+        "isDefault": false
+      }
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "oriented",
+                    "oriented"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "mystery",
+                    "mystery"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+]
