@@ -178,15 +178,22 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     }
   }
 
-  // One-time fix-up: CMLL's mask originally only showed the top corners
-  // (everything else, including the already-built Roux blocks, greyed
-  // out). Widen it to BUILT_IN_SEED's current pieceGroups — but only if
-  // it's still exactly that original narrower set, so a user's own tweak
-  // to CMLL's mask is left alone.
+  // One-time fix-ups: CMLL's mask has been widened twice — first from
+  // "top corners only" to "everything except top edges" (7 piece-groups,
+  // no rawOverride), then to the current hand-built rawOverride (also
+  // hides front/back D-edges and non-L/R centers). Each check only
+  // upgrades a group still sitting at that exact prior default, so a
+  // user's own tweak to CMLL's mask is left alone.
   const cmllIdx = next.findIndex((g) => g.id === "cmll");
   if (cmllIdx >= 0) {
     const cmllStickering = next[cmllIdx].displayConfig.stickering;
-    if (cmllStickering.kind === "mask" && cmllStickering.pieceGroups.length === 1 && cmllStickering.pieceGroups[0] === "u-corners") {
+    const atOriginalDefault = cmllStickering.kind === "mask" && cmllStickering.pieceGroups.length === 1 && cmllStickering.pieceGroups[0] === "u-corners";
+    const atSevenGroupDefault =
+      cmllStickering.kind === "mask" &&
+      !cmllStickering.rawOverride &&
+      cmllStickering.pieceGroups.length === 7 &&
+      ["u-corners", "d-edges", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"].every((id) => cmllStickering.pieceGroups.includes(id));
+    if (atOriginalDefault || atSevenGroupDefault) {
       const seedCmll = BUILT_IN_SEED.find((s) => s.id === "cmll");
       if (seedCmll) {
         next = [...next];
@@ -207,14 +214,40 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[
   // COLL solves LL corner orientation+permutation together — full-info PLL-style stickering (same reason PLL needs it: permutation matters, not just orientation).
   { id: "coll", name: "COLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // CMLL (Roux) only cares about the 4 top corners; edges are irrelevant
-  // until L6E. Show everything EXCEPT the top edges — that includes both
-  // already-built Roux blocks (bottom corners+edges, all 4 F2L-style
-  // middle-slot pieces) fully colored, not just the corners being solved.
+  // until L6E. Show the top corners plus both already-built Roux blocks
+  // (left/right: 2 D-corners + D-edge + 2 middle-layer edges each, per
+  // EDGES/CORNERS legend in lastLayerShared.ts). Hide the front/back
+  // D-edges (DF=4, DB=6 — they belong to neither block) and the
+  // front/back/top/bottom centers (only L/R centers anchor the blocks);
+  // no piece-group in maskPieceGroups.ts expresses "D-edges minus DF/DB"
+  // or per-center selection, so this is hand-built via rawOverride.
   {
     id: "cmll",
     name: "CMLL",
     displayConfig: {
-      stickering: { kind: "mask", pieceGroups: ["u-corners", "d-edges", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"] },
+      stickering: {
+        kind: "mask",
+        pieceGroups: ["u-corners", "d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
+        rawOverride: {
+          orbits: {
+            EDGES: {
+              // 0=UF 1=UR 2=UB 3=UL 4=DF 5=DR 6=DB 7=DL 8=FR 9=FL 10=BR 11=BL
+              pieces: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => ({
+                facelets: [4, 6].includes(i) || i <= 3 ? ["ignored", "ignored"] : ["regular", "regular"],
+              })),
+            },
+            CORNERS: {
+              pieces: Array.from({ length: 8 }, () => ({ facelets: ["regular", "regular", "regular"] })),
+            },
+            CENTERS: {
+              // 0=U 1=L 2=F 3=R 4=B 5=D — only L/R stay visible (anchor the two Roux blocks).
+              pieces: [0, 1, 2, 3, 4, 5].map((i) => ({
+                facelets: i === 1 || i === 3 ? ["regular", "regular", "regular", "regular"] : ["dim", "dim", "dim", "dim"],
+              })),
+            },
+          },
+        },
+      },
       cardVisualization: "experimental-2D-LL",
       cubeVisualization: "3D",
       cameraLatitude: 20,
