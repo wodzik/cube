@@ -163,10 +163,20 @@ export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): St
     const others = new Set(Array.from({ length: 12 }, (_, i) => i).filter((i) => !crossEdges.has(i)));
     return pieceMask(crossEdges, new Set(), others);
   }
+  // The mask array is indexed by PIECE IDENTITY (it follows a piece to
+  // wherever it currently sits — see this file's header comment), but
+  // `patternData.EDGES.{pieces,orientation}` are indexed by CURRENT SLOT
+  // (pieces[slot] = which piece identity currently occupies that slot).
+  // Build the inverse — piece identity -> its current slot — so each
+  // piece's orientation can be looked up correctly before writing it into
+  // the identity-indexed mask.
+  const pieceAtSlot = liveState.patternData.EDGES.pieces;
   const orientation = liveState.patternData.EDGES.orientation;
-  const edge = (p: number): FaceletMask => {
-    if (crossEdges.has(p)) return "regular";
-    return orientation[p] === 0 ? "oriented" : "mystery";
+  const currentSlotOfPiece = new Array<number>(12);
+  for (let slot = 0; slot < 12; slot++) currentSlotOfPiece[pieceAtSlot[slot]] = slot;
+  const edge = (pieceId: number): FaceletMask => {
+    if (crossEdges.has(pieceId)) return "regular";
+    return orientation[currentSlotOfPiece[pieceId]] === 0 ? "oriented" : "mystery";
   };
   return {
     orbits: {
