@@ -33,6 +33,7 @@ import {
   applySetSelectedBatch,
 } from "../logic/caseMutations";
 import zbllJson from "../algs/zbll.json";
+import advancedF2lJson from "../algs/advanced-f2l.json";
 
 const REGISTRY_KEY = "nact_alg_groups";
 
@@ -66,25 +67,113 @@ function buildZbllMeta(): AlgGroupMeta {
     previewAlg: subgroups[0]?.previewAlg ?? "",
     hasSubgroups: true,
     subgroups,
+    // 472 cases is a lot for a flat Attack queue — off by default, user-toggleable.
+    availableInAttack: false,
   };
 }
 
-/** Built-ins added after initial release don't exist in an already-seeded registry — inject them once, self-healing, same idea as migrateDisplayConfig above. */
+const F2L_SLOT_IDS = ["f2l-front-right", "f2l-front-left", "f2l-back-right", "f2l-back-left"] as const;
+const F2L_SLOT_LABELS: Record<(typeof F2L_SLOT_IDS)[number], string> = {
+  "f2l-front-right": "Front Right",
+  "f2l-front-left": "Front Left",
+  "f2l-back-right": "Back Right",
+  "f2l-back-left": "Back Left",
+};
+
+/**
+ * F2L — used to be 4 separate flat built-in groups (one per slot); now one
+ * built-in group with 4 subgroups. loadAlgGroup(oldId) is reused as the data
+ * source for each subgroup: on a fresh install it falls through to that
+ * slot's bundled JSON exactly as before, and on an existing install it
+ * returns whatever's actually in `alg_group_{oldId}` — so this single
+ * function is both "seed fresh" and "migrate existing progress" at once,
+ * the same as loadAlgGroup already was for the old flat groups.
+ */
+function buildF2LMeta(): AlgGroupMeta {
+  const subgroups: AlgSubgroup[] = F2L_SLOT_IDS.map((oldId) => {
+    const cases = loadAlgGroup(oldId);
+    const previewAlg = cases[0]?.algList.find((v) => v.isDefault)?.alg ?? cases[0]?.algList[0]?.alg ?? "";
+    return { id: oldId.replace("f2l-", ""), name: F2L_SLOT_LABELS[oldId], previewAlg, cases };
+  });
+  return {
+    id: "f2l",
+    name: "F2L",
+    isBuiltIn: true,
+    displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 },
+    previewAlg: subgroups[0]?.previewAlg ?? "",
+    hasSubgroups: true,
+    subgroups,
+    availableInAttack: true,
+  };
+}
+
+/** Advanced F2L (speedcubedb.com, scrape-advanced-f2l.mjs) — same per-slot subgroup shape as the merged F2L group above, but a much larger, separate set (not merged into it, since these are largely NOT the same cases as the plain F2L set). */
+function buildAdvancedF2LMeta(): AlgGroupMeta {
+  const subgroups: AlgSubgroup[] = (advancedF2lJson as { subgroups: RawSubgroup[] }).subgroups.map((sg) => ({
+    id: sg.id,
+    name: sg.name,
+    previewAlg: sg.previewAlg,
+    cases: hydrateCasesFromRaw(sg.cases, sg.id),
+  }));
+  return {
+    id: "advanced-f2l",
+    name: "Advanced F2L",
+    isBuiltIn: true,
+    displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 },
+    previewAlg: subgroups[0]?.previewAlg ?? "",
+    hasSubgroups: true,
+    subgroups,
+    // 216 cases, uncertain fit for a timed queue — off by default, user-toggleable.
+    availableInAttack: false,
+  };
+}
+
+/** Built-ins added after initial release don't exist in an already-seeded registry — inject/migrate them once, self-healing, same idea as migrateDisplayConfig above. */
 function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
-  if (groups.some((g) => g.id === "zbll")) return groups;
-  const next = [...groups, buildZbllMeta()];
-  writeRegistry(next);
+  let next = groups;
+  let changed = false;
+
+  if (!next.some((g) => g.id === "zbll")) {
+    next = [...next, buildZbllMeta()];
+    changed = true;
+  }
+
+  if (!next.some((g) => g.id === "f2l")) {
+    // Drop the 4 old flat slot groups (if present) — their data was already
+    // folded into buildF2LMeta()'s subgroups via loadAlgGroup above.
+    next = [...next.filter((g) => !(F2L_SLOT_IDS as readonly string[]).includes(g.id)), buildF2LMeta()];
+    F2L_SLOT_IDS.forEach(resetAlgGroup);
+    changed = true;
+  }
+
+  if (!next.some((g) => g.id === "advanced-f2l")) {
+    next = [...next, buildAdvancedF2LMeta()];
+    changed = true;
+  }
+
+  // One-time rename: this group's original bundled name was "F2L Adv" — now
+  // that "Advanced F2L" names the bigger speedcubedb-scraped set, disambiguate
+  // this one as its origin (J Perm's algorithm sheet). Only touches it if the
+  // name is still exactly the old default, so a user's own rename is left alone.
+  const advIdx = next.findIndex((g) => g.id === "f2l-advanced");
+  if (advIdx >= 0 && (next[advIdx].name === "F2L Adv" || next[advIdx].availableInAttack === undefined)) {
+    next = [...next];
+    next[advIdx] = {
+      ...next[advIdx],
+      name: next[advIdx].name === "F2L Adv" ? "Advanced F2L (J Perm)" : next[advIdx].name,
+      availableInAttack: false,
+    };
+    changed = true;
+  }
+
+  if (changed) writeRegistry(next);
   return next;
 }
 
-/** The 7 groups that shipped with the app, and their original hardcoded display config (was algGroupConfig.ts). Cards get the compact 2D-last-layer grid for OLL/PLL; the cube preview always defaults to 3D. */
+/** The built-in groups that shipped with the app, and their original hardcoded display config (was algGroupConfig.ts). Cards get the compact 2D-last-layer grid for OLL/PLL; the cube preview always defaults to 3D. F2L's 4 slots and ZBLL/Advanced F2L are added separately (see ensureBuiltInExtras) since they need subgroups. */
 const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig }[] = [
   { id: "oll", name: "OLL", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "pll", name: "PLL", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
-  { id: "f2l-front-right", name: "F2L FR", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
-  { id: "f2l-front-left", name: "F2L FL", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
-  { id: "f2l-back-right", name: "F2L BR", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
-  { id: "f2l-back-left", name: "F2L BL", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
   { id: "f2l-advanced", name: "F2L Adv", displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
 ];
 
@@ -139,6 +228,10 @@ function writeRegistry(groups: AlgGroupMeta[]): void {
 }
 
 function seedRegistry(): AlgGroupMeta[] {
+  // Just the plain flat built-ins here — zbll/f2l/advanced-f2l (all
+  // subgroup-based) are added right after by ensureBuiltInExtras, which
+  // also handles adding them to an already-seeded EXISTING registry, so
+  // there's no reason to duplicate that logic for the fresh-install case.
   const groups: AlgGroupMeta[] = BUILT_IN_SEED.map((g) => ({
     id: g.id,
     name: g.name,
@@ -146,14 +239,29 @@ function seedRegistry(): AlgGroupMeta[] {
     displayConfig: g.displayConfig,
     hasSubgroups: false,
   }));
-  groups.push(buildZbllMeta());
   writeRegistry(groups);
   return groups;
 }
 
+/** Fixed display order for the built-ins — everything else (user-created groups) sorts after, in creation order. */
+const BUILT_IN_ORDER = ["f2l", "oll", "pll", "f2l-advanced", "advanced-f2l", "zbll"];
+
+function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {
+  // Array.prototype.sort is stable (ES2019+), so custom groups (index -1,
+  // sorted after everything named) keep their relative creation order.
+  return [...groups].sort((a, b) => {
+    const ai = BUILT_IN_ORDER.indexOf(a.id);
+    const bi = BUILT_IN_ORDER.indexOf(b.id);
+    if (ai === -1 && bi === -1) return 0;
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+
 /** All registered groups, built-in + user-created, seeding the built-ins on first call. */
 export function listGroups(): AlgGroupMeta[] {
-  return ensureBuiltInExtras(readRegistry() ?? seedRegistry());
+  return sortGroups(ensureBuiltInExtras(readRegistry() ?? seedRegistry()));
 }
 
 export function getGroupMeta(id: string): AlgGroupMeta | undefined {
@@ -166,6 +274,11 @@ export function resetBuiltInGroup(id: string): void {
   if (!meta?.isBuiltIn) return;
   if (id === "zbll") {
     updateGroupMeta(id, { subgroups: buildZbllMeta().subgroups });
+  } else if (id === "advanced-f2l") {
+    updateGroupMeta(id, { subgroups: buildAdvancedF2LMeta().subgroups });
+  } else if (id === "f2l") {
+    F2L_SLOT_IDS.forEach(resetAlgGroup);
+    updateGroupMeta(id, { subgroups: buildF2LMeta().subgroups });
   } else {
     resetAlgGroup(id);
   }

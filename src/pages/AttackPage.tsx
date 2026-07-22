@@ -27,13 +27,20 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, ChevronRight, Video } from "lucide-react";
+import { GripVertical, RotateCcw, ChevronRight, ChevronLeft, Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
 import { invertSequence } from "../logic/moveParser";
 import { getDefaultVariant } from "../logic/algGroupConfig";
-import { getGroupMeta, resolveDisplayConfig, resolveStickeringProps } from "../services/algGroupRegistry";
+import {
+  getGroupMeta,
+  resolveDisplayConfig,
+  resolveStickeringProps,
+  getSubgroupCases,
+  recordSubgroupAttempt,
+  updateSubgroupCase,
+} from "../services/algGroupRegistry";
 import { loadAlgGroup, recordAttempt, updateCase } from "../services/algorithmStore";
 import { saveAttackSession, getAttackSessions, type AttackSession } from "../services/attackStore";
 import { useSmartCube } from "../hooks/useSmartCube";
@@ -49,6 +56,7 @@ import { CaseEdit } from "../components/CaseEdit";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
 import { GroupTabs } from "../components/GroupTabs";
+import { SubgroupCard } from "../components/SubgroupCard";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase, DisplayConfig } from "../types/algorithm";
 import { formatTimeMs } from "../logic/statistics";
@@ -107,13 +115,21 @@ function AttackPageInner() {
 
   const [group, setGroup] = useState<AlgGroup>("oll");
   const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"), "attack");
+  /** When the active group hasSubgroups: null = browsing the folder grid, set = drilled into one subgroup's own queue. */
+  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(null);
   const groupMeta = getGroupMeta(group);
-  const displayConfig = resolveDisplayConfig(groupMeta);
-  const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
-  const [queue, setQueue] = useState<string[]>(() => applyStoredOrder(group, cases.map((c) => c.name)));
+  const activeSubgroup = groupMeta?.hasSubgroups ? groupMeta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
+  const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
+  const displayConfig = resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig);
+  // Sessions/queue-order are stored per (group, subgroup) — attackStore just
+  // uses this as an opaque localStorage key suffix, no registry lookup.
+  const sessionKey = activeSubgroupId ? `${group}:${activeSubgroupId}` : group;
+  const loadCases = () => (activeSubgroupId ? getSubgroupCases(group, activeSubgroupId) : loadAlgGroup(group));
+  const [cases, setCases] = useState<AlgorithmCase[]>(() => loadCases());
+  const [queue, setQueue] = useState<string[]>(() => applyStoredOrder(sessionKey, cases.map((c) => c.name)));
   const [completed, setCompleted] = useState<{ caseName: string; timeMs: number }[]>([]);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-  const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(group));
+  const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(sessionKey));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   /** "Show me how" playback for the current queue case — no need to open the editor. */
@@ -138,16 +154,33 @@ function AttackPageInner() {
   } | null>(null);
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
-  useEffect(() => {
-    const loaded = loadAlgGroup(group);
+  const armSession = (key: string, loaded: AlgorithmCase[]) => {
     setCases(loaded);
-    setQueue(applyStoredOrder(group, loaded.map((c) => c.name)));
+    setQueue(applyStoredOrder(key, loaded.map((c) => c.name)));
     setCompleted([]);
     setSessionStartTime(null);
-    setHistory(getAttackSessions(group));
+    setJustFinished(null);
+    setHistory(getAttackSessions(key));
     setExpandedSessionId(null);
-    moveBuffer.clear(); // manual navigation — buffered moves belonged to the old group's queue
-  }, [group, moveBuffer]);
+    moveBuffer.clear(); // manual navigation — buffered moves belonged to the old queue
+  };
+
+  useEffect(() => {
+    setActiveSubgroupId(null);
+    const meta = getGroupMeta(group);
+    armSession(group, meta?.hasSubgroups ? [] : loadAlgGroup(group));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group]);
+
+  const openSubgroup = (subgroupId: string) => {
+    setActiveSubgroupId(subgroupId);
+    armSession(`${group}:${subgroupId}`, getSubgroupCases(group, subgroupId));
+  };
+
+  const backToFolders = () => {
+    setActiveSubgroupId(null);
+    armSession(group, []);
+  };
 
   const currentCase = useMemo(() => cases.find((c) => c.name === queue[0]) ?? null, [cases, queue]);
   const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
@@ -210,8 +243,10 @@ function AttackPageInner() {
     lastRecordedEndRef.current = state.endTime;
 
     const timeMs = state.endTime - state.startTime;
-    recordAttempt(group, currentCase.name, variant.id, { time: timeMs / 1000, hadErrors: false, source: "attack" });
-    const loadedCases = loadAlgGroup(group);
+    const attempt = { time: timeMs / 1000, hadErrors: false, source: "attack" as const };
+    if (activeSubgroupId) recordSubgroupAttempt(group, activeSubgroupId, currentCase.name, variant.id, attempt);
+    else recordAttempt(group, currentCase.name, variant.id, attempt);
+    const loadedCases = loadCases();
     setCases(loadedCases);
 
     const newCompleted = [...completed, { caseName: currentCase.name, timeMs }];
@@ -230,16 +265,17 @@ function AttackPageInner() {
     saveAttackSession({
       id: crypto.randomUUID(),
       date: Date.now(),
-      group,
+      group: sessionKey,
       totalMs: state.endTime - sessionStartTime,
       caseTimes: newCompleted,
     });
-    setHistory(getAttackSessions(group));
+    setHistory(getAttackSessions(sessionKey));
     setJustFinished({ totalMs: state.endTime - sessionStartTime, caseTimes: newCompleted });
-    setQueue(applyStoredOrder(group, loadedCases.map((c) => c.name)));
+    setQueue(applyStoredOrder(sessionKey, loadedCases.map((c) => c.name)));
     setCompleted([]);
     setSessionStartTime(null);
     moveBuffer.clear(); // fiddling right after completion doesn't belong to the fresh queue
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, state.startTime, state.endTime]);
 
   // Dismiss the completion banner the moment the user actually starts the
@@ -263,20 +299,14 @@ function AttackPageInner() {
         // Persist the FULL order: mid-session the queue is missing the
         // already-completed cases — keep them at the front (in play order)
         // so they don't vanish from the saved arrangement.
-        saveStoredOrder(group, [...completed.map((c) => c.caseName), ...next]);
+        saveStoredOrder(sessionKey, [...completed.map((c) => c.caseName), ...next]);
         return next;
       });
     }
   }
 
   function handleRestart() {
-    const loaded = loadAlgGroup(group);
-    setCases(loaded);
-    setQueue(applyStoredOrder(group, loaded.map((c) => c.name)));
-    setCompleted([]);
-    setSessionStartTime(null);
-    setJustFinished(null); // a manual restart makes the last summary stale
-    moveBuffer.clear(); // fiddling after the session finished doesn't belong to the fresh queue
+    armSession(sessionKey, loadCases());
     setRestartToken((t) => t + 1); // force a full re-arm (target, UNDO stack, cube view) even on a same-case restart
   }
 
@@ -301,12 +331,43 @@ function AttackPageInner() {
   const timerState: "idle" | "solving" | "solved" =
     justFinished ? "solved" : state.phase === "active" ? "solving" : "idle";
 
+  if (isSubgroupHome) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-1 w-full overflow-x-auto px-4 sm:px-6 py-4">
+          <GroupTabs activeId={group} onSelect={setGroup} attackContext />
+          <div className="ml-auto shrink-0">
+            <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+          </div>
+        </div>
+        <div className="px-4 sm:px-6 pb-10">
+          <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
+            {(groupMeta?.subgroups ?? []).map((sg) => (
+              <SubgroupCard
+                key={sg.id}
+                subgroup={sg}
+                groupDisplayConfig={resolveDisplayConfig(groupMeta)}
+                onOpen={() => openSubgroup(sg.id)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
     <TrainerPanel
       header={
         <div className="flex items-center gap-1 w-full overflow-x-auto">
-          <GroupTabs activeId={group} onSelect={setGroup} excludeSubgroupGroups />
+          {activeSubgroup ? (
+            <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
+              <ChevronLeft size={13} /> {activeSubgroup.name}
+            </button>
+          ) : (
+            <GroupTabs activeId={group} onSelect={setGroup} attackContext />
+          )}
           <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono shrink-0">
             {displayedCompleted.length} / {cases.length}
           </span>
@@ -470,14 +531,16 @@ function AttackPageInner() {
             group={group}
             groupDisplayConfig={displayConfig}
             onSave={(updated) => {
-              updateCase(group, updated);
+              if (activeSubgroupId) updateSubgroupCase(group, activeSubgroupId, updated);
+              else updateCase(group, updated);
               setEditingCase(null);
-              setCases(loadAlgGroup(group));
+              setCases(loadCases());
             }}
             onClose={() => setEditingCase(null)}
             onAutoSave={(updated) => {
-              updateCase(group, updated);
-              setCases(loadAlgGroup(group));
+              if (activeSubgroupId) updateSubgroupCase(group, activeSubgroupId, updated);
+              else updateCase(group, updated);
+              setCases(loadCases());
             }}
             position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}
             onPrev={editIdx > 0 ? () => setEditingCase(cases[editIdx - 1]) : undefined}

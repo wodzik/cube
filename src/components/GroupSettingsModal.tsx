@@ -15,7 +15,7 @@ import { DisplayConfigFields } from "./DisplayConfigFields";
 interface GroupSettingsModalProps {
   /** undefined = creating a new group. */
   group?: AlgGroupMeta;
-  onSave: (name: string, displayConfig: DisplayConfig, hasSubgroups: boolean, previewAlg: string) => void;
+  onSave: (name: string, displayConfig: DisplayConfig, hasSubgroups: boolean, previewAlg: string, availableInAttack: boolean) => void;
   onDelete?: () => void;
   onExport?: () => void;
   onClose: () => void;
@@ -37,6 +37,7 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
   const [config, setConfig] = useState<DisplayConfig>(group?.displayConfig ?? DEFAULT_DISPLAY_CONFIG);
   const [hasSubgroups, setHasSubgroups] = useState(group?.hasSubgroups ?? false);
   const [previewAlg, setPreviewAlg] = useState(group?.previewAlg ?? "");
+  const [availableInAttack, setAvailableInAttack] = useState(group?.availableInAttack ?? true);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -107,6 +108,17 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
             </label>
           )}
 
+          <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-white/[0.06] pt-4">
+            <input
+              type="checkbox"
+              checked={availableInAttack}
+              onChange={(e) => setAvailableInAttack(e.target.checked)}
+              className="w-3.5 h-3.5 rounded cursor-pointer"
+              style={{ accentColor: "var(--accent)" }}
+            />
+            Available in Attack
+          </label>
+
           {!hasSubgroups && <DisplayConfigFields config={config} onChange={setConfig} />}
         </div>
 
@@ -142,7 +154,7 @@ export function GroupSettingsModal({ group, onSave, onDelete, onExport, onClose 
               Cancel
             </button>
             <button
-              onClick={() => canSave && onSave(name.trim(), config, hasSubgroups, previewAlg.trim())}
+              onClick={() => canSave && onSave(name.trim(), config, hasSubgroups, previewAlg.trim(), availableInAttack)}
               disabled={!canSave}
               className="btn-primary"
             >

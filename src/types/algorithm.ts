@@ -69,6 +69,8 @@ export interface AlgGroupMeta {
   hasSubgroups: boolean;
   /** Present only when hasSubgroups. Cases for a subgroup-less group stay in the existing alg_group_{id} store. */
   subgroups?: AlgSubgroup[];
+  /** Whether this group is offered as an Attack queue. Undefined defaults to true — large/complex sets (ZBLL, Advanced F2L) default it false instead, but it's always user-toggleable per group. */
+  availableInAttack?: boolean;
 }
 
 /** Training and Attack are different practice contexts — their stats are kept separate, not pooled. */

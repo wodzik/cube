@@ -28,8 +28,8 @@ interface GroupTabsProps {
   activeId: string;
   onSelect: (id: string) => void;
   managementEnabled?: boolean;
-  /** Attack's queue is a flat list — it has no subgroup drill-down, so groups organized into subgroups (e.g. ZBLL) would just show an empty queue there. Hide them. */
-  excludeSubgroupGroups?: boolean;
+  /** Attack-mode filtering: only show groups with availableInAttack !== false (per-group setting, editable via GroupSettingsModal — defaults to true unless a group explicitly opts out). */
+  attackContext?: boolean;
 }
 
 function downloadJson(filename: string, json: string): void {
@@ -42,9 +42,9 @@ function downloadJson(filename: string, json: string): void {
   URL.revokeObjectURL(url);
 }
 
-export function GroupTabs({ activeId, onSelect, managementEnabled = false, excludeSubgroupGroups = false }: GroupTabsProps) {
+export function GroupTabs({ activeId, onSelect, managementEnabled = false, attackContext = false }: GroupTabsProps) {
   const [allGroups, setAllGroups] = useState<AlgGroupMeta[]>(() => listGroups());
-  const groups = excludeSubgroupGroups ? allGroups.filter((g) => !g.hasSubgroups) : allGroups;
+  const groups = attackContext ? allGroups.filter((g) => g.availableInAttack !== false) : allGroups;
   const [settingsFor, setSettingsFor] = useState<AlgGroupMeta | "new" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -78,13 +78,20 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, exclu
     }
   };
 
-  const handleSaveSettings = (name: string, displayConfig: DisplayConfig, hasSubgroups: boolean, previewAlg: string) => {
+  const handleSaveSettings = (
+    name: string,
+    displayConfig: DisplayConfig,
+    hasSubgroups: boolean,
+    previewAlg: string,
+    availableInAttack: boolean
+  ) => {
     if (settingsFor === "new") {
       const id = createGroup(name, displayConfig, hasSubgroups, previewAlg);
+      updateGroupMeta(id, { availableInAttack });
       refresh();
       onSelect(id);
     } else if (settingsFor) {
-      updateGroupMeta(settingsFor.id, { name, displayConfig, previewAlg });
+      updateGroupMeta(settingsFor.id, { name, displayConfig, previewAlg, availableInAttack });
       refresh();
     }
     setSettingsFor(null);

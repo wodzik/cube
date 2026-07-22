@@ -15,7 +15,8 @@ interface SubgroupCardProps {
   /** The parent group's resolved display config — the subgroup's own override layers on top. */
   groupDisplayConfig: DisplayConfig;
   onOpen: () => void;
-  onEditSettings: () => void;
+  /** Omit to render without the settings gear (e.g. Attack's read-only folder view). */
+  onEditSettings?: () => void;
 }
 
 export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSettings }: SubgroupCardProps) {
@@ -29,16 +30,18 @@ export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSetti
     >
       <div className="flex items-center justify-between gap-1 px-2.5 pt-2 pb-0">
         <span className="text-[11px] font-semibold text-white truncate leading-tight">{subgroup.name}</span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEditSettings();
-          }}
-          title="Subgroup settings"
-          className="p-1 rounded text-gray-700 hover:text-gray-300 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-        >
-          <Settings size={11} />
-        </button>
+        {onEditSettings && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditSettings();
+            }}
+            title="Subgroup settings"
+            className="p-1 rounded text-gray-700 hover:text-gray-300 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+          >
+            <Settings size={11} />
+          </button>
+        )}
       </div>
 
       <div className="px-2 py-1 flex items-center justify-center">
