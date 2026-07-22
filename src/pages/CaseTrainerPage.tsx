@@ -189,13 +189,19 @@ const ROUX_TYPES: readonly TrainerType[] = ["fb", "fs", "fbdr", "ss", "cmll", "e
 /** Both F2L drills: no computed optimum, no level dial / ladder / hints. */
 const F2L_TYPES: readonly TrainerType[] = ["f2l-case", "f2l"];
 /**
- * The F2L drills are DISPLAYED white-down (the way F2L is actually solved):
- * the view appends a trailing z2 and every animated move is z2-conjugated
- * (see the `view` helper). Detection, generation and stored attempts stay
- * in the app's white-up LETTER frame — only what the user sees rotates.
- * Slot letters therefore differ between the two frames: the letter-frame
- * FL slot sits at front-right when white is down. This maps a letter slot
- * to the label shown in the white-down view (its own inverse).
+ * Drills DISPLAYED white-down (the way F2L/cross are actually solved on a
+ * real cube): the view appends a trailing z2 and every animated move is
+ * z2-conjugated (see the `view` helper). Detection, generation and stored
+ * attempts stay in the app's white-up LETTER frame — only what the user
+ * sees rotates. F2L's slot letters therefore differ between the two
+ * frames (see F2L_SLOT_VIEW_LABELS below); cross has no slot concept, so
+ * it's unaffected beyond the display flip itself.
+ */
+const BOTTOM_UP_TYPES: readonly TrainerType[] = [...F2L_TYPES, "cross", "cross-case"];
+/**
+ * Slot letters differ between the two frames: the letter-frame FL slot
+ * sits at front-right when white is down. This maps a letter slot to the
+ * label shown in the white-down view (its own inverse).
  */
 const F2L_SLOT_VIEW_LABELS: Record<XCrossSlot, XCrossSlot> = { FL: "FR", BL: "BR", FR: "FL", BR: "BL" };
 /** Letter slots ordered so their white-down labels read FR, BR, FL, BL. */
@@ -479,7 +485,7 @@ function CaseTrainerInner() {
                       ? await generatePairScramble(len, slotNow, snapshot)
                       : await generateEOCrossScramble(len, snapshot);
           if (generationSeqRef.current !== seq) return;
-          viewRotatedRef.current = F2L_TYPES.includes(generated.type);
+          viewRotatedRef.current = BOTTOM_UP_TYPES.includes(generated.type);
           if (generated.type === "f2l-case" || generated.type === "cross-case") {
             // Virtual case: the view shows the case itself (not the physical
             // cube), detection replays the user's moves onto it, and there is
