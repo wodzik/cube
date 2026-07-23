@@ -9,6 +9,7 @@ import {
   algToPhysicalMoves,
   computeStageSplits,
 } from "./moveParser";
+import { createSolvedState, applyMoveToState, isFullySolved } from "./stageDetection/liveCubeState";
 
 describe("parseMove", () => {
   it("parses basic moves", () => {
@@ -95,6 +96,31 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
   it("empty alg produces an empty setup", () => {
     expect(buildCaseSetupAlg("")).toBe("");
     expect(buildCaseSetupAlg("y2")).toBe("");
+  });
+
+  it("REGRESSION: setup + the tokens actually PLAYED (leading rotation dropped from both) must cancel to solved — playing the FULL alg (rotation still attached) on top of the stripped setup left the cube visibly scrambled", async () => {
+    // Advanced F2L 3's own "y' U2 (R' F R F') (R' U' R)" variant, as
+    // reported live: AlgPlaybackModal built `setup` via buildCaseSetupAlg
+    // (rotation stripped) but still played the FULL token list (rotation
+    // included) forward — the two must be built from the exact same
+    // (rotation-free) token set to cancel out.
+    const fullTokens = "y' U2 R' F R F' R' U' R".split(" ");
+    const displayTokens = stripLeadingRotations(fullTokens);
+    const setup = buildCaseSetupAlg(fullTokens.join(" "));
+
+    const solved = await createSolvedState();
+    const afterSetup = setup
+      .split(/\s+/)
+      .filter(Boolean)
+      .reduce((s, m) => applyMoveToState(s, m), solved);
+    const afterPlaying = displayTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
+    expect(isFullySolved(afterPlaying)).toBe(true);
+
+    // The broken combination (setup from stripped tokens, but the FULL
+    // alg — rotation included — played forward) must NOT be solved, or
+    // this regression test isn't actually exercising the bug.
+    const afterPlayingFull = fullTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
+    expect(isFullySolved(afterPlayingFull)).toBe(false);
   });
 });
 

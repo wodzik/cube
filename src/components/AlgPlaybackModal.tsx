@@ -17,7 +17,7 @@
 import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { CubeVisualisation } from "./CubeVisualisation";
-import { buildCaseSetupAlg } from "../logic/moveParser";
+import { stripLeadingRotations, invertSequence } from "../logic/moveParser";
 import { parseDecoratedAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
 
@@ -34,11 +34,21 @@ interface AlgPlaybackModalProps {
 }
 
 export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringMaskOrbits, onClose }: AlgPlaybackModalProps) {
+  // Both `plain` (what's actually ANIMATED forward) and `setup` (the
+  // inverse it starts from) must derive from the SAME token set — dropping
+  // the leading rotation from setup alone while still playing the FULL alg
+  // (rotation included) forward broke the setup/playback cancellation
+  // (setup ∘ fullAlg ≠ identity once setup no longer accounts for that
+  // rotation): verified live, "y' U2 (R' F R F') (R' U' R)" (Advanced F2L
+  // 3) landed on a visibly scrambled cube instead of solved. Stripping the
+  // rotation from BOTH restores setup ∘ REST = identity exactly, and the
+  // display never needs to show that regrip at all.
   const { plain, setup } = useMemo(() => {
     const { tokens } = parseDecoratedAlg(alg);
+    const displayTokens = stripLeadingRotations(tokens);
     return {
-      plain: tokens.join(" "),
-      setup: buildCaseSetupAlg(tokens.join(" ")),
+      plain: displayTokens.join(" "),
+      setup: displayTokens.length === 0 ? "" : invertSequence(displayTokens).join(" "),
     };
   }, [alg]);
 

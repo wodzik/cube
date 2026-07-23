@@ -24,7 +24,7 @@ import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { buildCaseSetupAlg, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
+import { buildCaseSetupAlg, stripLeadingRotations, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
@@ -253,6 +253,19 @@ function TrainingPageInner() {
 
   /** The algorithm's own tokens, exactly as written — fed to the view one at a time as each completes (see the animation effect below), never the raw decomposed hardware sub-moves. */
   const algTokens = useMemo(() => (variant ? variant.alg.trim().split(/\s+/).filter(Boolean) : []), [variant?.id]);
+  /**
+   * How many tokens at the START of algTokens are pure whole-cube rotations
+   * (a regrip instruction, e.g. a leading "y'") — these must never reach
+   * view.addMove. The case-loading effect below already excludes them from
+   * the SETUP (via buildCaseSetupAlg), so setup ∘ (everything actually
+   * animated) must cancel to identity; animating a leading rotation the
+   * setup no longer accounts for broke exactly that cancellation (verified
+   * live: Advanced F2L 3's "y' U2 (R' F R F') (R' U' R)" ended visibly
+   * scrambled instead of solved). Indices are otherwise untouched — they
+   * still align with liveProgress.completedIndices below, which matches
+   * against the FULL (unstripped) target.
+   */
+  const leadingRotationCount = useMemo(() => algTokens.length - stripLeadingRotations(algTokens).length, [algTokens]);
   /** Highest completed-token index already animated onto the view this attempt. */
   const animatedTokenIndexRef = useRef(-1);
 
@@ -423,8 +436,10 @@ function TrainingPageInner() {
     let maxIdx = animatedTokenIndexRef.current;
     for (const idx of liveProgress.completedIndices) {
       if (idx <= animatedTokenIndexRef.current) continue;
-      const token = algTokens[idx];
-      if (token) view.addMove(token);
+      if (idx >= leadingRotationCount) {
+        const token = algTokens[idx];
+        if (token) view.addMove(token);
+      }
       if (idx > maxIdx) maxIdx = idx;
     }
     animatedTokenIndexRef.current = maxIdx;
