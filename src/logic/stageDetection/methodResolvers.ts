@@ -22,7 +22,7 @@
  * ever wired back in):
  *
  * - cfopResolver: confirmed once boundaries contains "f2l-1" WHILE
- *   lblStageDetector's own "first-layer" (all 4 first-layer corners) is
+ *   lblStageDetector's own "first-layer-4" (all 4 first-layer corners) is
  *   NOT yet reached on the same move stream — a paired corner+edge before
  *   all 4 corners are placed is CFOP-specific; LBL never pairs, it
  *   finishes all 4 first-layer corners with zero second-layer edges done,
@@ -32,7 +32,7 @@
  *   MethodResolver.isConfirmed signature (boundaries only) doesn't carry
  *   that cross-detector context; extending it is part of implementing this.
  *
- * - lblResolver: confirmed once "first-layer" is reached — LBL's earliest
+ * - lblResolver: confirmed once "first-layer-4" is reached — LBL's earliest
  *   unambiguous signal, later than CFOP's own (matches the "right after
  *   cross, default to showing CFOP tentatively; switch to LBL only if/when
  *   ITS confirm condition fires first" framing). MethodResolution already

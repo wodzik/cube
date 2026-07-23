@@ -24,8 +24,8 @@ describe("lblStageDetector — verified against known single-move effects", () =
     const solved = await createSolvedState();
     // D turn: leaves U's cross/first-layer/second-layer (and therefore CFOP's f2l-4) fully intact.
     const state = applyMoveToState(solved, "D");
-    expect(lblStageDetector.isStageSolved("first-layer", state)).toBe(true);
-    expect(lblStageDetector.isStageSolved("second-layer", state)).toBe(true);
+    expect(lblStageDetector.isStageSolved("first-layer-4", state)).toBe(true);
+    expect(lblStageDetector.isStageSolved("second-layer-4", state)).toBe(true);
     expect(cfopStageDetector.isStageSolved("f2l-4", state)).toBe(true);
   });
 
@@ -33,11 +33,24 @@ describe("lblStageDetector — verified against known single-move effects", () =
     const solved = await createSolvedState();
     const state = applyMoveToState(solved, "U");
     expect(lblStageDetector.isStageSolved("cross", state)).toBe(true);
-    expect(lblStageDetector.isStageSolved("first-layer", state)).toBe(true);
-    expect(lblStageDetector.isStageSolved("second-layer", state)).toBe(true);
+    expect(lblStageDetector.isStageSolved("first-layer-4", state)).toBe(true);
+    expect(lblStageDetector.isStageSolved("second-layer-4", state)).toBe(true);
     expect(lblStageDetector.isStageSolved("oll", state)).toBe(true); // U/D turns preserve orientation
     expect(lblStageDetector.isStageSolved("pll", state)).toBe(true); // AUF-tolerant
     expect(lblStageDetector.isStageSolved("auf", state)).toBe(false); // not literally solved yet
+  });
+
+  it("first-layer corners are tracked by COUNT, order-flexible — with cross locked on U, a single L leaves exactly 2 of U's 4 corners still solved", async () => {
+    const solved = await createSolvedState();
+    const context = lblStageDetector.createContext!();
+    const crossOnU = applyMoveToState(solved, "D");
+    expect(lblStageDetector.isStageSolved("cross", crossOnU, context)).toBe(true);
+
+    const state = applyMoveToState(crossOnU, "L");
+    expect(lblStageDetector.isStageSolved("first-layer-1", state, context)).toBe(true);
+    expect(lblStageDetector.isStageSolved("first-layer-2", state, context)).toBe(true);
+    expect(lblStageDetector.isStageSolved("first-layer-3", state, context)).toBe(false);
+    expect(lblStageDetector.isStageSolved("first-layer-4", state, context)).toBe(false);
   });
 });
 
@@ -68,6 +81,6 @@ describe("computeStageBoundaries — LBL", () => {
     // but NOT on U — fed through the same, already-locked context, this
     // must still evaluate against the locked "U", reading false.
     const firstLayerOnR = applyMoveToState(solved, "L");
-    expect(lblStageDetector.isStageSolved("first-layer", firstLayerOnR, context)).toBe(false);
+    expect(lblStageDetector.isStageSolved("first-layer-4", firstLayerOnR, context)).toBe(false);
   });
 });
