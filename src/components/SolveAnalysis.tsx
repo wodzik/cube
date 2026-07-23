@@ -42,6 +42,7 @@ import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liv
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
 import { patchSolve } from "../services/solveStore";
+import { stageDescription } from "./stageDescriptions";
 
 interface SolveAnalysisProps {
   record: SolveRecord;
@@ -94,7 +95,7 @@ function StageTimingRow({ timing, onJump }: { timing: StageTiming; onJump: (move
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-gray-100">{timing.stage}</span>
+          <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage)}</span>
           {skipped ? (
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
           ) : (

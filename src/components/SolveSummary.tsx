@@ -13,6 +13,7 @@ import type { SolveRecord } from "../types/solve";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
+import { stageDescription } from "./stageDescriptions";
 
 interface SolveSummaryProps {
   record: SolveRecord;
@@ -68,7 +69,7 @@ export function SolveSummary({ record, onOpenAnalysis }: SolveSummaryProps) {
               const skipped = t.moveCount === 0;
               return (
                 <tr key={t.stage} className={`border-t border-white/[0.04] ${skipped ? "text-gray-600" : "text-gray-300"}`}>
-                  <td className="py-1.5 text-left font-sans font-medium">{t.stage}</td>
+                  <td className="py-1.5 text-left font-sans font-medium">{stageDescription(t.stage)}</td>
                   {skipped ? (
                     <td colSpan={4} className="py-1.5 text-right text-[10px] uppercase tracking-wider text-amber-400/60">
                       skip
