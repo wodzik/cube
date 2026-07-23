@@ -69,14 +69,20 @@ export function detectCrossFace(state: LiveCubeState): Face | null {
   return FACES.find((face) => isCrossSolvedOnFace(state, face)) ?? null;
 }
 
-export function isOllSolvedOnFace(state: LiveCubeState, face: Face): boolean {
-  const opposite = FACE_SLOTS[OPPOSITE_FACE[face]];
+/** Last-layer CORNERS only oriented (2-look OLL's "orient corners" half) — permutation not checked. */
+export function isOllCornersOrientedOnFace(state: LiveCubeState, face: Face): boolean {
   const corners = state.patternData.CORNERS;
+  return FACE_SLOTS[OPPOSITE_FACE[face]].cornerSlots.every((slot) => corners.orientation[slot] === 0);
+}
+
+/** Last-layer EDGES only oriented (2-look OLL's "orient edges" half, i.e. the top cross) — permutation not checked. */
+export function isOllEdgesOrientedOnFace(state: LiveCubeState, face: Face): boolean {
   const edges = state.patternData.EDGES;
-  return (
-    opposite.cornerSlots.every((slot) => corners.orientation[slot] === 0) &&
-    opposite.edgeSlots.every((slot) => edges.orientation[slot] === 0)
-  );
+  return FACE_SLOTS[OPPOSITE_FACE[face]].edgeSlots.every((slot) => edges.orientation[slot] === 0);
+}
+
+export function isOllSolvedOnFace(state: LiveCubeState, face: Face): boolean {
+  return isOllCornersOrientedOnFace(state, face) && isOllEdgesOrientedOnFace(state, face);
 }
 
 /** PLL (+ trailing AUF) done: some 0-3 quarter turn of the last layer fully solves the cube. */
@@ -85,6 +91,26 @@ export function isPllSolvedOnFace(state: LiveCubeState, face: Face): boolean {
   let s = state;
   for (let i = 0; i < 4; i++) {
     if (isFullySolved(s)) return true;
+    if (i < 3) s = applyMoveToState(s, aufFace);
+  }
+  return false;
+}
+
+/**
+ * Last-layer CORNERS only permuted (2-look PLL's "permute corners" half,
+ * e.g. an Aa/Ab-perm) — some 0-3 quarter turn of the last layer puts every
+ * opposite-face corner in its own home slot. Edges/orientation not
+ * checked: this only makes sense once OLL is already done (corners are
+ * then either home or not — orientation is a non-issue), but checks
+ * position only regardless, so it can't misreport an oriented-but-not-yet-
+ * permuted state as done.
+ */
+export function isPllCornersSolvedOnFace(state: LiveCubeState, face: Face): boolean {
+  const aufFace = OPPOSITE_FACE[face];
+  const cornerSlots = FACE_SLOTS[OPPOSITE_FACE[face]].cornerSlots;
+  let s = state;
+  for (let i = 0; i < 4; i++) {
+    if (cornerSlots.every((slot) => s.patternData.CORNERS.pieces[slot] === slot)) return true;
     if (i < 3) s = applyMoveToState(s, aufFace);
   }
   return false;

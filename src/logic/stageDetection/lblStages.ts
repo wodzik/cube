@@ -1,7 +1,8 @@
 /**
  * LBL (beginner Layer-By-Layer) stage detector: cross -> first layer (4
  * corners placed, no pairing) -> second layer (4 middle edges placed,
- * separately from corners) -> OLL -> PLL -> AUF.
+ * separately from corners) -> OLL (2-look: orient corners/edges, either
+ * order) -> PLL (2-look: permute corners, then edges) -> AUF.
  *
  * Face-agnostic cross/OLL/PLL/AUF detection is IDENTICAL to CFOP's — both
  * import it from lastLayerShared.ts rather than duplicating it (see that
@@ -13,19 +14,34 @@
  * the exact same 16 pieces as CFOP's F2L-4 by the end of "second-layer-4",
  * just reached via a different path.
  *
- * Both the corner and edge halves are tracked by COUNT, not by which
- * specific piece — a beginner inserts them in whatever order is easiest
- * for a given scramble, exactly like CFOP's F2L pairs (see cfopStages.ts).
- * "first-layer-2" means "any 2 of the 4 first-layer corners are placed",
- * not "the 2nd corner specifically" — the count only increases as the
- * solve progresses, so this is a safe monotonic stage sequence for the
- * live tracker (see methodTracker.ts).
+ * The corner/edge halves of first-layer, second-layer, AND OLL are all
+ * tracked by COUNT, not by which specific piece/half — a beginner inserts
+ * them in whatever order is easiest, exactly like CFOP's F2L pairs (see
+ * cfopStages.ts). "first-layer-2" means "any 2 of the 4 first-layer
+ * corners are placed", not "the 2nd corner specifically"; "oll-partial"
+ * means "either corners OR edges are oriented" (2-look OLL is commonly
+ * taught either order) — the count only increases as the solve
+ * progresses, so this is a safe monotonic stage sequence for the live
+ * tracker (see methodTracker.ts). It can't reveal WHICH half a solver did
+ * first, only that one of the two is done — same trade-off as F2L pairs
+ * not revealing which specific pair, and for the same reason: any
+ * assignment that's actually order-flexible can't have a fixed identity
+ * without breaking the strict-sequential walker (StageWalker only ever
+ * advances to the NEXT stage in the array, see methodTracker.ts).
+ *
+ * PLL's two halves are NOT order-flexible — corners are permuted first,
+ * then edges (2-look PLL is always taught this way, unlike OLL) — so
+ * "pll-corners" is inserted as a single, fixed-order stage before the
+ * existing "pll" (which already means "corners AND edges permuted").
  */
 
 import { isFullySolved, isSlotSolved, type LiveCubeState } from "./liveCubeState";
 import {
   detectCrossFace,
+  isOllCornersOrientedOnFace,
+  isOllEdgesOrientedOnFace,
   isOllSolvedOnFace,
+  isPllCornersSolvedOnFace,
   isPllSolvedOnFace,
   lockFaceIfUnset,
   resolveFace,
@@ -69,7 +85,9 @@ export const lblStageDetector: StageDetector = {
     "second-layer-2",
     "second-layer-3",
     "second-layer-4",
+    "oll-partial",
     "oll",
+    "pll-corners",
     "pll",
     "auf",
   ],
@@ -99,9 +117,17 @@ export const lblStageDetector: StageDetector = {
         const target = Number(stage.split("-")[2]);
         return solvedSecondLayerEdgeCount(state, face) >= target;
       }
+      case "oll-partial": {
+        const face = resolveFace(context, state, detectActiveFace);
+        return face !== null && (isOllCornersOrientedOnFace(state, face) || isOllEdgesOrientedOnFace(state, face));
+      }
       case "oll": {
         const face = resolveFace(context, state, detectActiveFace);
         return face !== null && isOllSolvedOnFace(state, face);
+      }
+      case "pll-corners": {
+        const face = resolveFace(context, state, detectActiveFace);
+        return face !== null && isPllCornersSolvedOnFace(state, face);
       }
       case "pll": {
         const face = resolveFace(context, state, detectActiveFace);
