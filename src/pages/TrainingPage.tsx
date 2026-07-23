@@ -352,12 +352,19 @@ function TrainingPageInner() {
       setAccumulatedOrientation(accumulatedOrientationRef.current);
     }
 
+    // Short, not zero: long enough for the final move's cube animation to
+    // actually finish playing (tempoScale=5 on CubeVisualisation puts a
+    // single-move animation at roughly this order of magnitude) before
+    // view.reset() cuts it off for the next case — any moves the user
+    // fires during this window are still captured by moveBuffer and
+    // replayed once the next target arms, so shortening this further
+    // couldn't drop anything even for a very fast chained solver.
     const timer = setTimeout(() => {
       setCaseIdx((i) => (i + 1) % Math.max(selectedCases.length, 1));
       // Force the loading effect even when the next case is the same one
       // (single-case drills / repeats in a short rotation).
       setDrillRound((r) => r + 1);
-    }, 1200);
+    }, 350);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, state.startTime, state.endTime, currentCaseName, variantId, group, activeSubgroupId]);
@@ -389,10 +396,23 @@ function TrainingPageInner() {
   // from the target's own true effect no matter how many tokens chain.
   // Applies UNCONDITIONALLY (not gated by the Centers toggle) — this is a
   // general animation-correctness fix, not cross-case orientation tracking.
+  //
+  // Deliberately NOT keyed on `progress` above: selectCurrentProgress only
+  // returns non-null during "setup"/"active" (see sessionSelectors.ts) —
+  // the render where the FINAL move completes the algorithm is exactly the
+  // render where phase flips to "done", at which point progress is ALREADY
+  // null. That render never re-fires this effect with the final token
+  // included, so the last move's animation was silently dropped every
+  // time — recompute progress directly from moveLog here, unaffected by
+  // that phase gate (state.target/state.moveLog stay valid through "done").
+  const liveProgress = useMemo(
+    () => (state.target ? computeSequenceProgress(state.target, state.moveLog.map((m) => m.move)) : null),
+    [state.target, state.moveLog]
+  );
   useEffect(() => {
-    if (!progress) return;
+    if (!liveProgress) return;
     let maxIdx = animatedTokenIndexRef.current;
-    for (const idx of progress.completedIndices) {
+    for (const idx of liveProgress.completedIndices) {
       if (idx <= animatedTokenIndexRef.current) continue;
       const token = algTokens[idx];
       if (token) view.addMove(token);
@@ -400,7 +420,7 @@ function TrainingPageInner() {
     }
     animatedTokenIndexRef.current = maxIdx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress?.completedCount]);
+  }, [liveProgress?.completedCount]);
 
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
