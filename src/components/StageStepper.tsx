@@ -31,9 +31,11 @@ const STAGE_LABELS: Record<string, string> = {
   "second-layer-2": "SL-2",
   "second-layer-3": "SL-3",
   "second-layer-4": "SL-4",
-  "oll-partial": "OLL-P",
-  oll: "OLL",
+  "oll-first": "OLL-1",
+  "oll-second": "OLL-2",
   "pll-corners": "PLL-C",
+  "pll-edges": "PLL-E",
+  oll: "OLL",
   pll: "PLL",
   auf: "AUF",
   fb: "FB",
@@ -42,19 +44,34 @@ const STAGE_LABELS: Record<string, string> = {
   lse: "LSE",
 };
 
-function stageLabel(stage: string): string {
+/**
+ * LBL's oll-first/oll-second have a fixed id but a per-solve-varying
+ * identity (2-look OLL is taught either order — see lblStages.ts) — once
+ * the stage actually completes, its boundary carries a `detail` ("corners"
+ * or "edges") saying which one it turned out to be; show THAT instead of
+ * the generic "OLL-1"/"OLL-2" placeholder. Not yet reached (no boundary,
+ * detail undefined) still shows the placeholder — there's nothing to
+ * report yet.
+ */
+function stageLabel(stage: string, detail?: string): string {
+  if (stage === "oll-first" || stage === "oll-second") {
+    if (detail === "corners") return "Corners";
+    if (detail === "edges") return "Edges";
+  }
   return STAGE_LABELS[stage] ?? stage.toUpperCase();
 }
 
 export function StageStepper({ stages, boundaries }: StageStepperProps) {
-  const completed = new Set(boundaries.map((b) => b.stage));
-  const nextIdx = stages.findIndex((s) => !completed.has(s));
+  const boundaryByStage = new Map(boundaries.map((b) => [b.stage, b]));
+  const nextIdx = stages.findIndex((s) => !boundaryByStage.has(s));
 
   return (
     <div className="flex items-start w-full overflow-x-auto pb-1">
       {stages.map((stage, i) => {
-        const isDone = completed.has(stage);
+        const boundary = boundaryByStage.get(stage);
+        const isDone = boundary !== undefined;
         const isCurrent = i === nextIdx;
+        const label = stageLabel(stage, boundary?.detail);
         return (
           <div key={stage} className="flex items-start flex-1 min-w-14 last:flex-none">
             <div className="flex flex-col items-center gap-1.5 shrink-0">
@@ -67,14 +84,14 @@ export function StageStepper({ stages, boundaries }: StageStepperProps) {
                       : "bg-gray-800/80 border-gray-700 text-gray-500"
                 }`}
               >
-                {isDone ? <Check size={14} /> : stageLabel(stage).slice(0, 1)}
+                {isDone ? <Check size={14} /> : label.slice(0, 1)}
               </div>
               <span
                 className={`text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap ${
                   isDone ? "text-emerald-400" : isCurrent ? "text-amber-400" : "text-gray-600"
                 }`}
               >
-                {stageLabel(stage)}
+                {label}
               </span>
             </div>
             {i < stages.length - 1 && (

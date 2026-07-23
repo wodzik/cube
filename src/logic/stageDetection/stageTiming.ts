@@ -41,6 +41,8 @@ export interface StageTiming {
   startMoveIndex: number | null;
   /** Raw-move index of the move that completed this stage, or null if not reached / already solved pre-solve. */
   endMoveIndex: number | null;
+  /** See StageDetector.stageDetail — carried through from the boundary, undefined if the stage hasn't been reached or the detector doesn't use this. */
+  detail?: string;
 }
 
 export function computeStageTimings(
@@ -85,6 +87,7 @@ export function computeStageTimings(
       totalMs: boundary.timestampMs - prevTimestampMs,
       startMoveIndex: rawMoveCount > 0 ? prevMoveIndex + 1 : null,
       endMoveIndex: boundary.moveIndex >= 0 ? boundary.moveIndex : null,
+      detail: boundary.detail,
     });
 
     prevTimestampMs = boundary.timestampMs;

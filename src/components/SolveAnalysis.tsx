@@ -95,7 +95,7 @@ function StageTimingRow({ timing, onJump }: { timing: StageTiming; onJump: (move
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage)}</span>
+          <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage, timing.detail)}</span>
           {skipped ? (
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
           ) : (

@@ -35,8 +35,8 @@ describe("lblStageDetector — verified against known single-move effects", () =
     expect(lblStageDetector.isStageSolved("cross", state)).toBe(true);
     expect(lblStageDetector.isStageSolved("first-layer-4", state)).toBe(true);
     expect(lblStageDetector.isStageSolved("second-layer-4", state)).toBe(true);
-    expect(lblStageDetector.isStageSolved("oll", state)).toBe(true); // U/D turns preserve orientation
-    expect(lblStageDetector.isStageSolved("pll", state)).toBe(true); // AUF-tolerant
+    expect(lblStageDetector.isStageSolved("oll-second", state)).toBe(true); // U/D turns preserve orientation
+    expect(lblStageDetector.isStageSolved("pll-edges", state)).toBe(true); // AUF-tolerant
     expect(lblStageDetector.isStageSolved("auf", state)).toBe(false); // not literally solved yet
   });
 
@@ -53,26 +53,44 @@ describe("lblStageDetector — verified against known single-move effects", () =
     expect(lblStageDetector.isStageSolved("first-layer-4", state, context)).toBe(false);
   });
 
-  it("oll-partial is order-flexible: corners-oriented-first (M leaves D's edges flipped, corners untouched, cross locked on U) reports oll-partial without full oll", async () => {
+  it("oll-first is order-flexible: corners-oriented-first (M leaves D's edges flipped, corners untouched, cross locked on U) reports oll-first without full oll, with detail 'corners'", async () => {
     const solved = await createSolvedState();
     const context = lblStageDetector.createContext!();
     const crossOnU = applyMoveToState(solved, "D");
     expect(lblStageDetector.isStageSolved("cross", crossOnU, context)).toBe(true);
 
     const state = applyMoveToState(crossOnU, "M");
-    expect(lblStageDetector.isStageSolved("oll-partial", state, context)).toBe(true);
-    expect(lblStageDetector.isStageSolved("oll", state, context)).toBe(false);
+    expect(lblStageDetector.isStageSolved("oll-first", state, context)).toBe(true);
+    expect(lblStageDetector.isStageSolved("oll-second", state, context)).toBe(false);
+    expect(lblStageDetector.stageDetail!("oll-first", state, context)).toBe("corners");
   });
 
-  it("oll-partial is order-flexible: edges-oriented-first (Sune leaves U's corners twisted, edges untouched, cross locked on D) reports oll-partial without full oll", async () => {
+  it("oll-first is order-flexible: edges-oriented-first (Sune leaves U's corners twisted, edges untouched, cross locked on D) reports oll-first without full oll, with detail 'edges'", async () => {
     const solved = await createSolvedState();
     const context = lblStageDetector.createContext!();
     const crossOnD = applyMoveToState(solved, "U");
     expect(lblStageDetector.isStageSolved("cross", crossOnD, context)).toBe(true);
 
     const state = "R U R' U R U2 R'".split(" ").reduce((s, m) => applyMoveToState(s, m), crossOnD);
-    expect(lblStageDetector.isStageSolved("oll-partial", state, context)).toBe(true);
-    expect(lblStageDetector.isStageSolved("oll", state, context)).toBe(false);
+    expect(lblStageDetector.isStageSolved("oll-first", state, context)).toBe(true);
+    expect(lblStageDetector.isStageSolved("oll-second", state, context)).toBe(false);
+    expect(lblStageDetector.stageDetail!("oll-first", state, context)).toBe("edges");
+  });
+
+  it("oll-second's detail is the COMPLEMENT of oll-first's, tracked via context — corners first means oll-second is edges", async () => {
+    const solved = await createSolvedState();
+    const context = lblStageDetector.createContext!();
+    const crossOnU = applyMoveToState(solved, "D");
+    lblStageDetector.isStageSolved("cross", crossOnU, context);
+
+    const afterM = applyMoveToState(crossOnU, "M");
+    // stageDetail for oll-first ALSO records ollFirstDetail into context (a
+    // side effect, matching how methodTracker's StageWalker actually calls
+    // it — right after isStageSolved confirms the stage, on the walk's
+    // shared context) — oll-second's own detail then reads back that
+    // recorded value's complement, regardless of the state passed in.
+    expect(lblStageDetector.stageDetail!("oll-first", afterM, context)).toBe("corners");
+    expect(lblStageDetector.stageDetail!("oll-second", afterM, context)).toBe("edges");
   });
 
   it("pll-corners fires once corners are permuted (up to AUF) even with edges still scrambled — a pure-edge algorithm (Ua-perm) leaves corners untouched", async () => {
@@ -83,7 +101,7 @@ describe("lblStageDetector — verified against known single-move effects", () =
 
     const state = "R U' R U R U R U' R' U' R2".split(" ").reduce((s, m) => applyMoveToState(s, m), crossOnD);
     expect(lblStageDetector.isStageSolved("pll-corners", state, context)).toBe(true);
-    expect(lblStageDetector.isStageSolved("pll", state, context)).toBe(false);
+    expect(lblStageDetector.isStageSolved("pll-edges", state, context)).toBe(false);
   });
 });
 
@@ -101,6 +119,16 @@ describe("computeStageBoundaries — LBL", () => {
     for (let i = 1; i < boundaries.length; i++) {
       expect(boundaries[i].moveIndex).toBeGreaterThanOrEqual(boundaries[i - 1].moveIndex);
     }
+
+    // The full pipeline (StageWalker calling stageDetail when it records a
+    // boundary — see methodTracker.ts) actually attaches a valid detail to
+    // oll-first/oll-second for a real walked solve, not just in isolated
+    // stageDetail() calls — and oll-second is always the complement.
+    const ollFirst = boundaries.find((b) => b.stage === "oll-first")!;
+    const ollSecond = boundaries.find((b) => b.stage === "oll-second")!;
+    expect(ollFirst.detail).toBeDefined();
+    expect(["corners", "edges"]).toContain(ollFirst.detail!);
+    expect(ollSecond.detail).toBe(ollFirst.detail === "corners" ? "edges" : "corners");
   });
 
   it("locks its cross face once, same drift protection as CFOP (see methodTracker.test.ts's equivalent CFOP case)", async () => {

@@ -57,7 +57,9 @@ export class StageWalker {
   private checkStages(moveIndex: number, timestampMs: number): void {
     const { detector, context } = this;
     while (this.stageIdx < detector.stages.length && detector.isStageSolved(detector.stages[this.stageIdx], this.state, context)) {
-      this._boundaries.push({ stage: detector.stages[this.stageIdx], moveIndex, timestampMs });
+      const stage = detector.stages[this.stageIdx];
+      const detail = detector.stageDetail?.(stage, this.state, context);
+      this._boundaries.push(detail !== undefined ? { stage, moveIndex, timestampMs, detail } : { stage, moveIndex, timestampMs });
       this.stageIdx++;
     }
   }
