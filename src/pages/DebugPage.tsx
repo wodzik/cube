@@ -18,6 +18,14 @@ import { Trash2, RotateCcw, Box } from "lucide-react";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CubeVisualisation, type CubeVisualisationRef } from "../components/CubeVisualisation";
+import { TryAlgorithmPanel } from "../components/TryAlgorithmPanel";
+
+type DebugTab = "log" | "try";
+
+const TABS: { id: DebugTab; label: string }[] = [
+  { id: "log", label: "Move Log" },
+  { id: "try", label: "Try Algorithm" },
+];
 
 interface MoveEntry {
   id: number;
@@ -44,6 +52,7 @@ function formatAbsolute(ts: number): string {
 }
 
 export default function DebugPage() {
+  const [activeTab, setActiveTab] = useState<DebugTab>("log");
   const [moves, setMoves] = useState<MoveEntry[]>([]);
   const [showCube, setShowCube] = useState(true);
   const startTimeRef = useRef<number | null>(null);
@@ -77,79 +86,99 @@ export default function DebugPage() {
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 4rem)" }}>
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
-          <h1 className="text-sm font-semibold text-white">Cube Move Log</h1>
-          <span className="text-xs text-gray-500 tabular-nums">
-            {moves.length} move{moves.length !== 1 ? "s" : ""}
-          </span>
+        <div className="flex items-center gap-1">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-colors ${
+                activeTab === t.id ? "text-white bg-white/[0.08]" : "text-gray-600 hover:text-gray-300 hover:bg-white/[0.03]"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+          {activeTab === "log" && (
+            <span className="text-xs text-gray-500 tabular-nums ml-2">
+              {moves.length} move{moves.length !== 1 ? "s" : ""}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowCube((v) => !v)}
-            title={showCube ? "Hide cube" : "Show cube"}
-            className={`btn-secondary ${showCube ? "text-[var(--accent-bright)] border-[var(--accent)]/30 bg-[var(--accent)]/10" : ""}`}
-          >
-            <Box size={12} />
-            Cube
-          </button>
+          {activeTab === "log" && (
+            <>
+              <button
+                onClick={() => setShowCube((v) => !v)}
+                title={showCube ? "Hide cube" : "Show cube"}
+                className={`btn-secondary ${showCube ? "text-[var(--accent-bright)] border-[var(--accent)]/30 bg-[var(--accent)]/10" : ""}`}
+              >
+                <Box size={12} />
+                Cube
+              </button>
 
-          <button onClick={resetCube} disabled={!showCube} title="Reset cube to solved state" className="btn-secondary">
-            <RotateCcw size={12} />
-            Reset
-          </button>
+              <button onClick={resetCube} disabled={!showCube} title="Reset cube to solved state" className="btn-secondary">
+                <RotateCcw size={12} />
+                Reset
+              </button>
 
-          <button onClick={clearLog} disabled={moves.length === 0} title="Clear move log" className="btn-danger">
-            <Trash2 size={12} />
-            Clear
-          </button>
+              <button onClick={clearLog} disabled={moves.length === 0} title="Clear move log" className="btn-danger">
+                <Trash2 size={12} />
+                Clear
+              </button>
+            </>
+          )}
 
           <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        {showCube && (
-          <div className="flex-none w-72 xl:w-96 border-r border-white/[0.06] flex items-center justify-center p-6">
-            <div className="w-full aspect-square">
-              <CubeVisualisation ref={cubeRef} visualization="3D" background="none" controlPanel="none" dragInput="none" className="size-full" />
+      {activeTab === "log" ? (
+        <div className="flex flex-1 min-h-0">
+          {showCube && (
+            <div className="flex-none w-72 xl:w-96 border-r border-white/[0.06] flex items-center justify-center p-6">
+              <div className="w-full aspect-square">
+                <CubeVisualisation ref={cubeRef} visualization="3D" background="none" controlPanel="none" dragInput="none" className="size-full" />
+              </div>
             </div>
-          </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 font-mono text-sm">
-          {moves.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-2 text-gray-600">
-              <p className="text-base">No moves yet</p>
-              <p className="text-xs">Make a move on the connected Bluetooth cube</p>
-            </div>
-          ) : (
-            <table className="w-full max-w-xl">
-              <thead>
-                <tr className="text-left text-[10px] uppercase tracking-widest text-gray-600 border-b border-white/[0.06]">
-                  <th className="pb-2 pr-6 font-semibold">#</th>
-                  <th className="pb-2 pr-6 font-semibold">Move</th>
-                  <th className="pb-2 pr-6 font-semibold">Relative (s)</th>
-                  <th className="pb-2 font-semibold">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moves.map((entry, i) => (
-                  <tr key={entry.id} className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors">
-                    <td className="py-1.5 pr-6 text-gray-600 tabular-nums">{i + 1}</td>
-                    <td className="py-1.5 pr-6 font-bold text-base w-16" style={{ color: "var(--accent-bright)" }}>
-                      {entry.move}
-                    </td>
-                    <td className="py-1.5 pr-6 text-gray-400 tabular-nums">{formatRelative(entry.relativeMs)}</td>
-                    <td className="py-1.5 text-gray-600 tabular-nums text-xs">{formatAbsolute(entry.timestamp)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           )}
-          <div ref={bottomRef} />
+
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 font-mono text-sm">
+            {moves.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 gap-2 text-gray-600">
+                <p className="text-base">No moves yet</p>
+                <p className="text-xs">Make a move on the connected Bluetooth cube</p>
+              </div>
+            ) : (
+              <table className="w-full max-w-xl">
+                <thead>
+                  <tr className="text-left text-[10px] uppercase tracking-widest text-gray-600 border-b border-white/[0.06]">
+                    <th className="pb-2 pr-6 font-semibold">#</th>
+                    <th className="pb-2 pr-6 font-semibold">Move</th>
+                    <th className="pb-2 pr-6 font-semibold">Relative (s)</th>
+                    <th className="pb-2 font-semibold">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {moves.map((entry, i) => (
+                    <tr key={entry.id} className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors">
+                      <td className="py-1.5 pr-6 text-gray-600 tabular-nums">{i + 1}</td>
+                      <td className="py-1.5 pr-6 font-bold text-base w-16" style={{ color: "var(--accent-bright)" }}>
+                        {entry.move}
+                      </td>
+                      <td className="py-1.5 pr-6 text-gray-400 tabular-nums">{formatRelative(entry.relativeMs)}</td>
+                      <td className="py-1.5 text-gray-600 tabular-nums text-xs">{formatAbsolute(entry.timestamp)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <div ref={bottomRef} />
+          </div>
         </div>
-      </div>
+      ) : (
+        <TryAlgorithmPanel />
+      )}
     </div>
   );
 }

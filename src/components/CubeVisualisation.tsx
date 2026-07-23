@@ -241,6 +241,12 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       setAlgorithm: (newAlg: string) => {
         if (!playerRef.current) return;
         playerRef.current.alg = newAlg;
+        // Assigning `.alg` on an ALREADY-MOUNTED player preserves the
+        // current timeline position rather than resetting to the start —
+        // verified live: pasting a fresh algorithm landed the scrubber at
+        // the END, cube already fully turned, instead of ready to play
+        // from solved. Force it back to the start explicitly.
+        playerRef.current.jumpToStart({ flash: false });
       },
       setSetupAlgorithm: (setup: string, newAlg = "") => {
         if (!playerRef.current) return;
