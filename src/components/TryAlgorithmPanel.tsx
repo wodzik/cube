@@ -11,11 +11,14 @@
  *    whether a solution algorithm actually solves it.
  *  - "This algorithm solves the cube": OFF (default) plays the algorithm
  *    forward from solved (+ any setup moves), same as before. ON treats the
- *    pasted text as a SOLUTION — the setup becomes that algorithm's own
- *    inverse (same buildCaseSetupAlg convention used by case practice, see
- *    moveParser.ts — a leading rotation is a regrip instruction, stripped
- *    from both the setup AND the played tokens so they still cancel to
- *    solved), stacked after any manual setup moves.
+ *    pasted text as a SOLUTION — the setup additionally gets that
+ *    algorithm's own inverse stacked on top (same buildCaseSetupAlg
+ *    convention used by case practice, see moveParser.ts).
+ *
+ * Either way, a leading rotation in the typed Algorithm (e.g. "y U2 ...")
+ * is always moved into `setup` rather than left as the first token of what
+ * gets animated — TwistyPlayer silently ignores a rotation-only move
+ * sitting at index 0 of its animated `alg` timeline (verified live).
  *
  * TwistyPlayer's `alg`/`setupAlg` are effectively write-once-at-mount (see
  * CubeVisualisation's own doc comment) — live updates go through the
@@ -70,19 +73,30 @@ export function TryAlgorithmPanel() {
   const { setup, alg } = useMemo(() => {
     if (hasErrors) return { setup: "", alg: "" };
     const manualSetup = setupTokens.join(" ");
+
+    // TwistyPlayer silently ignores a rotation-only move sitting at index 0
+    // of its animated `alg` timeline (verified live: pasting "y U2 (L U'
+    // L') U (S' L' S)" directly into Algorithm showed the first VISIBLE
+    // move as U2, as if the leading y had never been typed — moving that
+    // same y into Setup moves instead animated correctly). So a leading
+    // rotation in the typed Algorithm must never be the first token of
+    // `alg` — it goes into `setup` instead (a one-shot state change, not
+    // an animated step, so it has no such issue) — regardless of whether
+    // "solves the cube" is on.
+    const playedTokens = stripLeadingRotations(algTokens);
+    const leadingRotation = algTokens.slice(0, algTokens.length - playedTokens.length).join(" ");
+
     if (!solvesTheCube) {
-      return { setup: manualSetup, alg: algTokens.join(" ") };
+      const combinedSetup = [manualSetup, leadingRotation].filter(Boolean).join(" ");
+      return { setup: combinedSetup, alg: playedTokens.join(" ") };
     }
-    // Same convention as case practice (buildCaseSetupAlg): a leading
-    // rotation is a regrip instruction, not something that scrambles the
-    // case — stripped from BOTH the inverted setup and the played tokens
-    // so they still cancel to solved (see moveParser.ts's doc comment and
-    // the regression this exact mismatch caused when only one side was
-    // stripped).
-    const displayTokens = stripLeadingRotations(algTokens);
-    const caseSetup = displayTokens.length === 0 ? "" : invertSequence(displayTokens).join(" ");
-    const combinedSetup = [manualSetup, caseSetup].filter(Boolean).join(" ");
-    return { setup: combinedSetup, alg: displayTokens.join(" ") };
+    // Same convention as case practice (buildCaseSetupAlg): the leading
+    // rotation is kept, just moved ahead of the inverted case setup rather
+    // than dropped, so setup + played tokens still reconstruct the exact
+    // original algorithm's meaning (see moveParser.ts's doc comment).
+    const caseSetup = playedTokens.length === 0 ? "" : invertSequence(playedTokens).join(" ");
+    const combinedSetup = [manualSetup, leadingRotation, caseSetup].filter(Boolean).join(" ");
+    return { setup: combinedSetup, alg: playedTokens.join(" ") };
   }, [hasErrors, setupTokens, algTokens, solvesTheCube]);
 
   useEffect(() => {

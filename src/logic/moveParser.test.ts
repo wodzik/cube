@@ -81,46 +81,35 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
     expect(stripLeadingRotations(["R", "y", "U"])).toEqual(["R", "y", "U"]);
   });
 
-  it("REGRESSION: a leading rotation must not end up applied to the display — Advanced F2L 4's own 'y2 ...' variant used to render blue-front instead of the case's canonical green-front", () => {
-    // Naive invertSequence(full alg) reverses order, so the leading y2
-    // lands LAST in the setup — applied to the display as a spurious net
-    // whole-cube spin. buildCaseSetupAlg must strip it before inverting.
-    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2")).toEqual(invertSequence(["U2", "R2", "u", "R2'", "u'", "R2"]).join(" "));
-    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2").trim().split(/\s+/).slice(-1)[0]).not.toMatch(/^y/);
+  it("a leading rotation is MOVED to the front of the setup, not dropped — TwistyPlayer silently ignores a rotation-only move at index 0 of its animated `alg`, but a rotation inside experimentalSetupAlg (a one-shot state, not an animated step) works fine (verified live: Debug > Try Algorithm)", () => {
+    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2")).toEqual(
+      ["y2", ...invertSequence(["U2", "R2", "u", "R2'", "u'", "R2"])].join(" ")
+    );
+    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2").trim().split(/\s+/)[0]).toBe("y2");
   });
 
   it("an alg with no leading rotation is unaffected (matches plain invertSequence)", () => {
     expect(buildCaseSetupAlg("U2 L2' u L2 u' L2'")).toEqual(invertSequence(["U2", "L2'", "u", "L2", "u'", "L2'"]).join(" "));
   });
 
-  it("empty alg produces an empty setup", () => {
+  it("empty alg produces an empty setup; a rotation-only alg produces just that rotation", () => {
     expect(buildCaseSetupAlg("")).toBe("");
-    expect(buildCaseSetupAlg("y2")).toBe("");
+    expect(buildCaseSetupAlg("y2")).toBe("y2");
   });
 
-  it("REGRESSION: setup + the tokens actually PLAYED (leading rotation dropped from both) must cancel to solved — playing the FULL alg (rotation still attached) on top of the stripped setup left the cube visibly scrambled", async () => {
-    // Advanced F2L 3's own "y' U2 (R' F R F') (R' U' R)" variant, as
-    // reported live: AlgPlaybackModal built `setup` via buildCaseSetupAlg
-    // (rotation stripped) but still played the FULL token list (rotation
-    // included) forward — the two must be built from the exact same
-    // (rotation-free) token set to cancel out.
+  it("REGRESSION: setup (rotation prepended) + the tokens actually PLAYED (rotation-free) must land on a solved cube — Advanced F2L 3's own 'y' U2 (R' F R F') (R' U' R)' variant, reported live as ending visibly scrambled under the OLDER drop-the-rotation implementation", async () => {
     const fullTokens = "y' U2 R' F R F' R' U' R".split(" ");
-    const displayTokens = stripLeadingRotations(fullTokens);
+    const playedTokens = stripLeadingRotations(fullTokens);
     const setup = buildCaseSetupAlg(fullTokens.join(" "));
+    expect(setup.split(/\s+/)[0]).toBe("y'");
 
     const solved = await createSolvedState();
     const afterSetup = setup
       .split(/\s+/)
       .filter(Boolean)
       .reduce((s, m) => applyMoveToState(s, m), solved);
-    const afterPlaying = displayTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
+    const afterPlaying = playedTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
     expect(isFullySolved(afterPlaying)).toBe(true);
-
-    // The broken combination (setup from stripped tokens, but the FULL
-    // alg — rotation included — played forward) must NOT be solved, or
-    // this regression test isn't actually exercising the bug.
-    const afterPlayingFull = fullTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
-    expect(isFullySolved(afterPlayingFull)).toBe(false);
   });
 });
 
