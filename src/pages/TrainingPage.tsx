@@ -173,6 +173,20 @@ function TrainingPageInner() {
     setDrillRound((r) => r + 1); // force the current case's setup to redisplay without the (now-cleared) rotation
   };
 
+  /**
+   * Abandon the current attempt and restart the SAME case from scratch —
+   * bumping drillRound re-runs the case-loading effect below exactly as it
+   * does on auto-advance (reset() the session, re-arm setTarget, view.reset()
+   * + re-apply the setup algorithm), just without moving to the next case.
+   * Clearing moveBuffer first covers the edge case of resetting right as a
+   * just-completed attempt's moves are still in its "done"-phase capture
+   * window — those belong to the abandoned attempt, not the fresh one.
+   */
+  const resetAttempt = () => {
+    moveBuffer.clear();
+    setDrillRound((r) => r + 1);
+  };
+
   const reload = () => {
     if (activeSubgroupId) setCases(getSubgroupCases(group, activeSubgroupId));
     else if (groupMeta?.hasSubgroups) setCases([]);
@@ -536,13 +550,22 @@ function TrainingPageInner() {
         hintText={hintText}
         controls={
           currentCase && variant ? (
-            <button
-              onClick={() => setShowPlayback(true)}
-              className="btn-secondary text-xs"
-              title="Watch this algorithm performed move by move"
-            >
-              <Video size={13} /> Show me how
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={resetAttempt}
+                className="btn-secondary text-xs"
+                title="Restart this case from the beginning"
+              >
+                <RotateCcw size={13} /> Reset
+              </button>
+              <button
+                onClick={() => setShowPlayback(true)}
+                className="btn-secondary text-xs"
+                title="Watch this algorithm performed move by move"
+              >
+                <Video size={13} /> Show me how
+              </button>
+            </div>
           ) : undefined
         }
         cubeRef={cubeRef}

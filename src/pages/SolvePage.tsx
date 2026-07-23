@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ClipboardPaste, CheckCircle2, FolderInput, Plus, Trash2 } from "lucide-react";
+import { ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
@@ -288,6 +288,26 @@ function SolvePageInner({
       setTarget("");
     }
   }, [session.startingStage, generate, setTarget]);
+
+  /**
+   * Abandon whatever's been done on the CURRENT attempt (scrambling or
+   * solving) and restart tracking the SAME scramble from scratch — unlike
+   * Cancel/Discard (startNextAttempt), which moves on to a brand new one.
+   * Re-arming with the identical notation re-enters "setup" with a cleared
+   * moveLog/timer; the targetNotation-keyed effect below won't fire (the
+   * string didn't change), so the visual mirror is reset here explicitly —
+   * same reasoning as the case-loading effect in TrainingPage.
+   */
+  const resetAttempt = useCallback(() => {
+    view.reset();
+    setTarget(state.targetNotation);
+    // The dismiss effect below only clears these on the FIRST move of a
+    // fresh "setup" (moveLog.length > 0) — re-arming here lands on an EMPTY
+    // moveLog, so it wouldn't fire; clear explicitly instead of leaving a
+    // stale summary/analysis modal next to the just-reset scramble.
+    setSummaryRecord(null);
+    setAnalysisRecord(null);
+  }, [view, setTarget, state.targetNotation]);
 
   // Every physical move mirrors 1:1 into the 3D view, unconditionally —
   // it's a live shadow of the real cube, not phase-aware.
@@ -649,22 +669,33 @@ function SolvePageInner({
       timerState={timerState}
       hintText={hintText}
       controls={
-        <SolveControls
-          mode="solve"
-          isActive={state.phase === "active" || state.phase === "inspecting"}
-          onDiscard={startNextAttempt}
-          onSaveAsDNF={startNextAttempt}
-          onResetCube={() => {
-            view.reset();
-            state.moveLog.forEach((m) => view.addMove(m.move));
-          }}
-          // No manual stop trigger (spacebar/timer) enabled -> Cancel can
-          // only mean "give up", so skip the Discard/Save-as-DNF menu and
-          // discard directly. Once a manual method is available the user
-          // has a legitimate way to end early on purpose, so the full menu
-          // (including Save as DNF) applies.
-          stopByCube={!state.config.stopMethod.includes("spacebar") && !state.config.stopMethod.includes("timer-device")}
-        />
+        <div className="flex items-center gap-2">
+          {state.phase !== "idle" && (
+            <button
+              onClick={resetAttempt}
+              className="btn-secondary text-xs"
+              title="Restart this scramble from the beginning"
+            >
+              <RotateCcw size={13} /> Reset
+            </button>
+          )}
+          <SolveControls
+            mode="solve"
+            isActive={state.phase === "active" || state.phase === "inspecting"}
+            onDiscard={startNextAttempt}
+            onSaveAsDNF={startNextAttempt}
+            onResetCube={() => {
+              view.reset();
+              state.moveLog.forEach((m) => view.addMove(m.move));
+            }}
+            // No manual stop trigger (spacebar/timer) enabled -> Cancel can
+            // only mean "give up", so skip the Discard/Save-as-DNF menu and
+            // discard directly. Once a manual method is available the user
+            // has a legitimate way to end early on purpose, so the full menu
+            // (including Save as DNF) applies.
+            stopByCube={!state.config.stopMethod.includes("spacebar") && !state.config.stopMethod.includes("timer-device")}
+          />
+        </div>
       }
       centerBottom={
         state.phase === "setup" && !isPasteOpen ? (
