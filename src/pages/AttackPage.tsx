@@ -31,7 +31,7 @@ import { GripVertical, RotateCcw, ChevronRight, ChevronLeft, Video } from "lucid
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence } from "../logic/moveParser";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import {
   getGroupMeta,
@@ -69,10 +69,6 @@ const ATTACK_CONFIG: SessionConfig = {
   inspectionSeconds: 15,
 };
 
-function invertAlg(alg: string): string {
-  const moves = alg.trim().split(/\s+/).filter(Boolean);
-  return moves.length === 0 ? "" : invertSequence(moves).join(" ");
-}
 
 /**
  * User's preferred queue order, per group — captured on every drag and
@@ -190,7 +186,7 @@ function AttackPageInner() {
     reset();
     setTarget(variant.alg);
     view.reset();
-    const inv = invertAlg(variant.alg);
+    const inv = buildCaseSetupAlg(variant.alg);
     if (inv) view.setSetupAlgorithm(inv, "");
     // Moves that arrived while the previous case was completing (the queue
     // advances over a render — a fast solver's first moves of the NEXT case

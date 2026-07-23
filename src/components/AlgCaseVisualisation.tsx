@@ -14,7 +14,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
-import { invertSequence } from "../logic/moveParser";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 
 interface AlgCaseVisualisationProps {
   /** The solution algorithm — the visualisation shows the state BEFORE this is applied. */
@@ -28,11 +28,6 @@ interface AlgCaseVisualisationProps {
   className?: string;
 }
 
-function invertAlg(algStr: string): string {
-  const moves = algStr.trim().split(/\s+/).filter((m) => m.length > 0);
-  return moves.length === 0 ? "" : invertSequence(moves).join(" ");
-}
-
 export function AlgCaseVisualisation({
   alg,
   stickering = "full",
@@ -44,7 +39,7 @@ export function AlgCaseVisualisation({
 }: AlgCaseVisualisationProps) {
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const inverseAlg = useMemo(() => invertAlg(alg), [alg]);
+  const inverseAlg = useMemo(() => buildCaseSetupAlg(alg), [alg]);
 
   const [visible, setVisible] = useState(false);
 

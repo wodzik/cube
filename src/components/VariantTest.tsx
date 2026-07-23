@@ -21,7 +21,7 @@ import { X } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence } from "../logic/moveParser";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
@@ -68,8 +68,8 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
     reset();
     setTarget(alg);
     cubeRef.current?.reset();
-    const tokens = alg.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length > 0) cubeRef.current?.setSetupAlgorithm(invertSequence(tokens).join(" "), "");
+    const setupAlg = buildCaseSetupAlg(alg);
+    if (setupAlg) cubeRef.current?.setSetupAlgorithm(setupAlg, "");
     // Replay moves made while the previous attempt was wrapping up — lets
     // the variant be executed several times back-to-back without waiting
     // for the reset delay. Stop at completion; any tail waits for the next

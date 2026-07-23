@@ -17,7 +17,7 @@
 import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { CubeVisualisation } from "./CubeVisualisation";
-import { invertSequence } from "../logic/moveParser";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 import { parseDecoratedAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
 
@@ -38,7 +38,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
     const { tokens } = parseDecoratedAlg(alg);
     return {
       plain: tokens.join(" "),
-      setup: tokens.length > 0 ? invertSequence(tokens).join(" ") : "",
+      setup: buildCaseSetupAlg(tokens.join(" ")),
     };
   }, [alg]);
 

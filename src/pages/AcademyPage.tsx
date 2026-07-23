@@ -24,7 +24,7 @@ import { GraduationCap, Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence } from "../logic/moveParser";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
@@ -145,7 +145,7 @@ function AcademyInner() {
     const plain = decorated.tokens.join(" ");
     setTarget(plain);
     view.reset();
-    view.setSetupAlgorithm(invertSequence(decorated.tokens).join(" "), "");
+    view.setSetupAlgorithm(buildCaseSetupAlg(decorated.tokens.join(" ")), "");
     // Replay moves chained straight out of the previous round — stop at
     // completion, tail waits a round (see usePendingMoveBuffer).
     const flushTarget = buildSequenceTarget(plain);

@@ -170,6 +170,40 @@ export function invertSequence(moves: string[]): string[] {
 }
 
 /**
+ * Drop a LEADING run of pure whole-cube rotations (y/y'/y2, x/x'/x2,
+ * z/z'/z2) from a token list — these are solver regrip instructions
+ * ("hold the cube like this before you start"), not part of what scrambles
+ * the case. A rotation anywhere else in the sequence is left alone; it's
+ * needed to correctly track which absolute face every SUBSEQUENT token
+ * refers to.
+ */
+export function stripLeadingRotations(moves: readonly string[]): string[] {
+  let i = 0;
+  while (i < moves.length && parseMove(moves[i])?.isRotation) i++;
+  return moves.slice(i);
+}
+
+/**
+ * Build the display SETUP for an algorithm's own text: the case state
+ * before the algorithm is applied, in the case's CANONICAL orientation.
+ *
+ * Deliberately strips a leading rotation before inverting (see
+ * stripLeadingRotations) — invertSequence reverses order, so a rotation at
+ * the START of the algorithm would otherwise land at the END of the
+ * inverted setup, applying a spurious net whole-cube spin to the display
+ * (verified: an alg written "y2 U2 R2 u R2' u' R2" rendered with BLUE
+ * facing front instead of the case's own canonical green-front — every
+ * other variant of that same physical case, none of which happen to start
+ * with a rotation, rendered green-front as expected). The full alg text
+ * (rotation included) is still exactly what gets tracked/animated as the
+ * solve executes — this only affects the static "before" picture.
+ */
+export function buildCaseSetupAlg(alg: string): string {
+  const moves = stripLeadingRotations(alg.trim().split(/\s+/).filter(Boolean));
+  return moves.length === 0 ? "" : invertSequence(moves).join(" ");
+}
+
+/**
  * Whether a move is a physical face move (not rotation).
  */
 export function isPhysicalMove(move: string): boolean {

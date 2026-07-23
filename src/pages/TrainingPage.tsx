@@ -24,7 +24,7 @@ import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
-import { invertSequence, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
+import { buildCaseSetupAlg, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { attemptsForSource } from "../logic/statistics";
@@ -76,11 +76,6 @@ const TRAINING_CONFIG: SessionConfig = {
   useInspection: false,
   inspectionSeconds: 15,
 };
-
-function invertAlg(alg: string): string {
-  const moves = alg.trim().split(/\s+/).filter(Boolean);
-  return moves.length === 0 ? "" : invertSequence(moves).join(" ");
-}
 
 /**
  * Per-group override for center-orientation tracking (localStorage key
@@ -280,7 +275,7 @@ function TrainingPageInner() {
     // assumes a canonical setup — see trainerMasks.ts) render misaligned,
     // and the drill's whole point is recognizing the pattern, not mirroring
     // whatever orientation the physical cube happens to be in right now.
-    const inv = invertAlg(variant.alg);
+    const inv = buildCaseSetupAlg(variant.alg);
     if (inv) view.setSetupAlgorithm(inv, "");
     // Moves made while the previous attempt was finishing up (phase "done",
     // e.g. chaining the next execution immediately) belong to THIS attempt —

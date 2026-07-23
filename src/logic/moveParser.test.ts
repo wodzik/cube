@@ -3,6 +3,8 @@ import {
   parseMove,
   invertMove,
   invertSequence,
+  stripLeadingRotations,
+  buildCaseSetupAlg,
   decomposeMove,
   algToPhysicalMoves,
   computeStageSplits,
@@ -65,6 +67,34 @@ describe("invertSequence", () => {
     // its "(" / ")" decoration.
     const decoratedTokens = "U2 (R' U R) U' (S R S')".split(/\s+/);
     expect(invertSequence(decoratedTokens)).toEqual(["S", "R'", "S'", "U", "R'", "U'", "R", "U2"]);
+  });
+});
+
+describe("stripLeadingRotations / buildCaseSetupAlg", () => {
+  it("stripLeadingRotations drops a leading run of rotations only", () => {
+    expect(stripLeadingRotations(["y2", "U2", "R2"])).toEqual(["U2", "R2"]);
+    expect(stripLeadingRotations(["y", "y'", "R"])).toEqual(["R"]);
+    expect(stripLeadingRotations(["U2", "R2"])).toEqual(["U2", "R2"]);
+    // A rotation NOT at the start is left alone — it's needed to correctly
+    // track which absolute face the following tokens refer to.
+    expect(stripLeadingRotations(["R", "y", "U"])).toEqual(["R", "y", "U"]);
+  });
+
+  it("REGRESSION: a leading rotation must not end up applied to the display — Advanced F2L 4's own 'y2 ...' variant used to render blue-front instead of the case's canonical green-front", () => {
+    // Naive invertSequence(full alg) reverses order, so the leading y2
+    // lands LAST in the setup — applied to the display as a spurious net
+    // whole-cube spin. buildCaseSetupAlg must strip it before inverting.
+    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2")).toEqual(invertSequence(["U2", "R2", "u", "R2'", "u'", "R2"]).join(" "));
+    expect(buildCaseSetupAlg("y2 U2 R2 u R2' u' R2").trim().split(/\s+/).slice(-1)[0]).not.toMatch(/^y/);
+  });
+
+  it("an alg with no leading rotation is unaffected (matches plain invertSequence)", () => {
+    expect(buildCaseSetupAlg("U2 L2' u L2 u' L2'")).toEqual(invertSequence(["U2", "L2'", "u", "L2", "u'", "L2'"]).join(" "));
+  });
+
+  it("empty alg produces an empty setup", () => {
+    expect(buildCaseSetupAlg("")).toBe("");
+    expect(buildCaseSetupAlg("y2")).toBe("");
   });
 });
 
