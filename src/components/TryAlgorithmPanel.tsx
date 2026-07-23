@@ -5,73 +5,281 @@
  * or session involved. Useful for eyeballing whether a pasted/scraped
  * algorithm's notation is actually valid and does what it's supposed to.
  *
- * TwistyPlayer's `alg` is write-once-on-mount (see CubeVisualisation's own
- * doc comment) — updates go through the imperative ref, same pattern as
- * AlgCaseVisualisation.
+ * Two independent options beyond the raw algorithm text:
+ *  - "Setup moves": a prefix applied to the cube BEFORE the algorithm,
+ *    exactly as written (not inverted) — e.g. paste a scramble here to see
+ *    whether a solution algorithm actually solves it.
+ *  - "This algorithm solves the cube": OFF (default) plays the algorithm
+ *    forward from solved (+ any setup moves), same as before. ON treats the
+ *    pasted text as a SOLUTION — the setup becomes that algorithm's own
+ *    inverse (same buildCaseSetupAlg convention used by case practice, see
+ *    moveParser.ts — a leading rotation is a regrip instruction, stripped
+ *    from both the setup AND the played tokens so they still cancel to
+ *    solved), stacked after any manual setup moves.
+ *
+ * TwistyPlayer's `alg`/`setupAlg` are effectively write-once-at-mount (see
+ * CubeVisualisation's own doc comment) — live updates go through the
+ * imperative ref, same pattern as AlgCaseVisualisation. Also passed as
+ * props so a stickering-channel remount (named <-> mask, see
+ * CubeVisualisation's internal remount effect) picks up the CURRENT
+ * setup/alg instead of resetting to blank.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, ChevronDown, ChevronRight } from "lucide-react";
 import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisation";
-import { parseMove } from "../logic/moveParser";
+import { MaskPicker } from "./MaskPicker";
+import { parseMove, stripLeadingRotations, invertSequence } from "../logic/moveParser";
 import { parseDecoratedAlg } from "../data/academy";
+import { resolveStickeringProps } from "../services/algGroupRegistry";
+import type { StickeringConfig } from "../types/algorithm";
+import type { VisualizationMode } from "../types/cube";
+
+const VISUALIZATIONS: { id: VisualizationMode; label: string }[] = [
+  { id: "3D", label: "3D" },
+  { id: "2D", label: "2D (flat net)" },
+  { id: "experimental-2D-LL", label: "2D last layer" },
+];
+
+const NAMED_PRESETS = ["full", "OLL", "PLL", "F2L", "CLL", "ELL", "COLL", "WV", "VLS", "ZBLL", "OLLCP"];
+
+const inputClass =
+  "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
+
+function tokenizeAndValidate(text: string): { tokens: string[]; invalid: string[] } {
+  const { tokens } = parseDecoratedAlg(text);
+  return { tokens, invalid: tokens.filter((t) => !parseMove(t)) };
+}
 
 export function TryAlgorithmPanel() {
-  const [input, setInput] = useState("");
+  const [algInput, setAlgInput] = useState("");
+  const [setupInput, setSetupInput] = useState("");
+  const [solvesTheCube, setSolvesTheCube] = useState(false);
+  const [displayOpen, setDisplayOpen] = useState(false);
+  const [visualization, setVisualization] = useState<VisualizationMode>("3D");
+  const [cameraLatitude, setCameraLatitude] = useState(20);
+  const [cameraLongitude, setCameraLongitude] = useState(20);
+  const [stickering, setStickering] = useState<StickeringConfig>({ kind: "named", value: "full" });
+  const [useMask, setUseMask] = useState(false);
   const cubeRef = useRef<CubeVisualisationRef>(null);
 
-  const { plain, invalidTokens } = useMemo(() => {
-    const { tokens } = parseDecoratedAlg(input);
-    return { plain: tokens.join(" "), invalidTokens: tokens.filter((t) => !parseMove(t)) };
-  }, [input]);
+  const { tokens: algTokens, invalid: invalidAlgTokens } = useMemo(() => tokenizeAndValidate(algInput), [algInput]);
+  const { tokens: setupTokens, invalid: invalidSetupTokens } = useMemo(() => tokenizeAndValidate(setupInput), [setupInput]);
+  const hasErrors = invalidAlgTokens.length > 0 || invalidSetupTokens.length > 0;
 
-  const playableAlg = invalidTokens.length === 0 ? plain : "";
+  const { setup, alg } = useMemo(() => {
+    if (hasErrors) return { setup: "", alg: "" };
+    const manualSetup = setupTokens.join(" ");
+    if (!solvesTheCube) {
+      return { setup: manualSetup, alg: algTokens.join(" ") };
+    }
+    // Same convention as case practice (buildCaseSetupAlg): a leading
+    // rotation is a regrip instruction, not something that scrambles the
+    // case — stripped from BOTH the inverted setup and the played tokens
+    // so they still cancel to solved (see moveParser.ts's doc comment and
+    // the regression this exact mismatch caused when only one side was
+    // stripped).
+    const displayTokens = stripLeadingRotations(algTokens);
+    const caseSetup = displayTokens.length === 0 ? "" : invertSequence(displayTokens).join(" ");
+    const combinedSetup = [manualSetup, caseSetup].filter(Boolean).join(" ");
+    return { setup: combinedSetup, alg: displayTokens.join(" ") };
+  }, [hasErrors, setupTokens, algTokens, solvesTheCube]);
 
   useEffect(() => {
-    cubeRef.current?.setAlgorithm(playableAlg);
-  }, [playableAlg]);
+    cubeRef.current?.setSetupAlgorithm(setup, alg, "start");
+  }, [setup, alg]);
 
-  function clear() {
-    setInput("");
+  function clearAll() {
+    setAlgInput("");
+    setSetupInput("");
   }
 
+  const stickeringProps = resolveStickeringProps(stickering);
+
   return (
-    <div className="flex flex-1 min-h-0">
-      <div className="flex-none w-72 xl:w-96 border-r border-white/[0.06] flex items-center justify-center p-6">
+    <div className="flex flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-none w-72 xl:w-96 border-r border-white/[0.06] flex items-center justify-center p-6 self-start">
         <div className="w-full aspect-square bg-gray-950/50 rounded-xl overflow-hidden">
           <CubeVisualisation
             ref={cubeRef}
-            visualization="3D"
+            visualization={visualization}
             background="none"
             controlPanel="bottom-row"
             dragInput="auto"
             hintFacelets="floating"
             tempoScale={1}
+            cameraLatitude={cameraLatitude}
+            cameraLongitude={cameraLongitude}
+            setupAlg={setup}
+            alg={alg}
+            {...stickeringProps}
             className="size-full"
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
-        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Algorithm</label>
+      <div className="flex-1 px-4 sm:px-6 py-4 max-w-2xl">
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Setup moves</label>
+        <input
+          type="text"
+          value={setupInput}
+          onChange={(e) => setSetupInput(e.target.value)}
+          placeholder="Optional — moves applied before the algorithm, e.g. a scramble"
+          spellCheck={false}
+          className={inputClass}
+        />
+        {invalidSetupTokens.length > 0 && (
+          <p className="text-xs text-red-400 mt-1.5">Not valid cube notation: {invalidSetupTokens.join(" ")}</p>
+        )}
+
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">Algorithm</label>
         <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={algInput}
+          onChange={(e) => setAlgInput(e.target.value)}
           placeholder="e.g. R U R' U' R' F R2 U' R' U' R U R' F'"
           rows={3}
           spellCheck={false}
-          className="w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+          className={`${inputClass} resize-none`}
         />
-
-        {invalidTokens.length > 0 && (
-          <p className="text-xs text-red-400 mt-2">Not valid cube notation: {invalidTokens.join(" ")}</p>
+        {invalidAlgTokens.length > 0 && (
+          <p className="text-xs text-red-400 mt-1.5">Not valid cube notation: {invalidAlgTokens.join(" ")}</p>
         )}
 
+        <label className="flex items-center gap-2 mt-3 text-xs text-gray-300 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={solvesTheCube}
+            onChange={(e) => setSolvesTheCube(e.target.checked)}
+            className="accent-[var(--accent)]"
+          />
+          This algorithm solves the cube (start scrambled, end solved — instead of starting solved)
+        </label>
+
         <div className="flex items-center gap-2 mt-3">
-          <button onClick={clear} disabled={!input} className="btn-secondary text-xs">
+          <button onClick={clearAll} disabled={!algInput && !setupInput} className="btn-secondary text-xs">
             <RotateCcw size={12} /> Clear
           </button>
         </div>
+
+        <button
+          onClick={() => setDisplayOpen((v) => !v)}
+          className="flex items-center gap-1 mt-5 text-xs font-semibold text-gray-400 hover:text-gray-200 transition-colors"
+        >
+          {displayOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          Display: visualization, camera, stickering
+        </button>
+
+        {displayOpen && (
+          <div className="mt-3 space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 mb-1.5">Visualization</p>
+              <div className="flex gap-1.5">
+                {VISUALIZATIONS.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setVisualization(v.id)}
+                    className={`flex-1 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+                      visualization === v.id
+                        ? "border-[var(--accent)]/50 bg-[var(--accent)]/[0.08] text-white"
+                        : "border-white/[0.06] bg-white/[0.02] text-gray-300 hover:border-white/15"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-gray-400 mb-1.5">Camera angle</p>
+              <div className="flex gap-2">
+                <label className="flex-1 text-[11px] text-gray-500">
+                  Latitude
+                  <input
+                    type="number"
+                    value={cameraLatitude}
+                    onChange={(e) => setCameraLatitude(Number(e.target.value))}
+                    className={`${inputClass} mt-1 py-1.5`}
+                  />
+                </label>
+                <label className="flex-1 text-[11px] text-gray-500">
+                  Longitude
+                  <input
+                    type="number"
+                    value={cameraLongitude}
+                    onChange={(e) => setCameraLongitude(Number(e.target.value))}
+                    className={`${inputClass} mt-1 py-1.5`}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs font-semibold text-gray-400">Stickering</p>
+                <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.03] p-0.5">
+                  <button
+                    onClick={() => {
+                      setUseMask(false);
+                      setStickering((s) => (s.kind === "named" ? s : { kind: "named", value: "full" }));
+                    }}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
+                      !useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    Named
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUseMask(true);
+                      setStickering((s) => (s.kind === "mask" ? s : { kind: "mask", pieceGroups: [] }));
+                    }}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
+                      useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    Mask
+                  </button>
+                </div>
+              </div>
+
+              {!useMask ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {NAMED_PRESETS.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setStickering({ kind: "named", value: p })}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        stickering.kind === "named" && stickering.value === p
+                          ? "text-white bg-white/[0.08]"
+                          : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                      }`}
+                      style={
+                        stickering.kind === "named" && stickering.value === p
+                          ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" }
+                          : undefined
+                      }
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <input
+                    type="text"
+                    value={stickering.kind === "named" ? stickering.value : ""}
+                    onChange={(e) => setStickering({ kind: "named", value: e.target.value })}
+                    placeholder="or type a scheme"
+                    className={`${inputClass} flex-1 min-w-[8rem] py-1.5`}
+                  />
+                </div>
+              ) : (
+                <MaskPicker
+                  value={stickering.kind === "mask" ? stickering : { kind: "mask", pieceGroups: [] }}
+                  onChange={setStickering}
+                />
+              )}
+            </div>
+          </div>
+        )}
 
         <p className="text-[11px] text-gray-600 mt-4">
           Press play or step through the moves with the controls under the cube. Drag the cube to change the view.

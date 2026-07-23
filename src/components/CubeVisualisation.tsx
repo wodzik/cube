@@ -81,8 +81,14 @@ export interface CubeVisualisationRef {
   reset: () => void;
   /** Replace the full algorithm string. */
   setAlgorithm: (alg: string) => void;
-  /** Set a new setup state, optionally with a new algorithm. */
-  setSetupAlgorithm: (setup: string, alg?: string) => void;
+  /**
+   * Set a new setup state, optionally with a new algorithm. Lands on
+   * `jumpTo` ("end" by default, matching every existing caller — they show
+   * the case already-solved/complete) — pass "start" when the caller wants
+   * the player parked ready to press play from the beginning instead (e.g.
+   * a from-scratch algorithm tester).
+   */
+  setSetupAlgorithm: (setup: string, alg?: string, jumpTo?: "start" | "end") => void;
   setVisualization: (mode: VisualizationMode) => void;
   /** Async: true if the current cube state is solved (orientation-agnostic). */
   isSolved: () => Promise<boolean>;
@@ -248,16 +254,20 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
         // from solved. Force it back to the start explicitly.
         playerRef.current.jumpToStart({ flash: false });
       },
-      setSetupAlgorithm: (setup: string, newAlg = "") => {
+      setSetupAlgorithm: (setup: string, newAlg = "", jumpTo: "start" | "end" = "end") => {
         if (!playerRef.current) return;
         playerRef.current.experimentalSetupAlg = setup;
         playerRef.current.alg = newAlg;
-        // Replacing the setup mid-animation (e.g. the trainer swapping in
-        // the next attempt's view right as the final solve move is still
-        // animating) can leave the timeline frozen before the end — the
-        // cube then LOOKS unsolved until the next move nudges it. Land on
-        // the final state explicitly.
-        playerRef.current.jumpToEnd({ flash: false });
+        if (jumpTo === "start") {
+          playerRef.current.jumpToStart({ flash: false });
+        } else {
+          // Replacing the setup mid-animation (e.g. the trainer swapping in
+          // the next attempt's view right as the final solve move is still
+          // animating) can leave the timeline frozen before the end — the
+          // cube then LOOKS unsolved until the next move nudges it. Land on
+          // the final state explicitly.
+          playerRef.current.jumpToEnd({ flash: false });
+        }
       },
       setVisualization: (mode: VisualizationMode) => {
         if (!playerRef.current) return;
