@@ -10,7 +10,7 @@
       },
       {
         "name": "Alg 2 (19 ETM)",
-        "alg": "y2 R U' R2 D' r U r' D R2 U' R' U' R U R' U' R U' R'",
+        "alg": "y2 R U' R2 D' r U r' D R2 U' R' U' R U R' U' R U' R' y2",
         "isDefault": false
       },
       {
@@ -46,7 +46,7 @@
       },
       {
         "name": "Alg 2 (13 ETM)",
-        "alg": "y2 M R U' L U2 R' U r U2 r' L' U M'",
+        "alg": "y2 M R U' L U2 R' U r U2 r' L' U M' y2",
         "isDefault": false
       },
       {
@@ -87,7 +87,7 @@
       },
       {
         "name": "Alg 5 (17 ETM)",
-        "alg": "y r U R U' r' F R' f' R U R' S U' R' F R F'",
+        "alg": "y r U R U' r' F R' f' R U R' S U' R' F R F' y'",
         "isDefault": false
       },
       {
@@ -102,7 +102,7 @@
       },
       {
         "name": "Alg 8 (15 ETM)",
-        "alg": "y' M' U R U' r' U2 F U2 r U r' U2 R' F' R",
+        "alg": "y' M' U R U' r' U2 F U2 r U r' U2 R' F' R y",
         "isDefault": false
       }
     ]
@@ -138,7 +138,7 @@
       },
       {
         "name": "Alg 6 (15 ETM)",
-        "alg": "y R' F R' F2 r U' R U r' L' U2 L r U M",
+        "alg": "y R' F R' F2 r U' R U r' L' U2 L r U M y'",
         "isDefault": false
       },
       {
@@ -159,7 +159,7 @@
     "algList": [
       {
         "name": "Alg 1 (18 ETM)",
-        "alg": "y R U2 R' F R' F' R2 U2 R' F R U' R' U' R U R' F'",
+        "alg": "y R U2 R' F R' F' R2 U2 R' F R U' R' U' R U R' F' y'",
         "isDefault": true
       },
       {
@@ -174,7 +174,7 @@
       },
       {
         "name": "Alg 4 (13 ETM)",
-        "alg": "y' R' D' r U' r' D R2 U R' U' F' U2 F",
+        "alg": "y' R' D' r U' r' D R2 U R' U' F' U2 F y",
         "isDefault": false
       }
     ]
@@ -185,7 +185,7 @@
     "algList": [
       {
         "name": "Alg 1 (18 ETM)",
-        "alg": "y F R U' R' U R U R' F' R U2 R2 F R F' R U2 R'",
+        "alg": "y F R U' R' U R U R' F' R U2 R2 F R F' R U2 R' y'",
         "isDefault": true
       },
       {
@@ -195,7 +195,7 @@
       },
       {
         "name": "Alg 3 (13 ETM)",
-        "alg": "y F' U2 F U R U' R2 D' r U r' D R",
+        "alg": "y F' U2 F U R U' R2 D' r U r' D R y'",
         "isDefault": false
       }
     ]
@@ -206,7 +206,7 @@
     "algList": [
       {
         "name": "Alg 1 (17 ETM)",
-        "alg": "y2 R U2 R' F R' F' R2 U2 R' F R' F' R U R U' R'",
+        "alg": "y2 R U2 R' F R' F' R2 U2 R' F R' F' R U R U' R' y2",
         "isDefault": true
       },
       {
@@ -216,7 +216,7 @@
       },
       {
         "name": "Alg 3 (14 ETM)",
-        "alg": "y' S' R' U R S y R U' R' F' r U' r' F2",
+        "alg": "y' S' R' U R S y R U' R' F' r U' r' F2 y",
         "isDefault": false
       }
     ]
@@ -227,7 +227,7 @@
     "algList": [
       {
         "name": "Alg 1 (17 ETM)",
-        "alg": "y' R U R' U' R' F R F' R U2 R2 F R F' R U2 R'",
+        "alg": "y' R U R' U' R' F R F' R U2 R2 F R F' R U2 R' y",
         "isDefault": true
       },
       {
@@ -237,12 +237,12 @@
       },
       {
         "name": "Alg 3 (18 ETM)",
-        "alg": "y F' L' U L U' L' U' L F L' U2 L2 F' L' F L' U2 L",
+        "alg": "y F' L' U L U' L' U' L F L' U2 L2 F' L' F L' U2 L y'",
         "isDefault": false
       },
       {
         "name": "Alg 4 (15 ETM)",
-        "alg": "y F R U' R2 D' r U' r' D R F R' F' R F'",
+        "alg": "y F R U' R2 D' r U' r' D R F R' F' R F' y'",
         "isDefault": false
       }
     ]
@@ -284,17 +284,17 @@
     "algList": [
       {
         "name": "Alg 1 (13 ETM)",
-        "alg": "y' R' U R2 F2 D r' U r D' F2 R2 U' R",
+        "alg": "y' R' U R2 F2 D r' U r D' F2 R2 U' R y",
         "isDefault": true
       },
       {
         "name": "Alg 2 (13 ETM)",
-        "alg": "y R' U R2 F2 D r' U' r D' F2 R2 U' R",
+        "alg": "y R' U R2 F2 D r' U' r D' F2 R2 U' R y'",
         "isDefault": false
       },
       {
         "name": "Alg 3 (17 ETM)",
-        "alg": "y2 R' F2 R2 U2 R' F R U2 R2 F2 R2 U2 R' U' R U' R'",
+        "alg": "y2 R' F2 R2 U2 R' F R U2 R2 F2 R2 U2 R' U' R U' R' y2",
         "isDefault": false
       },
       {
@@ -304,17 +304,17 @@
       },
       {
         "name": "Alg 5 (21 ETM)",
-        "alg": "y F R' F' R U R U' R' U R' U2 R2 U R2 U R U2 R' F R F'",
+        "alg": "y F R' F' R U R U' R' U R' U2 R2 U R2 U R U2 R' F R F' y'",
         "isDefault": false
       },
       {
         "name": "Alg 6 (17 ETM)",
-        "alg": "y2 F U R' U2 R2 U R2 U R U R' U' F' U F R F'",
+        "alg": "y2 F U R' U2 R2 U R2 U R U R' U' F' U F R F' y2",
         "isDefault": false
       },
       {
         "name": "Alg 7 (17 ETM)",
-        "alg": "y2 R' F2 R2 U2 R' F R U2 R2 F2 R2 U2 R' U' R U' R'",
+        "alg": "y2 R' F2 R2 U2 R' F R U2 R2 F2 R2 U2 R' U' R U' R' y2",
         "isDefault": false
       },
       {
@@ -330,7 +330,7 @@
     "algList": [
       {
         "name": "Alg 1 (13 ETM)",
-        "alg": "y' R U' R2 B2 D' r U r' D B2 R2 U R'",
+        "alg": "y' R U' R2 B2 D' r U r' D B2 R2 U R' y",
         "isDefault": true
       },
       {
@@ -345,7 +345,7 @@
       },
       {
         "name": "Alg 4 (13 ETM)",
-        "alg": "y' R D' F2 R2 U' r U r' U R2 F2 D R'",
+        "alg": "y' R D' F2 R2 U' r U r' U R2 F2 D R' y",
         "isDefault": false
       }
     ]
@@ -437,12 +437,12 @@
       },
       {
         "name": "Alg 8 (13 ETM)",
-        "alg": "y F R' F2 D2 R' B L2 B' R D2 F2 R F'",
+        "alg": "y F R' F2 D2 R' B L2 B' R D2 F2 R F' y'",
         "isDefault": false
       },
       {
         "name": "Alg 9 (15 ETM)",
-        "alg": "y' R' F2 L F L2 U2 L U2 L' U2 L2 F' L' F2 R",
+        "alg": "y' R' F2 L F L2 U2 L U2 L' U2 L2 F' L' F2 R y",
         "isDefault": false
       },
       {
@@ -529,7 +529,7 @@
       },
       {
         "name": "Alg 4 (19 ETM)",
-        "alg": "y' R U R2 F R F' R U2 R2 U' R f U R U' R' F' R S'",
+        "alg": "y' R U R2 F R F' R U2 R2 U' R f U R U' R' F' R S' y",
         "isDefault": false
       },
       {
@@ -545,7 +545,7 @@
     "algList": [
       {
         "name": "Alg 1 (13 ETM)",
-        "alg": "y2 R U' R2 F2 U' R F' R' U F2 R2 U R'",
+        "alg": "y2 R U' R2 F2 U' R F' R' U F2 R2 U R' y2",
         "isDefault": true
       },
       {
@@ -587,22 +587,22 @@
       },
       {
         "name": "Alg 2 (12 ETM)",
-        "alg": "y S U2 R' U' R U R U S' R U' R'",
+        "alg": "y S U2 R' U' R U R U S' R U' R' y'",
         "isDefault": false
       },
       {
         "name": "Alg 3 (13 ETM)",
-        "alg": "y2 L' U' L U' M' U L' U l U2 M' U M",
+        "alg": "y2 L' U' L U' M' U L' U l U2 M' U M y2",
         "isDefault": false
       },
       {
         "name": "Alg 4 (15 ETM)",
-        "alg": "y R U R' U' M' U R U' R' U M U2 M' U M",
+        "alg": "y R U R' U' M' U R U' R' U M U2 M' U M y'",
         "isDefault": false
       },
       {
         "name": "Alg 5 (14 ETM)",
-        "alg": "y2 f R U R' U' f' R' U' R' F R F' U R",
+        "alg": "y2 f R U R' U' f' R' U' R' F R F' U R y2",
         "isDefault": false
       },
       {
@@ -612,7 +612,7 @@
       },
       {
         "name": "Alg 7 (13 ETM)",
-        "alg": "y' M' U M U2 r U R' U M U' R U' R'",
+        "alg": "y' M' U M U2 r U R' U M U' R U' R' y",
         "isDefault": false
       },
       {
@@ -628,17 +628,17 @@
     "algList": [
       {
         "name": "Alg 1 (13 ETM)",
-        "alg": "y2 R U R' U M' U' R U' r' U2 M' U' M",
+        "alg": "y2 R U R' U M' U' R U' r' U2 M' U' M y2",
         "isDefault": true
       },
       {
         "name": "Alg 2 (12 ETM)",
-        "alg": "y S U2 R U R' U' R' U' S' R' U R",
+        "alg": "y S U2 R U R' U' R' U' S' R' U R y'",
         "isDefault": false
       },
       {
         "name": "Alg 3 (14 ETM)",
-        "alg": "y2 f' L' U' L U f L U L F' L' F U' L'",
+        "alg": "y2 f' L' U' L U f L U L F' L' F U' L' y2",
         "isDefault": false
       },
       {
@@ -648,12 +648,12 @@
       },
       {
         "name": "Alg 5 (15 ETM)",
-        "alg": "y2 R' U' F R' F' R U R U2 F R U R' U' F'",
+        "alg": "y2 R' U' F R' F' R U R U2 F R U R' U' F' y2",
         "isDefault": false
       },
       {
         "name": "Alg 6 (13 ETM)",
-        "alg": "y' M U' M' U2 r' U' R U' M' U R' U R",
+        "alg": "y' M U' M' U2 r' U' R U' M' U R' U R y",
         "isDefault": false
       },
       {
@@ -674,7 +674,7 @@
       },
       {
         "name": "Alg 2 (18 ETM)",
-        "alg": "y2 R U' R' U' R2 y R' F' R U' R U R' U' R U' R' F'",
+        "alg": "y2 R U' R' U' R2 y R' F' R U' R U R' U' R U' R' F' y2",
         "isDefault": false
       },
       {
@@ -705,7 +705,7 @@
     "algList": [
       {
         "name": "Alg 1 (20 ETM)",
-        "alg": "y2 F R U' R' S U' R U R' f' r U R' U' M r' F R F' M'",
+        "alg": "y2 F R U' R' S U' R U R' f' r U R' U' M r' F R F' M' y2",
         "isDefault": true
       },
       {
@@ -715,7 +715,7 @@
       },
       {
         "name": "Alg 3 (15 ETM)",
-        "alg": "y2 R U2 r' U2 F' R U' R' F R' F' R F U2 M'",
+        "alg": "y2 R U2 r' U2 F' R U' R' F R' F' R F U2 M' y2",
         "isDefault": false
       },
       {
@@ -725,7 +725,7 @@
       },
       {
         "name": "Alg 5 (15 ETM)",
-        "alg": "y2 R U2 r' U2 F' R U' R' F R' F' R F U2 M'",
+        "alg": "y2 R U2 r' U2 F' R U' R' F R' F' R F U2 M' y2",
         "isDefault": false
       },
       {
@@ -746,7 +746,7 @@
     "algList": [
       {
         "name": "Alg 1 (11 ETM)",
-        "alg": "y r U' M2 U r' U2 r U' M2 U r'",
+        "alg": "y r U' M2 U r' U2 r U' M2 U r' y'",
         "isDefault": true
       },
       {
@@ -761,12 +761,12 @@
       },
       {
         "name": "Alg 4 (11 ETM)",
-        "alg": "y' l U' M2 U R' F2 R U' M2 U l'",
+        "alg": "y' l U' M2 U R' F2 R U' M2 U l' y",
         "isDefault": false
       },
       {
         "name": "Alg 5 (15 ETM)",
-        "alg": "y r U' r U2 r U2 r2 U2 R2 U2 r U2 r' U r'",
+        "alg": "y r U' r U2 r U2 r2 U2 R2 U2 r U2 r' U r' y'",
         "isDefault": false
       },
       {
@@ -776,12 +776,12 @@
       },
       {
         "name": "Alg 7 (13 ETM)",
-        "alg": "y M U M' U2 M U M2 U' M U2 M' U' M",
+        "alg": "y M U M' U2 M U M2 U' M U2 M' U' M y'",
         "isDefault": false
       },
       {
         "name": "Alg 8 (18 ETM)",
-        "alg": "y S U' R' U' R2 U R U R2 U R U R2 U' R' U' R2 S'",
+        "alg": "y S U' R' U' R2 U R U R2 U R U R2 U' R' U' R2 S' y'",
         "isDefault": false
       }
     ]

@@ -196,22 +196,22 @@
       },
       {
         "name": "Alg 6 (5 ETM)",
-        "alg": "y' f3' l3' d3 z3' x3",
+        "alg": "y' f3' l3' d3 z3' x3 y",
         "isDefault": false
       },
       {
         "name": "Alg 7 (3 ETM)",
-        "alg": "y' f3' l3' d3",
+        "alg": "y' f3' l3' d3 y",
         "isDefault": false
       },
       {
         "name": "Alg 8 (3 ETM)",
-        "alg": "y' f3' R3' f3",
+        "alg": "y' f3' R3' f3 y",
         "isDefault": false
       },
       {
         "name": "Alg 9 (3 ETM)",
-        "alg": "y' f R f'",
+        "alg": "y' f R f' y",
         "isDefault": false
       },
       {
@@ -226,7 +226,7 @@
       },
       {
         "name": "Alg 12 (3 ETM)",
-        "alg": "y F U F'",
+        "alg": "y F U F' y'",
         "isDefault": false
       },
       {

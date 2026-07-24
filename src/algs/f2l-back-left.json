@@ -53,7 +53,7 @@
       },
       {
         "name": "F2L 2 - (U L)",
-        "alg": "y' U' L' U L",
+        "alg": "y' U' L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -65,7 +65,7 @@
       },
       {
         "name": "F2L 2 - (R U)",
-        "alg": "y U' R' U R",
+        "alg": "y U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -113,7 +113,7 @@
     "algList": [
       {
         "name": "F2L 3 - (R U)",
-        "alg": "y R' U' R",
+        "alg": "y R' U' R y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -137,7 +137,7 @@
       },
       {
         "name": "F2L 3 - (U L)",
-        "alg": "y' L' U' L",
+        "alg": "y' L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -209,7 +209,7 @@
       },
       {
         "name": "F2L 4 - (R U)",
-        "alg": "y2 R U R'",
+        "alg": "y2 R U R' y2",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -233,7 +233,7 @@
       },
       {
         "name": "F2L 5 - (R U)",
-        "alg": "y2 U' R U R' U2 R U' R'",
+        "alg": "y2 U' R U R' U2 R U' R' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -257,7 +257,7 @@
       },
       {
         "name": "F2L 6 - (R U)",
-        "alg": "y U R' U' R U R' U2 R",
+        "alg": "y U R' U' R U R' U2 R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -275,7 +275,7 @@
       },
       {
         "name": "F2L 6 - (U L)",
-        "alg": "y' U L' U' L U2 L' U L",
+        "alg": "y' U L' U' L U2 L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -299,7 +299,7 @@
       },
       {
         "name": "F2L 6 - (R U)",
-        "alg": "y U R' U' R U2 R' U R",
+        "alg": "y U R' U' R U2 R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -347,7 +347,7 @@
       },
       {
         "name": "F2L 8 - (R U)",
-        "alg": "y U R' U2 R U R' U2 R",
+        "alg": "y U R' U2 R U R' U2 R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -371,7 +371,7 @@
       },
       {
         "name": "F2L 8 - (U L)",
-        "alg": "y' U L' U2 L U2 L' U L",
+        "alg": "y' U L' U2 L U2 L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -389,7 +389,7 @@
       },
       {
         "name": "F2L 8 - (R U)",
-        "alg": "y U R' U2 R U2 R' U R",
+        "alg": "y U R' U2 R U2 R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -401,7 +401,7 @@
     "algList": [
       {
         "name": "F2L 9 - (R U)",
-        "alg": "y U R' U' R U' R' U' R",
+        "alg": "y U R' U' R U' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -419,7 +419,7 @@
       },
       {
         "name": "F2L 9 - (R U)",
-        "alg": "y U2 R' U R U R' U' R",
+        "alg": "y U2 R' U R U R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -437,7 +437,7 @@
       },
       {
         "name": "F2L 9 - (R U)",
-        "alg": "y R' U R U' R' U' R U2 R' U R",
+        "alg": "y R' U R U' R' U' R U2 R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -491,7 +491,7 @@
       },
       {
         "name": "F2L 10 - (R U)",
-        "alg": "y2 U' R U R' U R U R'",
+        "alg": "y2 U' R U R' U R U R' y2",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -521,13 +521,13 @@
       },
       {
         "name": "F2L 11 - (R U)",
-        "alg": "y R U2 R2 U' R2 U' R'",
+        "alg": "y R U2 R2 U' R2 U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 11 - (R U)",
-        "alg": "y R' U R U' R' U R U R' U2 R",
+        "alg": "y R' U R U' R' U R U R' U2 R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -539,7 +539,7 @@
       },
       {
         "name": "F2L 11 - (R U F)",
-        "alg": "y' F R U R' U' R U R' U' R U2 R' F'",
+        "alg": "y' F R U R' U' R U R' U' R U2 R' F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -563,7 +563,7 @@
       },
       {
         "name": "F2L 11 - (R U F)",
-        "alg": "y2 R U2 R' U F' U' F U' F' U F",
+        "alg": "y2 R U2 R' U F' U' F U' F' U F y2",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -611,7 +611,7 @@
       },
       {
         "name": "F2L 13 - (R U)",
-        "alg": "y U R' U R U' R' U' R",
+        "alg": "y U R' U R U' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -707,7 +707,7 @@
       },
       {
         "name": "F2L 15 - (U L F)",
-        "alg": "y' L' U L U2 F U F'",
+        "alg": "y' L' U L U2 F U F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -833,7 +833,7 @@
     "algList": [
       {
         "name": "F2L 18 - (R U)",
-        "alg": "y R' U2 R U R' U' R",
+        "alg": "y R' U2 R U R' U' R y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -869,7 +869,7 @@
       },
       {
         "name": "F2L 18 - (U L)",
-        "alg": "y' L' U2 L U L' U' L",
+        "alg": "y' L' U2 L U L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -899,7 +899,7 @@
     "algList": [
       {
         "name": "F2L 20 - (R U)",
-        "alg": "y U' R' U2 R U' R' U R",
+        "alg": "y U' R' U2 R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -935,7 +935,7 @@
       },
       {
         "name": "F2L 20 - (U L)",
-        "alg": "y' U' L' U2 L U' L' U L",
+        "alg": "y' U' L' U2 L U' L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1007,19 +1007,19 @@
       },
       {
         "name": "F2L 22 - (R U)",
-        "alg": "y R' U R U2 R' U' R",
+        "alg": "y R' U R U2 R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 22 - (R U)",
-        "alg": "y U2 R' U' R U' R' U R",
+        "alg": "y U2 R' U' R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 22 - (R U)",
-        "alg": "y R' U R U2 R' U' R",
+        "alg": "y R' U R U2 R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1079,7 +1079,7 @@
       },
       {
         "name": "F2L 24 - (R U)",
-        "alg": "y U' R' U R U R' U R U' R' U R",
+        "alg": "y U' R' U R U R' U R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1103,7 +1103,7 @@
       },
       {
         "name": "F2L 24 - (R U)",
-        "alg": "y U' R' U R U R' U R U' R' U R",
+        "alg": "y U' R' U R U R' U R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1127,7 +1127,7 @@
       },
       {
         "name": "F2L 24 - (R U)",
-        "alg": "y R' U' R U2 R' U' R U R' U' R",
+        "alg": "y R' U' R U2 R' U' R U R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1163,7 +1163,7 @@
       },
       {
         "name": "F2L 24 - (U L)",
-        "alg": "y' U' L' U L U L' U L U' L' U L",
+        "alg": "y' U' L' U L U L' U L U' L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1289,7 +1289,7 @@
       },
       {
         "name": "F2L 28 - (R U)",
-        "alg": "y R' U R U' R' U R",
+        "alg": "y R' U R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1313,7 +1313,7 @@
     "algList": [
       {
         "name": "F2L 29 - (R U)",
-        "alg": "y R' U' R U R' U' R",
+        "alg": "y R' U' R U R' U' R y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -1421,7 +1421,7 @@
       },
       {
         "name": "F2L 31 - (R U F)",
-        "alg": "y R' U R' F R F' R",
+        "alg": "y R' U R' F R F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1571,37 +1571,37 @@
       },
       {
         "name": "F2L 36 - (R U f)",
-        "alg": "y U R' U' R U' f R f'",
+        "alg": "y U R' U' R U' f R f' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 36 - (R U f)",
-        "alg": "y U R' U' R U' f R f'",
+        "alg": "y U R' U' R U' f R f' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 36 - (R U L d)",
-        "alg": "y U2 R' U R d L U L'",
+        "alg": "y U2 R' U R d L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 36 - (R U)",
-        "alg": "y U R' U' R U' y R U R'",
+        "alg": "y U R' U' R U' y R U R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 36 - (R U L)",
-        "alg": "y U R' U' R U' y' L U L'",
+        "alg": "y U R' U' R U' y' L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 36 - (R U L)",
-        "alg": "y U R' U' R y' U' L U L'",
+        "alg": "y U R' U' R y' U' L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1613,7 +1613,7 @@
       },
       {
         "name": "F2L 36 - (R U F)",
-        "alg": "y U R' F R' F' R U' R",
+        "alg": "y U R' F R' F' R U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1637,7 +1637,7 @@
       },
       {
         "name": "F2L 36 - (U L F)",
-        "alg": "y' U L' U' L U' F U F'",
+        "alg": "y' U L' U' L U' F U F' y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1697,7 +1697,7 @@
       },
       {
         "name": "F2L 37 - (U L)",
-        "alg": "y' L' U L U' y L U2 L' U2 L U' L'",
+        "alg": "y' L' U L U' y L U2 L' U2 L U' L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1715,25 +1715,25 @@
       },
       {
         "name": "F2L 37 - (U L F)",
-        "alg": "y' L2 U2 F' L2 F U2 L U' L",
+        "alg": "y' L2 U2 F' L2 F U2 L U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 37 - (R U F)",
-        "alg": "y2 R2 U2 F R2 F' U2 R' U R'",
+        "alg": "y2 R2 U2 F R2 F' U2 R' U R' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 37 - (U L F)",
-        "alg": "y' L F' L' F L U2 L2 U' L2 U' L'",
+        "alg": "y' L F' L' F L U2 L2 U' L2 U' L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 37 - (R U d)",
-        "alg": "y R' U R d' R U2 R' U2 R U' R'",
+        "alg": "y R' U R d' R U2 R' U2 R U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       }

@@ -727,7 +727,7 @@
       },
       {
         "name": "Alg 2 (3 ETM)",
-        "alg": "y2 M U M'",
+        "alg": "y2 M U M' y2",
         "isDefault": false
       },
       {
@@ -737,12 +737,12 @@
       },
       {
         "name": "Alg 4 (3 ETM)",
-        "alg": "y2 M U' M'",
+        "alg": "y2 M U' M' y2",
         "isDefault": false
       },
       {
         "name": "Alg 5 (3 ETM)",
-        "alg": "y2 M U' M'",
+        "alg": "y2 M U' M' y2",
         "isDefault": false
       },
       {
@@ -1738,12 +1738,12 @@
       },
       {
         "name": "Alg 6 (7 ETM)",
-        "alg": "y2 M' U M U M' U M'",
+        "alg": "y2 M' U M U M' U M' y2",
         "isDefault": false
       },
       {
         "name": "Alg 7 (7 ETM)",
-        "alg": "y2 M' U' M U' M' U' M'",
+        "alg": "y2 M' U' M U' M' U' M' y2",
         "isDefault": false
       }
     ],
