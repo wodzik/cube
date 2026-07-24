@@ -21,7 +21,7 @@ interface MaskPickerProps {
 export function MaskPicker({ value, onChange }: MaskPickerProps) {
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(value.rawOverride));
   const [jsonText, setJsonText] = useState(() =>
-    JSON.stringify(value.rawOverride ?? buildMaskFromPieceGroups(value.pieceGroups), null, 2)
+    JSON.stringify(value.rawOverride ?? buildMaskFromPieceGroups(value.pieceGroups, value.showCenters), null, 2)
   );
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
 
   const clearOverride = () => {
     setJsonError(null);
-    setJsonText(JSON.stringify(buildMaskFromPieceGroups(value.pieceGroups), null, 2));
+    setJsonText(JSON.stringify(buildMaskFromPieceGroups(value.pieceGroups, value.showCenters), null, 2));
     onChange({ ...value, rawOverride: undefined });
   };
 
@@ -70,6 +70,20 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
           <p className="text-[11px] text-gray-600 self-center">Pick at least one, or use the JSON override below.</p>
         )}
       </div>
+
+      <label
+        className={`flex items-center gap-2 mt-2.5 text-xs text-gray-300 cursor-pointer select-none ${
+          value.rawOverride ? "opacity-40 pointer-events-none" : ""
+        }`}
+      >
+        <input
+          type="checkbox"
+          checked={Boolean(value.showCenters)}
+          onChange={(e) => onChange({ ...value, showCenters: e.target.checked })}
+          className="accent-[var(--accent)]"
+        />
+        Show centers (don't dim)
+      </label>
 
       <button
         onClick={() => setAdvancedOpen((v) => !v)}

@@ -26,7 +26,13 @@ export type AlgGroup = string;
  */
 export type StickeringConfig =
   | { kind: "named"; value: string }
-  | { kind: "mask"; pieceGroups: string[]; rawOverride?: StickeringMaskOrbits };
+  | {
+      kind: "mask";
+      pieceGroups: string[];
+      rawOverride?: StickeringMaskOrbits;
+      /** Show centers at full color instead of the mask's usual dim — off by default (centers stay dim for orientation reference, see trainerMasks.ts). */
+      showCenters?: boolean;
+    };
 
 /**
  * Per-group/subgroup/case display settings — what the case/subgroup card

@@ -70,7 +70,7 @@ export const MASK_PIECE_GROUPS: MaskPieceGroup[] = [
 const BY_ID = new Map(MASK_PIECE_GROUPS.map((g) => [g.id, g]));
 
 /** Union the selected piece-groups' pieces and build one mask (unknown ids are ignored). */
-export function buildMaskFromPieceGroups(ids: readonly string[]): StickeringMaskOrbits {
+export function buildMaskFromPieceGroups(ids: readonly string[], showCenters = false): StickeringMaskOrbits {
   const edges = new Set<number>();
   const corners = new Set<number>();
   for (const id of ids) {
@@ -79,5 +79,5 @@ export function buildMaskFromPieceGroups(ids: readonly string[]): StickeringMask
     g.edges.forEach((e) => edges.add(e));
     g.corners.forEach((c) => corners.add(c));
   }
-  return pieceMask(edges, corners);
+  return pieceMask(edges, corners, undefined, showCenters);
 }

@@ -18,11 +18,14 @@ export function pieceMask(
   visibleEdges: Set<number>,
   visibleCorners: Set<number>,
   /** Edges rendered orientation-only (EO trainers) instead of ignored. */
-  orientedEdges: Set<number> = new Set()
+  orientedEdges: Set<number> = new Set(),
+  /** Show centers at full color instead of dim — off by default. */
+  showCenters = false
 ): StickeringMaskOrbits {
   const edge = (piece: number): FaceletMask =>
     visibleEdges.has(piece) ? "regular" : orientedEdges.has(piece) ? "oriented" : "ignored";
   const corner = (piece: number): FaceletMask => (visibleCorners.has(piece) ? "regular" : "ignored");
+  const centerFacelet: FaceletMask = showCenters ? "regular" : "dim";
   return {
     orbits: {
       EDGES: {
@@ -35,7 +38,7 @@ export function pieceMask(
         // 4 facelets per center: the CENTERS orbit has numOrientations = 4
         // (center twist), and PG3D reads one mask entry per orientation —
         // fewer entries crashes its setStickeringMask.
-        pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })),
+        pieces: Array.from({ length: 6 }, () => ({ facelets: [centerFacelet, centerFacelet, centerFacelet, centerFacelet] })),
       },
     },
   };
