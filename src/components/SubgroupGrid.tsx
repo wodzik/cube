@@ -48,7 +48,14 @@ export function SubgroupGrid({ groupId, groupDisplayConfig, subgroups, onOpen, o
       <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
         {subgroups.map((s) => (
           <SubgroupCard
-            key={s.id}
+            // Namespaced by groupId: subgroup ids are only unique WITHIN a
+            // group (e.g. F2L and Advanced F2L both use "back-right"), so a
+            // bare s.id key lets React conflate two unrelated groups' cards
+            // when switching between them — reusing (and even MOVING) an
+            // already-mounted TwistyPlayer instead of a fresh mount, which
+            // corrupts its internal camera-vantage state (cubing.js adds a
+            // duplicate vantage on reconnect — the "double cube" bug).
+            key={`${groupId}:${s.id}`}
             subgroup={s}
             groupDisplayConfig={groupDisplayConfig}
             onOpen={() => onOpen(s.id)}

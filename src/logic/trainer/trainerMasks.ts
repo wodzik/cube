@@ -4,8 +4,13 @@
  * pieces" at a glance instead of drowning them in a full scramble.
  *
  * Masks address PIECES (they follow a piece as it moves), using the same
- * verified orbit indexing as liveCubeState.ts. Centers stay dimmed for
- * orientation reference — a cross is only "solved" relative to its centers.
+ * verified orbit indexing as liveCubeState.ts. Centers show at full color
+ * (crossStickeringMask, xcrossStickeringMask, multiSlotStickeringMask,
+ * xxcrossStickeringMask, eocrossStickeringMask — every Case Trainer/Skill
+ * Trainers mask) rather than the generic pieceMask default of dim, since
+ * a solver still uses them as a color-orientation reference while
+ * training. academyStepMask and rouxBlocksStickeringMask below are
+ * exceptions with their own, more selective center logic — see each.
  */
 
 import { FACE_SLOTS, type Face } from "../stageDetection/lastLayerShared";
@@ -45,7 +50,7 @@ export function pieceMask(
 }
 
 export function crossStickeringMask(face: Face): StickeringMaskOrbits {
-  return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set());
+  return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set(), undefined, true);
 }
 
 export type AcademyView = "oll-corners" | "oll" | "corners" | "full";
@@ -98,7 +103,9 @@ export function xcrossStickeringMask(face: Face, slot: XCrossSlot): StickeringMa
   const frame = XCROSS_SLOT_FRAMES[slot];
   return pieceMask(
     new Set([...FACE_SLOTS[face].edgeSlots, frame.edgeSlot]),
-    new Set([frame.cornerSlot])
+    new Set([frame.cornerSlot]),
+    undefined,
+    true
   );
 }
 
@@ -107,7 +114,9 @@ export function multiSlotStickeringMask(face: Face, slots: readonly XCrossSlot[]
   const frames = slots.map((s) => XCROSS_SLOT_FRAMES[s]);
   return pieceMask(
     new Set([...FACE_SLOTS[face].edgeSlots, ...frames.map((f) => f.edgeSlot)]),
-    new Set(frames.map((f) => f.cornerSlot))
+    new Set(frames.map((f) => f.cornerSlot)),
+    undefined,
+    true
   );
 }
 
@@ -118,7 +127,9 @@ export function xxcrossStickeringMask(face: Face, pair: XXCrossPair): Stickering
   const f2 = XCROSS_SLOT_FRAMES[s2];
   return pieceMask(
     new Set([...FACE_SLOTS[face].edgeSlots, f1.edgeSlot, f2.edgeSlot]),
-    new Set([f1.cornerSlot, f2.cornerSlot])
+    new Set([f1.cornerSlot, f2.cornerSlot]),
+    undefined,
+    true
   );
 }
 
@@ -164,7 +175,7 @@ export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): St
   const crossEdges = new Set(FACE_SLOTS[face].edgeSlots);
   if (!liveState) {
     const others = new Set(Array.from({ length: 12 }, (_, i) => i).filter((i) => !crossEdges.has(i)));
-    return pieceMask(crossEdges, new Set(), others);
+    return pieceMask(crossEdges, new Set(), others, true);
   }
   // The mask array is indexed by PIECE IDENTITY (it follows a piece to
   // wherever it currently sits — see this file's header comment), but
@@ -185,7 +196,7 @@ export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): St
     orbits: {
       EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },
       CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["ignored", "ignored", "ignored"] })) },
-      CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })) },
+      CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["regular", "regular", "regular", "regular"] })) },
     },
   };
 }

@@ -157,21 +157,33 @@ export function isEolrSolved(state: LiveCubeState, goals: LiveCubeState[]): bool
 
 // ─── Masks ───
 
-function rouxMask(regularEdges: number[], regularCorners: number[], dimEdges: number[] = [], dimCorners: number[] = []): StickeringMaskOrbits {
+/** CENTERS orbit index of the L face (orange in this app's color scheme) — verified empirically against LEFT_BLOCK's rendered pieces. */
+const ORANGE_CENTER = 1;
+
+function rouxMask(
+  regularEdges: number[],
+  regularCorners: number[],
+  dimEdges: number[] = [],
+  dimCorners: number[] = [],
+  /** "dim" (default): every center dimmed, as context. "orange-only": only the L-block's anchor center (orange) shows at full color, every other center hidden. */
+  centersMode: "dim" | "orange-only" = "dim"
+): StickeringMaskOrbits {
   const edge = (p: number): FaceletMask => (regularEdges.includes(p) ? "regular" : dimEdges.includes(p) ? "dim" : "ignored");
   const corner = (p: number): FaceletMask =>
     regularCorners.includes(p) ? "regular" : dimCorners.includes(p) ? "dim" : "ignored";
+  const center = (p: number): FaceletMask =>
+    centersMode === "orange-only" ? (p === ORANGE_CENTER ? "regular" : "ignored") : "dim";
   return {
     orbits: {
       EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },
       CORNERS: { pieces: Array.from({ length: 8 }, (_, p) => ({ facelets: [corner(p), corner(p), corner(p)] })) },
-      CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })) },
+      CENTERS: { pieces: Array.from({ length: 6 }, (_, p) => ({ facelets: [center(p), center(p), center(p), center(p)] })) },
     },
   };
 }
 
 export function fbStickeringMask(): StickeringMaskOrbits {
-  return rouxMask(LEFT_BLOCK.edges, LEFT_BLOCK.corners);
+  return rouxMask(LEFT_BLOCK.edges, LEFT_BLOCK.corners, [], [], "orange-only");
 }
 
 /** SS pieces in full color, the (already solved) FB dimmed for context. */
@@ -182,7 +194,7 @@ export function ssStickeringMask(side: RouxSsSide): StickeringMaskOrbits {
 
 export function fsStickeringMask(side: RouxSsSide): StickeringMaskOrbits {
   const square = FS_SQUARE[side];
-  return rouxMask(square.edges, square.corners);
+  return rouxMask(square.edges, square.corners, [], [], "orange-only");
 }
 
 /** The trained remainder (other FS square + DR) in full color, the pre-solved FS dimmed. `solvedSide` = which FS the scramble keeps solved. */
