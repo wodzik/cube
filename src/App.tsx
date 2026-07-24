@@ -1,8 +1,10 @@
 import { Suspense, lazy, useState } from "react";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { useAlgorithmDataVersionCheck } from "./hooks/useAlgorithmDataVersionCheck";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { UpdateNotice } from "./components/UpdateNotice";
+import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -30,6 +32,8 @@ const TABS: { id: Tab; label: string }[] = [
 export default function App() {
   const [tab, setTab] = useState<Tab>("solve");
   const updateAvailable = useVersionCheck();
+  const dataUpdateAvailable = useAlgorithmDataVersionCheck();
+  const [dataNoticeDismissed, setDataNoticeDismissed] = useState(false);
   useWakeLock();
 
   return (
@@ -67,6 +71,9 @@ export default function App() {
         </Suspense>
 
         {updateAvailable && <UpdateNotice />}
+        {!updateAvailable && dataUpdateAvailable && !dataNoticeDismissed && (
+          <AlgorithmDataUpdateNotice onClose={() => setDataNoticeDismissed(true)} />
+        )}
       </div>
     </SmartCubeProvider>
   );
