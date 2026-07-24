@@ -8,4 +8,4 @@
  * deploy, forces a reload for stale JS chunks) — this is opt-in and only
  * for changes to the shipped algorithm data itself.
  */
-export const ALGORITHM_DATA_VERSION = 1;
+export const ALGORITHM_DATA_VERSION = 2;
