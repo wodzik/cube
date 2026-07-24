@@ -185,37 +185,22 @@ export function stripLeadingRotations(moves: readonly string[]): string[] {
 
 /**
  * Build the display SETUP for an algorithm's own text: the case state
- * before the algorithm is applied.
+ * before the algorithm is applied, in the case's CANONICAL orientation.
  *
- * A leading rotation (e.g. "y2 U2 R2 u R2' u' R2") is kept, but MOVED to the
- * front of the SETUP rather than left as the first token of whatever gets
- * ANIMATED — TwistyPlayer's animated `alg` timeline silently ignores a
- * rotation-only move sitting at index 0 (verified live: pasting a
- * leading-rotation alg directly into Debug's Try Algorithm tab, the first
- * VISIBLE move was the SECOND token, as if the rotation had never been
- * typed — moving that same rotation into the setup instead, or appending
- * its inverse at the very end of the algorithm, both animate correctly).
- * `experimentalSetupAlg` has no such issue — a rotation there is a one-shot
- * state change, not an animated step, so this is exactly where it belongs.
- *
- * Earlier this simply DROPPED the leading rotation instead of relocating
- * it — that avoided the display glitch (an alg starting with a rotation no
- * longer rendered a spurious spin) but silently discarded part of the
- * algorithm's own meaning, so the shown "before" case no longer matched
- * what dropping-then-appending would (setup ∘ REST alone is a DIFFERENT
- * cube state than setup ∘ [rotation + REST], even though both happen to
- * end up solved by construction). Prepending it instead keeps the FULL
- * algorithm's actual meaning intact — the tokens actually ANIMATED
- * (see stripLeadingRotations, still rotation-free) plus this setup
- * together reconstruct exactly the original, unmodified algorithm.
+ * Deliberately strips a leading rotation before inverting (see
+ * stripLeadingRotations) — invertSequence reverses order, so a rotation at
+ * the START of the algorithm would otherwise land at the END of the
+ * inverted setup, applying a spurious net whole-cube spin to the display
+ * (verified: an alg written "y2 U2 R2 u R2' u' R2" rendered with BLUE
+ * facing front instead of the case's own canonical green-front — every
+ * other variant of that same physical case, none of which happen to start
+ * with a rotation, rendered green-front as expected). The full alg text
+ * (rotation included) is still exactly what gets tracked/animated as the
+ * solve executes — this only affects the static "before" picture.
  */
 export function buildCaseSetupAlg(alg: string): string {
-  const allMoves = alg.trim().split(/\s+/).filter(Boolean);
-  const rest = stripLeadingRotations(allMoves);
-  const leadingRotations = allMoves.slice(0, allMoves.length - rest.length);
-  const invertedRest = rest.length === 0 ? [] : invertSequence(rest);
-  const setupMoves = [...leadingRotations, ...invertedRest];
-  return setupMoves.join(" ");
+  const moves = stripLeadingRotations(alg.trim().split(/\s+/).filter(Boolean));
+  return moves.length === 0 ? "" : invertSequence(moves).join(" ");
 }
 
 /**
