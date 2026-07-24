@@ -105,7 +105,7 @@ export default function SettingsPage() {
       <Section title="Algorithm progress">
         <SettingsRow
           title="Reset all algorithm progress"
-          description="Clears learning status and recorded times for every built-in F2L/OLL/PLL case, reloads from defaults. Custom groups are left alone."
+          description="Clears learning status and recorded times for every built-in group (OLL, PLL, F2L, Advanced F2L, VLS, ZBLL, CMLL, COLL, …) and reloads its cases from the bundled defaults. Custom groups are left alone."
           last
           action={
             <button
