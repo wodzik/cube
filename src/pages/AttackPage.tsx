@@ -365,15 +365,46 @@ function AttackPageInner() {
     <TrainerPanel
       header={
         activeSubgroup ? (
-          <div className="flex items-center gap-1 w-full overflow-x-auto">
-            <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
-              <ChevronLeft size={13} /> {activeSubgroup.name}
-            </button>
-            <span className="ml-auto text-xs text-gray-500 tabular-nums font-mono shrink-0">
-              {displayedCompleted.length} / {cases.length}
-            </span>
-            <div className="shrink-0">
-              <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+          <div className="w-full overflow-x-auto">
+            <GroupTabs
+              activeId={group}
+              onSelect={setGroup}
+              attackContext
+              rightSlot={
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 tabular-nums font-mono shrink-0">
+                    {displayedCompleted.length} / {cases.length}
+                  </span>
+                  <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+                </div>
+              }
+            />
+            {/* Third tab level — the group's Attack-enabled subgroups, styled
+                identically to the group-tab row above it rather than one
+                ambiguous "‹ Front Right" button (read as "go back TO Front
+                Right" instead of "you're IN Front Right, go back"). */}
+            <div className="flex items-center gap-1 shrink-0 mt-1">
+              <button
+                onClick={backToFolders}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-xl text-gray-500 hover:text-gray-300 hover:bg-white/[0.03] transition-all shrink-0"
+              >
+                <ChevronLeft size={13} /> Back
+              </button>
+              <div className="w-px h-5 bg-white/[0.08] mx-1 shrink-0" />
+              {(groupMeta?.subgroups ?? [])
+                .filter((sg) => sg.availableInAttack === true)
+                .map((sg) => (
+                  <button
+                    key={sg.id}
+                    onClick={() => openSubgroup(sg.id)}
+                    className={`px-3 py-1 text-xs font-semibold rounded-xl transition-all shrink-0 ${
+                      activeSubgroupId === sg.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={activeSubgroupId === sg.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {sg.name}
+                  </button>
+                ))}
             </div>
           </div>
         ) : (

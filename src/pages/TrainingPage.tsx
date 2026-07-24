@@ -512,13 +512,45 @@ function TrainingPageInner() {
       <TrainerPanel
         header={
           activeSubgroup ? (
-            <div className="flex items-center gap-1 w-full overflow-x-auto">
-              <button onClick={backToFolders} className="btn-secondary text-xs shrink-0">
-                <ChevronLeft size={13} /> {activeSubgroup.name}
-              </button>
-              <div className="ml-auto flex items-center gap-2 shrink-0">
-                {orientationControls}
-                <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            <div className="w-full overflow-x-auto">
+              <GroupTabs
+                activeId={group}
+                onSelect={setGroup}
+                managementEnabled
+                rightSlot={
+                  <div className="flex items-center gap-2">
+                    {orientationControls}
+                    <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+                  </div>
+                }
+              />
+              {/* Third tab level — the group's own subgroups (e.g. F2L's 4
+                  slots), styled identically to the group-tab row above it
+                  rather than one ambiguous "‹ Front Right" button, which
+                  read as "go back TO Front Right" instead of "you're
+                  IN Front Right, go back" — separate "‹ Back" (to the
+                  folder-grid overview) plus a normal tab row that also lets
+                  you jump straight to a sibling subgroup. */}
+              <div className="flex items-center gap-1 shrink-0 mt-1">
+                <button
+                  onClick={backToFolders}
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-xl text-gray-500 hover:text-gray-300 hover:bg-white/[0.03] transition-all shrink-0"
+                >
+                  <ChevronLeft size={13} /> Back
+                </button>
+                <div className="w-px h-5 bg-white/[0.08] mx-1 shrink-0" />
+                {(groupMeta?.subgroups ?? []).map((sg) => (
+                  <button
+                    key={sg.id}
+                    onClick={() => openSubgroup(sg.id)}
+                    className={`px-3 py-1 text-xs font-semibold rounded-xl transition-all shrink-0 ${
+                      activeSubgroupId === sg.id ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+                    }`}
+                    style={activeSubgroupId === sg.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {sg.name}
+                  </button>
+                ))}
               </div>
             </div>
           ) : (
