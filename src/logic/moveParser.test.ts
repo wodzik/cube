@@ -4,6 +4,7 @@ import {
   invertMove,
   invertSequence,
   stripLeadingRotations,
+  stripTrailingRotations,
   buildCaseSetupAlg,
   decomposeMove,
   algToPhysicalMoves,
@@ -91,6 +92,20 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
 
   it("an alg with no leading rotation is unaffected (matches plain invertSequence)", () => {
     expect(buildCaseSetupAlg("U2 L2' u L2 u' L2'")).toEqual(invertSequence(["U2", "L2'", "u", "L2", "u'", "L2'"]).join(" "));
+  });
+
+  it("stripTrailingRotations drops a trailing run of rotations only", () => {
+    expect(stripTrailingRotations(["R2", "U2", "y2"])).toEqual(["R2", "U2"]);
+    expect(stripTrailingRotations(["R", "y", "y'"])).toEqual(["R"]);
+    expect(stripTrailingRotations(["U2", "R2"])).toEqual(["U2", "R2"]);
+    expect(stripTrailingRotations(["R", "y", "U"])).toEqual(["R", "y", "U"]);
+  });
+
+  it("REGRESSION: a regrip-and-restore 'x (moves) x'' alg (bundled PLL Aa's own default variant) must not leave a residual rotation in the setup — inverting the trailing x' lands it FIRST in the naive setup, which doesn't change which face 2D-LL flattens but DOES shift every piece's slot, so cubing.js's PLL scheme dims the wrong pieces ('PLL cards look like the side of the cube' reported live)", () => {
+    const setup = buildCaseSetupAlg("x R' U R' D2 R U' R' D2 R2 x'");
+    expect(setup).toEqual(invertSequence(["R'", "U", "R'", "D2", "R", "U'", "R'", "D2", "R2"]).join(" "));
+    expect(setup.trim().split(/\s+/)[0]).not.toMatch(/^x/);
+    expect(setup.trim().split(/\s+/).slice(-1)[0]).not.toMatch(/^x/);
   });
 
   it("empty alg produces an empty setup", () => {
