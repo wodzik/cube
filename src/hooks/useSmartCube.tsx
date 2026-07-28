@@ -160,6 +160,20 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Dev-only escape hatch: flip `connected` without a real BT device — lets
+  // console/test driving of disconnect-triggered behavior (e.g.
+  // SessionProvider's abort-on-disconnect) without physical hardware.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const w = window as unknown as { __nactSimulateConnected?: (connected: boolean) => void };
+    w.__nactSimulateConnected = (connected: boolean) => {
+      setState((s) => (connected ? { ...s, connected: true } : INITIAL_DEVICE_CONNECTION));
+    };
+    return () => {
+      delete w.__nactSimulateConnected;
+    };
+  }, []);
+
   const value = useMemo<SmartCubeContextValue>(
     () => ({ ...state, error, connect, disconnect, addMoveListener }),
     [state, error, connect, disconnect, addMoveListener]

@@ -1,12 +1,14 @@
 /**
  * React Context + Provider for the unified session reducer.
- * Used identically by SolvePage, TrainingPage, AttackPage — only `config`
- * (specifically `config.mode`) differs per page.
+ * Used identically by SolvePage, TrainingPage, AttackPage (and Academy,
+ * VariantTest) — only `config` (specifically `config.mode`) differs per
+ * consumer.
  */
 
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { sessionReducer } from "./sessionReducer";
 import { actions } from "./sessionActions";
+import { useSmartCube } from "../hooks/useSmartCube";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionConfig, SessionState, StartMethod, StopMethod } from "../types/session";
 import type { Orientation } from "../types/cube";
@@ -52,6 +54,21 @@ export function SessionProvider({
     ...INITIAL_SESSION_STATE,
     config,
   });
+
+  // A disconnect mid-attempt means no more moves can ever arrive — an
+  // "active"/"ready" phase would just sit there forever with a running
+  // timer and no way to finish it honestly. Abort back to idle, uniformly,
+  // whatever page/mode this session belongs to (every SessionProvider
+  // consumer gets this for free). Only the CUBE matters here, not an
+  // optional separately-connected BT timer.
+  const { connected } = useSmartCube();
+  const wasConnectedRef = useRef(connected);
+  useEffect(() => {
+    if (wasConnectedRef.current && !connected) {
+      dispatch(actions.reset());
+    }
+    wasConnectedRef.current = connected;
+  }, [connected]);
 
   const value = useMemo<SessionContextValue>(
     () => ({
