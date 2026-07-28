@@ -63,7 +63,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 4",
@@ -201,7 +399,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 9",
@@ -333,7 +729,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 15",
@@ -393,7 +987,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 17",
@@ -423,7 +1215,205 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 19",
@@ -453,7 +1443,205 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Advanced F2L 21",
@@ -783,7 +1971,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Expert F2L 4",
@@ -957,7 +2343,205 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [],
+        "rawOverride": {
+          "orbits": {
+            "EDGES": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored"
+                  ]
+                }
+              ]
+            },
+            "CORNERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "dim",
+                    "dim",
+                    "dim"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "ignored",
+                    "ignored",
+                    "ignored"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            },
+            "CENTERS": {
+              "pieces": [
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                },
+                {
+                  "facelets": [
+                    "regular",
+                    "regular",
+                    "regular",
+                    "regular"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   {
     "name": "Expert F2L 10",
