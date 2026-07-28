@@ -5,6 +5,7 @@ import {
   invertSequence,
   stripLeadingRotations,
   buildCaseSetupAlg,
+  buildCanonicalDisplaySetupAlg,
   decomposeMove,
   algToPhysicalMoves,
   computeStageSplits,
@@ -96,6 +97,51 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
   it("empty alg produces an empty setup", () => {
     expect(buildCaseSetupAlg("")).toBe("");
     expect(buildCaseSetupAlg("y2")).toBe("");
+  });
+
+  describe("buildCanonicalDisplaySetupAlg (static preview only — see its own doc comment for why this must stay separate from buildCaseSetupAlg)", () => {
+    const alg = "x R' U R' D2 R U' R' D2 R2 x'"; // bundled PLL Aa's own default variant
+
+    it("REGRESSION: a matched 'regrip and restore' pair (leading rotation exactly undone by a trailing one) is inverted WHOLE, not stripped at both ends — Aa's card rendered like a scrambled side of the cube instead of the textbook Aa (3-cycled corners, untouched edges)", async () => {
+      // Stripping BOTH ends before inverting (the first, wrong fix attempt)
+      // computes a DIFFERENT, invalid permutation — not just a differently
+      // rotated view of the same case.
+      const strippedBothEnds = invertSequence(["R'", "U", "R'", "D2", "R", "U'", "R'", "D2", "R2"]).join(" ");
+      const setup = buildCanonicalDisplaySetupAlg(alg);
+      expect(setup).not.toEqual(strippedBothEnds);
+
+      // The correct setup inverts the FULL text, rotations included.
+      expect(setup).toEqual(invertSequence(alg.split(" ")).join(" "));
+
+      const solved = await createSolvedState();
+      const state = setup
+        .split(/\s+/)
+        .filter(Boolean)
+        .reduce((s, m) => applyMoveToState(s, m), solved);
+
+      // Textbook Aa: edges untouched, corners a clean 3-cycle (no twist), centers identity (2D-LL's "PLL" stickering reads this orbit to decide what's dimmed — a non-identity center orbit is what caused the wrong pieces to dim).
+      expect(state.patternData.EDGES.pieces).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(state.patternData.EDGES.orientation).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      expect(state.patternData.CORNERS.orientation).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+      expect(state.patternData.CENTERS.pieces).toEqual([0, 1, 2, 3, 4, 5]);
+
+      const afterAlg = alg.split(" ").reduce((s, m) => applyMoveToState(s, m), state);
+      expect(isFullySolved(afterAlg)).toBe(true);
+    });
+
+    it("REGRESSION: buildCaseSetupAlg (the LIVE-TRACKING function — TrainingPage/AcademyPage/AttackPage/VariantTest) must stay on its ORIGINAL leading-strip-only behavior for this exact alg — those callers track physical moves against stripLeadingRotations(fullAlg) and rely on setup∘that = solved; the canonical (whole-invert) setup above does NOT cancel against that shorter, leading-rotation-dropped sequence, so it would break live solving if buildCaseSetupAlg ever used it", async () => {
+      const trackingSetup = buildCaseSetupAlg(alg);
+      expect(trackingSetup).not.toEqual(buildCanonicalDisplaySetupAlg(alg));
+      expect(trackingSetup).toEqual(invertSequence(stripLeadingRotations(alg.split(" "))).join(" "));
+
+      const trackedTokens = stripLeadingRotations(alg.split(" "));
+      const solved = await createSolvedState();
+      const afterTrackedPlay = [...trackingSetup.split(/\s+/).filter(Boolean), ...trackedTokens].reduce(
+        (s, m) => applyMoveToState(s, m),
+        solved
+      );
+      expect(isFullySolved(afterTrackedPlay)).toBe(true);
+    });
   });
 
   it("REGRESSION: setup + the tokens actually PLAYED (leading rotation dropped from both) must cancel to solved — playing the FULL alg (rotation still attached) on top of the stripped setup left the cube visibly scrambled", async () => {

@@ -197,10 +197,74 @@ export function stripLeadingRotations(moves: readonly string[]): string[] {
  * with a rotation, rendered green-front as expected). The full alg text
  * (rotation included) is still exactly what gets tracked/animated as the
  * solve executes — this only affects the static "before" picture.
+ *
+ * DO NOT extend this to also strip a matching TRAILING rotation for a
+ * nicer canonical picture (tried once — see buildCanonicalDisplaySetupAlg
+ * below for why that needs a genuinely separate function): every caller
+ * here (TrainingPage, AcademyPage, AttackPage, VariantTest) tracks live
+ * smart-cube moves against exactly `stripLeadingRotations(fullAlg)` and
+ * relies on `setup ∘ that-exact-sequence = solved`. Silently changing what
+ * this returns for a matched-rotation-pair alg breaks that cancellation —
+ * the drill would never register as solved even when performed correctly.
  */
 export function buildCaseSetupAlg(alg: string): string {
   const moves = stripLeadingRotations(alg.trim().split(/\s+/).filter(Boolean));
   return moves.length === 0 ? "" : invertSequence(moves).join(" ");
+}
+
+/** The leading run itself (the tokens stripLeadingRotations would remove), not the remainder. */
+function leadingRotationRun(moves: readonly string[]): string[] {
+  let i = 0;
+  while (i < moves.length && parseMove(moves[i])?.isRotation) i++;
+  return moves.slice(0, i);
+}
+
+/** The trailing run itself (the tokens stripTrailingRotations would remove), not the remainder. */
+function trailingRotationRun(moves: readonly string[]): string[] {
+  let i = moves.length;
+  while (i > 0 && parseMove(moves[i - 1])?.isRotation) i--;
+  return moves.slice(i);
+}
+
+/**
+ * Build the setup for a PURELY STATIC, never-tracked/never-animated case
+ * picture (AlgCaseVisualisation's card/thumbnail previews only — alg="" on
+ * every caller, no smart-cube move ever gets checked against it). Same as
+ * buildCaseSetupAlg EXCEPT for one case it must handle differently: a
+ * matched "regrip and restore" pair (a leading rotation exactly undone by
+ * a trailing one, e.g. bundled PLL Aa/Ab/E/Ja's own "x (moves) x'") is
+ * inverted WHOLE, with nothing stripped — buildCaseSetupAlg's
+ * leading-only strip leaves an uncancelled rotation baked into the
+ * pattern's centers orbit, which doesn't change which face 2D-LL flattens
+ * but DOES confuse cubing.js's named "PLL" stickering (it reads the
+ * centers orbit to decide which pieces count as "home" and dims the wrong
+ * ones — reported live as "PLL cards look like the side of the cube").
+ *
+ * Appending a rotation to an already-correct setup is a pure whole-cube
+ * relabeling — provably safe, doesn't touch which piece sits in which slot
+ * relative to the others. DROPPING one half of the pair before inverting
+ * (tried first) is NOT safe: it changes which absolute faces the moves in
+ * between refer to, computing a different (wrong) permutation entirely —
+ * verified against the piece data: stripping both ends of Aa's algorithm
+ * produced solved edges (should be untouched) and a 2-swap+twisted corners
+ * (should be a clean 3-cycle), an invalid, non-PLL pattern. Inverting the
+ * full text instead gives exactly the textbook Aa (edges identity, corners
+ * a clean 3-cycle, centers identity too).
+ *
+ * Every OTHER shape of algorithm (no rotation, or an unmatched/asymmetric
+ * one) falls back to buildCaseSetupAlg's exact behavior.
+ */
+export function buildCanonicalDisplaySetupAlg(alg: string): string {
+  const allTokens = alg.trim().split(/\s+/).filter(Boolean);
+  const leading = leadingRotationRun(allTokens);
+  const trailing = trailingRotationRun(stripLeadingRotations(allTokens));
+  const isRegripAndRestore = leading.length > 0 && trailing.length > 0 && invertSequence(leading).join(" ") === trailing.join(" ");
+
+  if (isRegripAndRestore) {
+    return invertSequence(allTokens).join(" ");
+  }
+
+  return buildCaseSetupAlg(alg);
 }
 
 /**

@@ -6,6 +6,13 @@
  * no animation). `stickering`/`visualization` decide 2D-last-layer vs full
  * 3D — driven by logic/algGroupConfig.ts per group (OLL/PLL -> 2D, F2L -> 3D).
  *
+ * Uses buildCanonicalDisplaySetupAlg, NOT buildCaseSetupAlg — this
+ * component never tracks/animates a move against its setup (alg is always
+ * ""), so unlike every OTHER buildCaseSetupAlg caller it's free to invert a
+ * matched "regrip and restore" rotation pair (e.g. bundled PLL Aa's own "x
+ * (moves) x'") as a whole instead of leaving one half stripped — see that
+ * function's doc comment for why the two must stay separate.
+ *
  * Performance: TwistyPlayer is expensive to mount (WebGL/SVG init). A grid
  * of 40+ cases would otherwise mount 40+ contexts at once, so mounting is
  * deferred via IntersectionObserver until the card is near the viewport;
@@ -14,7 +21,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
-import { buildCaseSetupAlg } from "../logic/moveParser";
+import { buildCanonicalDisplaySetupAlg } from "../logic/moveParser";
 
 interface AlgCaseVisualisationProps {
   /** The solution algorithm — the visualisation shows the state BEFORE this is applied. */
@@ -39,7 +46,7 @@ export function AlgCaseVisualisation({
 }: AlgCaseVisualisationProps) {
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const inverseAlg = useMemo(() => buildCaseSetupAlg(alg), [alg]);
+  const inverseAlg = useMemo(() => buildCanonicalDisplaySetupAlg(alg), [alg]);
 
   const [visible, setVisible] = useState(false);
 
