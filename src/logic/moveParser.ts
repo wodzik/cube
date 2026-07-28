@@ -184,44 +184,22 @@ export function stripLeadingRotations(moves: readonly string[]): string[] {
 }
 
 /**
- * Drop a TRAILING run of pure whole-cube rotations — the mirror of
- * stripLeadingRotations, for algorithms written "x (moves) x'" so the
- * solver's grip ends back where it started. Same reasoning as the leading
- * case: a trailing rotation is a regrip bookkeeping token, not part of what
- * scrambles the case.
- */
-export function stripTrailingRotations(moves: readonly string[]): string[] {
-  let i = moves.length;
-  while (i > 0 && parseMove(moves[i - 1])?.isRotation) i--;
-  return moves.slice(0, i);
-}
-
-/**
  * Build the display SETUP for an algorithm's own text: the case state
  * before the algorithm is applied, in the case's CANONICAL orientation.
  *
- * Deliberately strips leading AND trailing rotations before inverting (see
- * stripLeadingRotations/stripTrailingRotations) — invertSequence reverses
- * order, so a rotation at either END of the algorithm would otherwise land
- * at the OTHER end of the inverted setup, applying a spurious net
- * whole-cube spin to the display (verified: an alg written "y2 U2 R2 u
- * R2' u' R2" rendered with BLUE facing front instead of the case's own
- * canonical green-front — every other variant of that same physical case,
- * none of which happen to start with a rotation, rendered green-front as
- * expected). Trailing rotations cause the identical problem from the other
- * direction: a "x (moves) x'" regrip-and-restore algorithm (common in
- * bundled PLL data, e.g. Aa/Ab/E/Ja) left an uncancelled leading rotation
- * in the inverted setup, which doesn't change the flattened 2D-LL face
- * shown but DOES shift every piece's slot in the underlying pattern —
- * cubing.js's "PLL" named stickering dims pieces it considers already
- * home, so a rotated pattern made it dim the wrong ones (reported live as
- * "PLL cards look like the side of the cube instead of the LL"). The full
- * alg text (rotations included) is still exactly what gets tracked/
- * animated as the solve executes — this only affects the static "before"
- * picture.
+ * Deliberately strips a leading rotation before inverting (see
+ * stripLeadingRotations) — invertSequence reverses order, so a rotation at
+ * the START of the algorithm would otherwise land at the END of the
+ * inverted setup, applying a spurious net whole-cube spin to the display
+ * (verified: an alg written "y2 U2 R2 u R2' u' R2" rendered with BLUE
+ * facing front instead of the case's own canonical green-front — every
+ * other variant of that same physical case, none of which happen to start
+ * with a rotation, rendered green-front as expected). The full alg text
+ * (rotation included) is still exactly what gets tracked/animated as the
+ * solve executes — this only affects the static "before" picture.
  */
 export function buildCaseSetupAlg(alg: string): string {
-  const moves = stripTrailingRotations(stripLeadingRotations(alg.trim().split(/\s+/).filter(Boolean)));
+  const moves = stripLeadingRotations(alg.trim().split(/\s+/).filter(Boolean));
   return moves.length === 0 ? "" : invertSequence(moves).join(" ");
 }
 
