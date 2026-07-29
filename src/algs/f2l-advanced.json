@@ -21,7 +21,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -58,7 +60,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -95,7 +99,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -138,7 +144,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -181,7 +189,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -212,7 +222,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -255,7 +267,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -298,7 +312,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -329,7 +345,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -360,7 +378,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -397,7 +417,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -434,7 +456,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -471,7 +495,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -508,7 +534,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -551,7 +579,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -594,7 +624,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -625,7 +657,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -650,7 +684,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -681,7 +717,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -706,7 +744,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -737,7 +777,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -774,7 +816,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -799,7 +843,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -824,7 +870,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -855,7 +903,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -880,7 +930,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -911,7 +963,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -948,7 +1002,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -979,7 +1035,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1010,7 +1068,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1041,7 +1101,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1072,7 +1134,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1103,7 +1167,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1134,7 +1200,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1177,7 +1245,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1214,7 +1284,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1257,7 +1329,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1294,7 +1368,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1337,7 +1413,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1380,7 +1458,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1429,7 +1509,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1478,7 +1560,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1509,7 +1593,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1546,7 +1632,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1583,7 +1671,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1614,7 +1704,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1645,7 +1737,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1682,7 +1776,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1719,7 +1815,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1756,7 +1854,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [
@@ -1793,7 +1893,9 @@
         "kind": "mask",
         "pieceGroups": [
           "d-edges",
-          "f2l-fr"
+          "f2l-fl",
+          "f2l-bl",
+          "f2l-br"
         ],
         "showCenters": true,
         "hiddenCenters": [

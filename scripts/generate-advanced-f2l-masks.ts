@@ -1,23 +1,29 @@
 /**
  * One-off generator: gives every Advanced F2L / J Perm F2L case a uniform,
- * editable baseline mask override — bottom edges + the ONE F2L slot chip
- * matching the case's own subgroup shown (advanced-f2l.json's subgroup ids
- * are already exactly front-right/front-left/back-left/back-right; J
- * Perm's f2l-advanced.json is a flat sheet that's always front-right, see
- * the front-right-never-untouched check this script used to run), centers
- * shown (not dimmed) except the top one (last layer, its center included,
- * is fully hidden — matches the group's default named "F2L" scheme, just
- * now expressed as an editable per-case mask).
+ * editable baseline mask override — bottom edges + the 3 F2L slot chips
+ * OTHER than the case's own subgroup shown, centers shown (not dimmed)
+ * except the top one (last layer, its center included, is fully hidden —
+ * matches the group's default named "F2L" scheme, just now expressed as
+ * an editable per-case mask).
+ *
+ * The subgroup's OWN slot is hidden, not shown — per the user: these
+ * subgroup names describe which slot's PHYSICAL SPACE the algorithm uses
+ * as scratch space, not which pair it's teaching. A "Front Right" case's
+ * actual target pair is a DIFFERENT slot's corner+edge that got displaced
+ * through the front-right position; showing the front-right identity
+ * (wherever it drifted to) is exactly the confusing, irrelevant clutter
+ * this masking effort exists to hide, and the other 3 slots' identities
+ * (wherever THEY currently sit) are the genuine, meaningful content.
  *
  * This intentionally does NOT try to auto-detect a DIFFERENT target pair
- * per case beyond the subgroup itself — earlier attempts at that
- * (cross-variant majority voting) kept getting the specific per-case call
- * wrong in ways only visible by eye. Per the user: apply this
- * subgroup-matching baseline everywhere, then go through the cases BY HAND
- * in the app's own CaseEdit "Advanced" section (MaskPicker) — toggle on
- * any OTHER F2L slot chip a specific case's algorithm actually needs (a
- * "Trapped"/displaced-pair case), toggle any of the "Hide X center" chips
- * if needed — then export the group as JSON and re-import.
+ * per case beyond "everything except the named slot" — earlier attempts
+ * at that (cross-variant majority voting) kept getting the specific
+ * per-case call wrong in ways only visible by eye. Per the user: apply
+ * this subgroup-matching baseline everywhere, then go through the cases
+ * BY HAND in the app's own CaseEdit "Advanced" section (MaskPicker) —
+ * toggle chips as a specific case's algorithm actually needs, toggle any
+ * of the "Hide X center" chips if needed — then export the group as JSON
+ * and re-import.
  *
  * Run: bun scripts/generate-advanced-f2l-masks.ts
  * Writes src/algs/advanced-f2l.json and src/algs/f2l-advanced.json in place.
@@ -26,10 +32,12 @@ import advancedF2lJson from "../src/algs/advanced-f2l.json";
 import fperAdvJson from "../src/algs/f2l-advanced.json";
 import { writeFileSync } from "fs";
 
-function baselineFor(slotId: string) {
+const ALL_F2L_SLOTS = ["f2l-fr", "f2l-fl", "f2l-bl", "f2l-br"];
+
+function baselineFor(hiddenSlotId: string) {
   return {
     kind: "mask",
-    pieceGroups: ["d-edges", slotId],
+    pieceGroups: ["d-edges", ...ALL_F2L_SLOTS.filter((id) => id !== hiddenSlotId)],
     showCenters: true,
     hiddenCenters: ["center-u"],
   };
