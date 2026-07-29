@@ -2975,7 +2975,7 @@
       },
       {
         "name": "OLL 15 [30] - (R U F B S)",
-        "alg": "z' B' U' S U' F U B' R B z",
+        "alg": "z' B' U' S U' F U B' R B z z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3113,7 +3113,7 @@
       },
       {
         "name": "OLL 16 [20] - (R U F B S)",
-        "alg": "z' F U S U B' U' F R' F' z",
+        "alg": "z' F U S U B' U' F R' F' z z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7643,7 +7643,7 @@
       },
       {
         "name": "OLL 34 [57] - (R U F B S)",
-        "alg": "R U R' U' B' R' F R S",
+        "alg": "R U R' U' B' R' F R S z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -9467,7 +9467,7 @@
       },
       {
         "name": "OLL 44 [5] - (R U L M)",
-        "alg": "x U' L U2 R' U' M U' L' U L U2 R U2 R' x'",
+        "alg": "x U' L U2 R' U' M U' L' U L U2 R U2 R' x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10949,7 +10949,7 @@
       },
       {
         "name": "OLL 54 [5] - (R U L M)",
-        "alg": "x U' L U2 R' U' M U' L' U L U R U R' U' R U' R' x'",
+        "alg": "x U' L U2 R' U' M U' L' U L U R U R' U' R U' R' x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
