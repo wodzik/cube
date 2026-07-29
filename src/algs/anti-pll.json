@@ -216,7 +216,7 @@
       },
       {
         "name": "Alg 3 (14 ETM)",
-        "alg": "y' S' R' U R S y R U' R' F' r U' r' F2 y",
+        "alg": "y' S' R' U R S y R U' R' F' r U' r' F2 y y'",
         "isDefault": false
       }
     ]
@@ -674,7 +674,7 @@
       },
       {
         "name": "Alg 2 (18 ETM)",
-        "alg": "y2 R U' R' U' R2 y R' F' R U' R U R' U' R U' R' F' y2",
+        "alg": "y2 R U' R' U' R2 y R' F' R U' R U R' U' R U' R' F' y2 y'",
         "isDefault": false
       },
       {

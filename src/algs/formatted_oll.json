@@ -113,7 +113,7 @@
       },
       {
         "name": "OLL 1 [18] - (R U F)",
-        "alg": "F U R U' R' F' R U R' U R U' y R U' R' F'",
+        "alg": "F U R U' R' F' R U R' U R U' y R U' R' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -149,25 +149,25 @@
       },
       {
         "name": "OLL 1 [24] - (R U F r S)",
-        "alg": "U F R' F' R U S' R U' R' y' r U' r' F R' F' r",
+        "alg": "U F R' F' R U S' R U' R' y' r U' r' F R' F' r y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 1 [25] - (R U F r M)",
-        "alg": "U R U R' U R' F R F' U2 y' r' U' R U M'",
+        "alg": "U R U R' U R' F R F' U2 y' r' U' R U M' y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 1 [26] - (R U F r)",
-        "alg": "F R' F' R U2 R U' R' y' r' U r U' r' U' r",
+        "alg": "F R' F' R U2 R U' R' y' r' U r U' r' U' r y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 1 [27] - (R U F)",
-        "alg": "F U R' F R F2 U' y' R' F R F'",
+        "alg": "F U R' F R F2 U' y' R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -479,7 +479,7 @@
       },
       {
         "name": "OLL 2 [47] - (R U F)",
-        "alg": "R' F R F' U2 R' F R y' R2 U2 R",
+        "alg": "R' F R F' U2 R' F R y' R2 U2 R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -701,7 +701,7 @@
       },
       {
         "name": "OLL 3 [33] - (U L F)",
-        "alg": "L F U F' U' F U F' U' L' y' L F U F' U' L'",
+        "alg": "L F U F' U' F U F' U' L' y' L F U F' U' L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -977,7 +977,7 @@
       },
       {
         "name": "OLL 4 [31] - (R U F f)",
-        "alg": "f R U R' U' f' y R' F R U R' U' F' U R",
+        "alg": "f R U R' U' f' y R' F R U R' U' F' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1175,7 +1175,7 @@
       },
       {
         "name": "OLL 5 [14] - (R U F)",
-        "alg": "R' F R' F' R2 y U' R U' R'",
+        "alg": "R' F R' F' R2 y U' R U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1265,7 +1265,7 @@
       },
       {
         "name": "OLL 6 [12] - (R U F f S)",
-        "alg": "R U R' U' R' F R F' y S R U R' U' R' F R f'",
+        "alg": "R U R' U' R' F R F' y S R U R' U' R' F R f' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1277,7 +1277,7 @@
       },
       {
         "name": "OLL 6 [14] - (R U F)",
-        "alg": "R U R' U y' R2 F R F' R",
+        "alg": "R U R' U y' R2 F R F' R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1553,13 +1553,13 @@
       },
       {
         "name": "OLL 9 [6] - (R U r)",
-        "alg": "R' U' R y r U' r' U r U r'",
+        "alg": "R' U' R y r U' r' U r U r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 9 [7] - (R U F)",
-        "alg": "R' U' R y' x' R U' R' F R U R' x",
+        "alg": "R' U' R y' x' R U' R' F R U R' x y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1583,7 +1583,7 @@
       },
       {
         "name": "OLL 9 [11] - (R U B l)",
-        "alg": "R' U' R y' l U' l' U R B R'",
+        "alg": "R' U' R y' l U' l' U R B R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1601,7 +1601,7 @@
       },
       {
         "name": "OLL 9 [14] - (U L F r)",
-        "alg": "L' U' L y' L F' L' U r U r'",
+        "alg": "L' U' L y' L F' L' U r U r' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1625,7 +1625,7 @@
       },
       {
         "name": "OLL 9 [18] - (U L l)",
-        "alg": "L' U' L y l U' l' U l U l'",
+        "alg": "L' U' L y l U' l' U l U l' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1637,7 +1637,7 @@
       },
       {
         "name": "OLL 9 [20] - (U L F)",
-        "alg": "L' U' L y' L F' L' U L F L'",
+        "alg": "L' U' L y' L F' L' U L F L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1649,7 +1649,7 @@
       },
       {
         "name": "OLL 9 [22] - (R U L F)",
-        "alg": "F' U' L' U L y' U' R U' R' U2 R",
+        "alg": "F' U' L' U L y' U' R U' R' U2 R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1667,7 +1667,7 @@
       },
       {
         "name": "OLL 9 [25] - (R U B)",
-        "alg": "R' U' R y' R B' R' U R B R'",
+        "alg": "R' U' R y' R B' R' U R B R' y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1721,7 +1721,7 @@
       },
       {
         "name": "OLL 10 [7] - (R U F)",
-        "alg": "R U R' y R' F R U' R' F' R",
+        "alg": "R U R' y R' F R U' R' F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1739,7 +1739,7 @@
       },
       {
         "name": "OLL 10 [10] - (U L l)",
-        "alg": "L U L' y' l' U l U' l' U' l",
+        "alg": "L U L' y' l' U l U' l' U' l y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1781,7 +1781,7 @@
       },
       {
         "name": "OLL 10 [17] - (R U r)",
-        "alg": "R U R' y' r' U r U' r' U' r",
+        "alg": "R U R' y' r' U r U' r' U' r y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1817,7 +1817,7 @@
       },
       {
         "name": "OLL 10 [23] - (R U F l)",
-        "alg": "R U R' y R' F R U' l' U' l",
+        "alg": "R U R' y R' F R U' l' U' l y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1901,7 +1901,7 @@
       },
       {
         "name": "OLL 10 [37] - (R U L F)",
-        "alg": "F U R U' R' y U L' U L U2 L'",
+        "alg": "F U R U' R' y U L' U L U2 L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2447,13 +2447,13 @@
       },
       {
         "name": "OLL 13 [3] - (U L r)",
-        "alg": "r U' r' U' r U r' y L' U L",
+        "alg": "r U' r' U' r U r' y L' U L y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 13 [4] - (R U r)",
-        "alg": "r U' r' U' r U r' y' R' U R",
+        "alg": "r U' r' U' r U r' y' R' U R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2513,7 +2513,7 @@
       },
       {
         "name": "OLL 13 [14] - (R U L F)",
-        "alg": "L F' L' U' L F L' y' R' U R",
+        "alg": "L F' L' U' L F L' y' R' U R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2585,7 +2585,7 @@
       },
       {
         "name": "OLL 13 [26] - (U L l)",
-        "alg": "l U' l' U' l U l' y' L' U L",
+        "alg": "l U' l' U' l U l' y' L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2633,13 +2633,13 @@
       },
       {
         "name": "OLL 14 [4] - (R U L F)",
-        "alg": "R' F R U R' F' R y L U' L'",
+        "alg": "R' F R U R' F' R y L U' L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 14 [5] - (R U r)",
-        "alg": "r' U r U r' U' r y R U' R'",
+        "alg": "r' U r U r' U' r y R U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2657,7 +2657,7 @@
       },
       {
         "name": "OLL 14 [8] - (R U l)",
-        "alg": "l' U l U l' U' l y' R U' R'",
+        "alg": "l' U l U l' U' l y' R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2681,7 +2681,7 @@
       },
       {
         "name": "OLL 14 [12] - (R U F)",
-        "alg": "R' F R U R' F' R y' R U' R'",
+        "alg": "R' F R U R' F' R y' R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2903,7 +2903,7 @@
       },
       {
         "name": "OLL 15 [18] - (R U r)",
-        "alg": "U2 y2 U2 r' U' r R' U' R U r' U r",
+        "alg": "U2 y2 U2 r' U' r R' U' R U r' U r y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2945,7 +2945,7 @@
       },
       {
         "name": "OLL 15 [25] - (R U L F)",
-        "alg": "F' L' U' L U F2 U y' R' U R U2 R'",
+        "alg": "F' L' U' L U F2 U y' R' U R U2 R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2969,7 +2969,7 @@
       },
       {
         "name": "OLL 15 [29] - (R U r)",
-        "alg": "r' U r U r' U' r y R U R' U' R U' R'",
+        "alg": "r' U r U r' U' r y R U R' U' R U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3071,7 +3071,7 @@
       },
       {
         "name": "OLL 16 [13] - (U L F)",
-        "alg": "F' L' U' L U F y' L' U' L U' L' U2 L",
+        "alg": "F' L' U' L U F y' L' U' L U' L' U2 L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3413,7 +3413,7 @@
       },
       {
         "name": "OLL 18 [9] - (R U F)",
-        "alg": "F R U R' U y' R' U2 R' F R F'",
+        "alg": "F R U R' U y' R' U2 R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3479,13 +3479,13 @@
       },
       {
         "name": "OLL 18 [20] - (R U F)",
-        "alg": "F R U R' U' F' y2 F R U R' U' R U R' U' F'",
+        "alg": "F R U R' U' F' y2 F R U R' U' R U R' U' F' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 18 [21] - (R U F)",
-        "alg": "R U R' U' R' F R F' y2 F R' F' R U R U' R'",
+        "alg": "R U R' U' R' F R F' y2 F R' F' R U R U' R' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3515,7 +3515,7 @@
       },
       {
         "name": "OLL 18 [26] - (R U F)",
-        "alg": "F R U R' U F' U2 y' R' F R F'",
+        "alg": "F R U R' U F' U2 y' R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3635,7 +3635,7 @@
       },
       {
         "name": "OLL 18 [46] - (R U F)",
-        "alg": "F R U R' y' U R' U2 R' F R F'",
+        "alg": "F R U R' y' U R' U2 R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3917,7 +3917,7 @@
       },
       {
         "name": "OLL 20 [15] - (R U r M)",
-        "alg": "r U R' U' M U R U' R' y R U R' U' M' U R U' r'",
+        "alg": "r U R' U' M U R U' R' y R U R' U' M' U R U' r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4619,7 +4619,7 @@
       },
       {
         "name": "OLL 23 [8] - (R U)",
-        "alg": "R U R' U R U2 R' y R U2 R' U' R U' R' U",
+        "alg": "R U R' U R U2 R' y R U2 R' U' R U' R' U y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4877,7 +4877,7 @@
       },
       {
         "name": "OLL 23 [51] - (R U)",
-        "alg": "R U R' U R U2 R' y R U2 R' U' R U' R'",
+        "alg": "R U R' U R U2 R' y R U2 R' U' R U' R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5039,13 +5039,13 @@
       },
       {
         "name": "OLL 24 [17] - (R U F r)",
-        "alg": "r U' r' U2 r U r' y' R' F' U2 F R",
+        "alg": "r U' r' U2 r U r' y' R' F' U2 F R y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 24 [18] - (U L B r)",
-        "alg": "r U' r' U2 r U r' y L' B' U2 B L",
+        "alg": "r U' r' U2 r U r' y L' B' U2 B L y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6377,7 +6377,7 @@
       },
       {
         "name": "OLL 29 [26] - (R U F)",
-        "alg": "R' F R F' R U2 R' U' y' R' U' R",
+        "alg": "R' F R F' R U2 R' U' y' R' U' R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6431,7 +6431,7 @@
       },
       {
         "name": "OLL 29 [35] - (R U L F)",
-        "alg": "R' F R F' R U2 R' U' y L' U' L",
+        "alg": "R' F R F' R U2 R' U' y L' U' L y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6647,7 +6647,7 @@
       },
       {
         "name": "OLL 30 [24] - (R U F)",
-        "alg": "R U R' U R U' R' U R U' y R U' R' F'",
+        "alg": "R U R' U R U' R' U R U' y R U' R' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6671,7 +6671,7 @@
       },
       {
         "name": "OLL 30 [28] - (U L F)",
-        "alg": "L F' L' F L' U2 L U y L U L'",
+        "alg": "L F' L' F L' U2 L U y L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7289,7 +7289,7 @@
       },
       {
         "name": "OLL 33 [14] - (R U F M)",
-        "alg": "M' U2 M U' y' F R F' R U R' U' R'",
+        "alg": "M' U2 M U' y' F R F' R U R' U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -7325,7 +7325,7 @@
       },
       {
         "name": "OLL 34 [4] - (R U r M)",
-        "alg": "R U R' U' y' r' U' R U M'",
+        "alg": "R U R' U' y' r' U' R U M' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7385,7 +7385,7 @@
       },
       {
         "name": "OLL 34 [14] - (R U F M)",
-        "alg": "R U R' U' y R' F' R M' U M",
+        "alg": "R U R' U' y R' F' R M' U M y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7397,7 +7397,7 @@
       },
       {
         "name": "OLL 34 [16] - (R U L l M)",
-        "alg": "R' U' R U y' l U L' U' M'",
+        "alg": "R' U' R U y' l U L' U' M' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7415,7 +7415,7 @@
       },
       {
         "name": "OLL 34 [19] - (R U r)",
-        "alg": "R U R' U' y' r' U' R U R' r",
+        "alg": "R U R' U' y' r' U' R U R' r y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7433,7 +7433,7 @@
       },
       {
         "name": "OLL 34 [22] - (R U F r)",
-        "alg": "R U R' U' y R' F' r U r' R",
+        "alg": "R U R' U' y R' F' r U r' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7499,7 +7499,7 @@
       },
       {
         "name": "OLL 34 [33] - (R U F r M)",
-        "alg": "R U R' U' y R' F' r U M",
+        "alg": "R U R' U' y R' F' r U M y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7547,7 +7547,7 @@
       },
       {
         "name": "OLL 34 [41] - (R U F r)",
-        "alg": "R U R' U' y R' F' r U R r'",
+        "alg": "R U R' U' y R' F' r U R r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7571,7 +7571,7 @@
       },
       {
         "name": "OLL 34 [45] - (U L l M)",
-        "alg": "L' U' L U y l U L' U' M'",
+        "alg": "L' U' L U y l U L' U' M' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7589,7 +7589,7 @@
       },
       {
         "name": "OLL 34 [48] - (R U L f M)",
-        "alg": "R U R' U' f' y U' L U M",
+        "alg": "R U R' U' f' y U' L U M y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7625,13 +7625,13 @@
       },
       {
         "name": "OLL 34 [54] - (R U r)",
-        "alg": "R' U' R U y r U R' U' r' R",
+        "alg": "R' U' R U y r U R' U' r' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 34 [55] - (R U r M)",
-        "alg": "R' U' R y U r U R' U' M",
+        "alg": "R' U' R y U r U R' U' M y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7661,7 +7661,7 @@
       },
       {
         "name": "OLL 34 [60] - (R U r)",
-        "alg": "R U R' U' y' r' U' R U r R'",
+        "alg": "R U R' U' y' r' U' R U r R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7757,13 +7757,13 @@
       },
       {
         "name": "OLL 35 [12] - (R U r)",
-        "alg": "R' U2 R y U r U' r' U r U r'",
+        "alg": "R' U2 R y U r U' r' U r U r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 35 [13] - (R U r)",
-        "alg": "R' U2 R U y r U' r' U r U r'",
+        "alg": "R' U2 R U y r U' r' U r U r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7949,7 +7949,7 @@
       },
       {
         "name": "OLL 36 [22] - (R U F)",
-        "alg": "R' U' R U' R' U R U R y R' F' R",
+        "alg": "R' U' R U' R' U R U R y R' F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8075,7 +8075,7 @@
       },
       {
         "name": "OLL 36 [43] - (R U F)",
-        "alg": "R' U' R U' R' U R U y F R' F' R",
+        "alg": "R' U' R U' R' U R U y F R' F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8153,7 +8153,7 @@
       },
       {
         "name": "OLL 37 [10] - (R U L F)",
-        "alg": "L F' L' F y' U R U' R'",
+        "alg": "L F' L' F y' U R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8171,7 +8171,7 @@
       },
       {
         "name": "OLL 37 [13] - (R U F M)",
-        "alg": "M' U' M R' F R U y' R U' R'",
+        "alg": "M' U' M R' F R U y' R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8207,7 +8207,7 @@
       },
       {
         "name": "OLL 37 [19] - (R U L r M)",
-        "alg": "M' U R U' r' y U' L' U L",
+        "alg": "M' U R U' r' y U' L' U L y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8363,7 +8363,7 @@
       },
       {
         "name": "OLL 38 [21] - (R U L F)",
-        "alg": "L U L' U L U' L' U' y2 R' F R F'",
+        "alg": "L U L' U L U' L' U' y2 R' F R F' y2",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -8567,7 +8567,7 @@
       },
       {
         "name": "OLL 39 [32] - (R U r S)",
-        "alg": "R U' r' y' U' R' U R S'",
+        "alg": "R U' r' y' U' R' U R S' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8579,7 +8579,7 @@
       },
       {
         "name": "OLL 39 [34] - (R U r f)",
-        "alg": "r U' r' U' r y R U R' f'",
+        "alg": "r U' r' U' r y R U R' f' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8891,7 +8891,7 @@
       },
       {
         "name": "OLL 41 [23] - (R U L F)",
-        "alg": "R U2 R' U' R U' R2 y L' U' L U F",
+        "alg": "R U2 R' U' R U' R2 y L' U' L U F y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8951,7 +8951,7 @@
       },
       {
         "name": "OLL 41 [33] - (R U B)",
-        "alg": "U' R U2 R' U' R U' R2 y' R' U' R U B",
+        "alg": "U' R U2 R' U' R U' R2 y' R' U' R U B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8969,7 +8969,7 @@
       },
       {
         "name": "OLL 41 [36] - (R U F)",
-        "alg": "R U' R' U2 R U y R U' R' U' F'",
+        "alg": "R U' R' U2 R U y R U' R' U' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -9281,13 +9281,13 @@
       },
       {
         "name": "OLL 42 [50] - (R U F)",
-        "alg": "R' U2 R U R' U R2 y R U R' U' F'",
+        "alg": "R' U2 R U R' U R2 y R U R' U' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 42 [51] - (U L F)",
-        "alg": "L' U L U2 L' U' y' L' U L U F",
+        "alg": "L' U L U2 L' U' y' L' U L U F y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -9773,7 +9773,7 @@
       },
       {
         "name": "OLL 46 [11] - (R U F)",
-        "alg": "F R U R' y' R' U R U2 R'",
+        "alg": "F R U R' y' R' U R U2 R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10247,7 +10247,7 @@
       },
       {
         "name": "OLL 49 [21] - (R F d)",
-        "alg": "R' F R' F' R2 d2 y' R' F R F'",
+        "alg": "R' F R' F' R2 d2 y' R' F R F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10379,7 +10379,7 @@
       },
       {
         "name": "OLL 50 [18] - (L F d)",
-        "alg": "L F' L F L2 d2 y L F' L' F",
+        "alg": "L F' L F L2 d2 y L F' L' F y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10529,13 +10529,13 @@
       },
       {
         "name": "OLL 52 [3] - (R U F)",
-        "alg": "R U R' U R U' y R U' R' F'",
+        "alg": "R U R' U R U' y R U' R' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 52 [4] - (R U B)",
-        "alg": "R' U' R U' R' U y' R' U R B",
+        "alg": "R' U' R U' R' U y' R' U R B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10679,7 +10679,7 @@
       },
       {
         "name": "OLL 52 [28] - (R U F)",
-        "alg": "F R U R' y' U R' U' R U' R'",
+        "alg": "F R U R' y' U R' U' R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10691,13 +10691,13 @@
       },
       {
         "name": "OLL 52 [30] - (U L b)",
-        "alg": "L U L' U L U' y' z' U L' U' b'",
+        "alg": "L U L' U L U' y' z' U L' U' b' y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 52 [31] - (R U F)",
-        "alg": "R U R' U R y U' R U' R' F'",
+        "alg": "R U R' U R y U' R U' R' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10877,7 +10877,7 @@
       },
       {
         "name": "OLL 53 [18] - (R U F)",
-        "alg": "R' F R F' U2 R2 y R' F' R F'",
+        "alg": "R' F R F' U2 R2 y R' F' R F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11039,7 +11039,7 @@
       },
       {
         "name": "OLL 54 [20] - (U L F)",
-        "alg": "L F' L' F U2 L2 y' L F L' F",
+        "alg": "L F' L' F U2 L2 y' L F L' F y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11177,7 +11177,7 @@
       },
       {
         "name": "OLL 55 [19] - (R U L F)",
-        "alg": "R U2 R2 U' R U' R' U2 y L F L'",
+        "alg": "R U2 R2 U' R U' R' U2 y L F L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11255,7 +11255,7 @@
       },
       {
         "name": "OLL 55 [32] - (R U F D)",
-        "alg": "R U' y R2 D R' U2 R D' R2 U F'",
+        "alg": "R U' y R2 D R' U2 R D' R2 U F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11279,7 +11279,7 @@
       },
       {
         "name": "OLL 55 [36] - (R U F)",
-        "alg": "R' U2 R2 U R' U R U2 y R' F' R",
+        "alg": "R' U2 R2 U R' U R U2 y R' F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },

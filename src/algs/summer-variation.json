@@ -196,7 +196,7 @@
       },
       {
         "name": "Alg 6 (5 ETM)",
-        "alg": "y' f3' l3' d3 z3' x3 y",
+        "alg": "y' f3' l3' d3 z3' x3 y y'",
         "isDefault": false
       },
       {

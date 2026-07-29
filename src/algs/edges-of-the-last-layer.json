@@ -1154,7 +1154,7 @@
       },
       {
         "name": "Alg 11 (17 ETM)",
-        "alg": "M' U M' U M' U M' U y2 M' U M' U M' U M' U",
+        "alg": "M' U M' U M' U M' U y2 M' U M' U M' U M' U y2",
         "isDefault": false
       },
       {
@@ -1164,7 +1164,7 @@
       },
       {
         "name": "Alg 13 (33 ETM)",
-        "alg": "M' U' M' U' M' U' M' U' M U M U M U M U y M' U' M' U' M' U' M' U' M U M U M U M U",
+        "alg": "M' U' M' U' M' U' M' U' M U M U M U M U y M' U' M' U' M' U' M' U' M U M U M U M U y'",
         "isDefault": false
       },
       {
@@ -1416,7 +1416,7 @@
       },
       {
         "name": "Alg 22 (17 ETM)",
-        "alg": "M' U M' U M' U M' U y2 M' U' M' U' M' U' M' U'",
+        "alg": "M' U M' U M' U M' U y2 M' U' M' U' M' U' M' U' y2",
         "isDefault": false
       },
       {
