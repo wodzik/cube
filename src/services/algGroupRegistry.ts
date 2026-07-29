@@ -44,6 +44,8 @@ interface RawSubgroup {
   name: string;
   previewAlg: string;
   cases: RawCase[];
+  displayConfig?: Partial<DisplayConfig>;
+  availableInAttack?: boolean;
 }
 
 /** ZBLL — bundled like OLL/PLL/F2L, but shipped pre-split into its 7 top-pattern subgroups (see scrape-zbll.mjs in the repo root). Built fresh from the bundled JSON on demand so "reset" can rebuild it exactly like the flat built-ins reload from their JSON. */
@@ -53,6 +55,8 @@ function buildZbllMeta(): AlgGroupMeta {
     name: sg.name,
     previewAlg: sg.previewAlg,
     cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    displayConfig: sg.displayConfig,
+    availableInAttack: sg.availableInAttack,
   }));
   return {
     id: "zbll",
@@ -125,6 +129,8 @@ function buildAdvancedF2LMeta(): AlgGroupMeta {
     name: sg.name,
     previewAlg: sg.previewAlg,
     cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    displayConfig: sg.displayConfig,
+    availableInAttack: sg.availableInAttack,
   }));
   return {
     id: "advanced-f2l",
@@ -146,6 +152,8 @@ function buildVlsMeta(): AlgGroupMeta {
     name: sg.name,
     previewAlg: sg.previewAlg,
     cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    displayConfig: sg.displayConfig,
+    availableInAttack: sg.availableInAttack,
   }));
   return {
     id: "vls",
