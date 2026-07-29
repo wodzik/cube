@@ -15,7 +15,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 2",
@@ -39,7 +52,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 3",
@@ -63,7 +89,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 4",
@@ -93,7 +132,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 5",
@@ -123,7 +175,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 6",
@@ -141,7 +206,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 7",
@@ -171,7 +249,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 8",
@@ -201,7 +292,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 9",
@@ -219,7 +323,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 10",
@@ -237,7 +354,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 11",
@@ -261,7 +391,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 12",
@@ -285,7 +428,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 13",
@@ -309,7 +465,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 14",
@@ -333,7 +502,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 15",
@@ -363,7 +545,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 16",
@@ -393,7 +588,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 17",
@@ -411,7 +619,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 18",
@@ -423,7 +644,20 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 19",
@@ -441,7 +675,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 20",
@@ -453,7 +700,20 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 21",
@@ -471,7 +731,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 22",
@@ -495,7 +768,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 23",
@@ -507,7 +793,20 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 24",
@@ -519,7 +818,20 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 25",
@@ -537,7 +849,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 26",
@@ -549,7 +874,20 @@
         "youtubeUrl": null,
         "isDefault": true
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 27",
@@ -567,7 +905,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 28",
@@ -591,7 +942,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 29",
@@ -609,7 +973,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 30",
@@ -627,7 +1004,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 31",
@@ -645,7 +1035,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 32",
@@ -663,7 +1066,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 33",
@@ -681,7 +1097,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Advanced F2L 34",
@@ -699,7 +1128,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 1",
@@ -729,7 +1171,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 2",
@@ -753,7 +1208,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 3",
@@ -783,7 +1251,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 4",
@@ -807,7 +1288,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 5",
@@ -837,7 +1331,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 6",
@@ -867,7 +1374,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 7",
@@ -903,7 +1423,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 8",
@@ -939,7 +1472,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 9",
@@ -957,7 +1503,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 10",
@@ -981,7 +1540,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 11",
@@ -1005,7 +1577,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 12",
@@ -1023,7 +1608,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 13",
@@ -1041,7 +1639,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 14",
@@ -1065,7 +1676,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 15",
@@ -1089,7 +1713,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 16",
@@ -1113,7 +1750,20 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   },
   {
     "name": "Expert F2L 17",
@@ -1137,6 +1787,19 @@
         "youtubeUrl": null,
         "isDefault": false
       }
-    ]
+    ],
+    "displayConfigOverride": {
+      "stickering": {
+        "kind": "mask",
+        "pieceGroups": [
+          "d-edges",
+          "f2l-fr"
+        ],
+        "showCenters": true,
+        "hiddenCenters": [
+          "center-u"
+        ]
+      }
+    }
   }
 ]

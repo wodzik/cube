@@ -763,7 +763,7 @@ export function resolveStickeringProps(
   if (stickering.kind === "named") return { stickering: stickering.value };
   return {
     stickeringMaskOrbits:
-      stickering.rawOverride ?? buildMaskFromPieceGroups(stickering.pieceGroups, stickering.showCenters),
+      stickering.rawOverride ?? buildMaskFromPieceGroups(stickering.pieceGroups, stickering.showCenters, stickering.hiddenCenters),
   };
 }
 

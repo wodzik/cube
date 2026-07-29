@@ -32,6 +32,8 @@ export type StickeringConfig =
       rawOverride?: StickeringMaskOrbits;
       /** Show centers at full color instead of the mask's usual dim — off by default (centers stay dim for orientation reference, see trainerMasks.ts). */
       showCenters?: boolean;
+      /** Individually-hidden centers (ids from CENTER_GROUPS, e.g. "center-u") — override showCenters per-face, e.g. F2L-style masks that show most centers but keep the last layer fully blank. */
+      hiddenCenters?: string[];
     };
 
 /**

@@ -69,8 +69,44 @@ export const MASK_PIECE_GROUPS: MaskPieceGroup[] = [
 
 const BY_ID = new Map(MASK_PIECE_GROUPS.map((g) => [g.id, g]));
 
-/** Union the selected piece-groups' pieces and build one mask (unknown ids are ignored). */
-export function buildMaskFromPieceGroups(ids: readonly string[], showCenters = false): StickeringMaskOrbits {
+export interface CenterGroup {
+  id: string;
+  label: string;
+  index: number;
+}
+
+/**
+ * CENTERS orbit indices, one per face — U=0 and L=1 are existing, verified
+ * constants (trainerMasks.ts's academyStepMask U_CENTER, rouxTargets.ts's
+ * ORANGE_CENTER); F/R/B/D confirmed live via Debug > Try Algorithm's mask
+ * JSON override (isolating each index in turn against an all-invisible
+ * cube: 2=green/F, 3=red/R, 4=hidden-from-default-camera/B, 5=yellow/D on
+ * the flattened net) — matches cubing.js's standard U,L,F,R,B,D kpuzzle
+ * center-orbit order.
+ */
+export const CENTER_GROUPS: CenterGroup[] = [
+  { id: "center-u", label: "Top center", index: 0 },
+  { id: "center-l", label: "Left center", index: 1 },
+  { id: "center-f", label: "Front center", index: 2 },
+  { id: "center-r", label: "Right center", index: 3 },
+  { id: "center-b", label: "Back center", index: 4 },
+  { id: "center-d", label: "Bottom center", index: 5 },
+];
+
+const CENTER_BY_ID = new Map(CENTER_GROUPS.map((g) => [g.id, g]));
+
+/**
+ * Union the selected piece-groups' pieces and build one mask (unknown ids
+ * are ignored). `hiddenCenters` (CenterGroup ids) force those specific
+ * centers hidden regardless of `showCenters` — e.g. an F2L-style mask that
+ * shows most centers as an orientation reference but keeps the last layer
+ * (its center included) fully blank.
+ */
+export function buildMaskFromPieceGroups(
+  ids: readonly string[],
+  showCenters = false,
+  hiddenCenters: readonly string[] = []
+): StickeringMaskOrbits {
   const edges = new Set<number>();
   const corners = new Set<number>();
   for (const id of ids) {
@@ -79,5 +115,10 @@ export function buildMaskFromPieceGroups(ids: readonly string[], showCenters = f
     g.edges.forEach((e) => edges.add(e));
     g.corners.forEach((c) => corners.add(c));
   }
-  return pieceMask(edges, corners, undefined, showCenters);
+  const mask = pieceMask(edges, corners, undefined, showCenters);
+  for (const id of hiddenCenters) {
+    const g = CENTER_BY_ID.get(id);
+    if (g) mask.orbits.CENTERS.pieces[g.index] = { facelets: ["ignored", "ignored", "ignored", "ignored"] };
+  }
+  return mask;
 }

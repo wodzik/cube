@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { MASK_PIECE_GROUPS, buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
+import { MASK_PIECE_GROUPS, CENTER_GROUPS, buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
 import type { StickeringConfig } from "../types/algorithm";
 
 type MaskConfig = Extract<StickeringConfig, { kind: "mask" }>;
@@ -21,7 +21,7 @@ interface MaskPickerProps {
 export function MaskPicker({ value, onChange }: MaskPickerProps) {
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(value.rawOverride));
   const [jsonText, setJsonText] = useState(() =>
-    JSON.stringify(value.rawOverride ?? buildMaskFromPieceGroups(value.pieceGroups, value.showCenters), null, 2)
+    JSON.stringify(value.rawOverride ?? buildMaskFromPieceGroups(value.pieceGroups, value.showCenters, value.hiddenCenters), null, 2)
   );
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -30,6 +30,12 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
       ? value.pieceGroups.filter((x) => x !== id)
       : [...value.pieceGroups, id];
     onChange({ ...value, pieceGroups: next });
+  };
+
+  const toggleHiddenCenter = (id: string) => {
+    const current = value.hiddenCenters ?? [];
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    onChange({ ...value, hiddenCenters: next });
   };
 
   const applyJson = () => {
@@ -44,7 +50,7 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
 
   const clearOverride = () => {
     setJsonError(null);
-    setJsonText(JSON.stringify(buildMaskFromPieceGroups(value.pieceGroups, value.showCenters), null, 2));
+    setJsonText(JSON.stringify(buildMaskFromPieceGroups(value.pieceGroups, value.showCenters, value.hiddenCenters), null, 2));
     onChange({ ...value, rawOverride: undefined });
   };
 
@@ -84,6 +90,27 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
         />
         Show centers (don't dim)
       </label>
+
+      <p className={`mt-2.5 text-[11px] text-gray-500 ${value.rawOverride ? "opacity-40 pointer-events-none" : ""}`}>
+        Hide individual centers (overrides "Show centers" per face):
+      </p>
+      <div className={`flex flex-wrap gap-1.5 mt-1 ${value.rawOverride ? "opacity-40 pointer-events-none" : ""}`}>
+        {CENTER_GROUPS.map((g) => {
+          const active = (value.hiddenCenters ?? []).includes(g.id);
+          return (
+            <button
+              key={g.id}
+              onClick={() => toggleHiddenCenter(g.id)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                active ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
+              }`}
+              style={active ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+            >
+              {g.label}
+            </button>
+          );
+        })}
+      </div>
 
       <button
         onClick={() => setAdvancedOpen((v) => !v)}
