@@ -11,7 +11,7 @@
       },
       {
         "name": "F2L 1 - (R U d)",
-        "alg": "d R U' R'",
+        "alg": "d R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -227,7 +227,7 @@
       },
       {
         "name": "F2L 5 - (U L d)",
-        "alg": "d' L U L' U2 L U' L'",
+        "alg": "d' L U L' U2 L U' L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -341,7 +341,7 @@
       },
       {
         "name": "F2L 7 - (U L d)",
-        "alg": "d' L U2 L' U2 L U' L'",
+        "alg": "d' L U2 L' U2 L U' L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -455,7 +455,7 @@
       },
       {
         "name": "F2L 10 - (U L d)",
-        "alg": "d' L U L' U L U L'",
+        "alg": "d' L U L' U L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -539,7 +539,7 @@
       },
       {
         "name": "F2L 12 - (U L d)",
-        "alg": "U L' U2 L d' L U L'",
+        "alg": "U L' U2 L d' L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -599,7 +599,7 @@
     "algList": [
       {
         "name": "F2L 14 - (U L d)",
-        "alg": "d' L U' L' U L U L'",
+        "alg": "d' L U' L' U L U L' y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -881,7 +881,7 @@
       },
       {
         "name": "F2L 19 - (R U d)",
-        "alg": "d R U2 R' U R U' R'",
+        "alg": "d R U2 R' U R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1211,7 +1211,7 @@
       },
       {
         "name": "F2L 25 - (R U L d)",
-        "alg": "U' L' U L d R U' R'",
+        "alg": "U' L' U L d R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1313,7 +1313,7 @@
       },
       {
         "name": "F2L 27 - (R U L F d)",
-        "alg": "L' U' L d R' F R F'",
+        "alg": "L' U' L d R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1577,7 +1577,7 @@
     "algList": [
       {
         "name": "F2L 36 - (U L d)",
-        "alg": "U L' U' L d' L U L'",
+        "alg": "U L' U' L d' L U L' y'",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -1715,7 +1715,7 @@
       },
       {
         "name": "F2L 37 - (U L d)",
-        "alg": "L' U2 L U' L' U2 L d' L U L'",
+        "alg": "L' U2 L U' L' U2 L d' L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1895,7 +1895,7 @@
       },
       {
         "name": "F2L 41 - (U L d)",
-        "alg": "L' U L d' L U L' U L U L'",
+        "alg": "L' U L d' L U L' U L U L' y'",
         "youtubeUrl": null,
         "isDefault": false
       },

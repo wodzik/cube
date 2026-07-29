@@ -47,7 +47,7 @@
       },
       {
         "name": "F2L 2 - (R U d)",
-        "alg": "d' R' U R",
+        "alg": "d' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -71,7 +71,7 @@
       },
       {
         "name": "F2L 2 - (U r f)",
-        "alg": "f U' f' r",
+        "alg": "f U' f' r x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -89,7 +89,7 @@
       },
       {
         "name": "F2L 2 - (U r f)",
-        "alg": "U f' U' r f U' r x'",
+        "alg": "U f' U' r f U' r x' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -125,7 +125,7 @@
       },
       {
         "name": "F2L 3 - (U r f)",
-        "alg": "f' r' U z",
+        "alg": "f' r' U z y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -161,13 +161,13 @@
       },
       {
         "name": "F2L 3 - (R U d)",
-        "alg": "U d' R' U' R",
+        "alg": "U d' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 3 - (U L d)",
-        "alg": "U' d L' U' L",
+        "alg": "U' d L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -305,7 +305,7 @@
       },
       {
         "name": "F2L 6 - (U L d)",
-        "alg": "d L' U' L U2 L' U L",
+        "alg": "d L' U' L U2 L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -353,7 +353,7 @@
       },
       {
         "name": "F2L 8 - (U L d)",
-        "alg": "d L' U2 L U2 L' U L",
+        "alg": "d L' U2 L U2 L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -413,7 +413,7 @@
       },
       {
         "name": "F2L 9 - (U L d)",
-        "alg": "d L' U' L U' L' U' L",
+        "alg": "d L' U' L U' L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -425,7 +425,7 @@
       },
       {
         "name": "F2L 9 - (U L d)",
-        "alg": "U' L U' L' d L' U' L",
+        "alg": "U' L U' L' d L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -509,7 +509,7 @@
       },
       {
         "name": "F2L 11 - (U L d)",
-        "alg": "U' L U2 L' d L' U' L",
+        "alg": "U' L U2 L' d L' U' L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -551,7 +551,7 @@
       },
       {
         "name": "F2L 11 - (R U d)",
-        "alg": "U' R U R' U R U2 R' d' R' U' R",
+        "alg": "U' R U R' U R U2 R' d' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -581,7 +581,7 @@
       },
       {
         "name": "F2L 12 - (U L F d)",
-        "alg": "d L' U2 L U' F U F'",
+        "alg": "d L' U2 L U' F U F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -605,7 +605,7 @@
     "algList": [
       {
         "name": "F2L 13 - (U L d)",
-        "alg": "d L' U L U' L' U' L",
+        "alg": "d L' U L U' L' U' L y",
         "youtubeUrl": null,
         "isDefault": true
       },
@@ -773,13 +773,13 @@
       },
       {
         "name": "F2L 16 - (R U L d)",
-        "alg": "L U' L' U' d' R' U' R",
+        "alg": "L U' L' U' d' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "F2L 16 - (R U L d)",
-        "alg": "L U' L' U' d' R' U' R",
+        "alg": "L U' L' U' d' R' U' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -911,7 +911,7 @@
       },
       {
         "name": "F2L 20 - (R U d)",
-        "alg": "d' R' U2 R U' R' U R",
+        "alg": "d' R' U2 R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1709,7 +1709,7 @@
       },
       {
         "name": "F2L 37 - (U L d)",
-        "alg": "L U' L' d L' U2 L U2 L' U L",
+        "alg": "L U' L' d L' U2 L U2 L' U L y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1865,7 +1865,7 @@
       },
       {
         "name": "F2L 41 - (R U L d)",
-        "alg": "L U' L' d' U' R' U' R U' R' U R",
+        "alg": "L U' L' d' U' R' U' R U' R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },

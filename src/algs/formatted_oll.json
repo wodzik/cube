@@ -101,7 +101,7 @@
       },
       {
         "name": "OLL 1 [16] - (R U F r d M)",
-        "alg": "R U R' d' R' F' R U2 M' U' M F R' F' r U R U' r'",
+        "alg": "R U R' d' R' F' R U2 M' U' M F R' F' r U R U' r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -893,7 +893,7 @@
       },
       {
         "name": "OLL 4 [17] - (R U F f l d)",
-        "alg": "f R U R' d' l' F R U R' U' F'",
+        "alg": "f R U R' d' l' F R U R' U' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1157,7 +1157,7 @@
       },
       {
         "name": "OLL 5 [11] - (R U B d)",
-        "alg": "R' U' R d' R2 B' R' B R'",
+        "alg": "R' U' R d' R2 B' R' B R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1763,7 +1763,7 @@
       },
       {
         "name": "OLL 10 [14] - (R U B f l)",
-        "alg": "R' U' R2 f l U' R' B' l U' R U z'",
+        "alg": "R' U' R2 f l U' R' B' l U' R U z' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2327,7 +2327,7 @@
       },
       {
         "name": "OLL 12 [33] - (R U r)",
-        "alg": "y3 R2 r U' R U' R' U2 R U' R r'",
+        "alg": "y3 R2 r U' R U' R' U2 R U' R r' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3509,7 +3509,7 @@
       },
       {
         "name": "OLL 18 [25] - (R U F Dw)",
-        "alg": "F R U R' Dw R' U2 R' F R F'",
+        "alg": "F R U R' Dw R' U2 R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3605,7 +3605,7 @@
       },
       {
         "name": "OLL 18 [41] - (R U F d)",
-        "alg": "F R U R' d R' U2 R' F R F'",
+        "alg": "F R U R' d R' U2 R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4991,7 +4991,7 @@
       },
       {
         "name": "OLL 24 [9] - (R U L r)",
-        "alg": "r U R' U' L' U R U'",
+        "alg": "r U R' U' L' U R U' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5075,7 +5075,7 @@
       },
       {
         "name": "OLL 24 [23] - (R U D l)",
-        "alg": "l' U' R D' R' U R D x",
+        "alg": "l' U' R D' R' U R D x x2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5303,7 +5303,7 @@
       },
       {
         "name": "OLL 24 [61] - (R U r)",
-        "alg": "r U R' U' z U' R z' R U'",
+        "alg": "r U R' U' z U' R z' R U' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5525,13 +5525,13 @@
       },
       {
         "name": "OLL 25 [33] - (R U L r)",
-        "alg": "x U R' U' L U R U' r' x'",
+        "alg": "x U R' U' L U R U' r' x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 25 [34] - (R U D l)",
-        "alg": "l' U R D' R' U' R D",
+        "alg": "l' U R D' R' U' R D x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5621,7 +5621,7 @@
       },
       {
         "name": "OLL 25 [49] - (R U L F r)",
-        "alg": "F' r U R' U' L' U R",
+        "alg": "F' r U R' U' L' U R x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5753,7 +5753,7 @@
       },
       {
         "name": "OLL 25 [71] - (R U L r)",
-        "alg": "r U R U' L' U R' U'",
+        "alg": "r U R U' L' U R' U' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6419,7 +6419,7 @@
       },
       {
         "name": "OLL 29 [33] - (R U L F d)",
-        "alg": "R' F R F' R U2 R' d' L' U' L",
+        "alg": "R' F R F' R U2 R' d' L' U' L y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7001,7 +7001,7 @@
       },
       {
         "name": "OLL 32 [12] - (R U F r)",
-        "alg": "z U R F' R' U' R z' r U r' z'",
+        "alg": "z U R F' R' U' R z' r U r' z' z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7115,7 +7115,7 @@
       },
       {
         "name": "OLL 32 [31] - (R U D u)",
-        "alg": "z u' R2 U R U2 R D R' U R z' x' z'",
+        "alg": "z u' R2 U R U2 R D R' U R z' x' z' z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7145,7 +7145,7 @@
       },
       {
         "name": "OLL 32 [36] - (R U l)",
-        "alg": "x' U' R U l' U' R' U' R U R' U R x",
+        "alg": "x' U' R U l' U' R' U' R U R' U R x x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7559,13 +7559,13 @@
       },
       {
         "name": "OLL 34 [43] - (R U L l d)",
-        "alg": "U2 R U R' d' l' U' L U L' l",
+        "alg": "U2 R U R' d' l' U' L U L' l y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "OLL 34 [44] - (R U L r d)",
-        "alg": "L' U' L d r U R' U' R r'",
+        "alg": "L' U' L d r U R' U' R r' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7583,7 +7583,7 @@
       },
       {
         "name": "OLL 34 [47] - (R U L l d)",
-        "alg": "R U R' d' l' U' L U L' l",
+        "alg": "R U R' d' l' U' L U L' l y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7613,7 +7613,7 @@
       },
       {
         "name": "OLL 34 [52] - (R U L r l d)",
-        "alg": "R U R' d' l' U' L U r' R",
+        "alg": "R U R' d' l' U' L U r' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7667,7 +7667,7 @@
       },
       {
         "name": "OLL 34 [61] - (R U F r d)",
-        "alg": "F R U R' d' x U2 R2 F R F' R U2 r'",
+        "alg": "F R U R' d' x U2 R2 F R F' R U2 r' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7703,7 +7703,7 @@
       },
       {
         "name": "OLL 35 [3] - (R U F d)",
-        "alg": "R U2 R' d' R' F R U' R' F' R",
+        "alg": "R U2 R' d' R' F R U' R' F' R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7907,7 +7907,7 @@
       },
       {
         "name": "OLL 36 [15] - (R U l)",
-        "alg": "R' U' R U' R' U R U l U' R' U",
+        "alg": "R' U' R U' R' U R U l U' R' U x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8159,7 +8159,7 @@
       },
       {
         "name": "OLL 37 [11] - (R U F d)",
-        "alg": "d F R U' R' U' R U R' F'",
+        "alg": "d F R U' R' U' R U R' F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8507,7 +8507,7 @@
       },
       {
         "name": "OLL 39 [22] - (U L F D b)",
-        "alg": "L F' L' U' L U b L' D'",
+        "alg": "L F' L' U' L U b L' D' z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8549,7 +8549,7 @@
       },
       {
         "name": "OLL 39 [29] - (R U F r)",
-        "alg": "r U' r' z R' U R F R' U'",
+        "alg": "r U' r' z R' U R F R' U' z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8999,7 +8999,7 @@
       },
       {
         "name": "OLL 42 [3] - (R U F D B u)",
-        "alg": "R' U' F2 u' R U R' D R2 B",
+        "alg": "R' U' F2 u' R U R' D R2 B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -9395,7 +9395,7 @@
       },
       {
         "name": "OLL 43 [15] - (R U L B d)",
-        "alg": "L' d' R' U R B",
+        "alg": "L' d' R' U R B y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -9497,7 +9497,7 @@
       },
       {
         "name": "OLL 44 [10] - (U L F b)",
-        "alg": "z' F L U L' U' b' z",
+        "alg": "z' F L U L' U' b' z z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -9857,7 +9857,7 @@
       },
       {
         "name": "OLL 46 [25] - (R U F d)",
-        "alg": "F R U R' F' d R U2 R'",
+        "alg": "F R U R' F' d R U2 R' y",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -10103,7 +10103,7 @@
       },
       {
         "name": "OLL 48 [13] - (U L F b)",
-        "alg": "z' F U L U' L' U L U' L' b' z",
+        "alg": "z' F U L U' L' U L U' L' b' z z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10523,7 +10523,7 @@
       },
       {
         "name": "OLL 52 [2] - (R U F d)",
-        "alg": "R U R' U R d' R U' R' F'",
+        "alg": "R U R' U R d' R U' R' F' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -10751,7 +10751,7 @@
       },
       {
         "name": "OLL 52 [40] - (R U B d)",
-        "alg": "R' U' R U' R' d R' U R B",
+        "alg": "R' U' R U' R' d R' U R B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11201,7 +11201,7 @@
       },
       {
         "name": "OLL 55 [23] - (R U D B d)",
-        "alg": "R' d R2 D' R U2 R' D R2 U' B",
+        "alg": "R' d R2 D' R U2 R' D R2 U' B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -11591,7 +11591,7 @@
       },
       {
         "name": "OLL 57 [11] - (R U L F r)",
-        "alg": "R U R' U' R' L F R F' r'",
+        "alg": "R U R' U' R' L F R F' r' x",
         "youtubeUrl": null,
         "isDefault": false
       },

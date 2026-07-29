@@ -82,7 +82,7 @@
       },
       {
         "name": "Alg 4 (17 ETM)",
-        "alg": "R2 D R' U R D' R2 B' U' R' F U R U' F' U f",
+        "alg": "R2 D R' U R D' R2 B' U' R' F U R U' F' U f z'",
         "isDefault": false
       },
       {

@@ -201,12 +201,12 @@
       },
       {
         "name": "Alg 7 (3 ETM)",
-        "alg": "y' f3' l3' d3 y",
+        "alg": "y' f3' l3' d3 y z'",
         "isDefault": false
       },
       {
         "name": "Alg 8 (3 ETM)",
-        "alg": "y' f3' R3' f3 y",
+        "alg": "y' f3' R3' f3 y x2",
         "isDefault": false
       },
       {

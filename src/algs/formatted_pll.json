@@ -221,7 +221,7 @@
       },
       {
         "name": "Aa [36] - (U L D r)",
-        "alg": "x' r2 D2 L' U' L D2 L' U r' x",
+        "alg": "x' r2 D2 L' U' L D2 L' U r' x x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -281,7 +281,7 @@
       },
       {
         "name": "Aa [46] - (R U D l)",
-        "alg": "l' D' R D R' U' R D' R' U D R",
+        "alg": "l' D' R D R' U' R D' R' U D R x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -383,7 +383,7 @@
       },
       {
         "name": "Aa [63] - (R U F D B r)",
-        "alg": "U' r U R' U' r' F R F' x R' U R D' R' U' R D B",
+        "alg": "U' r U R' U' r' F R F' x R' U R D' R' U' R D B x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -407,7 +407,7 @@
       },
       {
         "name": "Aa [67] - (R U D r u)",
-        "alg": "x R' U R' D2 R U' R' u2 r2 x'",
+        "alg": "x R' U R' D2 R U' R' u2 r2 x' y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -437,7 +437,7 @@
       },
       {
         "name": "Aa [72] - (U L D r)",
-        "alg": "r' U L' D2 L U' L' D2 L2",
+        "alg": "r' U L' D2 L U' L' D2 L2 x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -461,7 +461,7 @@
       },
       {
         "name": "Aa [76] - (R U F r)",
-        "alg": "F' r U' R2 U z U' z' U' R2 U2",
+        "alg": "F' r U' R2 U z U' z' U' R2 U2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -485,13 +485,13 @@
       },
       {
         "name": "Aa [80] - (R U D l)",
-        "alg": "l R D2 R' U' R D2 R' U R'",
+        "alg": "l R D2 R' U' R D2 R' U R' x",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Aa [81] - (R U D l)",
-        "alg": "l' U R' D2 R U' R' D2 R2",
+        "alg": "l' U R' D2 R U' R' D2 R2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -521,7 +521,7 @@
       },
       {
         "name": "Aa [86] - (R U D Lw)",
-        "alg": "Lw' U R' D2 R U' R' D2 R2",
+        "alg": "Lw' U R' D2 R U' R' D2 R2 x'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -635,7 +635,7 @@
       },
       {
         "name": "Ab [17] - (U L D r)",
-        "alg": "r U' L D2 L' U L D2 L2",
+        "alg": "r U' L D2 L' U L D2 L2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -671,7 +671,7 @@
       },
       {
         "name": "Ab [23] - (R U D l)",
-        "alg": "l U' R D2 R' U R D2 R2",
+        "alg": "l U' R D2 R' U R D2 R2 x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -689,7 +689,7 @@
       },
       {
         "name": "Ab [26] - (R U D l)",
-        "alg": "l' R' D2 R U R' D2 R U' R",
+        "alg": "l' R' D2 R U R' D2 R U' R x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -743,7 +743,7 @@
       },
       {
         "name": "Ab [35] - (U L D r)",
-        "alg": "r U' L D2 L' U L D2 r2",
+        "alg": "r U' L D2 L' U L D2 r2 x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -839,7 +839,7 @@
       },
       {
         "name": "Ab [51] - (U L F D r)",
-        "alg": "r U' L D2 r' F r D2 r2",
+        "alg": "r U' L D2 r' F r D2 r2 x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -887,13 +887,13 @@
       },
       {
         "name": "Ab [59] - (R U L F r)",
-        "alg": "R U2 R' U2 R' F R F' L F R' F R F2 r'",
+        "alg": "R U2 R' U2 R' F R F' L F R' F R F2 r' x",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ab [60] - (R U L F D r)",
-        "alg": "R U R2 F' L F R F' r' D R F' R'",
+        "alg": "R U R2 F' L F R F' r' D R F' R' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1013,7 +1013,7 @@
       },
       {
         "name": "E [7] - (R U D u)",
-        "alg": "x' R U' R' D R U R' u2 R' U R D R' U' R x",
+        "alg": "x' R U' R' D R U R' u2 R' U R D R' U' R x z2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1031,13 +1031,13 @@
       },
       {
         "name": "E [10] - (R U F d)",
-        "alg": "R2 U R' d' R U R' U' R U R' U' R U R' F U' F2",
+        "alg": "R2 U R' d' R U R' U' R U R' U' R U R' F U' F2 y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "E [11] - (R U F D B l)",
-        "alg": "R' F R B' R' F' R B l' U' R D' R' U R D",
+        "alg": "R' F R B' R' F' R B l' U' R D' R' U R D x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1217,7 +1217,7 @@
       },
       {
         "name": "E [41] - (R U L r)",
-        "alg": "x U R' U' L U R U' r2 U' R U L U' R' U x'",
+        "alg": "x U R' U' L U R U' r2 U' R U L U' R' U x' x2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1427,13 +1427,13 @@
       },
       {
         "name": "E [76] - (R U D u)",
-        "alg": "x' R U' R' D R U R' D' R U R' D R U' R' u' x",
+        "alg": "x' R U' R' D R U R' D' R U R' D R U' R' u' x z'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "E [77] - (R U D u)",
-        "alg": "x' R U' R' D R U R' D' R U R' D R U' R' u' x",
+        "alg": "x' R U' R' D R U R' D' R U R' D R U' R' u' x z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1445,7 +1445,7 @@
       },
       {
         "name": "E [79] - (R U D l)",
-        "alg": "l U' R' D R U R' D' R U R' D R U' R' D'",
+        "alg": "l U' R' D R U R' D' R U R' D R U' R' D' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1469,7 +1469,7 @@
       },
       {
         "name": "E [83] - (R U L u)",
-        "alg": "x' R U' R U' z U' R u' z x' U' R U' R' U' L' U R U' x",
+        "alg": "x' R U' R U' z U' R u' z x' U' R U' R' U' L' U R U' x z2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1523,7 +1523,7 @@
       },
       {
         "name": "F [6] - (R U L F r M)",
-        "alg": "M' U2 L F' R U2 r' U r' R2 U2 R2 F'",
+        "alg": "M' U2 L F' R U2 r' U r' R2 U2 R2 F' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1613,7 +1613,7 @@
       },
       {
         "name": "F [21] - (R U F d)",
-        "alg": "R' U2 R' d' R' F' R2 U' R' U R' F R U' F",
+        "alg": "R' U2 R' d' R' F' R2 U' R' U R' F R U' F y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -1841,7 +1841,7 @@
       },
       {
         "name": "F [59] - (R U L r)",
-        "alg": "R U2 R' U' R U2 L' R U R U R U' R' U' R2 U' r",
+        "alg": "R U2 R' U' R U2 L' R U R U R U' R' U' R2 U' r x'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -1973,7 +1973,7 @@
       },
       {
         "name": "Ga [20] - (U L B u f)",
-        "alg": "L2 u L' U L' U' L u' L2 f' L B L'",
+        "alg": "L2 u L' U L' U' L u' L2 f' L B L' z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2033,7 +2033,7 @@
       },
       {
         "name": "Ga [30] - (R U F D u l)",
-        "alg": "R2 u R' U R' U' R u' R l D' F u z",
+        "alg": "R2 u R' U R' U' R u' R l D' F u z y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2081,19 +2081,19 @@
       },
       {
         "name": "Ga [38] - (R U D u)",
-        "alg": "u' R2 U R' U R' U' R U' R2 U' D R' U R",
+        "alg": "u' R2 U R' U R' U' R U' R2 U' D R' U R y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ga [39] - (R U D r u)",
-        "alg": "R2 u R' U R' U' R D' x U2 r' U r x'",
+        "alg": "R2 u R' U R' U' R D' x U2 r' U r x' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ga [40] - (R U D u)",
-        "alg": "R2 U R' U R' U' R U' R2 D U' R' U R u'",
+        "alg": "R2 U R' U R' U' R U' R2 D U' R' U R u' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2105,7 +2105,7 @@
       },
       {
         "name": "Ga [42] - (R U F r u l S)",
-        "alg": "R2 S2 U l2 U' l2 u R2 U' r2 F2 U'",
+        "alg": "R2 S2 U l2 U' l2 u R2 U' r2 F2 U' y'",
         "youtubeUrl": null,
         "isDefault": false
       }
@@ -2135,13 +2135,13 @@
       },
       {
         "name": "Gb [3] - (R U F u d)",
-        "alg": "R' d' F R2 u R' U R U' R u' R2",
+        "alg": "R' d' F R2 u R' U R U' R u' R2 y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Gb [4] - (R U L F D u)",
-        "alg": "L' U' L F2 D R' U R U' R u' R2",
+        "alg": "L' U' L F2 D R' U R U' R u' R2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2189,7 +2189,7 @@
       },
       {
         "name": "Gb [12] - (R U L D B u)",
-        "alg": "R' U' R B2 D L' U L U' L u' L2",
+        "alg": "R' U' R B2 D L' U L U' L u' L2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2309,7 +2309,7 @@
       },
       {
         "name": "Gb [32] - (R U r f)",
-        "alg": "R' U' R f2 U z' U' R U R' U r' U2 z'",
+        "alg": "R' U' R f2 U z' U' R U R' U r' U2 z' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2321,7 +2321,7 @@
       },
       {
         "name": "Gb [34] - (R U F D u)",
-        "alg": "F' U' F R2 u R' U R U' R D' F2",
+        "alg": "F' U' F R2 u R' U R U' R D' F2 y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2381,7 +2381,7 @@
       },
       {
         "name": "Gb [44] - (R U F D r u)",
-        "alg": "r' F' r F2 D R' U R U' R u' R2",
+        "alg": "r' F' r F2 D R' U R U' R u' R2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2465,7 +2465,7 @@
       },
       {
         "name": "Gc [8] - (R U F D B r S)",
-        "alg": "R2 S2 U' R2 D R2 D' F2 U B2 r2",
+        "alg": "R2 S2 U' R2 D R2 D' F2 U B2 r2 y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2525,7 +2525,7 @@
       },
       {
         "name": "Gc [18] - (R U L D B u)",
-        "alg": "R2 u' R U' R U R' D B2 L U' L'",
+        "alg": "R2 u' R U' R U R' D B2 L U' L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2567,19 +2567,19 @@
       },
       {
         "name": "Gc [25] - (R U D r u)",
-        "alg": "R2 u' R U' R U R' D x' U2 r U' r' x",
+        "alg": "R2 u' R U' R U R' D x' U2 r U' r' x y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Gc [26] - (R U u f)",
-        "alg": "R2 u' R U' R U z' U' R f2 U R' U' z'",
+        "alg": "R2 u' R U' R U z' U' R f2 U R' U' z' y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Gc [27] - (R U L F D u)",
-        "alg": "L2 u' L U' L U L' D F2 R U' R'",
+        "alg": "L2 u' L U' L U L' D F2 R U' R' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2597,7 +2597,7 @@
       },
       {
         "name": "Gc [30] - (R U F D B r S)",
-        "alg": "R2 S2 D' F2 D F2 U' F2 U B2 r2",
+        "alg": "R2 S2 D' F2 D F2 U' F2 U B2 r2 y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2615,7 +2615,7 @@
       },
       {
         "name": "Gc [33] - (R U B u f)",
-        "alg": "R2 u' R U' R U R' u R2 f R' B' R",
+        "alg": "R2 u' R U' R U R' u R2 f R' B' R z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2633,7 +2633,7 @@
       },
       {
         "name": "Gc [36] - (R U D l)",
-        "alg": "z R2 U' D' R2 U D l' U R' D R2 U' R D' z'",
+        "alg": "z R2 U' D' R2 U D l' U R' D R2 U' R D' z' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2723,7 +2723,7 @@
       },
       {
         "name": "Gc [51] - (R U L D r u)",
-        "alg": "R2 u' R U' R U R' D x' U2 r U' L'",
+        "alg": "R2 u' R U' R U R' D x' U2 r U' L' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2795,7 +2795,7 @@
       },
       {
         "name": "Gd [8] - (R U F D u)",
-        "alg": "R U R' F2 u' F U' F' U F' D R2",
+        "alg": "R U R' F2 u' F U' F' U F' D R2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2813,7 +2813,7 @@
       },
       {
         "name": "Gd [11] - (R U L D B u)",
-        "alg": "L U L' B2 D' R U' R' U R' u R2",
+        "alg": "L U L' B2 D' R U' R' U R' u R2 y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2921,7 +2921,7 @@
       },
       {
         "name": "Gd [29] - (U L F u d)",
-        "alg": "U2 L d F' L2 u' L U' L' U L' u L2",
+        "alg": "U2 L d F' L2 u' L U' L' U L' u L2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2951,7 +2951,7 @@
       },
       {
         "name": "Gd [34] - (R U D u)",
-        "alg": "R U R' U' D R2 U' R U' R' U R' U R2 u'",
+        "alg": "R U R' U' D R2 U' R U' R' U R' U R2 u' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -2987,13 +2987,13 @@
       },
       {
         "name": "Gd [40] - (R U D u)",
-        "alg": "u' R U R' U' D R2 U' R U' R' U R' U R2",
+        "alg": "u' R U R' U' D R2 U' R U' R' U R' U R2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Gd [41] - (R U B u d)",
-        "alg": "R d B' R2 u' R U' R' U R' u R2",
+        "alg": "R d B' R2 u' R U' R' U R' u R2 y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3113,7 +3113,7 @@
       },
       {
         "name": "H [17] - (L B f E)",
-        "alg": "f' B E2 L E2 L2 E2 L E2",
+        "alg": "f' B E2 L E2 L2 E2 L E2 z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3149,7 +3149,7 @@
       },
       {
         "name": "H [23] - (R U D r u)",
-        "alg": "z U' D' R2 U u R r U2 R' r' z'",
+        "alg": "z U' D' R2 U u R r U2 R' r' z' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3431,7 +3431,7 @@
       },
       {
         "name": "H [70] - (R U D r u)",
-        "alg": "x' R r U2 R' r' u' U' R2 U D x",
+        "alg": "x' R r U2 R' r' u' U' R2 U D x z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3467,7 +3467,7 @@
       },
       {
         "name": "H [76] - (R U D r u)",
-        "alg": "x' R r U2 r' R' u' U' R2 U D x",
+        "alg": "x' R r U2 r' R' u' U' R2 U D x z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3659,7 +3659,7 @@
       },
       {
         "name": "Ja [24] - (R U F r)",
-        "alg": "U x R2 F R F' R U2 r' U r U2",
+        "alg": "U x R2 F R F' R U2 r' U r U2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3683,13 +3683,13 @@
       },
       {
         "name": "Ja [28] - (R U L r)",
-        "alg": "R' U L' U2 R U' R' U2 R r",
+        "alg": "R' U L' U2 R U' R' U2 R r x'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ja [29] - (R U r l)",
-        "alg": "x U2 r' U' r U2 l' U R' U' R2 x2 x'",
+        "alg": "x U2 r' U' r U2 l' U R' U' R2 x2 x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3755,7 +3755,7 @@
       },
       {
         "name": "Ja [40] - (R U F B r)",
-        "alg": "U2 x R2 F R F' R U2 r' U r U2 B'",
+        "alg": "U2 x R2 F R F' R U2 r' U r U2 B' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3779,7 +3779,7 @@
       },
       {
         "name": "Ja [44] - (R U L F r)",
-        "alg": "U2 R' U2 R U R' U2 L U' R U r' F'",
+        "alg": "U2 R' U2 R U R' U2 L U' R U r' F' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -3821,13 +3821,13 @@
       },
       {
         "name": "Ja [51] - (U L F r)",
-        "alg": "x r' U' r U r' U' L U r U' r2 F r x'",
+        "alg": "x r' U' r U r' U' L U r U' r2 F r x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ja [52] - (U F B r f)",
-        "alg": "f' r U' r2 U r' F' r2 F B",
+        "alg": "f' r U' r2 U r' F' r2 F B z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4055,7 +4055,7 @@
       },
       {
         "name": "Ja [90] - (R U L F l)",
-        "alg": "U' R' U L' U2 R U' R' U2 L l F",
+        "alg": "U' R' U L' U2 R U' R' U2 L l F x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4139,19 +4139,19 @@
       },
       {
         "name": "Ja [104] - (R U F r l)",
-        "alg": "U l2 U l F' R U2 r' U r U2",
+        "alg": "U l2 U l F' R U2 r' U r U2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ja [105] - (R U D r l)",
-        "alg": "x U2 r' U' r U2 l' U R' U' R2 D x'",
+        "alg": "x U2 r' U' r U2 l' U R' U' R2 D x' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "Ja [106] - (R U F B r l)",
-        "alg": "l2 U l F' R U2 r' U r U2 B",
+        "alg": "l2 U l F' R U2 r' U r U2 B x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4199,7 +4199,7 @@
       },
       {
         "name": "Ja [114] - (R U L r)",
-        "alg": "x' r U' R' U L' U2 R U' R' U2 R x",
+        "alg": "x' r U' R' U L' U2 R U' R' U2 R x x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4469,7 +4469,7 @@
       },
       {
         "name": "Jb [35] - (R U F r M)",
-        "alg": "x r2 F R F' r U2 R' U R U2 M' x' U x'",
+        "alg": "x r2 F R F' r U2 R' U R U2 M' x' U x' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4505,7 +4505,7 @@
       },
       {
         "name": "Jb [41] - (R U L B r)",
-        "alg": "R U2 R' U' R U2 L' U R' U' r B",
+        "alg": "R U2 R' U' R U2 L' U R' U' r B x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -4541,7 +4541,7 @@
       },
       {
         "name": "Jb [47] - (U L D r l)",
-        "alg": "x U2 l U l' U2 r U' L U L2 D x'",
+        "alg": "x U2 l U l' U2 r U' L U L2 D x' x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5141,7 +5141,7 @@
       },
       {
         "name": "Nb [33] - (R U L F r u E)",
-        "alg": "U2 x u' L' u R2 F R F' R U2 r' U r U E L u",
+        "alg": "U2 x u' L' u R2 F R F' R U2 r' U r U E L u x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5201,7 +5201,7 @@
       },
       {
         "name": "Nb [43] - (R U F d)",
-        "alg": "R U' R' d R' U R U' R' F' U F R U R' U' R",
+        "alg": "R U' R' d R' U R U' R' F' U F R U R' U' R y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5243,7 +5243,7 @@
       },
       {
         "name": "Nb [50] - (R U F r l)",
-        "alg": "R' U' R U' x R2 F R F' R U2 r' U r U2 x' U R' U l",
+        "alg": "R' U' R U' x R2 F R F' R U2 r' U r U2 x' U R' U l x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5333,7 +5333,7 @@
       },
       {
         "name": "Nb [65] - (R U F d)",
-        "alg": "R' U R U' R' F' U' F R U R' U' R d' R U R'",
+        "alg": "R' U R U' R' F' U' F R U R' U' R d' R U R' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5459,7 +5459,7 @@
       },
       {
         "name": "Nb [86] - (U D B r f S)",
-        "alg": "f' r U' r2 U r' S U f' r2 B r' D z",
+        "alg": "f' r U' r2 U r' S U f' r2 B r' D z y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5891,7 +5891,7 @@
       },
       {
         "name": "Rb [21] - (R U L F l d M)",
-        "alg": "M' U' L' U l U' M' U' L' U l d R' F R F'",
+        "alg": "M' U' L' U l U' M' U' L' U l d R' F R F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -5957,7 +5957,7 @@
       },
       {
         "name": "T [1] - (R U L F r u f l b d M E S)",
-        "alg": "l b d' L' U' F U2 L' U' L' U L U' f' S M r u E U' R'",
+        "alg": "l b d' L' U' F U2 L' U' L' U L U' f' S M r u E U' R' z",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6131,13 +6131,13 @@
       },
       {
         "name": "T [30] - (R U F r d)",
-        "alg": "R U R' d' F' r U r' F' r U r' U' r' F r",
+        "alg": "R U R' d' F' r U r' F' r U r' U' r' F r y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "T [31] - (R U L r)",
-        "alg": "z U2 R' U2 R U2 R L' U2 R U2 R' U2 r z'",
+        "alg": "z U2 R' U2 R U2 R L' U2 R U2 R' U2 r z' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6383,7 +6383,7 @@
       },
       {
         "name": "Ua [38] - (R U L l M)",
-        "alg": "l' U2 L U M U' L' U M' U R",
+        "alg": "l' U2 L U M U' L' U M' U R x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6917,7 +6917,7 @@
       },
       {
         "name": "V [4] - (R U F d)",
-        "alg": "R' U R' d' R' F' R2 U' R' U R' F R F",
+        "alg": "R' U R' d' R' F' R2 U' R' U R' F R F y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -6965,7 +6965,7 @@
       },
       {
         "name": "V [12] - (R U F f l)",
-        "alg": "R' U l' f' R' F R' F' R2 U' R' U l F",
+        "alg": "R' U l' f' R' F R' F' R2 U' R' U l F y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7061,13 +7061,13 @@
       },
       {
         "name": "V [28] - (U L F d)",
-        "alg": "L U' L d L F L2 U L U' L F' L' F'",
+        "alg": "L U' L d L F L2 U L U' L F' L' F' y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "V [29] - (R U D u)",
-        "alg": "R U2 R' D R U' R U' R U R2 D R' U' R u2",
+        "alg": "R U2 R' D R U' R U' R U R2 D R' U' R u2 y2",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7259,7 +7259,7 @@
       },
       {
         "name": "V [61] - (R U F l)",
-        "alg": "R' U l F' U R U2 R' U' R U' R' U2 R U R' U'",
+        "alg": "R' U l F' U R U2 R' U' R U' R' U2 R U R' U' x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7325,19 +7325,19 @@
       },
       {
         "name": "V [72] - (R U L F d)",
-        "alg": "L' d F' U' R' F' R2 U' R' U R' F R F",
+        "alg": "L' d F' U' R' F' R2 U' R' U R' F R F y",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "V [73] - (R U F f)",
-        "alg": "R' U R' x f' R' F R' F' R2 U' R' U R U x'",
+        "alg": "R' U R' x f' R' F R' F' R2 U' R' U R U x' y'",
         "youtubeUrl": null,
         "isDefault": false
       },
       {
         "name": "V [74] - (R U F D r l)",
-        "alg": "l' U R' D2 R U' R' D2 F R F' R U2 r' U r U2",
+        "alg": "l' U R' D2 R U' R' D2 F R F' R U2 r' U r U2 x'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7463,7 +7463,7 @@
       },
       {
         "name": "Y [15] - (R U f)",
-        "alg": "R2 U' R' U R U' f' U' y' R U' R' U' z U R",
+        "alg": "R2 U' R' U R U' f' U' y' R U' R' U' z U R x",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7481,7 +7481,7 @@
       },
       {
         "name": "Y [18] - (R U F B f)",
-        "alg": "F f U R2 F' R F R U' F' U R U' B'",
+        "alg": "F f U R2 F' R F R U' F' U R U' B' z'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7535,7 +7535,7 @@
       },
       {
         "name": "Y [27] - (R U B r)",
-        "alg": "R2 U' R' U R U' x' U' z' U' R U' R' U' r B",
+        "alg": "R2 U' R' U R U' x' U' z' U' R U' R' U' r B y",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -7637,7 +7637,7 @@
       },
       {
         "name": "Y [44] - (R U F D u)",
-        "alg": "R2 u R2 U R2 D' R' U' R F2 R' U R",
+        "alg": "R2 u R2 U R2 D' R' U' R F2 R' U R y'",
         "youtubeUrl": null,
         "isDefault": false
       },
@@ -8213,7 +8213,7 @@
       },
       {
         "name": "Z [86] - (R U d M S)",
-        "alg": "U R2 S2 R2 S2 d' M2 U' M2",
+        "alg": "U R2 S2 R2 S2 d' M2 U' M2 y'",
         "youtubeUrl": null,
         "isDefault": false
       },
