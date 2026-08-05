@@ -96,6 +96,23 @@ function saveStoredOrder(group: AlgGroup, order: string[]) {
   localStorage.setItem(orderStorageKey(group), JSON.stringify(order));
 }
 
+// Recent attack sessions list page size — persisted (shared across groups),
+// same convention as the Solve page's Recent solves list.
+const PAGE_SIZE_STORAGE_KEY = "nact_attack_history_page_size";
+const PAGE_SIZE_OPTIONS: (number | "all")[] = [10, 25, 50, 100, "all"];
+
+function readStoredPageSize(): number | "all" {
+  try {
+    const raw = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
+    if (raw === "all") return "all";
+    const n = Number(raw);
+    if (Number.isFinite(n) && PAGE_SIZE_OPTIONS.includes(n)) return n;
+  } catch {
+    // localStorage unavailable — fall through to the default.
+  }
+  return 10;
+}
+
 export default function AttackPage() {
   return (
     <SessionProvider config={ATTACK_CONFIG}>
@@ -128,6 +145,10 @@ function AttackPageInner() {
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(sessionKey));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  // Recent attack sessions pagination — page size persists across groups,
+  // current page resets on group switch (armSession) and page-size change.
+  const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number | "all">(readStoredPageSize);
+  const [historyPage, setHistoryPage] = useState(1);
   /** "Show me how" playback for the current queue case — no need to open the editor. */
   const [showPlayback, setShowPlayback] = useState(false);
   // Bumped by Restart so the case-arming effect below re-runs even when the
@@ -158,6 +179,7 @@ function AttackPageInner() {
     setJustFinished(null);
     setHistory(getAttackSessions(key));
     setExpandedSessionId(null);
+    setHistoryPage(1);
     moveBuffer.clear(); // manual navigation — buffered moves belonged to the old queue
   };
 
@@ -323,6 +345,26 @@ function AttackPageInner() {
   // (oldest -> newest), not individual case times within the current run —
   // that's what the per-case list below the queue is for.
   const sessionTotalsMs = useMemo(() => [...history].sort((a, b) => a.date - b.date).map((s) => s.totalMs), [history]);
+
+  const sortedHistory = useMemo(() => [...history].sort((a, b) => b.date - a.date), [history]);
+  const historyTotalPages =
+    historyItemsPerPage === "all" ? 1 : Math.max(1, Math.ceil(sortedHistory.length / historyItemsPerPage));
+  const clampedHistoryPage = Math.min(historyPage, historyTotalPages);
+  const pagedHistory = useMemo(() => {
+    if (historyItemsPerPage === "all") return sortedHistory;
+    const start = (clampedHistoryPage - 1) * historyItemsPerPage;
+    return sortedHistory.slice(start, start + historyItemsPerPage);
+  }, [sortedHistory, historyItemsPerPage, clampedHistoryPage]);
+
+  function handleHistoryPageSizeChange(next: number | "all") {
+    setHistoryItemsPerPage(next);
+    setHistoryPage(1);
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(next));
+    } catch {
+      // localStorage unavailable — preference just won't persist across reloads.
+    }
+  }
 
   const timerState: "idle" | "solving" | "solved" =
     justFinished ? "solved" : state.phase === "active" ? "solving" : "idle";
@@ -517,14 +559,27 @@ function AttackPageInner() {
           )}
           {history.length > 0 && (
             <div className="border-t border-gray-800">
-              <div className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                Recent {groupMeta?.name ?? group} attack sessions
+              <div className="px-4 pt-3 pb-1 flex items-center gap-3">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  Recent {groupMeta?.name ?? group} attack sessions
+                </span>
+                <div className="ml-auto flex items-center gap-1">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                  <select
+                    value={historyItemsPerPage}
+                    onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
+                  >
+                    {PAGE_SIZE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n === "all" ? "All" : n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="divide-y divide-gray-800/40">
-                {[...history]
-                  .sort((a, b) => b.date - a.date)
-                  .slice(0, 10)
-                  .map((s) => {
+                {pagedHistory.map((s) => {
                     const isExpanded = expandedSessionId === s.id;
                     return (
                       <div key={s.id}>
@@ -553,6 +608,29 @@ function AttackPageInner() {
                     );
                   })}
               </div>
+              {historyItemsPerPage !== "all" && historyTotalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 px-4 py-2 border-t border-gray-800/40">
+                  <button
+                    onClick={() => setHistoryPage(clampedHistoryPage - 1)}
+                    disabled={clampedHistoryPage <= 1}
+                    className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                    title="Previous page"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <span className="text-[10px] font-mono tabular-nums text-gray-500">
+                    Page {clampedHistoryPage} / {historyTotalPages}
+                  </span>
+                  <button
+                    onClick={() => setHistoryPage(clampedHistoryPage + 1)}
+                    disabled={clampedHistoryPage >= historyTotalPages}
+                    className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                    title="Next page"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
