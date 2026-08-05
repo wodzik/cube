@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
@@ -88,6 +88,23 @@ const SOLVE_SORT_OPTIONS: { key: SolveSortKey; label: string; defaultAsc: boolea
   { key: "moves", label: "Moves", defaultAsc: true },
   { key: "tps", label: "TPS", defaultAsc: false },
 ];
+
+// Recent solves list page size — persisted (shared across sessions) so it
+// doesn't have to be re-picked every time.
+const PAGE_SIZE_STORAGE_KEY = "nact_solve_list_page_size";
+const PAGE_SIZE_OPTIONS: (number | "all")[] = [10, 25, 50, 100, "all"];
+
+function readStoredPageSize(): number | "all" {
+  try {
+    const raw = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
+    if (raw === "all") return "all";
+    const n = Number(raw);
+    if (Number.isFinite(n) && PAGE_SIZE_OPTIONS.includes(n)) return n;
+  } catch {
+    // localStorage unavailable — fall through to the default.
+  }
+  return 25;
+}
 
 export interface SolvePageProps {
   /** Called once per completed (and persisted) solve. */
@@ -253,6 +270,29 @@ function SolvePageInner({
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
     return numbered;
   }, [solves, sortKey, sortAsc]);
+
+  // Recent solves pagination — page size persists across sessions (csTimer-
+  // style), current page does not (SolvePageInner remounts per session via
+  // providerKey, and re-sorting/re-sizing jumps back to page 1 below).
+  const [itemsPerPage, setItemsPerPage] = useState<number | "all">(readStoredPageSize);
+  const [page, setPage] = useState(1);
+  const totalPages = itemsPerPage === "all" ? 1 : Math.max(1, Math.ceil(sortedSolves.length / itemsPerPage));
+  const clampedPage = Math.min(page, totalPages);
+  const pagedSolves = useMemo(() => {
+    if (itemsPerPage === "all") return sortedSolves;
+    const start = (clampedPage - 1) * itemsPerPage;
+    return sortedSolves.slice(start, start + itemsPerPage);
+  }, [sortedSolves, itemsPerPage, clampedPage]);
+
+  function handlePageSizeChange(next: number | "all") {
+    setItemsPerPage(next);
+    setPage(1);
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(next));
+    } catch {
+      // localStorage unavailable — preference just won't persist across reloads.
+    }
+  }
 
   function handleDeleteSolve(record: SolveRecord) {
     deleteSolve(record.id);
@@ -731,30 +771,47 @@ function SolvePageInner({
           <div className="flex flex-col">
             <div className="px-4 sm:px-6 pt-3 pb-1 flex items-center gap-3">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent solves</span>
-              <div className="ml-auto flex items-center gap-1">
-                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
-                {SOLVE_SORT_OPTIONS.map((o) => (
-                  <button
-                    key={o.key}
-                    onClick={() => {
-                      if (sortKey === o.key) setSortAsc((v) => !v);
-                      else {
-                        setSortKey(o.key);
-                        setSortAsc(o.defaultAsc);
-                      }
-                    }}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
-                      sortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
-                    }`}
+              <div className="ml-auto flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
                   >
-                    {o.label}
-                    {sortKey === o.key && (sortAsc ? " ↑" : " ↓")}
-                  </button>
-                ))}
+                    {PAGE_SIZE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n === "all" ? "All" : n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
+                  {SOLVE_SORT_OPTIONS.map((o) => (
+                    <button
+                      key={o.key}
+                      onClick={() => {
+                        if (sortKey === o.key) setSortAsc((v) => !v);
+                        else {
+                          setSortKey(o.key);
+                          setSortAsc(o.defaultAsc);
+                        }
+                        setPage(1);
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                        sortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
+                      }`}
+                    >
+                      {o.label}
+                      {sortKey === o.key && (sortAsc ? " ↑" : " ↓")}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="divide-y divide-gray-800/40">
-            {sortedSolves.map(({ record: s, nr }) => (
+            {pagedSolves.map(({ record: s, nr }) => (
               <div key={s.id} className="relative flex items-center gap-1 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
                 <button
                   onClick={() => setAnalysisRecord(s)}
@@ -812,6 +869,29 @@ function SolvePageInner({
               </div>
             ))}
             </div>
+            {itemsPerPage !== "all" && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 px-4 sm:px-6 py-2 border-t border-gray-800/40">
+                <button
+                  onClick={() => setPage(clampedPage - 1)}
+                  disabled={clampedPage <= 1}
+                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  title="Previous page"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="text-[10px] font-mono tabular-nums text-gray-500">
+                  Page {clampedPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(clampedPage + 1)}
+                  disabled={clampedPage >= totalPages}
+                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  title="Next page"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
         ) : undefined
       }
