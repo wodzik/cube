@@ -5,7 +5,6 @@ import { useAlgorithmDataVersionCheck } from "./hooks/useAlgorithmDataVersionChe
 import { useWakeLock } from "./hooks/useWakeLock";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
-import { Footer } from "./components/Footer";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -72,8 +71,6 @@ export default function App() {
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
         </Suspense>
-
-        <Footer />
 
         {updateAvailable && <UpdateNotice />}
         {!updateAvailable && dataUpdateAvailable && !dataNoticeDismissed && (
