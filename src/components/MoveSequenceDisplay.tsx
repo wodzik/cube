@@ -20,6 +20,7 @@
  * hooks/useMaskMoves, shared/persisted across pages), not local state here.
  */
 
+import type { ReactNode } from "react";
 import { RefreshCw, Eye, EyeOff } from "lucide-react";
 import type { SequenceProgress } from "../logic/sequenceTracker";
 
@@ -59,6 +60,8 @@ interface MoveSequenceDisplayProps {
    * Keyed by token index in `moves`.
    */
   decorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
+  /** Extra buttons appended after the eye/refresh controls — e.g. SolvePage's "paste a custom scramble" button — so every action for this scramble/algorithm lives in one control row instead of scattered around the card. */
+  extraControls?: ReactNode;
 }
 
 export function MoveSequenceDisplay({
@@ -79,6 +82,7 @@ export function MoveSequenceDisplay({
   errorLabel = "Undo:",
   className = "",
   decorations,
+  extraControls,
 }: MoveSequenceDisplayProps) {
   const hasErrors = (progress?.correctionSequence.length ?? 0) > 0;
   const isComplete = progress?.isCompleted ?? false;
@@ -162,6 +166,7 @@ export function MoveSequenceDisplay({
               <RefreshCw size={20} />
             </button>
           )}
+          {extraControls}
         </div>
       </div>
 

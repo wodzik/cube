@@ -140,7 +140,7 @@
 }
 
 .scramble-layout {
-  @apply flex items-start justify-between gap-3;
+  @apply flex flex-col-reverse sm:flex-row items-stretch sm:items-start justify-between gap-2 sm:gap-3;
 }
 
 .scramble-display {
@@ -209,7 +209,7 @@
 }
 
 .scramble-controls {
-  @apply flex items-center gap-1 flex-shrink-0;
+  @apply flex items-center justify-end gap-1 flex-shrink-0;
 }
 
 .control-button {

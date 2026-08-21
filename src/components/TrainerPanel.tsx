@@ -175,29 +175,25 @@ export function TrainerPanel({
         <>
           {sequenceTop}
           {sequenceContent ?? (
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <MoveSequenceDisplay
-                  moves={moves}
-                  progress={progress}
-                  decorations={sequenceDecorations}
-                  onRefresh={onRefresh}
-                  showRefresh={showRefresh}
-                  maxErrors={maxErrors}
-                  totalErrorCount={totalErrorCount}
-                  onReset={onReset}
-                  loading={loading}
-                  loadingText={loadingText}
-                  completeText={completeText}
-                  showMaskToggle={showMaskToggle}
-                  maskMoves={maskMoves}
-                  onToggleMask={onToggleMask}
-                  showErrorCount={showErrorCount}
-                  errorLabel={errorLabel}
-                />
-              </div>
-              {sequenceTrailing}
-            </div>
+            <MoveSequenceDisplay
+              moves={moves}
+              progress={progress}
+              decorations={sequenceDecorations}
+              onRefresh={onRefresh}
+              showRefresh={showRefresh}
+              maxErrors={maxErrors}
+              totalErrorCount={totalErrorCount}
+              onReset={onReset}
+              loading={loading}
+              loadingText={loadingText}
+              completeText={completeText}
+              showMaskToggle={showMaskToggle}
+              maskMoves={maskMoves}
+              onToggleMask={onToggleMask}
+              showErrorCount={showErrorCount}
+              errorLabel={errorLabel}
+              extraControls={sequenceTrailing}
+            />
           )}
         </>
       }

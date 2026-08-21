@@ -662,9 +662,9 @@ function SolvePageInner({
               setPasteError(null);
             }}
             title="Paste or type a custom scramble"
-            className="shrink-0 p-2 rounded-xl text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-colors"
+            className="control-button"
           >
-            <ClipboardPaste size={16} />
+            <ClipboardPaste size={20} />
           </button>
         ) : undefined
       }
