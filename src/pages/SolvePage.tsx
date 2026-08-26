@@ -760,7 +760,7 @@ function SolvePageInner({
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cubeSetupAlg=""
       timesMs={sessionTimesMs}
-      statsLabel="Session"
+      statsLabel={`Session: ${session.name}`}
       statsAside={
         summaryRecord ? (
           <SolveSummary record={summaryRecord} onOpenAnalysis={() => setAnalysisRecord(summaryRecord)} />

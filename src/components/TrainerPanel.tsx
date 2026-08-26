@@ -265,11 +265,11 @@ export function TrainerPanel({
       stats={
         <div className="px-5 sm:px-6 py-6 flex flex-col xl:flex-row gap-5 h-full">
           {statsAside && <div className="xl:w-80 shrink-0">{statsAside}</div>}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4">
+          <div className="flex-1 min-w-0 panel p-4 flex flex-col">
+            <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
               {statsLabel}
             </h3>
-            <div className="panel p-4 flex-1 flex flex-col justify-center">
+            <div className="flex-1 flex flex-col justify-center">
               <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
             </div>
           </div>

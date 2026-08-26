@@ -110,73 +110,71 @@ interface ChartBodyProps {
 
 function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg }: ChartBodyProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
-      <div className="flex-1 min-w-0">
-        <ResponsiveContainer width="100%" height={height}>
-          <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="var(--color-gray-700)" strokeDasharray="3 3" />
-            <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
-            <YAxis
-              domain={[yMin, yMax]}
-              tickFormatter={(v: number) => formatTimeMs(v)}
-              tick={{ fill: "var(--color-gray-500)", fontSize: 10 }}
-              tickLine={false}
-              axisLine={false}
-              width={52}
+    <div className="flex flex-col gap-4">
+      <ResponsiveContainer width="100%" height={height}>
+        <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+          <CartesianGrid stroke="var(--color-gray-700)" strokeDasharray="3 3" />
+          <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
+          <YAxis
+            domain={[yMin, yMax]}
+            tickFormatter={(v: number) => formatTimeMs(v)}
+            tick={{ fill: "var(--color-gray-500)", fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+            width={52}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          {visible.single && (
+            <Line
+              type="monotone"
+              dataKey="single"
+              stroke={METRIC_COLOR.single}
+              strokeWidth={1}
+              dot={{ r: 2, fill: METRIC_COLOR.single }}
+              name="Single"
+              isAnimationActive={false}
             />
-            <Tooltip content={<CustomTooltip />} />
-            {visible.single && (
-              <Line
-                type="monotone"
-                dataKey="single"
-                stroke={METRIC_COLOR.single}
-                strokeWidth={1}
-                dot={{ r: 2, fill: METRIC_COLOR.single }}
-                name="Single"
-                isAnimationActive={false}
-              />
-            )}
-            {visible.ao5 && (
-              <Line
-                type="monotone"
-                dataKey="ao5"
-                stroke={METRIC_COLOR.ao5}
-                strokeWidth={2}
-                dot={false}
-                name="Ao5"
-                connectNulls
-                isAnimationActive={false}
-              />
-            )}
-            {visible.ao12 && (
-              <Line
-                type="monotone"
-                dataKey="ao12"
-                stroke={METRIC_COLOR.ao12}
-                strokeWidth={2}
-                dot={false}
-                name="Ao12"
-                connectNulls
-                isAnimationActive={false}
-              />
-            )}
-            {visible.ao100 && (
-              <Line
-                type="monotone"
-                dataKey="ao100"
-                stroke={METRIC_COLOR.ao100}
-                strokeWidth={2}
-                dot={false}
-                name="Ao100"
-                connectNulls
-                isAnimationActive={false}
-              />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+          )}
+          {visible.ao5 && (
+            <Line
+              type="monotone"
+              dataKey="ao5"
+              stroke={METRIC_COLOR.ao5}
+              strokeWidth={2}
+              dot={false}
+              name="Ao5"
+              connectNulls
+              isAnimationActive={false}
+            />
+          )}
+          {visible.ao12 && (
+            <Line
+              type="monotone"
+              dataKey="ao12"
+              stroke={METRIC_COLOR.ao12}
+              strokeWidth={2}
+              dot={false}
+              name="Ao12"
+              connectNulls
+              isAnimationActive={false}
+            />
+          )}
+          {visible.ao100 && (
+            <Line
+              type="monotone"
+              dataKey="ao100"
+              stroke={METRIC_COLOR.ao100}
+              strokeWidth={2}
+              dot={false}
+              name="Ao100"
+              connectNulls
+              isAnimationActive={false}
+            />
+          )}
+        </ComposedChart>
+      </ResponsiveContainer>
 
-      <div className="flex flex-row sm:flex-col justify-center gap-4 sm:pr-2 sm:min-w-21 flex-wrap">
+      <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3">
         <StatCard label="Ao5" value={currentAo5 ? formatTimeMs(currentAo5) : null} accent={METRIC_COLOR.ao5} />
         <StatCard label="Ao12" value={currentAo12 ? formatTimeMs(currentAo12) : null} accent={METRIC_COLOR.ao12} />
         <StatCard label="Ao100" value={currentAo100 ? formatTimeMs(currentAo100) : null} accent={METRIC_COLOR.ao100} />
