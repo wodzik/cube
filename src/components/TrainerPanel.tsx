@@ -164,7 +164,7 @@ export function TrainerPanel({
   cubeAlg,
   timesMs,
   statsLabel = "Statistics",
-  statsHeight = 180,
+  statsHeight = 280,
   showAo12,
   statsAside,
 }: TrainerPanelProps) {
@@ -269,7 +269,7 @@ export function TrainerPanel({
             <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
               {statsLabel}
             </h3>
-            <div className="flex-1 flex flex-col justify-center">
+            <div className="flex-1 min-h-0 flex flex-col">
               <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
             </div>
           </div>
