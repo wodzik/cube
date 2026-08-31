@@ -379,6 +379,21 @@ function SolvePageInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // A cube disconnect mid-attempt resets the session back to "idle" (see
+  // sessionContext's abort-on-disconnect effect), which wipes the scramble
+  // off the screen — reconnecting doesn't undo that on its own, so without
+  // this the solver is left staring at a blank scramble bar until they
+  // manually refresh or switch tabs. Regenerate the next attempt the moment
+  // the cube comes back, but only if nothing else already claimed "idle" in
+  // the meantime (i.e. this reconnect is the reason we're here).
+  const wasCubeConnectedRef = useRef(cube.connected);
+  useEffect(() => {
+    if (!wasCubeConnectedRef.current && cube.connected && state.phase === "idle") {
+      startNextAttempt();
+    }
+    wasCubeConnectedRef.current = cube.connected;
+  }, [cube.connected, state.phase, startNextAttempt]);
+
   // Reset the 3D view whenever a new scramble is set.
   const targetNotation = state.targetNotation;
   useEffect(() => {
