@@ -5,6 +5,7 @@ import { useAlgorithmDataVersionCheck } from "./hooks/useAlgorithmDataVersionChe
 import { useWakeLock } from "./hooks/useWakeLock";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
+import { AppLogo } from "./components/AppLogo";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -43,9 +44,12 @@ export default function App() {
           {/* Phones: brand hidden, the tab pill scrolls horizontally (it is
               wider than the viewport). ≥sm: the original centered grid. */}
           <div className="w-full max-w-7xl mx-auto flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">
-            <span className="hidden sm:block text-sm font-bold tracking-wide text-gray-200 select-none whitespace-nowrap">
-              (ANOTHER) Cube trainer
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <AppLogo className="size-8 shrink-0" />
+              <span className="hidden sm:block text-sm font-bold tracking-wide text-gray-200 select-none whitespace-nowrap">
+                (ANOTHER) Cube trainer
+              </span>
+            </div>
             <div className="min-w-0 flex-1 sm:flex-none overflow-x-auto nav-scroll">
               <div className="nav-pill w-max mx-auto">
                 {TABS.map((t) => (
