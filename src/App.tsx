@@ -6,6 +6,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
 import { AppLogo } from "./components/AppLogo";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -63,7 +64,9 @@ export default function App() {
                 ))}
               </div>
             </div>
-            <span className="hidden sm:block" />
+            <div className="flex items-center justify-end shrink-0">
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <Suspense fallback={null}>

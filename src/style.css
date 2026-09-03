@@ -13,6 +13,32 @@
   --accent-glow: rgba(99, 102, 241, 0.35);
 }
 
+/* ─── Light theme ───
+   Every panel/border/text color in this app is written as a Tailwind
+   gray-NNN class or a white/N% opacity overlay — both of which Tailwind v4
+   compiles to `var(--color-gray-NNN)` / `color-mix(..., var(--color-white)
+   N%, transparent)`. Redefining those variables here is enough to flip the
+   whole app's chrome (panels, borders, hover states, secondary text) without
+   touching individual components: each numbered step just swaps for its
+   mirror across the scale (950↔100, 900↔100 tier, etc.), and `--color-white`
+   (used for "loudest" foreground text and the lightest overlays) becomes the
+   near-black that used to be gray-950. `--color-black` and the indigo accent
+   are left as-is — modal scrims stay dark in both themes, and the accent
+   already reads fine on a light background. */
+[data-theme="light"] {
+  --color-gray-950: oklch(98.5% 0.002 264.542);
+  --color-gray-900: oklch(96.7% 0.003 264.542);
+  --color-gray-800: oklch(92.8% 0.006 264.531);
+  --color-gray-700: oklch(87.2% 0.01 258.338);
+  --color-gray-600: oklch(70.7% 0.022 261.325);
+  --color-gray-500: oklch(55.1% 0.027 264.364);
+  --color-gray-400: oklch(44.6% 0.03 256.802);
+  --color-gray-300: oklch(37.3% 0.034 259.733);
+  --color-gray-200: oklch(27.8% 0.033 256.848);
+  --color-gray-100: oklch(21% 0.034 264.665);
+  --color-white: oklch(13% 0.028 261.692);
+}
+
 .font-mono,
 .mono {
   font-family: "JetBrains Mono", ui-monospace, monospace;
