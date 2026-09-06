@@ -16,44 +16,35 @@
   <circle cx="100" cy="100" r="94" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1.5"/>
   <circle cx="100" cy="100" r="60" fill="url(#glow)"/>
 
-  <g>
-    <path d="M48.038,130 L30.718,120 L30.718,100 L48.038,110 Z" fill="#f97316" fill-opacity="0.4" stroke="#f97316" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M48.038,110 L30.718,100 L30.718,80 L48.038,90 Z" fill="#f97316" fill-opacity="0.4" stroke="#f97316" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M48.038,90 L30.718,80 L30.718,60 L48.038,70 Z" fill="#f97316" fill-opacity="0.4" stroke="#f97316" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M151.962,130 L169.282,120 L169.282,100 L151.962,110 Z" fill="#3b82f6" fill-opacity="0.4" stroke="#3b82f6" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M151.962,110 L169.282,100 L169.282,80 L151.962,90 Z" fill="#3b82f6" fill-opacity="0.4" stroke="#3b82f6" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M151.962,90 L169.282,80 L169.282,60 L151.962,70 Z" fill="#3b82f6" fill-opacity="0.4" stroke="#3b82f6" stroke-opacity="0.55" stroke-width="1.5" stroke-linejoin="round"/>
-  </g>
-
   <path d="M100,40 L151.962,70 L151.962,130 L100,160 L48.038,130 L48.038,70 Z" fill="none" stroke="#05070d" stroke-width="4.5" stroke-linejoin="round"/>
 
   <g>
     <path d="M100,100 L117.321,90 L100,80 L82.679,90 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M117.321,90 L134.641,80 L117.321,70 L100,80 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M134.641,80 L151.962,70 L134.641,60 L117.321,70 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M134.641,80 L151.962,70 L134.641,60 L117.321,70 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M82.679,90 L100,80 L82.679,70 L65.359,80 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,80 L117.321,70 L100,60 L82.679,70 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M117.321,70 L134.641,60 L117.321,50 L100,60 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M65.359,80 L82.679,70 L65.359,60 L48.038,70 Z" fill="#f97316" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M65.359,80 L82.679,70 L65.359,60 L48.038,70 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M82.679,70 L100,60 L82.679,50 L65.359,60 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,60 L117.321,50 L100,40 L82.679,50 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,160 L82.679,150 L82.679,130 L100,140 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M82.679,150 L65.359,140 L65.359,120 L82.679,130 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M65.359,140 L48.038,130 L48.038,110 L65.359,120 Z" fill="#f8fafc" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M65.359,140 L48.038,130 L48.038,110 L65.359,120 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,140 L82.679,130 L82.679,110 L100,120 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M82.679,130 L65.359,120 L65.359,100 L82.679,110 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M65.359,120 L48.038,110 L48.038,90 L65.359,100 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M100,120 L82.679,110 L82.679,90 L100,100 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M100,120 L82.679,110 L82.679,90 L100,100 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M82.679,110 L65.359,100 L65.359,80 L82.679,90 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M65.359,100 L48.038,90 L48.038,70 L65.359,80 Z" fill="#22c55e" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,160 L117.321,150 L117.321,130 L100,140 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M117.321,150 L134.641,140 L134.641,120 L117.321,130 Z" fill="#f97316" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M117.321,150 L134.641,140 L134.641,120 L117.321,130 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M134.641,140 L151.962,130 L151.962,110 L134.641,120 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,140 L117.321,130 L117.321,110 L100,120 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M117.321,130 L134.641,120 L134.641,100 L117.321,110 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M134.641,120 L151.962,110 L151.962,90 L134.641,100 Z" fill="#eab308" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M134.641,120 L151.962,110 L151.962,90 L134.641,100 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M100,120 L117.321,110 L117.321,90 L100,100 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
     <path d="M117.321,110 L134.641,100 L134.641,80 L117.321,90 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M134.641,100 L151.962,90 L151.962,70 L134.641,80 Z" fill="#3b82f6" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M134.641,100 L151.962,90 L151.962,70 L134.641,80 Z" fill="#ef4444" stroke="#05070d" stroke-width="2" stroke-linejoin="round"/>
   </g>
 </svg>

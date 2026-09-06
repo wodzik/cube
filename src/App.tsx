@@ -46,7 +46,7 @@ export default function App() {
               wider than the viewport). ≥sm: the original centered grid. */}
           <div className="w-full max-w-7xl mx-auto flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">
             <div className="flex items-center gap-2 shrink-0">
-              <AppLogo className="size-8 shrink-0" />
+              <AppLogo className="size-12 shrink-0" />
               <span className="hidden sm:block text-sm font-bold tracking-wide text-gray-200 select-none whitespace-nowrap">
                 (ANOTHER) Cube trainer
               </span>
