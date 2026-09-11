@@ -1,4 +1,4 @@
-# NACT — Smart Cube Trainer
+# (ANOTHER) Cube trainer
 
 A speedcubing training app built around **Bluetooth smart cubes**: every
 physical turn of your cube is tracked live, so scrambles verify themselves,

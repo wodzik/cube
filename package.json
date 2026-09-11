@@ -1,5 +1,5 @@
 {
-  "name": "nact",
+  "name": "act",
   "private": true,
   "license": "GPL-3.0-only",
   "version": "0.1.0",
@@ -14,23 +14,23 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "cubing": "^0.63.3",
-    "lucide-react": "^1.25.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "recharts": "^3.9.2",
-    "rxjs": "^7.8.1",
+    "cubing": "^0.63.4",
+    "lucide-react": "^1.45.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "recharts": "^3.10.1",
+    "rxjs": "^7.8.2",
     "smartcube-web-bluetooth": "github:poliva/smartcube-web-bluetooth"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/aes-js": "^3.1.4",
     "@types/bun": "latest",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.1.5"
+    "vite": "^8.3.0"
   }
 }

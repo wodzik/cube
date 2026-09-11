@@ -24,6 +24,9 @@ import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { SequenceProgress } from "../logic/sequenceTracker";
 
+// Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
+const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(2));
+
 export interface TrainerPanelProps {
   // ── Layout ──
   header: ReactNode;
@@ -63,6 +66,9 @@ export interface TrainerPanelProps {
   timeMs: number;
   timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
   timerClassName?: string;
+  /** Show move count instead of time on the big timer, and chart `moveCounts` instead of `timesMs` — see StoredSession.moveCountOnly. */
+  moveCountOnly?: boolean;
+  moveCount?: number;
   hintText?: string | null;
   controls?: ReactNode;
   centerBottom?: ReactNode;
@@ -105,6 +111,8 @@ export interface TrainerPanelProps {
 
   // ── Stats chart ──
   timesMs: number[];
+  /** Per-solve move counts, same order as `timesMs` — charted instead of times when `moveCountOnly` is set. */
+  moveCounts?: number[];
   statsLabel?: string;
   statsHeight?: number;
   showAo12?: boolean;
@@ -141,6 +149,8 @@ export function TrainerPanel({
   timeMs,
   timerState,
   timerClassName = "text-6xl xl:text-7xl font-extrabold",
+  moveCountOnly = false,
+  moveCount = 0,
   hintText,
   controls,
   centerBottom,
@@ -163,8 +173,9 @@ export function TrainerPanel({
   cubeSetupAnchor,
   cubeAlg,
   timesMs,
+  moveCounts = [],
   statsLabel = "Statistics",
-  statsHeight = 180,
+  statsHeight = 280,
   showAo12,
   statsAside,
 }: TrainerPanelProps) {
@@ -175,29 +186,25 @@ export function TrainerPanel({
         <>
           {sequenceTop}
           {sequenceContent ?? (
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <MoveSequenceDisplay
-                  moves={moves}
-                  progress={progress}
-                  decorations={sequenceDecorations}
-                  onRefresh={onRefresh}
-                  showRefresh={showRefresh}
-                  maxErrors={maxErrors}
-                  totalErrorCount={totalErrorCount}
-                  onReset={onReset}
-                  loading={loading}
-                  loadingText={loadingText}
-                  completeText={completeText}
-                  showMaskToggle={showMaskToggle}
-                  maskMoves={maskMoves}
-                  onToggleMask={onToggleMask}
-                  showErrorCount={showErrorCount}
-                  errorLabel={errorLabel}
-                />
-              </div>
-              {sequenceTrailing}
-            </div>
+            <MoveSequenceDisplay
+              moves={moves}
+              progress={progress}
+              decorations={sequenceDecorations}
+              onRefresh={onRefresh}
+              showRefresh={showRefresh}
+              maxErrors={maxErrors}
+              totalErrorCount={totalErrorCount}
+              onReset={onReset}
+              loading={loading}
+              loadingText={loadingText}
+              completeText={completeText}
+              showMaskToggle={showMaskToggle}
+              maskMoves={maskMoves}
+              onToggleMask={onToggleMask}
+              showErrorCount={showErrorCount}
+              errorLabel={errorLabel}
+              extraControls={sequenceTrailing}
+            />
           )}
         </>
       }
@@ -208,7 +215,13 @@ export function TrainerPanel({
           {isInspecting ? (
             <InspectionCountdown secondsLeft={inspectionSecondsLeft} mode={inspectionMode} />
           ) : (
-            <TimerDisplay timeMs={timeMs} state={timerState} className={timerClassName} />
+            <TimerDisplay
+              timeMs={timeMs}
+              state={timerState}
+              className={timerClassName}
+              moveCountOnly={moveCountOnly}
+              moveCount={moveCount}
+            />
           )}
 
           {hintText && <p className="text-gray-500 text-sm tracking-wide animate-pulse">{hintText}</p>}
@@ -269,12 +282,16 @@ export function TrainerPanel({
       stats={
         <div className="px-5 sm:px-6 py-6 flex flex-col xl:flex-row gap-5 h-full">
           {statsAside && <div className="xl:w-80 shrink-0">{statsAside}</div>}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4">
+          <div className="flex-1 min-w-0 panel p-4 flex flex-col">
+            <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
               {statsLabel}
             </h3>
-            <div className="panel p-4 flex-1 flex flex-col justify-center">
-              <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
+            <div className="flex-1 min-h-0 flex flex-col">
+              {moveCountOnly ? (
+                <StatsChart values={moveCounts} formatValue={formatMoveCount} height={statsHeight} showAo12={showAo12} />
+              ) : (
+                <StatsChart values={timesMs} height={statsHeight} showAo12={showAo12} />
+              )}
             </div>
           </div>
         </div>

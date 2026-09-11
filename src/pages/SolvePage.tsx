@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
@@ -88,6 +88,23 @@ const SOLVE_SORT_OPTIONS: { key: SolveSortKey; label: string; defaultAsc: boolea
   { key: "moves", label: "Moves", defaultAsc: true },
   { key: "tps", label: "TPS", defaultAsc: false },
 ];
+
+// Recent solves list page size — persisted (shared across sessions) so it
+// doesn't have to be re-picked every time.
+const PAGE_SIZE_STORAGE_KEY = "nact_solve_list_page_size";
+const PAGE_SIZE_OPTIONS: (number | "all")[] = [10, 25, 50, 100, "all"];
+
+function readStoredPageSize(): number | "all" {
+  try {
+    const raw = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
+    if (raw === "all") return "all";
+    const n = Number(raw);
+    if (Number.isFinite(n) && PAGE_SIZE_OPTIONS.includes(n)) return n;
+  } catch {
+    // localStorage unavailable — fall through to the default.
+  }
+  return 25;
+}
 
 export interface SolvePageProps {
   /** Called once per completed (and persisted) solve. */
@@ -246,13 +263,41 @@ function SolvePageInner({
   // they stay stable across re-sorts (and renumber on deletion, csTimer-style).
   const [sortKey, setSortKey] = useState<SolveSortKey>("nr");
   const [sortAsc, setSortAsc] = useState(false);
+  // A "time"/"tps" sort chosen before Move count only was switched on stays
+  // applied (nothing to reset it), just no longer reachable via a button —
+  // fall back to session order so the un-highlighted list isn't silently
+  // sorted by a metric the UI no longer shows a control for.
+  const effectiveSortKey = session.moveCountOnly && (sortKey === "time" || sortKey === "tps") ? "nr" : sortKey;
   const sortedSolves = useMemo(() => {
     const numbered = solves.map((record, i) => ({ record, nr: i + 1 }));
     const value = (e: (typeof numbered)[number]): number =>
-      sortKey === "nr" ? e.nr : sortKey === "time" ? e.record.timeMs : sortKey === "moves" ? e.record.moveCount : e.record.tps;
+      effectiveSortKey === "nr" ? e.nr : effectiveSortKey === "time" ? e.record.timeMs : effectiveSortKey === "moves" ? e.record.moveCount : e.record.tps;
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
     return numbered;
-  }, [solves, sortKey, sortAsc]);
+  }, [solves, effectiveSortKey, sortAsc]);
+
+  // Recent solves pagination — page size persists across sessions (csTimer-
+  // style), current page does not (SolvePageInner remounts per session via
+  // providerKey, and re-sorting/re-sizing jumps back to page 1 below).
+  const [itemsPerPage, setItemsPerPage] = useState<number | "all">(readStoredPageSize);
+  const [page, setPage] = useState(1);
+  const totalPages = itemsPerPage === "all" ? 1 : Math.max(1, Math.ceil(sortedSolves.length / itemsPerPage));
+  const clampedPage = Math.min(page, totalPages);
+  const pagedSolves = useMemo(() => {
+    if (itemsPerPage === "all") return sortedSolves;
+    const start = (clampedPage - 1) * itemsPerPage;
+    return sortedSolves.slice(start, start + itemsPerPage);
+  }, [sortedSolves, itemsPerPage, clampedPage]);
+
+  function handlePageSizeChange(next: number | "all") {
+    setItemsPerPage(next);
+    setPage(1);
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(next));
+    } catch {
+      // localStorage unavailable — preference just won't persist across reloads.
+    }
+  }
 
   function handleDeleteSolve(record: SolveRecord) {
     deleteSolve(record.id);
@@ -273,6 +318,7 @@ function SolvePageInner({
     setMoveMenuSolveId(null);
   }
   const sessionTimesMs = solves.map((s) => s.timeMs);
+  const sessionMoveCounts = solves.map((s) => s.moveCount);
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
   // Starting the next attempt: a "scratch" session gets a fresh random
@@ -338,6 +384,21 @@ function SolvePageInner({
     startNextAttempt();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A cube disconnect mid-attempt resets the session back to "idle" (see
+  // sessionContext's abort-on-disconnect effect), which wipes the scramble
+  // off the screen — reconnecting doesn't undo that on its own, so without
+  // this the solver is left staring at a blank scramble bar until they
+  // manually refresh or switch tabs. Regenerate the next attempt the moment
+  // the cube comes back, but only if nothing else already claimed "idle" in
+  // the meantime (i.e. this reconnect is the reason we're here).
+  const wasCubeConnectedRef = useRef(cube.connected);
+  useEffect(() => {
+    if (!wasCubeConnectedRef.current && cube.connected && state.phase === "idle") {
+      startNextAttempt();
+    }
+    wasCubeConnectedRef.current = cube.connected;
+  }, [cube.connected, state.phase, startNextAttempt]);
 
   // Reset the 3D view whenever a new scramble is set.
   const targetNotation = state.targetNotation;
@@ -414,6 +475,16 @@ function SolvePageInner({
   const solveTimeMs = selectSolveTimeMs(state);
   const moveCount = selectMoveCount(state);
   const tps = selectTPS(state);
+  // Mirrors displaySec's "hold the last result" logic. Outside active/done
+  // moveLog holds SCRAMBLE moves (it's only reset when the solve starts), so
+  // the timer must not count those — show 0, exactly like the time display
+  // sits at 0.000 until the solve begins.
+  const displayMoveCount =
+    summaryRecord && state.phase !== "active"
+      ? summaryRecord.moveCount
+      : state.phase === "active" || state.phase === "done"
+        ? moveCount
+        : 0;
 
   const progress = selectCurrentProgress(state);
   const targetTokens = state.targetNotation.trim().split(/\s+/).filter(Boolean);
@@ -560,7 +631,9 @@ function SolvePageInner({
             ? "Keep holding…"
             : buildStartHint(state.config.startMethod)
         : state.phase === "done"
-          ? `${moveCount} moves · ${tps ? tps.toFixed(2) : "—"} TPS`
+          ? session.moveCountOnly
+            ? `${moveCount} moves`
+            : `${moveCount} moves · ${tps ? tps.toFixed(2) : "—"} TPS`
           : null;
 
   // The scramble notation is only useful while it's actually being
@@ -622,9 +695,9 @@ function SolvePageInner({
               setPasteError(null);
             }}
             title="Paste or type a custom scramble"
-            className="shrink-0 p-2 rounded-xl text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-colors"
+            className="control-button"
           >
-            <ClipboardPaste size={16} />
+            <ClipboardPaste size={20} />
           </button>
         ) : undefined
       }
@@ -667,6 +740,8 @@ function SolvePageInner({
       inspectionMode={session.inspectionMode}
       timeMs={displaySec * 1000}
       timerState={timerState}
+      moveCountOnly={session.moveCountOnly}
+      moveCount={displayMoveCount}
       hintText={hintText}
       controls={
         <div className="flex items-center gap-2">
@@ -720,10 +795,15 @@ function SolvePageInner({
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cubeSetupAlg=""
       timesMs={sessionTimesMs}
-      statsLabel="Session"
+      moveCounts={sessionMoveCounts}
+      statsLabel={`Session: ${session.name}`}
       statsAside={
         summaryRecord ? (
-          <SolveSummary record={summaryRecord} onOpenAnalysis={() => setAnalysisRecord(summaryRecord)} />
+          <SolveSummary
+            record={summaryRecord}
+            onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
+            moveCountOnly={session.moveCountOnly}
+          />
         ) : undefined
       }
       bottom={
@@ -731,38 +811,59 @@ function SolvePageInner({
           <div className="flex flex-col">
             <div className="px-4 sm:px-6 pt-3 pb-1 flex items-center gap-3">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent solves</span>
-              <div className="ml-auto flex items-center gap-1">
-                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
-                {SOLVE_SORT_OPTIONS.map((o) => (
-                  <button
-                    key={o.key}
-                    onClick={() => {
-                      if (sortKey === o.key) setSortAsc((v) => !v);
-                      else {
-                        setSortKey(o.key);
-                        setSortAsc(o.defaultAsc);
-                      }
-                    }}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
-                      sortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
-                    }`}
+              <div className="ml-auto flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
                   >
-                    {o.label}
-                    {sortKey === o.key && (sortAsc ? " ↑" : " ↓")}
-                  </button>
-                ))}
+                    {PAGE_SIZE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n === "all" ? "All" : n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
+                  {SOLVE_SORT_OPTIONS.filter((o) => !session.moveCountOnly || (o.key !== "time" && o.key !== "tps")).map((o) => (
+                    <button
+                      key={o.key}
+                      onClick={() => {
+                        if (effectiveSortKey === o.key) setSortAsc((v) => !v);
+                        else {
+                          setSortKey(o.key);
+                          setSortAsc(o.defaultAsc);
+                        }
+                        setPage(1);
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                        effectiveSortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
+                      }`}
+                    >
+                      {o.label}
+                      {effectiveSortKey === o.key && (sortAsc ? " ↑" : " ↓")}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="divide-y divide-gray-800/40">
-            {sortedSolves.map(({ record: s, nr }) => (
+            {pagedSolves.map(({ record: s, nr }) => (
               <div key={s.id} className="relative flex items-center gap-1 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
                 <button
                   onClick={() => setAnalysisRecord(s)}
                   className="flex-1 min-w-0 flex items-center gap-3 py-1 text-left"
                 >
                   <span className="text-[10px] font-mono tabular-nums text-gray-600 w-9 shrink-0">#{nr}</span>
-                  <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(s.timeMs)}</span>
-                  <span className="text-xs text-gray-500 flex-1 truncate">{s.moveCount} moves · {s.tps.toFixed(2)} TPS · {s.method}</span>
+                  <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">
+                    {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
+                  </span>
+                  <span className="text-xs text-gray-500 flex-1 truncate">
+                    {session.moveCountOnly ? s.method : `${s.moveCount} moves · ${s.tps.toFixed(2)} TPS · ${s.method}`}
+                  </span>
                   <span className="text-[10px] text-gray-700 shrink-0">{new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                 </button>
                 <button
@@ -812,6 +913,29 @@ function SolvePageInner({
               </div>
             ))}
             </div>
+            {itemsPerPage !== "all" && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 px-4 sm:px-6 py-2 border-t border-gray-800/40">
+                <button
+                  onClick={() => setPage(clampedPage - 1)}
+                  disabled={clampedPage <= 1}
+                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  title="Previous page"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="text-[10px] font-mono tabular-nums text-gray-500">
+                  Page {clampedPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(clampedPage + 1)}
+                  disabled={clampedPage >= totalPages}
+                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                  title="Next page"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
           </div>
         ) : undefined
       }
@@ -830,6 +954,7 @@ function SolvePageInner({
         onMoveToSession={(sessionId) => handleMoveSolve(analysisRecord, sessionId)}
         onMoveToNewSession={() => setCreateSessionForSolve(analysisRecord)}
         onDelete={() => handleDeleteSolve(analysisRecord)}
+        moveCountOnly={session.moveCountOnly}
       />
     )}
 

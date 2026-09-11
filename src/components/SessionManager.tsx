@@ -229,6 +229,7 @@ export function SessionEditModal({ session, onClose, onSave }: SessionEditModalP
   const [inspectionMode, setInspectionMode] = useState<"wca" | "custom" | "unlimited">(session?.inspectionMode ?? "wca");
   // Kept as a string while editing so the field can be temporarily empty/mid-edit; validated on save.
   const [customSeconds, setCustomSeconds] = useState(String(session?.customInspectionSeconds ?? 15));
+  const [moveCountOnly, setMoveCountOnly] = useState(session?.moveCountOnly ?? false);
 
   const parsedCustomSeconds = Math.floor(Number(customSeconds));
   const customSecondsValid = Number.isFinite(parsedCustomSeconds) && parsedCustomSeconds >= 1 && parsedCustomSeconds <= 120;
@@ -244,6 +245,7 @@ export function SessionEditModal({ session, onClose, onSave }: SessionEditModalP
       inputMethod,
       startingStage,
       solveMethod,
+      moveCountOnly,
     });
   }
 
@@ -376,6 +378,34 @@ export function SessionEditModal({ session, onClose, onSave }: SessionEditModalP
                 {!customSecondsValid && <span className="text-xs text-red-400">Enter 1–120</span>}
               </div>
             )}
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-gray-400 mb-1.5">Display</p>
+            <div className="flex gap-1.5">
+              {(
+                [
+                  { id: false, label: "Time" },
+                  { id: true, label: "Move count only" },
+                ] as const
+              ).map((m) => (
+                <button
+                  key={String(m.id)}
+                  onClick={() => setMoveCountOnly(m.id)}
+                  className={`flex-1 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+                    moveCountOnly === m.id
+                      ? "border-[var(--accent)]/50 bg-[var(--accent)]/[0.08] text-white"
+                      : "border-white/[0.06] bg-white/[0.02] text-gray-300 hover:border-white/15"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-500 mt-2 leading-snug">
+              Hide solve times everywhere in this session — the timer, last-solve result, and history show move
+              count instead. Times are still recorded, just not shown.
+            </p>
           </div>
         </div>
 

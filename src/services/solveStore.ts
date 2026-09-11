@@ -80,6 +80,7 @@ function normalizeSession(session: StoredSession): StoredSession {
     startingStage: session.startingStage ?? "scratch",
     solveMethod: session.solveMethod ?? "CFOP",
     customInspectionSeconds: session.customInspectionSeconds ?? 15,
+    moveCountOnly: session.moveCountOnly ?? false,
   };
 }
 
@@ -93,7 +94,8 @@ export function getSessions(): StoredSession[] {
       s.inputMethod !== raw[i].inputMethod ||
       s.startingStage !== raw[i].startingStage ||
       s.solveMethod !== raw[i].solveMethod ||
-      s.customInspectionSeconds !== raw[i].customInspectionSeconds
+      s.customInspectionSeconds !== raw[i].customInspectionSeconds ||
+      s.moveCountOnly !== raw[i].moveCountOnly
   );
   if (changed) writeJson(SESSIONS_KEY, normalized);
   return normalized;
@@ -142,6 +144,7 @@ export function ensureDefaultSession(): string {
     inputMethod: "cube",
     startingStage: "scratch",
     solveMethod: "CFOP",
+    moveCountOnly: false,
   };
   saveSession(session);
   return session.id;
@@ -166,6 +169,7 @@ export function ensureCustomScramblesSession(): string {
     inputMethod: "cube",
     startingStage: "scratch",
     solveMethod: "CFOP",
+    moveCountOnly: false,
   };
   saveSession(session);
   return session.id;

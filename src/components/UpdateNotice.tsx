@@ -13,7 +13,7 @@ export function UpdateNotice() {
       <div className="bg-gray-900 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-6 max-w-sm w-full text-center">
         <h2 className="text-white font-semibold text-lg">New version available</h2>
         <p className="text-sm text-gray-400 mt-1.5 mb-5">
-          NACT has been updated — reload to get the latest version. Your sessions and solves are stored locally and stay
+          (ANOTHER) Cube trainer has been updated — reload to get the latest version. Your sessions and solves are stored locally and stay
           untouched.
         </p>
         <button onClick={() => location.reload()} className="btn-primary w-full justify-center">

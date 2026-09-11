@@ -3,11 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NACT</title>
+    <script>
+      // Runs before first paint so a returning light-theme user never sees a
+      // dark flash — default (no stored value, or anything else) stays dark,
+      // matching useTheme's default.
+      try {
+        if (localStorage.getItem("nact_theme") === "light") {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      } catch {}
+    </script>
+    <title>(ANOTHER) Cube trainer</title>
     <meta
       name="description"
-      content="NACT — Rubik's Cube trainer: speed solving with method detection, algorithm training, OLL/PLL attack"
+      content="(ANOTHER) Cube trainer — Rubik's Cube trainer: speed solving with method detection, algorithm training, OLL/PLL attack"
     />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
