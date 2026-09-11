@@ -1,5 +1,6 @@
 /**
- * Time series chart of solve times with moving averages.
+ * Series chart of solve values (times by default, or e.g. move counts via
+ * `values` + `formatValue`) with moving averages.
  * Lines: single time (gray), Ao5 (indigo), Ao12 (orange), Ao100 (purple) —
  * each independently toggle-able via the chips above the chart, so e.g.
  * "just Single + Ao12" is one click each. A fullscreen button opens the
@@ -13,8 +14,10 @@ import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cartes
 import { ao5, ao12, ao100, best, mean, formatTimeMs } from "../logic/statistics";
 
 interface StatsChartProps {
-  /** Solve times in ms, chronological order (oldest first). */
-  timesMs: number[];
+  /** Values in chronological order (oldest first) — solve times in ms by default; anything where lower is better works (e.g. move counts) given a matching `formatValue`. */
+  values: number[];
+  /** How a value is rendered on the axis, tooltip, and stat cards. Defaults to formatTimeMs. */
+  formatValue?: (value: number) => string;
   showAo5?: boolean;
   showAo12?: boolean;
   showAo100?: boolean;
@@ -39,9 +42,9 @@ interface ChartPoint {
   ao100: number | undefined;
 }
 
-function buildChartData(timesMs: number[]): ChartPoint[] {
-  return timesMs.map((t, i) => {
-    const slice = timesMs.slice(0, i + 1);
+function buildChartData(values: number[]): ChartPoint[] {
+  return values.map((t, i) => {
+    const slice = values.slice(0, i + 1);
     return {
       index: i + 1,
       single: t,
@@ -79,16 +82,18 @@ function MetricChip({ metric, active, onClick }: { metric: Metric; active: boole
 function CustomTooltip({
   active,
   payload,
+  formatValue = formatTimeMs,
 }: {
   active?: boolean;
   payload?: { name: string; value: number; color: string }[];
+  formatValue?: (value: number) => string;
 }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-gray-900/95 backdrop-blur border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
       {payload.map((p) => (
         <div key={p.name} style={{ color: p.color }}>
-          {p.name}: {formatTimeMs(p.value)}
+          {p.name}: {formatValue(p.value)}
         </div>
       ))}
     </div>
@@ -106,9 +111,10 @@ interface ChartBodyProps {
   currentAo100: number | null;
   pb: number | null;
   avg: number | null;
+  formatValue: (value: number) => string;
 }
 
-function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg }: ChartBodyProps) {
+function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue }: ChartBodyProps) {
   return (
     <div className="flex flex-col gap-4">
       <ResponsiveContainer width="100%" height={height}>
@@ -117,13 +123,13 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
           <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
           <YAxis
             domain={[yMin, yMax]}
-            tickFormatter={(v: number) => formatTimeMs(v)}
+            tickFormatter={formatValue}
             tick={{ fill: "var(--color-gray-500)", fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             width={52}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip formatValue={formatValue} />} />
           {visible.single && (
             <Line
               type="monotone"
@@ -175,17 +181,17 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
       </ResponsiveContainer>
 
       <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3">
-        <StatCard label="Ao5" value={currentAo5 ? formatTimeMs(currentAo5) : null} accent={METRIC_COLOR.ao5} />
-        <StatCard label="Ao12" value={currentAo12 ? formatTimeMs(currentAo12) : null} accent={METRIC_COLOR.ao12} />
-        <StatCard label="Ao100" value={currentAo100 ? formatTimeMs(currentAo100) : null} accent={METRIC_COLOR.ao100} />
-        <StatCard label="Mean" value={avg ? formatTimeMs(avg) : null} />
-        <StatCard label="PB" value={pb ? formatTimeMs(pb) : null} accent="#34d399" />
+        <StatCard label="Ao5" value={currentAo5 ? formatValue(currentAo5) : null} accent={METRIC_COLOR.ao5} />
+        <StatCard label="Ao12" value={currentAo12 ? formatValue(currentAo12) : null} accent={METRIC_COLOR.ao12} />
+        <StatCard label="Ao100" value={currentAo100 ? formatValue(currentAo100) : null} accent={METRIC_COLOR.ao100} />
+        <StatCard label="Mean" value={avg ? formatValue(avg) : null} />
+        <StatCard label="PB" value={pb ? formatValue(pb) : null} accent="#34d399" />
       </div>
     </div>
   );
 }
 
-export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100 = false, height = 200 }: StatsChartProps) {
+export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true, showAo12 = true, showAo100 = false, height = 200 }: StatsChartProps) {
   const [visible, setVisible] = useState<Record<Metric, boolean>>({
     single: true,
     ao5: showAo5,
@@ -216,7 +222,7 @@ export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100
 
   const toggle = (metric: Metric) => setVisible((v) => ({ ...v, [metric]: !v[metric] }));
 
-  if (timesMs.length === 0) {
+  if (values.length === 0) {
     return (
       <div className="flex items-center justify-center text-gray-600 text-sm" style={{ height }}>
         No data yet
@@ -224,17 +230,17 @@ export function StatsChart({ timesMs, showAo5 = true, showAo12 = true, showAo100
     );
   }
 
-  const data = buildChartData(timesMs);
-  const currentAo5 = ao5(timesMs);
-  const currentAo12 = ao12(timesMs);
-  const currentAo100 = ao100(timesMs);
-  const pb = best(timesMs);
-  const avg = mean(timesMs);
+  const data = buildChartData(values);
+  const currentAo5 = ao5(values);
+  const currentAo12 = ao12(values);
+  const currentAo100 = ao100(values);
+  const pb = best(values);
+  const avg = mean(values);
 
   const yMin = Math.max(0, (pb ?? 0) * 0.9);
-  const yMax = Math.max(...timesMs) * 1.05;
+  const yMax = Math.max(...values) * 1.05;
 
-  const bodyProps = { data, visible, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg };
+  const bodyProps = { data, visible, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue };
 
   return (
     <div>

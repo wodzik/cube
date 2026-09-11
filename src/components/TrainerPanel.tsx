@@ -24,6 +24,9 @@ import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { SequenceProgress } from "../logic/sequenceTracker";
 
+// Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
+const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(2));
+
 export interface TrainerPanelProps {
   // ── Layout ──
   header: ReactNode;
@@ -63,7 +66,7 @@ export interface TrainerPanelProps {
   timeMs: number;
   timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
   timerClassName?: string;
-  /** Show move count instead of time on the big timer (and hide the stats time chart) — see StoredSession.moveCountOnly. */
+  /** Show move count instead of time on the big timer, and chart `moveCounts` instead of `timesMs` — see StoredSession.moveCountOnly. */
   moveCountOnly?: boolean;
   moveCount?: number;
   hintText?: string | null;
@@ -108,6 +111,8 @@ export interface TrainerPanelProps {
 
   // ── Stats chart ──
   timesMs: number[];
+  /** Per-solve move counts, same order as `timesMs` — charted instead of times when `moveCountOnly` is set. */
+  moveCounts?: number[];
   statsLabel?: string;
   statsHeight?: number;
   showAo12?: boolean;
@@ -168,6 +173,7 @@ export function TrainerPanel({
   cubeSetupAnchor,
   cubeAlg,
   timesMs,
+  moveCounts = [],
   statsLabel = "Statistics",
   statsHeight = 280,
   showAo12,
@@ -282,14 +288,9 @@ export function TrainerPanel({
             </h3>
             <div className="flex-1 min-h-0 flex flex-col">
               {moveCountOnly ? (
-                <div
-                  className="flex-1 flex items-center justify-center text-center text-gray-600 text-sm px-6"
-                  style={{ minHeight: statsHeight }}
-                >
-                  Move count only — time chart hidden for this session.
-                </div>
+                <StatsChart values={moveCounts} formatValue={formatMoveCount} height={statsHeight} showAo12={showAo12} />
               ) : (
-                <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
+                <StatsChart values={timesMs} height={statsHeight} showAo12={showAo12} />
               )}
             </div>
           </div>

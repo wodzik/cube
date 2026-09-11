@@ -318,6 +318,7 @@ function SolvePageInner({
     setMoveMenuSolveId(null);
   }
   const sessionTimesMs = solves.map((s) => s.timeMs);
+  const sessionMoveCounts = solves.map((s) => s.moveCount);
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
   // Starting the next attempt: a "scratch" session gets a fresh random
@@ -794,6 +795,7 @@ function SolvePageInner({
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}
       cubeSetupAlg=""
       timesMs={sessionTimesMs}
+      moveCounts={sessionMoveCounts}
       statsLabel={`Session: ${session.name}`}
       statsAside={
         summaryRecord ? (
