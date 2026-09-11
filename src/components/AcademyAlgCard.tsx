@@ -2,8 +2,10 @@
  * AcademyAlgCard — grid card for one Academy algorithm, mirroring
  * CaseCard's look (2D case preview, name, alg text, selection checkbox,
  * practice-now play button) minus everything Academy deliberately lacks:
- * no learning status, no editing, no persisted stats. The badge shows the
- * curriculum weight instead (required / nice to know).
+ * no learning status, no editing, no persisted stats. A colored dot next
+ * to the name shows the curriculum weight instead (green = required,
+ * blue = nice to know) — the cards are small enough that a text badge
+ * would crowd the name out.
  */
 
 import { useState } from "react";
@@ -34,38 +36,33 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
           : "border-white/[0.06] bg-gray-900/40 hover:border-white/15"
       }`}
     >
-      <div className="flex items-center justify-between gap-1 px-2.5 pt-2 pb-0">
+      <div className="flex items-center gap-1.5 px-2 pt-1.5 pb-0 min-w-0">
         <span
-          className="text-[11px] font-semibold text-white truncate leading-tight cursor-pointer hover:underline"
+          className={`shrink-0 w-1.5 h-1.5 rounded-full ${alg.required ? "bg-emerald-400" : "bg-sky-400"}`}
+          title={alg.required ? "Required" : "Nice to know"}
+        />
+        <span
+          className="flex-1 min-w-0 text-[11px] font-semibold text-white truncate leading-tight cursor-pointer hover:underline"
           onClick={onPractice}
-          title="Practice this now"
+          title={`${alg.name} — practice this now`}
         >
           {alg.name}
         </span>
-        <div className="flex items-center gap-1 shrink-0">
-          <span
-            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
-              alg.required ? "bg-emerald-500/15 text-emerald-300" : "bg-sky-500/15 text-sky-300"
-            }`}
-          >
-            {alg.required ? "required" : "nice to know"}
-          </span>
-          <button
-            onClick={() => setShowPlayback(true)}
-            title="Show how to perform this algorithm"
-            className="p-1 rounded text-gray-500 hover:text-white transition-colors"
-          >
-            <Video size={12} />
-          </button>
-          <button
-            onClick={onPractice}
-            title="Practice this now"
-            className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
-            style={{ color: "var(--accent-bright)" }}
-          >
-            <Play size={12} fill="currentColor" />
-          </button>
-        </div>
+        <button
+          onClick={() => setShowPlayback(true)}
+          title="Show how to perform this algorithm"
+          className="shrink-0 p-0.5 rounded text-gray-500 hover:text-white transition-colors"
+        >
+          <Video size={11} />
+        </button>
+        <button
+          onClick={onPractice}
+          title="Practice this now"
+          className="shrink-0 p-0.5 rounded transition-colors opacity-0 group-hover:opacity-100"
+          style={{ color: "var(--accent-bright)" }}
+        >
+          <Play size={11} fill="currentColor" />
+        </button>
       </div>
 
       <div className="px-2 py-1 flex items-center justify-center cursor-pointer" onClick={onPractice} title="Practice this now">
@@ -79,7 +76,7 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-1 px-2.5 py-2 mt-auto">
+      <div className="flex items-center justify-between gap-1 px-2 py-1.5 mt-auto">
         <span className="text-[9px] text-gray-600 font-mono truncate" title={alg.alg}>
           {alg.alg}
         </span>

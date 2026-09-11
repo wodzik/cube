@@ -106,16 +106,17 @@ describe("4LLL corners-first lesson data", () => {
       "corners",
       "full",
     ]);
-    // "oll-corners": LL corners primary-sticker-only (OLL look), LL edges blacked out.
+    // "oll-corners": LL corners primary-sticker-only (OLL look), LL edges blacked out, F2L in full color.
     const co = academyStepMask("oll-corners");
     expect(co.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "ignored", "ignored"]);
     expect(co.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
-    expect(co.orbits.EDGES.pieces[5]!.facelets[0]).toBe("dim");
-    // "oll": classic OLL — LL edges also show their primary sticker.
+    expect(co.orbits.EDGES.pieces[5]!.facelets).toEqual(["regular", "regular"]);
+    // "oll": classic OLL — LL edges also show their primary sticker; F2L stays in full color.
     const oll = academyStepMask("oll");
     expect(oll.orbits.EDGES.pieces[0]!.facelets).toEqual(["regular", "ignored"]);
     expect(oll.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "ignored", "ignored"]);
-    expect(oll.orbits.CORNERS.pieces[5]!.facelets[0]).toBe("dim");
+    expect(oll.orbits.CORNERS.pieces[5]!.facelets).toEqual(["regular", "regular", "regular"]);
+    expect(oll.orbits.CENTERS.pieces[2]!.facelets[0]).toBe("regular");
     // "corners": full-color LL corners (permutation visible), edges blacked out.
     const cp = academyStepMask("corners");
     expect(cp.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "regular", "regular"]);
