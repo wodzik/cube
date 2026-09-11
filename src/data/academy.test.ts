@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { cube3x3x3 } from "cubing/puzzles";
-import { ACADEMY_LESSONS, F2L_METHOD, FOUR_LOOK_LL_CORNERS_FIRST, LBL_METHOD, SECOND_LAYER, ZBL_METHOD, parseDecoratedAlg } from "./academy";
+import { ACADEMY_LESSONS, F2L_METHOD, FOUR_LOOK_LL_CORNERS_FIRST, TWO_FIRST_LAYERS, SECOND_LAYER, ZETA_SLOTTING, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 
@@ -96,18 +96,44 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("lesson registry lists LBL, ZBL, F2L in order", () => {
-    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["lbl", "zbl", "f2l"]);
+  it("lesson registry lists Two first layers, Last layer, Zeta Slotting, F2L in order — four independent lessons", () => {
+    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["two-first-layers", "4lll-corners-first", "zeta-slotting", "f2l"]);
+    expect(ACADEMY_LESSONS.map((l) => l.title)).toEqual(["Two first layers", "Last layer", "Zeta Slotting", "F2L"]);
   });
 
-  it("LBL and ZBL share the same last-layer step objects (selection/attempts stay in sync)", () => {
-    expect(LBL_METHOD.steps.slice(2)).toEqual(FOUR_LOOK_LL_CORNERS_FIRST.steps);
-    expect(ZBL_METHOD.steps.slice(2)).toEqual(FOUR_LOOK_LL_CORNERS_FIRST.steps);
-    expect(LBL_METHOD.steps[2]).toBe(FOUR_LOOK_LL_CORNERS_FIRST.steps[0]);
-    expect(ZBL_METHOD.steps[2]).toBe(FOUR_LOOK_LL_CORNERS_FIRST.steps[0]);
-    // Edges is shared between LBL and ZBL too — same algorithms either way.
-    expect(LBL_METHOD.steps[1]).toBe(SECOND_LAYER.steps[0]);
-    expect(ZBL_METHOD.steps[0]).toBe(SECOND_LAYER.steps[0]);
+  it("Two first layers reuses FIRST_LAYER/SECOND_LAYER's step objects; Zeta Slotting has its own, distinct edges step", () => {
+    expect(TWO_FIRST_LAYERS.steps.map((s) => s.id)).toEqual(["corners", "edges"]);
+    expect(TWO_FIRST_LAYERS.steps[1]).toBe(SECOND_LAYER.steps[0]);
+    expect(ZETA_SLOTTING.steps.map((s) => s.id)).toEqual(["zeta-edges", "zeta-corners"]);
+    expect(ZETA_SLOTTING.steps[0]).not.toBe(SECOND_LAYER.steps[0]);
+    // Same alg text for the two shared cases, sourced from SECOND_LAYER so they can't drift.
+    const zetaEdges = ZETA_SLOTTING.steps[0].algs;
+    expect(zetaEdges.find((a) => a.id === "edge-right")!.alg).toBe(SECOND_LAYER.steps[0].algs[0].alg);
+    expect(zetaEdges.find((a) => a.id === "edge-left")!.alg).toBe(SECOND_LAYER.steps[0].algs[1].alg);
+    // Plus the two new sledgehammer cases, absent from Two first layers' own edges step.
+    expect(zetaEdges.some((a) => a.id === "edge-unoriented-right")).toBe(true);
+    expect(SECOND_LAYER.steps[0].algs.some((a) => a.id === "edge-unoriented-right")).toBe(false);
+    // No lesson shares last-layer steps anymore — it's its own top-level lesson.
+    for (const lesson of [TWO_FIRST_LAYERS, ZETA_SLOTTING, F2L_METHOD]) {
+      for (const step of lesson.steps) expect(FOUR_LOOK_LL_CORNERS_FIRST.steps).not.toContain(step);
+    }
+  });
+
+  it("Zeta Slotting's sledgehammer edge cases insert without disturbing the cross", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const id of ["edge-unoriented-right", "edge-unoriented-left"]) {
+      const alg = ZETA_SLOTTING.steps[0].algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const crossOk = [4, 5, 6, 7].every((e) => p.patternData.EDGES.pieces[e] === e && p.patternData.EDGES.orientation[e] === 0);
+      expect(`${id}: cross intact`).toBe(`${id}: cross intact`);
+      expect(crossOk).toBe(true);
+      // Before insertion the edge sits up in the last layer (U-index slots), same as any other not-yet-placed piece.
+      const edgeId = id === "edge-unoriented-left" ? 9 : 8;
+      const slot = p.patternData.EDGES.pieces.indexOf(edgeId);
+      expect([0, 1, 2, 3]).toContain(slot);
+      expect(p.patternData.EDGES.orientation[slot]).toBe(0);
+    }
   });
 
   it("every algorithm in every lesson solves its case from the drill's setup (inverse applied to solved)", async () => {
@@ -125,7 +151,7 @@ describe("4LLL corners-first lesson data", () => {
     }
     // The inserts act on the D slots (U is the last layer, as for OLL), so the
     // case must leave U untouched apart from the displaced piece itself.
-    const corner = parseDecoratedAlg(LBL_METHOD.steps[0].algs[0].alg).tokens.join(" ");
+    const corner = parseDecoratedAlg(TWO_FIRST_LAYERS.steps[0].algs[0].alg).tokens.join(" ");
     const cornerCase = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(corner));
     expect([4, 5, 6, 7].filter((c) => cornerCase.patternData.CORNERS.pieces[c] !== c).length).toBe(1);
     // Views: first layer = D-index pieces; f2l greys out the U (last) layer.
@@ -139,7 +165,7 @@ describe("4LLL corners-first lesson data", () => {
     expect(f2l.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
   });
 
-  const zetaCornersStep = () => ZBL_METHOD.steps.find((s) => s.id === "zeta-corners")!;
+  const zetaCornersStep = () => ZETA_SLOTTING.steps.find((s) => s.id === "zeta-corners")!;
 
   it("Zeta Slotting's corner algs never disturb the already-seated FR edge or the cross", async () => {
     const kpuzzle = await cube3x3x3.kpuzzle();

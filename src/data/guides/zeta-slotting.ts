@@ -6,20 +6,28 @@
  * cases (F2L 32-34 in the Drill Algorithms F2L set), verified against the
  * engine in academy.test.ts and guides.test.ts.
  *
- * The edge-insertion algorithms are identical to "Layer by layer"'s
- * second-layer step — inserting an edge never cared whether a corner had
- * already filled the slot, so there was nothing to redo — sourced from
- * SECOND_LAYER (data/academy.ts) via helpers.academyAlg so the two guides
- * can't drift apart. The corner-insertion algorithms are new and come from
- * ZBL_METHOD the same way.
+ * Zeta Slotting is a genuinely DIFFERENT method from "Two first layers"
+ * (Layer by layer's corner-first order), and has its own Academy lesson
+ * (ZETA_SLOTTING, data/academy.ts) rather than sharing steps with it — its
+ * edge step additionally covers the two "unoriented" sledgehammer cases,
+ * whose setup disturbs a first-layer corner in passing (harmless here,
+ * since corners aren't addressed yet either way, but would look like a
+ * broken first layer under the corner-first method).
+ *
+ * The base two edge-insertion algorithms are still identical text to
+ * "Layer by layer"'s second-layer step — sourced from SECOND_LAYER
+ * (data/academy.ts) via helpers.academyAlg so the two guides can't drift
+ * apart. The sledgehammer and corner-insertion algorithms come from
+ * ZETA_SLOTTING the same way.
  */
 
 import type { Guide } from "./types";
 import { academyAlg, solveCase, SOLVED_SETUP } from "./helpers";
-import { SECOND_LAYER, ZBL_METHOD } from "../academy";
+import { SECOND_LAYER, ZETA_SLOTTING } from "../academy";
 
 const EDGE = (algId: string) => academyAlg("edges", algId, SECOND_LAYER);
-const CORNER = (algId: string) => academyAlg("zeta-corners", algId, ZBL_METHOD);
+const SLEDGE = (algId: string) => academyAlg("zeta-edges", algId, ZETA_SLOTTING);
+const CORNER = (algId: string) => academyAlg("zeta-corners", algId, ZETA_SLOTTING);
 
 export const ZETA_SLOTTING_GUIDE: Guide = {
   id: "zeta-slotting",
@@ -57,8 +65,16 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
             solveCase("edge-left", "Goes left", "Front sticker matches the front centre; the top sticker matches the centre on the left.", "The matching T at the front.", EDGE("edge-left"), "cross-edge", { note: "The exact mirror of \"goes right\"." }),
           ],
         },
+        { kind: "p", text: "Sometimes neither side face shows the front colour at all — the edge's front-colour sticker is sitting on TOP instead, so no amount of turning U lines it up the normal way. The sledgehammer inserts it directly, no alignment needed." },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("edge-unoriented-right", "Unoriented · right", "The edge sits at the top-right with its front-colour sticker on top, not on a side face.", "Slot at the front-right.", SLEDGE("edge-unoriented-right"), "cross-edge", { note: "The sledgehammer, used directly — no U alignment first." }),
+            solveCase("edge-unoriented-left", "Unoriented · left", "Mirrored: the edge sits at the top-left with its front-colour sticker on top.", "Slot at the front-left.", SLEDGE("edge-unoriented-left"), "cross-edge", { note: "The left sledgehammer." }),
+          ],
+        },
         { kind: "callout", tone: "note", title: "Edge already in the slot, but flipped", text: ["Insert any other top-layer non-yellow edge into that slot with one of the two triggers above — it kicks the wrong edge back out to the top, same fix as Layer by layer. With no corner there yet, ANY spare edge works, not just a yellow one."] },
-        { kind: "practice", lessonId: "zbl", stepId: "edges", label: "Drill both inserts in the Academy" },
+        { kind: "practice", lessonId: "zeta-slotting", stepId: "zeta-edges", label: "Drill both inserts in the Academy" },
         { kind: "callout", tone: "checkpoint", title: "Checkpoint — cross plus four edges", text: ["All four middle-layer edges seated and correctly oriented. Every corner is still wherever it started — the top layer looks untouched, and that's exactly right."], demo: { setup: SOLVED_SETUP, alg: "", mask: "f2l", label: "Edges done — corners still to come" } },
       ],
     },
@@ -78,7 +94,7 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
           ],
         },
         { kind: "callout", tone: "tip", title: "Left-hand version", text: ["Same three cases work on the front-left slot with the left sexy move family: `(U' L' U L)` repeated three times for \"white up\", and the mirrored 8-move algorithms for the other two."] },
-        { kind: "practice", lessonId: "zbl", stepId: "zeta-corners", label: "Drill the three corner cases in the Academy" },
+        { kind: "practice", lessonId: "zeta-slotting", stepId: "zeta-corners", label: "Drill the three corner cases in the Academy" },
         { kind: "callout", tone: "checkpoint", title: "Checkpoint — first two layers", text: ["Same finish line as Layer by layer: two full layers solved, every side showing two rows of its own colour under a mixed top row."], demo: { setup: SOLVED_SETUP, alg: "", mask: "f2l", label: "First two layers done" } },
       ],
     },

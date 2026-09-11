@@ -3,30 +3,32 @@
  * algorithms here are not selectable or editable: each lesson teaches a
  * specific set, split into `required` and nice-to-know).
  *
- * Three TOP-LEVEL lessons, one per first-two-layers method, each ending in
- * the same last layer (LBL_METHOD / ZBL_METHOD literally share the four
- * FOUR_LOOK_LL_CORNERS_FIRST step objects — selecting/practicing an alg in
- * one lesson's last-layer step is the same drill in the other, since
- * storage is keyed by step id, not lesson id):
+ * FOUR independent TOP-LEVEL lessons, one per guide in the "Learn to
+ * solve"/F2L track — each is self-contained (its own steps, its own
+ * selection storage), not a shared multi-method curriculum:
  *
- *  - LBL ("layer by layer"): FIRST_LAYER's corners step, then
- *    SECOND_LAYER's edges step, then the four last-layer looks. Mirrors
- *    the "Layer by layer" + "The last layer, corners first" guides.
- *  - ZBL ("Zeta Slotting"): edges first (SECOND_LAYER's step, reused
- *    as-is — inserting an edge doesn't care whether a corner already
- *    filled the slot), then ZETA_CORNERS (F2L's "Edge In Slot" cases:
- *    insert the corner around an edge that's already seated), then the
- *    same four last-layer looks. Mirrors the "Zeta Slotting" guide.
- *  - F2L: the intuitive-F2L curriculum from the "Beginner F2L" guide —
+ *  - "Two first layers": FIRST_LAYER's corners step, then SECOND_LAYER's
+ *    edges step. Mirrors the "Layer by layer" guide's first two steps
+ *    (that guide's last-layer step is the separate "Last layer" lesson
+ *    below).
+ *  - "Last layer" (FOUR_LOOK_LL_CORNERS_FIRST): the four looks, shared by
+ *    every first-two-layers method — whichever one got you here, this is
+ *    the same last layer. Mirrors "The last layer, corners first" guide.
+ *  - "Zeta Slotting": edges first (its own step — NOT the same object as
+ *    "Two first layers"'s edges step, since Zeta Slotting's edge step
+ *    additionally covers the two sledgehammer "unoriented" cases, which
+ *    would misleadingly show a first-layer corner getting disturbed if
+ *    reused in the corner-first method), then ZETA_CORNERS (F2L's "Edge
+ *    In Slot" cases: insert the corner around an edge that's already
+ *    seated). Mirrors the "Zeta Slotting" guide.
+ *  - "F2L": the intuitive-F2L curriculum from the "Beginner F2L" guide —
  *    the four basic inserts, then the set-up cases — sourced from the
- *    SAME algorithm data the guide reads via helpers.f2lAlg, so guide and
- *    drill can't drift apart (same pattern as academyAlg for last layer).
+ *    SAME algorithm data the guide reads via helpers.academyAlg, so guide
+ *    and drill can't drift apart.
  *
- * FIRST_LAYER, SECOND_LAYER and FOUR_LOOK_LL_CORNERS_FIRST stay exported
- * as their own (non-top-level) AcademyLesson values purely so their
- * `.steps` can be spread into LBL_METHOD/ZBL_METHOD below and so
- * data/guides/helpers.ts's academyAlg() can keep reading from
- * FOUR_LOOK_LL_CORNERS_FIRST directly.
+ * FIRST_LAYER and SECOND_LAYER stay exported as their own (non-top-level)
+ * AcademyLesson values purely so their `.steps[0]` can be reused by
+ * "Two first layers" below without a duplicate object literal.
  *
  * Alg notation may contain "(...)" trigger grouping — e.g.
  * "F (R U R' U') F'" marks the sexy move. Parentheses are DISPLAY-ONLY:
@@ -311,22 +313,48 @@ const ZETA_CORNERS_STEP: AcademyStep = {
   ],
 };
 
-export const LBL_METHOD: AcademyLesson = {
-  id: "lbl",
-  title: "LBL",
+/**
+ * Zeta Slotting's OWN edges step — NOT the same object as SECOND_LAYER's
+ * (deliberately: this one adds the two sledgehammer "unoriented" cases,
+ * whose set-up disturbs a first-layer corner in passing, which would look
+ * like a broken first layer if it showed up under "Two first layers",
+ * where corners are supposed to already be solved by this point. Sharing
+ * storage/attempts with that lesson would also be wrong once the case
+ * sets differ). The two base algorithms are still sourced from
+ * SECOND_LAYER so the text can't drift.
+ */
+const ZETA_EDGES_STEP: AcademyStep = {
+  id: "zeta-edges",
+  title: "Edges",
   description:
-    "Layer by layer: corners into the first layer, then edges into the second, then the last layer in four looks. " +
-    "See the \"Layer by layer\" and \"The last layer, corners first\" guides.",
-  steps: [FIRST_LAYER.steps[0], SECOND_LAYER.steps[0], ...FOUR_LOOK_LL_CORNERS_FIRST.steps],
+    "Edge at the top-front with its front sticker matching the front centre: goes right or left. If instead its " +
+    "front-colour sticker is on TOP — no amount of turning U lines it up the normal way — the sledgehammer inserts " +
+    "it directly.",
+  view: "f2l",
+  algs: [
+    { id: "edge-right", name: "Goes right", alg: SECOND_LAYER.steps[0].algs[0].alg, required: true, description: "Top sticker matches the centre on the right." },
+    { id: "edge-left", name: "Goes left", alg: SECOND_LAYER.steps[0].algs[1].alg, required: true, description: "Top sticker matches the centre on the left." },
+    { id: "edge-unoriented-right", name: "Unoriented · right", alg: "R' F R F'", required: true, description: "Front-colour sticker on top, at the top-right. The sledgehammer, used directly." },
+    { id: "edge-unoriented-left", name: "Unoriented · left", alg: "L F' L' F", required: false, description: "Mirror of \"unoriented · right\" — the left sledgehammer." },
+  ],
 };
 
-export const ZBL_METHOD: AcademyLesson = {
-  id: "zbl",
-  title: "ZBL",
+export const TWO_FIRST_LAYERS: AcademyLesson = {
+  id: "two-first-layers",
+  title: "Two first layers",
   description:
-    "Zeta Slotting: edges into the first two layers before any corners, then a small set of F2L algorithms drops " +
-    "each corner in around its already-seated edge, then the same last layer as LBL. See the \"Zeta Slotting\" guide.",
-  steps: [SECOND_LAYER.steps[0], ZETA_CORNERS_STEP, ...FOUR_LOOK_LL_CORNERS_FIRST.steps],
+    "Layer by layer's first two steps: corners into the first layer with the sexy move, then edges into the " +
+    "second. See the \"Layer by layer\" guide.",
+  steps: [FIRST_LAYER.steps[0], SECOND_LAYER.steps[0]],
+};
+
+export const ZETA_SLOTTING: AcademyLesson = {
+  id: "zeta-slotting",
+  title: "Zeta Slotting",
+  description:
+    "Edges into the first two layers before any corners, then a small set of F2L algorithms drops each corner in " +
+    "around its already-seated edge. See the \"Zeta Slotting\" guide.",
+  steps: [ZETA_EDGES_STEP, ZETA_CORNERS_STEP],
 };
 
 /**
@@ -380,4 +408,4 @@ export const F2L_METHOD: AcademyLesson = {
   ],
 };
 
-export const ACADEMY_LESSONS: AcademyLesson[] = [LBL_METHOD, ZBL_METHOD, F2L_METHOD];
+export const ACADEMY_LESSONS: AcademyLesson[] = [TWO_FIRST_LAYERS, FOUR_LOOK_LL_CORNERS_FIRST, ZETA_SLOTTING, F2L_METHOD];

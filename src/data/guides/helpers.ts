@@ -58,7 +58,7 @@ export function repeatAlg(alg: string, n: number): string {
  * An Academy lesson's algorithm text, by step and alg id — single source of
  * truth shared between a guide and its matching drill (defaults to the
  * 4-Look Last Layer lesson, used by both the last-layer and Zeta Slotting
- * guides; pass ZBL_METHOD/F2L_METHOD/SECOND_LAYER etc. for the others).
+ * guides; pass ZETA_SLOTTING/F2L_METHOD/SECOND_LAYER etc. for the others).
  */
 export function academyAlg(stepId: string, algId: string, lesson: AcademyLesson = FOUR_LOOK_LL_CORNERS_FIRST): string {
   const step = lesson.steps.find((s) => s.id === stepId);
