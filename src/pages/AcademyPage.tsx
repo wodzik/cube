@@ -1,10 +1,8 @@
 /**
- * AcademyPage — guided lessons with a FIXED curriculum (currently: 4-Look
- * Last Layer, corners first — see data/academy.ts).
+ * AcademyPage — guided lessons with a FIXED curriculum (first layer,
+ * second layer, last layer in four looks — see data/academy.ts).
  *
- * Two levels of navigation: a LESSON picker (so future lessons — 4LLL
- * edge-first, cross, F2L — slot in beside this one) and the lesson's STEPS
- * as tabs (the way OLL/PLL groups are tabs in Practice). Each step shows
+ * Two levels of navigation: a LESSON picker and the lesson's STEPS as tabs (the way OLL/PLL groups are tabs in Practice). Each step shows
  * its algorithms as selectable preview cards, and the drill cycles through
  * the SELECTED algorithms of the active step. Same drill machinery as
  * Practice (pending-move buffer, drill-round restart, batched-render-safe

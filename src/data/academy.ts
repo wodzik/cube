@@ -1,7 +1,9 @@
 /**
  * Academy — guided lessons with a FIXED curriculum (unlike Training, the
  * algorithms here are not selectable or editable: each lesson teaches a
- * specific set, split into `required` and nice-to-know).
+ * specific set, split into `required` and nice-to-know). Three lessons —
+ * first layer, second layer, last layer (four looks) — mirroring the
+ * "Learn to solve" guides in data/guides.
  *
  * Alg notation may contain "(...)" trigger grouping — e.g.
  * "F (R U R' U') F'" marks the sexy move. Parentheses are DISPLAY-ONLY:
@@ -25,12 +27,14 @@ export interface AcademyStep {
   description: string;
   /**
    * Cube view for this step + its card previews, resolved to a mask by
-   * trainerMasks.academyStepMask: "oll-corners" = OLL stickers with the LL
-   * edges blacked out (orient corners), "oll" = classic OLL stickers,
-   * "corners" = full-color LL corners with edges blacked out (permute
-   * corners — edge permutation is ignored there), "full" = plain cube.
+   * trainerMasks.academyStepMask: "first-layer" = only the first layer's
+   * pieces, "f2l" = first two layers (last layer greyed out),
+   * "oll-corners" = OLL stickers with the LL edges blacked out (orient
+   * corners), "oll" = classic OLL stickers, "corners" = full-color LL
+   * corners with edges blacked out (permute corners — edge permutation is
+   * ignored there), "full" = plain cube.
    */
-  view: "oll-corners" | "oll" | "corners" | "full";
+  view: "first-layer" | "f2l" | "oll-corners" | "oll" | "corners" | "full";
   algs: AcademyAlg[];
 }
 
@@ -78,6 +82,60 @@ export function parseDecoratedAlg(notation: string): DecoratedAlg {
 }
 
 /**
+ * First layer — the four white corners, each dropped in with the sexy move
+ * (repeated per where the white sticker points). The cross itself has no
+ * algorithm and isn't drilled. Same algorithms as the "Layer by layer"
+ * guide's corner cases (data/guides/layer-by-layer.ts).
+ */
+export const FIRST_LAYER: AcademyLesson = {
+  id: "first-layer",
+  title: "First layer",
+  description: "Drop the four first-layer corners in with the sexy move — one, three, or the reverse trigger, depending on which way the white sticker points.",
+  steps: [
+    {
+      id: "corners",
+      title: "Corners",
+      description:
+        "Corner above its slot at the front-right. White facing right: one sexy move. White facing up: three. " +
+        "White facing you: the reverse sexy move (or five sexy moves). The drill shows the first layer as the " +
+        "BOTTOM layer in yellow — it plays the part of white.",
+      view: "first-layer",
+      algs: [
+        { id: "corner-right", name: "White right · ×1", alg: "(R U R' U')", required: true, description: "The corner's white sticker points right." },
+        { id: "corner-up", name: "White up · ×3", alg: "(R U R' U') (R U R' U') (R U R' U')", required: true, description: "The corner's white sticker points up." },
+        { id: "corner-front", name: "White front · reverse", alg: "U R U' R'", required: true, description: "The corner's white sticker points at you. Five sexy moves also work." },
+        { id: "corner-left-sexy", name: "Left hand · ×1", alg: "(L' U' L U)", required: false, description: "Same as \"white right\", mirrored: slot at the front-left, white facing left." },
+      ],
+    },
+  ],
+};
+
+/**
+ * Second layer — the four middle-layer edges, inserted right or left from
+ * the top layer. Same algorithms as the "Layer by layer" guide's
+ * second-layer cases.
+ */
+export const SECOND_LAYER: AcademyLesson = {
+  id: "second-layer",
+  title: "Second layer",
+  description: "Insert the middle-layer edges from the top: line up the front sticker with its centre, then send the edge right or left.",
+  steps: [
+    {
+      id: "edges",
+      title: "Edges",
+      description:
+        "Edge at the top-front with its front sticker matching the front centre. Its top sticker says where it goes: " +
+        "right or left. Both sequences are two triggers back to back. The first two layers are the bottom two here.",
+      view: "f2l",
+      algs: [
+        { id: "edge-right", name: "Goes right", alg: "(U R U' R') (U' F' U F)", required: true, description: "Top sticker matches the centre on the right." },
+        { id: "edge-left", name: "Goes left", alg: "(U' L' U L) (U F U' F')", required: true, description: "Top sticker matches the centre on the left." },
+      ],
+    },
+  ],
+};
+
+/**
  * 4-Look Last Layer, CORNERS FIRST — corners before edges in BOTH phases:
  * orient corners → orient edges (full OLL done) → permute corners →
  * permute edges. The corner-permutation algorithms are literally
@@ -86,7 +144,7 @@ export function parseDecoratedAlg(notation: string): DecoratedAlg {
  */
 export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
   id: "4lll-corners-first",
-  title: "4-Look Last Layer — Corners First",
+  title: "Last layer",
   description:
     "Finish the last layer in four looks, corners before edges in both phases: " +
     "orient the corners, orient the edges (OLL done), then permute the corners (with the A/B blocks) " +
@@ -204,4 +262,4 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
   ],
 };
 
-export const ACADEMY_LESSONS: AcademyLesson[] = [FOUR_LOOK_LL_CORNERS_FIRST];
+export const ACADEMY_LESSONS: AcademyLesson[] = [FIRST_LAYER, SECOND_LAYER, FOUR_LOOK_LL_CORNERS_FIRST];

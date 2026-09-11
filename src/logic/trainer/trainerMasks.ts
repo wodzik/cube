@@ -53,7 +53,7 @@ export function crossStickeringMask(face: Face): StickeringMaskOrbits {
   return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set(), undefined, true);
 }
 
-export type AcademyView = "oll-corners" | "oll" | "corners" | "full";
+export type AcademyView = "first-layer" | "f2l" | "oll-corners" | "oll" | "corners" | "full";
 
 /**
  * Academy step views (see data/academy.ts). ALL of them are MASKS — even
@@ -71,15 +71,32 @@ export type AcademyView = "oll-corners" | "oll" | "corners" | "full";
  *  - "corners":     LL corners in FULL color (permutation visible), LL
  *                   edges blacked out — the permute-corners look.
  *  - "full":        plain cube.
+ *  - "first-layer": only the first layer's edges and corners, in full
+ *                   color — the first-layer corners drill; the rest is
+ *                   greyed out.
+ *  - "f2l":         first two layers in full color, the last layer greyed
+ *                   out — the second-layer edges drill.
+ *
+ * Frame: the drill applies the inverse of the algorithm to a solved cube
+ * with no rotation, and every Academy algorithm (like every OLL) acts on U
+ * as the LAST layer — the first-layer corner and second-layer edge inserts
+ * drop pieces into the D slots. So "first layer" here means the D-index
+ * pieces (4-7) and "last layer" the U-index pieces (0-3), the same
+ * piece-index split as logic/guideMasks.ts.
  */
 export function academyStepMask(view: AcademyView): StickeringMaskOrbits {
   const U_PIECES = new Set([0, 1, 2, 3]);
+  const D_PIECES = new Set([4, 5, 6, 7]);
   const edge = (p: number): ("regular" | "ignored")[] => {
+    if (view === "first-layer") return D_PIECES.has(p) ? ["regular", "regular"] : ["ignored", "ignored"];
+    if (view === "f2l") return U_PIECES.has(p) ? ["ignored", "ignored"] : ["regular", "regular"];
     if (view === "full" || !U_PIECES.has(p)) return ["regular", "regular"];
     if (view === "oll") return ["regular", "ignored"];
     return ["ignored", "ignored"]; // oll-corners, corners
   };
   const corner = (p: number): ("regular" | "ignored")[] => {
+    if (view === "first-layer") return D_PIECES.has(p) ? ["regular", "regular", "regular"] : ["ignored", "ignored", "ignored"];
+    if (view === "f2l") return U_PIECES.has(p) ? ["ignored", "ignored", "ignored"] : ["regular", "regular", "regular"];
     if (view === "full" || view === "corners" || !U_PIECES.has(p)) return ["regular", "regular", "regular"];
     return ["regular", "ignored", "ignored"]; // oll / oll-corners: primary sticker only
   };

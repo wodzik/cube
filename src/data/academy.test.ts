@@ -2,6 +2,7 @@ import { describe, it, expect } from "bun:test";
 import { cube3x3x3 } from "cubing/puzzles";
 import { ACADEMY_LESSONS, FOUR_LOOK_LL_CORNERS_FIRST, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 
 describe("parseDecoratedAlg", () => {
   it("strips trigger parentheses into per-token decorations", () => {
@@ -95,8 +96,35 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("lesson registry exposes the lesson", () => {
-    expect(ACADEMY_LESSONS.length).toBe(1);
+  it("lesson registry lists first, second, last layer in order", () => {
+    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["first-layer", "second-layer", "4lll-corners-first"]);
+  });
+
+  it("first/second layer algorithms solve their case from the drill's setup (inverse applied to solved)", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const lesson of ACADEMY_LESSONS.slice(0, 2)) {
+      for (const step of lesson.steps) {
+        for (const a of step.algs) {
+          const { tokens } = parseDecoratedAlg(a.alg);
+          const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" "))).applyAlg(tokens.join(" "));
+          expect(`${a.id}: ${p.experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true })}`).toBe(`${a.id}: true`);
+        }
+      }
+    }
+    // The inserts act on the D slots (U is the last layer, as for OLL), so the
+    // case must leave U untouched apart from the displaced piece itself.
+    const corner = parseDecoratedAlg(ACADEMY_LESSONS[0].steps[0].algs[0].alg).tokens.join(" ");
+    const cornerCase = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(corner));
+    expect([4, 5, 6, 7].filter((c) => cornerCase.patternData.CORNERS.pieces[c] !== c).length).toBe(1);
+    // Views: first layer = D-index pieces; f2l greys out the U (last) layer.
+    const fl = academyStepMask("first-layer");
+    expect(fl.orbits.CORNERS.pieces[5]!.facelets).toEqual(["regular", "regular", "regular"]);
+    expect(fl.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
+    expect(fl.orbits.EDGES.pieces[9]!.facelets).toEqual(["ignored", "ignored"]);
+    const f2l = academyStepMask("f2l");
+    expect(f2l.orbits.EDGES.pieces[9]!.facelets).toEqual(["regular", "regular"]);
+    expect(f2l.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
+    expect(f2l.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
   });
 
   it("step views follow the curriculum: OLL-style for orientation, corner-only for CP", () => {
