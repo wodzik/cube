@@ -1,5 +1,5 @@
 import { invertSequence } from "../../logic/moveParser";
-import { FOUR_LOOK_LL_CORNERS_FIRST } from "../academy";
+import { FOUR_LOOK_LL_CORNERS_FIRST, type AcademyLesson } from "../academy";
 import type { GuideMaskKind } from "../../logic/guideMasks";
 import type { GuideCase } from "./types";
 
@@ -54,10 +54,15 @@ export function repeatAlg(alg: string, n: number): string {
   return Array(n).fill(alg).join(" ");
 }
 
-/** The 4-Look Last Layer lesson's algorithm text, by step and alg id — single source of truth for the last-layer sections. */
-export function academyAlg(stepId: string, algId: string): string {
-  const step = FOUR_LOOK_LL_CORNERS_FIRST.steps.find((s) => s.id === stepId);
+/**
+ * An Academy lesson's algorithm text, by step and alg id — single source of
+ * truth shared between a guide and its matching drill (defaults to the
+ * 4-Look Last Layer lesson, used by both the last-layer and Zeta Slotting
+ * guides; pass ZBL_METHOD/F2L_METHOD/SECOND_LAYER etc. for the others).
+ */
+export function academyAlg(stepId: string, algId: string, lesson: AcademyLesson = FOUR_LOOK_LL_CORNERS_FIRST): string {
+  const step = lesson.steps.find((s) => s.id === stepId);
   const alg = step?.algs.find((a) => a.id === algId);
-  if (!alg) throw new Error(`academy alg not found: ${stepId}/${algId}`);
+  if (!alg) throw new Error(`academy alg not found: ${lesson.id}/${stepId}/${algId}`);
   return alg.alg;
 }

@@ -15,8 +15,23 @@
 
 import type { Guide, GuideCase } from "./types";
 import { guideSetup } from "./helpers";
+import { F2L_METHOD } from "../academy";
 
-function pairCase(id: string, name: string, recognise: string, hold: string | undefined, alg: string, note?: string): GuideCase {
+/**
+ * Algorithm text comes from F2L_METHOD (data/academy.ts) by case id — same
+ * source the Academy "F2L" drill reads, so guide and drill can't drift
+ * apart (mirrors helpers.academyAlg's role for the last-layer guides).
+ */
+function f2lAlg(id: string): string {
+  for (const step of F2L_METHOD.steps) {
+    const alg = step.algs.find((a) => a.id === id);
+    if (alg) return alg.alg;
+  }
+  throw new Error(`F2L_METHOD alg not found: ${id}`);
+}
+
+function pairCase(id: string, name: string, recognise: string, hold: string | undefined, note?: string): GuideCase {
+  const alg = f2lAlg(id);
   return { id, name, recognise, hold, alg, note, demo: { setup: guideSetup(alg), alg, mask: "f2l-pair", tryOnCube: true } };
 }
 
@@ -51,13 +66,14 @@ export const BEGINNER_F2L_GUIDE: Guide = {
         {
           kind: "cases",
           cases: [
-            pairCase("matched-right", "Matched pair, right hand", "The pair is joined at the front-right of the top layer; the corner's white sticker faces you, and the edge sits to its right with the colours lined up.", "Slot at the front-right.", "U R U' R'", "Move the pair away from the slot (`U`), open the slot (`R`), bring the pair over it (`U'`), close (`R'`). This is the reverse sexy move."),
-            pairCase("matched-left", "Matched pair, left hand", "Same shape, mirrored: the pair is at the front-left, white facing you, edge to its left.", "Slot at the front-left.", "U' L' U L", "The exact mirror: `U'`, open with `L'`, `U`, close with `L`."),
-            pairCase("split-right", "Split pair, right hand", "The corner is above its slot with white facing right; the edge is at the back of the top layer, green (the front colour) facing up.", "Slot at the front-right.", "R U R'", "Open the slot (`R`) — the corner swings up to the back; the edge comes over (`U`) and joins it; close (`R'`) and the pair drops in."),
-            pairCase("split-left", "Split pair, left hand", "Mirrored: corner above the front-left slot with white facing left; edge at the back, green facing up.", "Slot at the front-left.", "L' U' L", "Mirror of the split insert."),
+            pairCase("matched-right", "Matched pair, right hand", "The pair is joined at the front-right of the top layer; the corner's white sticker faces you, and the edge sits to its right with the colours lined up.", "Slot at the front-right.", "Move the pair away from the slot (`U`), open the slot (`R`), bring the pair over it (`U'`), close (`R'`). This is the reverse sexy move."),
+            pairCase("matched-left", "Matched pair, left hand", "Same shape, mirrored: the pair is at the front-left, white facing you, edge to its left.", "Slot at the front-left.", "The exact mirror: `U'`, open with `L'`, `U`, close with `L`."),
+            pairCase("split-right", "Split pair, right hand", "The corner is above its slot with white facing right; the edge is at the back of the top layer, green (the front colour) facing up.", "Slot at the front-right.", "Open the slot (`R`) — the corner swings up to the back; the edge comes over (`U`) and joins it; close (`R'`) and the pair drops in."),
+            pairCase("split-left", "Split pair, left hand", "Mirrored: corner above the front-left slot with white facing left; edge at the back, green facing up.", "Slot at the front-left.", "Mirror of the split insert."),
           ],
         },
         { kind: "callout", tone: "note", text: ["Notice that the two inserts differ only in which way the corner's white sticker points: **towards you** → matched insert (`U R U' R'`), **to the side** → split insert (`R U R'`). The edge just has to be in the right place for that insert."] },
+        { kind: "practice", lessonId: "f2l", stepId: "inserts", label: "Drill the two inserts in the Academy" },
       ],
     },
     {
@@ -70,30 +86,31 @@ export const BEGINNER_F2L_GUIDE: Guide = {
         {
           kind: "cases",
           cases: [
-            pairCase("corner-in-slot-right", "Corner in the slot, white facing right", "The corner is in its slot but twisted (white on the side, pointing right); the edge is on top at the right, green facing up.", "Slot at the front-right.", "R U R' U' R U R'", "`R U R'` pulls the corner out; one `U'` lines the edge up, and `R U R'` is the **split insert**."),
-            pairCase("corner-in-slot-front", "Corner in the slot, white facing you", "The corner is in its slot twisted the other way (white pointing at you); the edge is on top at the right, green facing up.", "Slot at the front-right.", "R U' R' U R U' R'", "`R U' R'` pulls the corner out and it lands next to the edge as a **matched pair**; `U R U' R'` inserts it."),
-            pairCase("edge-in-slot", "Edge in the slot, corner on top", "The edge is already in the slot (the right way round, even); the corner is above the slot with white facing you.", "Slot at the front-right.", "U' R U' R' U2 R U' R'", "`U' R U' R'` brings the edge out and it joins the corner as a **matched pair**; `U2 R U' R'` is the matched insert with an extra `U` to line up."),
-            pairCase("both-in-slot", "Both in the slot, corner twisted", "The pair is in its slot but the corner's white sticker points right.", "Slot at the front-right.", "R U' R' U R U2 R' U R U' R'", "Three parts: `R U' R'` takes the pair out, `U R U2 R'` joins the two pieces, `U R U' R'` is the **matched insert**."),
+            pairCase("corner-in-slot-right", "Corner in the slot, white facing right", "The corner is in its slot but twisted (white on the side, pointing right); the edge is on top at the right, green facing up.", "Slot at the front-right.", "`R U R'` pulls the corner out; one `U'` lines the edge up, and `R U R'` is the **split insert**."),
+            pairCase("corner-in-slot-front", "Corner in the slot, white facing you", "The corner is in its slot twisted the other way (white pointing at you); the edge is on top at the right, green facing up.", "Slot at the front-right.", "`R U' R'` pulls the corner out and it lands next to the edge as a **matched pair**; `U R U' R'` inserts it."),
+            pairCase("edge-in-slot", "Edge in the slot, corner on top", "The edge is already in the slot (the right way round, even); the corner is above the slot with white facing you.", "Slot at the front-right.", "`U' R U' R'` brings the edge out and it joins the corner as a **matched pair**; `U2 R U' R'` is the matched insert with an extra `U` to line up."),
+            pairCase("both-in-slot", "Both in the slot, corner twisted", "The pair is in its slot but the corner's white sticker points right.", "Slot at the front-right.", "Three parts: `R U' R'` takes the pair out, `U R U2 R'` joins the two pieces, `U R U' R'` is the **matched insert**."),
           ],
         },
         { kind: "p", text: "**The pieces are apart on top.** Join them first: bring the corner up out of the slot's way, slide the edge next to it, put the corner back. Then insert." },
         {
           kind: "cases",
           cases: [
-            pairCase("apart-white-front", "Corner white facing you, edge at the back", "The corner is above its slot with white facing you; the edge is at the back of the top layer, green facing up.", "Slot at the front-right.", "U' R U R' U2 R U' R'", "`U' R U R'` joins them into a **matched pair** (the corner dips into the slot while the edge slides next to it); then `U2 R U' R'` — the matched insert plus a `U` to line up."),
-            pairCase("apart-white-right", "Corner white facing right, edge at the left", "The corner is above its slot with white facing right; the edge is at the left of the top layer, green facing up.", "Slot at the front-right.", "U' R U R' U R U R'", "`U' R U R'` joins them; `U R U R'` is a `U` to line up and then the **split insert**."),
-            pairCase("joined-wrong", "Joined, but the colours don't match", "The corner and edge are next to each other at the front-right, but the corner's white faces right and the colours don't line up.", "Slot at the front-right.", "U' R U' R' U R U R'", "`U' R U' R'` separates them and re-joins them properly; `U R U R'` lines up and does the **split insert**."),
+            pairCase("apart-white-front", "Corner white facing you, edge at the back", "The corner is above its slot with white facing you; the edge is at the back of the top layer, green facing up.", "Slot at the front-right.", "`U' R U R'` joins them into a **matched pair** (the corner dips into the slot while the edge slides next to it); then `U2 R U' R'` — the matched insert plus a `U` to line up."),
+            pairCase("apart-white-right", "Corner white facing right, edge at the left", "The corner is above its slot with white facing right; the edge is at the left of the top layer, green facing up.", "Slot at the front-right.", "`U' R U R'` joins them; `U R U R'` is a `U` to line up and then the **split insert**."),
+            pairCase("joined-wrong", "Joined, but the colours don't match", "The corner and edge are next to each other at the front-right, but the corner's white faces right and the colours don't line up.", "Slot at the front-right.", "`U' R U' R'` separates them and re-joins them properly; `U R U R'` lines up and does the **split insert**."),
           ],
         },
         { kind: "p", text: "**White facing up.** The awkward one: with white on top, neither basic insert applies directly. Turn the corner first — a `R U2 R'`-style move flips it to white-on-the-side — then it's a normal case." },
         {
           kind: "cases",
           cases: [
-            pairCase("white-up-edge-right", "White up, edge at the right", "The corner is above its slot with white facing up; the edge is at the right of the top layer, green facing up.", "Slot at the front-right.", "R U2 R' U' R U R'", "`R U2 R'` turns the corner so white faces the side; `U' R U R'` lines up and does the **split insert**."),
-            pairCase("white-up-edge-left", "White up, edge at the left", "The corner is above its slot with white facing up; the edge is at the left of the top layer, green facing up.", "Slot at the front-right.", "U2 R U R' U R U' R'", "`U2 R U R'` joins the two pieces into a **matched pair**; `U R U' R'` inserts it."),
+            pairCase("white-up-edge-right", "White up, edge at the right", "The corner is above its slot with white facing up; the edge is at the right of the top layer, green facing up.", "Slot at the front-right.", "`R U2 R'` turns the corner so white faces the side; `U' R U R'` lines up and does the **split insert**."),
+            pairCase("white-up-edge-left", "White up, edge at the left", "The corner is above its slot with white facing up; the edge is at the left of the top layer, green facing up.", "Slot at the front-right.", "`U2 R U R'` joins the two pieces into a **matched pair**; `U R U' R'` inserts it."),
           ],
         },
         { kind: "callout", tone: "warning", title: "Slower at first — normal", text: ["Switching from the beginner method to F2L makes you slower for a week or two while you learn to see pairs. Stick with it: after that it's the biggest single speed-up you'll ever get."] },
+        { kind: "practice", lessonId: "f2l", stepId: "setup", label: "Drill the set-up cases in the Academy" },
       ],
     },
     {

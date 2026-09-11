@@ -1,9 +1,32 @@
 /**
  * Academy — guided lessons with a FIXED curriculum (unlike Training, the
  * algorithms here are not selectable or editable: each lesson teaches a
- * specific set, split into `required` and nice-to-know). Three lessons —
- * first layer, second layer, last layer (four looks) — mirroring the
- * "Learn to solve" guides in data/guides.
+ * specific set, split into `required` and nice-to-know).
+ *
+ * Three TOP-LEVEL lessons, one per first-two-layers method, each ending in
+ * the same last layer (LBL_METHOD / ZBL_METHOD literally share the four
+ * FOUR_LOOK_LL_CORNERS_FIRST step objects — selecting/practicing an alg in
+ * one lesson's last-layer step is the same drill in the other, since
+ * storage is keyed by step id, not lesson id):
+ *
+ *  - LBL ("layer by layer"): FIRST_LAYER's corners step, then
+ *    SECOND_LAYER's edges step, then the four last-layer looks. Mirrors
+ *    the "Layer by layer" + "The last layer, corners first" guides.
+ *  - ZBL ("Zeta Slotting"): edges first (SECOND_LAYER's step, reused
+ *    as-is — inserting an edge doesn't care whether a corner already
+ *    filled the slot), then ZETA_CORNERS (F2L's "Edge In Slot" cases:
+ *    insert the corner around an edge that's already seated), then the
+ *    same four last-layer looks. Mirrors the "Zeta Slotting" guide.
+ *  - F2L: the intuitive-F2L curriculum from the "Beginner F2L" guide —
+ *    the four basic inserts, then the set-up cases — sourced from the
+ *    SAME algorithm data the guide reads via helpers.f2lAlg, so guide and
+ *    drill can't drift apart (same pattern as academyAlg for last layer).
+ *
+ * FIRST_LAYER, SECOND_LAYER and FOUR_LOOK_LL_CORNERS_FIRST stay exported
+ * as their own (non-top-level) AcademyLesson values purely so their
+ * `.steps` can be spread into LBL_METHOD/ZBL_METHOD below and so
+ * data/guides/helpers.ts's academyAlg() can keep reading from
+ * FOUR_LOOK_LL_CORNERS_FIRST directly.
  *
  * Alg notation may contain "(...)" trigger grouping — e.g.
  * "F (R U R' U') F'" marks the sexy move. Parentheses are DISPLAY-ONLY:
@@ -262,4 +285,99 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
   ],
 };
 
-export const ACADEMY_LESSONS: AcademyLesson[] = [FIRST_LAYER, SECOND_LAYER, FOUR_LOOK_LL_CORNERS_FIRST];
+/**
+ * Zeta Slotting's corner step — F2L's "Edge In Slot" cases: the edge
+ * already sits correctly in the slot (placed by SECOND_LAYER's step
+ * first), and the corner drops in from the top layer around it without
+ * disturbing it. Three cases, by which way the corner's white sticker
+ * points while it waits directly above the slot (up / front / right) —
+ * same recognition shape as FIRST_LAYER's corners step, different
+ * algorithms because the edge is in the way this time. Verified against
+ * the engine in academy.test.ts and data/guides/guides.test.ts.
+ */
+const ZETA_CORNERS_STEP: AcademyStep = {
+  id: "zeta-corners",
+  title: "Corners",
+  description:
+    "Corner above its slot at the front-right, edge already correctly seated below it. White facing up: the " +
+    "reverse sexy move ×3. White facing front or right: one longer algorithm each — the edge staying put is what " +
+    "makes them longer than plain first-layer inserts.",
+  view: "f2l",
+  algs: [
+    { id: "up", name: "White up · reverse ×3", alg: "(U R U' R') (U R U' R') (U R U' R')", required: true, description: "The corner's white sticker points up. F2L 32." },
+    { id: "front", name: "White front", alg: "U' R U' R' U2 R U' R'", required: true, description: "The corner's white sticker points at you. F2L 33." },
+    { id: "right", name: "White right", alg: "U R U R' U2 R U R'", required: true, description: "The corner's white sticker points right. F2L 34." },
+    { id: "left-up", name: "Left hand · white up", alg: "(U' L' U L) (U' L' U L) (U' L' U L)", required: false, description: "Same as \"white up\", mirrored: slot at the front-left." },
+  ],
+};
+
+export const LBL_METHOD: AcademyLesson = {
+  id: "lbl",
+  title: "LBL",
+  description:
+    "Layer by layer: corners into the first layer, then edges into the second, then the last layer in four looks. " +
+    "See the \"Layer by layer\" and \"The last layer, corners first\" guides.",
+  steps: [FIRST_LAYER.steps[0], SECOND_LAYER.steps[0], ...FOUR_LOOK_LL_CORNERS_FIRST.steps],
+};
+
+export const ZBL_METHOD: AcademyLesson = {
+  id: "zbl",
+  title: "ZBL",
+  description:
+    "Zeta Slotting: edges into the first two layers before any corners, then a small set of F2L algorithms drops " +
+    "each corner in around its already-seated edge, then the same last layer as LBL. See the \"Zeta Slotting\" guide.",
+  steps: [SECOND_LAYER.steps[0], ZETA_CORNERS_STEP, ...FOUR_LOOK_LL_CORNERS_FIRST.steps],
+};
+
+/**
+ * F2L — the intuitive curriculum from the "Beginner F2L" guide: two basic
+ * inserts (plus their left-hand mirrors) and the set-up cases that reduce
+ * to one of those two. Algorithm text is the single source of truth for
+ * that guide too (see helpers.f2lAlg) — this is NOT the full 41-case F2L
+ * reference set (that lives in the Drill Algorithms tab); it's the small
+ * set this app actually teaches as "enough to solve every case".
+ */
+export const F2L_METHOD: AcademyLesson = {
+  id: "f2l",
+  title: "F2L",
+  description:
+    "Intuitive F2L: solve the first two layers in corner-edge pairs instead of one piece at a time. See the " +
+    "\"Beginner F2L\" guide for the full reasoning behind each case.",
+  steps: [
+    {
+      id: "inserts",
+      title: "Basic inserts",
+      description:
+        "A pair sitting in the top layer is either matched (joined, colours lined up) or split (corner above its " +
+        "slot, edge across the top). One insert for each shape, plus its left-hand mirror.",
+      view: "f2l",
+      algs: [
+        { id: "matched-right", name: "Matched", alg: "U R U' R'", required: true, description: "Reverse sexy move — corner's white sticker faces you, edge joined to its right." },
+        { id: "split-right", name: "Split", alg: "R U R'", required: true, description: "Corner above its slot, white facing right; edge across the top, green facing up." },
+        { id: "matched-left", name: "Matched · left hand", alg: "U' L' U L", required: false, description: "Mirror of the matched insert." },
+        { id: "split-left", name: "Split · left hand", alg: "L' U' L", required: false, description: "Mirror of the split insert." },
+      ],
+    },
+    {
+      id: "setup",
+      title: "Setting up the pair",
+      description:
+        "Most pairs aren't ready to insert. Each of these is a couple of set-up moves followed by exactly one of " +
+        "the two basic inserts above.",
+      view: "f2l",
+      algs: [
+        { id: "corner-in-slot-right", name: "Corner in slot · white right", alg: "R U R' U' R U R'", required: true, description: "Pulls the corner out, then the split insert." },
+        { id: "corner-in-slot-front", name: "Corner in slot · white front", alg: "R U' R' U R U' R'", required: true, description: "Pulls the corner out into a matched pair, then the matched insert." },
+        { id: "edge-in-slot", name: "Edge in slot", alg: "U' R U' R' U2 R U' R'", required: true, description: "Brings the edge out into a matched pair, then the matched insert." },
+        { id: "both-in-slot", name: "Both in slot, corner twisted", alg: "R U' R' U R U2 R' U R U' R'", required: true, description: "Takes the pair out, joins them, then the matched insert." },
+        { id: "apart-white-front", name: "Apart · white front", alg: "U' R U R' U2 R U' R'", required: true, description: "Joins the pair into a matched shape, then the matched insert." },
+        { id: "apart-white-right", name: "Apart · white right", alg: "U' R U R' U R U R'", required: true, description: "Joins the pair, then the split insert." },
+        { id: "joined-wrong", name: "Joined, wrong colours", alg: "U' R U' R' U R U R'", required: true, description: "Re-joins the pair properly, then the split insert." },
+        { id: "white-up-edge-right", name: "White up · edge right", alg: "R U2 R' U' R U R'", required: true, description: "Turns the corner so white faces the side, then the split insert." },
+        { id: "white-up-edge-left", name: "White up · edge left", alg: "U2 R U R' U R U' R'", required: true, description: "Joins the pair into a matched shape, then the matched insert." },
+      ],
+    },
+  ],
+};
+
+export const ACADEMY_LESSONS: AcademyLesson[] = [LBL_METHOD, ZBL_METHOD, F2L_METHOD];

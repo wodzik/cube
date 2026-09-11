@@ -124,7 +124,7 @@ describe("guide data integrity", () => {
   });
 
   it("masks have the right orbit sizes (4 facelets per center)", () => {
-    const kinds: GuideMaskKind[] = ["cross", "first-layer", "f2l", "f2l-pair", "ll-corners-orient", "ll-orient", "ll-corners", "ll", "full"];
+    const kinds: GuideMaskKind[] = ["cross", "first-layer", "cross-edge", "f2l", "f2l-pair", "ll-corners-orient", "ll-orient", "ll-corners", "ll", "full"];
     for (const k of kinds) {
       const m = guideMask(k);
       expect(m.orbits.EDGES.pieces.length).toBe(12);

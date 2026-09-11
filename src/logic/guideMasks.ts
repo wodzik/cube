@@ -28,6 +28,8 @@ export type GuideMaskKind =
   | "cross"
   /** White layer (cross + corners) + centers. */
   | "first-layer"
+  /** White cross + the one front-right middle edge (F2L_PAIR.edge) — no corners at all. For "insert the edges before any corner exists" scenes (Zeta Slotting). */
+  | "cross-edge"
   /** First two layers in color, last layer greyed out — cubing.js's "F2L" stickering look. */
   | "f2l"
   /** Same as "f2l" in the guides — kept as a distinct kind so the F2L guide can be re-styled later without touching layer-by-layer. */
@@ -63,6 +65,8 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
       case "cross":
       case "first-layer":
         return WHITE_EDGES.has(p) ? [REG, REG] : [OFF, OFF];
+      case "cross-edge":
+        return WHITE_EDGES.has(p) || p === F2L_PAIR.edge ? [REG, REG] : [OFF, OFF];
       case "f2l":
       case "f2l-pair":
         return yellow ? [OFF, OFF] : [REG, REG];
@@ -84,6 +88,8 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
         return [OFF, OFF, OFF];
       case "first-layer":
         return WHITE_CORNERS.has(p) ? [REG, REG, REG] : [OFF, OFF, OFF];
+      case "cross-edge":
+        return [OFF, OFF, OFF];
       case "f2l":
       case "f2l-pair":
         return yellow ? [OFF, OFF, OFF] : [REG, REG, REG];

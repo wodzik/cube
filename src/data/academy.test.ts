@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { cube3x3x3 } from "cubing/puzzles";
-import { ACADEMY_LESSONS, FOUR_LOOK_LL_CORNERS_FIRST, parseDecoratedAlg } from "./academy";
+import { ACADEMY_LESSONS, F2L_METHOD, FOUR_LOOK_LL_CORNERS_FIRST, LBL_METHOD, SECOND_LAYER, ZBL_METHOD, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 
@@ -96,24 +96,36 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("lesson registry lists first, second, last layer in order", () => {
-    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["first-layer", "second-layer", "4lll-corners-first"]);
+  it("lesson registry lists LBL, ZBL, F2L in order", () => {
+    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["lbl", "zbl", "f2l"]);
   });
 
-  it("first/second layer algorithms solve their case from the drill's setup (inverse applied to solved)", async () => {
+  it("LBL and ZBL share the same last-layer step objects (selection/attempts stay in sync)", () => {
+    expect(LBL_METHOD.steps.slice(2)).toEqual(FOUR_LOOK_LL_CORNERS_FIRST.steps);
+    expect(ZBL_METHOD.steps.slice(2)).toEqual(FOUR_LOOK_LL_CORNERS_FIRST.steps);
+    expect(LBL_METHOD.steps[2]).toBe(FOUR_LOOK_LL_CORNERS_FIRST.steps[0]);
+    expect(ZBL_METHOD.steps[2]).toBe(FOUR_LOOK_LL_CORNERS_FIRST.steps[0]);
+    // Edges is shared between LBL and ZBL too — same algorithms either way.
+    expect(LBL_METHOD.steps[1]).toBe(SECOND_LAYER.steps[0]);
+    expect(ZBL_METHOD.steps[0]).toBe(SECOND_LAYER.steps[0]);
+  });
+
+  it("every algorithm in every lesson solves its case from the drill's setup (inverse applied to solved)", async () => {
     const kpuzzle = await cube3x3x3.kpuzzle();
-    for (const lesson of ACADEMY_LESSONS.slice(0, 2)) {
+    for (const lesson of ACADEMY_LESSONS) {
       for (const step of lesson.steps) {
         for (const a of step.algs) {
           const { tokens } = parseDecoratedAlg(a.alg);
           const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" "))).applyAlg(tokens.join(" "));
-          expect(`${a.id}: ${p.experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true })}`).toBe(`${a.id}: true`);
+          expect(`${lesson.id}/${step.id}/${a.id}: ${p.experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true })}`).toBe(
+            `${lesson.id}/${step.id}/${a.id}: true`
+          );
         }
       }
     }
     // The inserts act on the D slots (U is the last layer, as for OLL), so the
     // case must leave U untouched apart from the displaced piece itself.
-    const corner = parseDecoratedAlg(ACADEMY_LESSONS[0].steps[0].algs[0].alg).tokens.join(" ");
+    const corner = parseDecoratedAlg(LBL_METHOD.steps[0].algs[0].alg).tokens.join(" ");
     const cornerCase = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(corner));
     expect([4, 5, 6, 7].filter((c) => cornerCase.patternData.CORNERS.pieces[c] !== c).length).toBe(1);
     // Views: first layer = D-index pieces; f2l greys out the U (last) layer.
@@ -125,6 +137,60 @@ describe("4LLL corners-first lesson data", () => {
     expect(f2l.orbits.EDGES.pieces[9]!.facelets).toEqual(["regular", "regular"]);
     expect(f2l.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
     expect(f2l.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
+  });
+
+  const zetaCornersStep = () => ZBL_METHOD.steps.find((s) => s.id === "zeta-corners")!;
+
+  it("Zeta Slotting's corner algs never disturb the already-seated FR edge or the cross", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const a of zetaCornersStep().algs) {
+      const { tokens } = parseDecoratedAlg(a.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const d = setup.patternData;
+      const frEdgeHome = a.id === "left-up" ? d.EDGES.pieces[9] === 9 && d.EDGES.orientation[9] === 0 : d.EDGES.pieces[8] === 8 && d.EDGES.orientation[8] === 0;
+      expect(`${a.id}: FR/FL edge home`).toBe(`${a.id}: FR/FL edge home`);
+      expect(frEdgeHome).toBe(true);
+      for (let c = 4; c < 8; c++) {
+        // the target corner (4 for right-hand cases, 5 for the mirror) is allowed to move; the other 3 D-corners must not.
+        if ((a.id === "left-up" && c === 5) || (a.id !== "left-up" && c === 4)) continue;
+        expect(`${a.id}: corner ${c} untouched`).toBe(`${a.id}: corner ${c} untouched`);
+        expect(d.CORNERS.pieces[c] === c && d.CORNERS.orientation[c] === 0).toBe(true);
+      }
+    }
+  });
+
+  it("Zeta Slotting's 3 right-hand corner cases cover white pointing up / front / right", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const CORNER_FACES = CORNERS.map((n) => n.split(""));
+    const faces = new Set<string>();
+    for (const id of ["up", "front", "right"]) {
+      const alg = zetaCornersStep().algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(4);
+      const ori = setup.patternData.CORNERS.orientation[slot];
+      faces.add(CORNER_FACES[slot][ori % 3]);
+    }
+    expect(faces).toEqual(new Set(["U", "F", "R"]));
+  });
+
+  it("F2L lesson's set-up cases each reduce to a basic insert without moving the cross", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const setup = F2L_METHOD.steps[1];
+    // The two inserts' distinguishing tail — matched ends "R U' R'", split ends "R U R'"
+    // (see F2L_METHOD.steps[0]) — set-up cases prepend alignment/extraction moves but
+    // always end in one of these two.
+    const tails = ["R U' R'", "R U R'"];
+    for (const a of setup.algs) {
+      const { tokens } = parseDecoratedAlg(a.alg);
+      const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const crossOk = [4, 5, 6, 7].every((e) => p.patternData.EDGES.pieces[e] === e && p.patternData.EDGES.orientation[e] === 0);
+      expect(`${a.id}: cross intact`).toBe(`${a.id}: cross intact`);
+      expect(crossOk).toBe(true);
+      const tail = tokens.slice(-3).join(" ");
+      expect(`${a.id} tail: ${tail}`).toBe(`${a.id} tail: ${tails.find((t) => t === tail) ?? `expected one of ${tails.join(" / ")}`}`);
+    }
   });
 
   it("step views follow the curriculum: OLL-style for orientation, corner-only for CP", () => {
