@@ -474,11 +474,16 @@ function SolvePageInner({
   const solveTimeMs = selectSolveTimeMs(state);
   const moveCount = selectMoveCount(state);
   const tps = selectTPS(state);
-  // Mirrors displaySec's "hold the last result" logic — once the next
-  // attempt's scramble starts generating, moveCount above tracks THAT
-  // attempt's (empty) moveLog, so the held display needs the finished
-  // solve's own count instead.
-  const displayMoveCount = summaryRecord && state.phase !== "active" ? summaryRecord.moveCount : moveCount;
+  // Mirrors displaySec's "hold the last result" logic. Outside active/done
+  // moveLog holds SCRAMBLE moves (it's only reset when the solve starts), so
+  // the timer must not count those — show 0, exactly like the time display
+  // sits at 0.000 until the solve begins.
+  const displayMoveCount =
+    summaryRecord && state.phase !== "active"
+      ? summaryRecord.moveCount
+      : state.phase === "active" || state.phase === "done"
+        ? moveCount
+        : 0;
 
   const progress = selectCurrentProgress(state);
   const targetTokens = state.targetNotation.trim().split(/\s+/).filter(Boolean);
