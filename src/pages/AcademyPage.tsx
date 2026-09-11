@@ -117,6 +117,11 @@ function AcademyInner() {
 
   const step: AcademyStep = lesson.steps.find((s) => s.id === stepId) ?? lesson.steps[0];
   const stepMask = useMemo(() => academyStepMask(step.view), [step.view]);
+  // First-layer/second-layer cases turn on where a sticker points relative
+  // to the SIDE of the cube (white right vs. up vs. front) — invisible from
+  // the flat top-down 2D-LL angle every other step uses. Those two steps
+  // get a 3D card instead.
+  const cardVisualization = step.view === "first-layer" || step.view === "f2l" ? "3D" : "experimental-2D-LL";
   const selectedIds = useMemo(() => selectedInStep(step, stored), [step, stored]);
   const selectedAlgs = useMemo(() => step.algs.filter((a) => selectedIds.includes(a.id)), [step, selectedIds]);
   const alg = selectedAlgs[Math.min(drillIdx, Math.max(selectedAlgs.length - 1, 0))];
@@ -395,6 +400,7 @@ function AcademyInner() {
                   key={a.id}
                   alg={a}
                   stickeringMaskOrbits={stepMask}
+                  visualization={cardVisualization}
                   selected={selectedIds.includes(a.id)}
                   onSelectedChange={(sel) => setSelection(a.id, sel)}
                   onPractice={() => practiceNow(a.id)}

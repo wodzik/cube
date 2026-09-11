@@ -14,17 +14,26 @@ import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { parseDecoratedAlg, type AcademyAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
+import type { VisualizationMode } from "../types/cube";
 
 interface AcademyAlgCardProps {
   alg: AcademyAlg;
   /** Step view mask (trainerMasks.academyStepMask) applied to the preview. */
   stickeringMaskOrbits: StickeringMaskOrbits;
+  /**
+   * Preview angle — the flat top-down "experimental-2D-LL" reads fine for
+   * last-layer steps (everything relevant faces up), but the first-layer
+   * and second-layer steps need the FRONT of the cube visible too (a
+   * corner's white sticker pointing at you vs. up vs. right isn't
+   * distinguishable from directly above) — those steps pass "3D" instead.
+   */
+  visualization?: VisualizationMode;
   selected: boolean;
   onSelectedChange: (selected: boolean) => void;
   onPractice: () => void;
 }
 
-export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelectedChange, onPractice }: AcademyAlgCardProps) {
+export function AcademyAlgCard({ alg, stickeringMaskOrbits, visualization = "experimental-2D-LL", selected, onSelectedChange, onPractice }: AcademyAlgCardProps) {
   const plainAlg = parseDecoratedAlg(alg.alg).tokens.join(" ");
   const [showPlayback, setShowPlayback] = useState(false);
 
@@ -70,7 +79,7 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, selected, onSelected
           <AlgCaseVisualisation
             alg={plainAlg}
             stickeringMaskOrbits={stickeringMaskOrbits}
-            visualization="experimental-2D-LL"
+            visualization={visualization}
             className="size-full"
           />
         </div>
