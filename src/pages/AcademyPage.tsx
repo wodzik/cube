@@ -389,7 +389,9 @@ function AcademyInner() {
           {step.algs.length === 0 ? (
             <p className="text-xs text-gray-600 italic">Coming soon.</p>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+            {/* Fixed-width tiles (not a stretching grid): a 2D case preview is
+                legible at ~150px and only gets cartoonish on wide screens. */}
+            <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(140px, 160px))" }}>
               {step.algs.map((a) => (
                 <AcademyAlgCard
                   key={a.id}
