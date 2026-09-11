@@ -10,7 +10,7 @@
  *
  * Every demo uses the same pair — white/green/orange, into the front-right
  * slot (between the green and orange centres, white on the bottom) — with
- * the other three pairs dimmed and the last layer hidden.
+ * the other three pairs solved and the last layer greyed out.
  */
 
 import type { Guide, GuideCase } from "./types";
@@ -38,7 +38,7 @@ export const BEGINNER_F2L_GUIDE: Guide = {
       eyebrow: "The idea",
       blocks: [
         { kind: "p", text: "After the cross, each of the four corners of the first layer has exactly one middle-layer edge that belongs directly above it. Together they fill one **slot** — the front-right slot is the space between the green and orange centres, above the green-orange cross edge. F2L is: get the corner and its edge next to each other in the top layer, so they form a pair, then drop the pair into its slot with three or four moves." },
-        { kind: "p", text: "Everything below is shown on one pair — white/green/orange, going into the front-right slot. The other three pairs are already solved and dimmed, and the last layer is hidden: **while you're doing F2L, the top layer doesn't matter**. Turn it as much as you like." },
+        { kind: "p", text: "Everything below is shown on one pair — white/green/orange, going into the front-right slot. The other three pairs are already solved, and the last layer is greyed out: **while you're doing F2L, the top layer doesn't matter**. Turn it as much as you like." },
         { kind: "callout", tone: "tip", title: "Every case has a mirror", text: ["Everything here is shown for the front-right slot with the right hand. The same situation on the front-left slot uses the mirror: swap `R` for `L'`, `R'` for `L`, `U` for `U'` — the left-hand versions of the two basic inserts are listed explicitly so you can see the pattern."] },
       ],
     },

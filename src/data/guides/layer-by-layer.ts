@@ -45,7 +45,7 @@ export const LAYER_BY_LAYER_GUIDE: Guide = {
             solveCase("daisy-bottom-wrong", "On the bottom, white down, wrong spot", "White faces down but the side colour doesn't match its centre.", "Hold it at the right.", "R2", "cross", { note: "A half turn brings it straight up as a petal.", setup: "z2 F2 U' R2" }),
           ],
         },
-        { kind: "p", text: "**Stage 2 — daisy to cross.** Take any petal. Turn the top (`U`) until the petal's *side* colour sits directly above the centre of the same colour. Then turn that face twice: the petal goes down onto the bottom, white facing down, side colour matching. Repeat for all four." },
+        { kind: "p", text: "**Stage 2 — daisy to cross.** Take any petal. Turn the top (`U`) until the petal's **side** colour sits directly above the centre of the same colour. Then turn that face twice: the petal goes down onto the bottom, white facing down, side colour matching. Repeat for all four." },
         {
           kind: "cases",
           cases: [
@@ -82,7 +82,7 @@ export const LAYER_BY_LAYER_GUIDE: Guide = {
       eyebrow: "Step 3",
       blocks: [
         { kind: "p", text: "**Goal:** the four edges of the middle layer. They're the edges with **no yellow** on them — every yellow edge belongs to the last layer and can wait. The demos show the first two layers in colour and grey out the last layer: that's exactly what you should be looking at." },
-        { kind: "p", text: "Find a non-yellow edge in the top layer. Turn the top (`U`) until its *front* sticker matches the centre below it — the edge and the centre form an upside-down T. Now look at the edge's *top* sticker: it matches either the centre on the right or the centre on the left. That's where the edge goes." },
+        { kind: "p", text: "Find a non-yellow edge in the top layer. Turn the top (`U`) until its **front** sticker matches the centre below it — the edge and the centre form an upside-down T. Now look at the edge's **top** sticker: it matches either the centre on the right or the centre on the left. That's where the edge goes." },
         {
           kind: "cases",
           cases: [

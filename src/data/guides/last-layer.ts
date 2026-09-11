@@ -37,7 +37,7 @@ export const LAST_LAYER_GUIDE: Guide = {
       blocks: [
         { kind: "list", ordered: true, items: ["**Orient the corners** — get all four corner yellow stickers facing up.", "**Orient the edges** — get the edge yellow stickers up too; the whole top is yellow.", "**Permute the corners** — move the corners into their correct spots.", "**Permute the edges** — cycle the edges home; solved."] },
         { kind: "p", text: "The trick of this method: look 1 teaches you two building blocks, **A** and **B**. Look 3 doesn't need anything new — its two algorithms are literally A followed by B, and B followed by A." },
-        { kind: "callout", tone: "tip", title: "Headlights", text: ["Two corners next to each other whose yellow stickers both point out of the *same* side look like a pair of headlights. Several cases are recognised by where the headlights are — and \"hold the headlights on the left\" means turn the whole cube (not just the top) so that side is on your left."] },
+        { kind: "callout", tone: "tip", title: "Headlights", text: ["Two corners next to each other whose yellow stickers both point out of the **same** side look like a pair of headlights. Several cases are recognised by where the headlights are — and \"hold the headlights on the left\" means turn the whole cube (not just the top) so that side is on your left."] },
       ],
     },
     {

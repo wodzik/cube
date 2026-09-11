@@ -10,10 +10,12 @@
  * this file exists next to trainerMasks.academyStepMask (which is written
  * for the un-rotated frame).
  *
- * The first two layers are never dimmed in the last-layer views: a solved
- * F2L in full colour is what the reader actually sees on their cube, and
- * it's what "match the centres" recognition refers to. Only the last-layer
- * stickers that don't matter for the current look are hidden.
+ * The first two layers are NEVER dimmed, in any view: a solved (or
+ * being-solved) F2L in full colour is what the reader actually sees on
+ * their cube, and it's what "match the centres" recognition refers to.
+ * Pieces that don't matter for the current step are greyed out with
+ * "ignored" — never "dim", which renders as darkened colours that read as
+ * a dirty cube rather than as "not relevant".
  *
  * The spatial FRONT-RIGHT slot in the z2 frame holds the pieces cubing.js
  * calls UFL (corner 3) and FL (edge 9) — see F2L_PAIR below.
@@ -26,9 +28,9 @@ export type GuideMaskKind =
   | "cross"
   /** White layer (cross + corners) + centers. */
   | "first-layer"
-  /** First two layers in color, last layer dimmed. */
+  /** First two layers in color, last layer greyed out — cubing.js's "F2L" stickering look. */
   | "f2l"
-  /** Like "f2l", but only the front-right pair in color — the other three pairs and the cross are dimmed too. */
+  /** Same as "f2l" in the guides — kept as a distinct kind so the F2L guide can be re-styled later without touching layer-by-layer. */
   | "f2l-pair"
   /** Last-layer corners show only their yellow sticker; LL edges hidden — the orient-corners look. */
   | "ll-corners-orient"
@@ -49,7 +51,6 @@ const MIDDLE_EDGES = new Set([8, 9, 10, 11]);
 const F2L_PAIR = { corner: 3, edge: 9 };
 
 const REG: FaceletMask = "regular";
-const DIM: FaceletMask = "dim";
 const OFF: FaceletMask = "ignored";
 
 export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
@@ -63,9 +64,8 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
       case "first-layer":
         return WHITE_EDGES.has(p) ? [REG, REG] : [OFF, OFF];
       case "f2l":
-        return yellow ? [DIM, DIM] : [REG, REG];
       case "f2l-pair":
-        return p === F2L_PAIR.edge ? [REG, REG] : yellow ? [OFF, OFF] : [DIM, DIM];
+        return yellow ? [OFF, OFF] : [REG, REG];
       case "ll-corners-orient":
       case "ll-corners":
         return yellow ? [OFF, OFF] : [REG, REG];
@@ -85,9 +85,8 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
       case "first-layer":
         return WHITE_CORNERS.has(p) ? [REG, REG, REG] : [OFF, OFF, OFF];
       case "f2l":
-        return yellow ? [DIM, DIM, DIM] : [REG, REG, REG];
       case "f2l-pair":
-        return p === F2L_PAIR.corner ? [REG, REG, REG] : yellow ? [OFF, OFF, OFF] : [DIM, DIM, DIM];
+        return yellow ? [OFF, OFF, OFF] : [REG, REG, REG];
       case "ll-corners-orient":
       case "ll-orient":
         return yellow ? [REG, OFF, OFF] : [REG, REG, REG];
