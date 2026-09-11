@@ -63,6 +63,9 @@ export interface TrainerPanelProps {
   timeMs: number;
   timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
   timerClassName?: string;
+  /** Show move count instead of time on the big timer (and hide the stats time chart) — see StoredSession.moveCountOnly. */
+  moveCountOnly?: boolean;
+  moveCount?: number;
   hintText?: string | null;
   controls?: ReactNode;
   centerBottom?: ReactNode;
@@ -141,6 +144,8 @@ export function TrainerPanel({
   timeMs,
   timerState,
   timerClassName = "text-6xl xl:text-7xl font-extrabold",
+  moveCountOnly = false,
+  moveCount = 0,
   hintText,
   controls,
   centerBottom,
@@ -204,7 +209,13 @@ export function TrainerPanel({
           {isInspecting ? (
             <InspectionCountdown secondsLeft={inspectionSecondsLeft} mode={inspectionMode} />
           ) : (
-            <TimerDisplay timeMs={timeMs} state={timerState} className={timerClassName} />
+            <TimerDisplay
+              timeMs={timeMs}
+              state={timerState}
+              className={timerClassName}
+              moveCountOnly={moveCountOnly}
+              moveCount={moveCount}
+            />
           )}
 
           {hintText && <p className="text-gray-500 text-sm tracking-wide animate-pulse">{hintText}</p>}
@@ -270,7 +281,16 @@ export function TrainerPanel({
               {statsLabel}
             </h3>
             <div className="flex-1 min-h-0 flex flex-col">
-              <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
+              {moveCountOnly ? (
+                <div
+                  className="flex-1 flex items-center justify-center text-center text-gray-600 text-sm px-6"
+                  style={{ minHeight: statsHeight }}
+                >
+                  Move count only — time chart hidden for this session.
+                </div>
+              ) : (
+                <StatsChart timesMs={timesMs} height={statsHeight} showAo12={showAo12} />
+              )}
             </div>
           </div>
         </div>

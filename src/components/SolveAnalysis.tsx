@@ -56,6 +56,8 @@ interface SolveAnalysisProps {
   onMoveToNewSession?: () => void;
   /** Delete this solve permanently (double-click confirmed here) — omit to hide the button. */
   onDelete?: () => void;
+  /** Hide time (header, TPS, per-stage recog/exec/total) and show move count instead — see StoredSession.moveCountOnly. */
+  moveCountOnly?: boolean;
 }
 
 type DisplayMethod = Exclude<SolveMethod, "unknown">;
@@ -74,7 +76,15 @@ function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
-function StageTimingRow({ timing, onJump }: { timing: StageTiming; onJump: (moveIndex: number) => void }) {
+function StageTimingRow({
+  timing,
+  onJump,
+  moveCountOnly = false,
+}: {
+  timing: StageTiming;
+  onJump: (moveIndex: number) => void;
+  moveCountOnly?: boolean;
+}) {
   const reached = timing.startMoveIndex !== null;
   // A stage with 0 moves either completed as a side effect of the previous
   // stage's last move (cascade — one turn satisfied two stages at once) or
@@ -104,7 +114,7 @@ function StageTimingRow({ timing, onJump }: { timing: StageTiming; onJump: (move
         </div>
         {timing.moves.length > 0 && <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{timing.moves.join(" ")}</p>}
       </div>
-      {!skipped && (
+      {!skipped && !moveCountOnly && (
         <div className="shrink-0 flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-right">
           <span className="text-gray-400" title="Recognition time">
             recog {formatMs(timing.recognitionMs)}
@@ -121,7 +131,16 @@ function StageTimingRow({ timing, onJump }: { timing: StageTiming; onJump: (move
   );
 }
 
-export function SolveAnalysis({ record, onClose, onUseScramble, moveTargets, onMoveToSession, onMoveToNewSession, onDelete }: SolveAnalysisProps) {
+export function SolveAnalysis({
+  record,
+  onClose,
+  onUseScramble,
+  moveTargets,
+  onMoveToSession,
+  onMoveToNewSession,
+  onDelete,
+  moveCountOnly = false,
+}: SolveAnalysisProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Display text: collapsed, compact (R2 instead of R R).
   const displayAlg = record.reducedMoves.join(" ");
@@ -175,9 +194,11 @@ export function SolveAnalysis({ record, onClose, onUseScramble, moveTargets, onM
       <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-white font-semibold text-base font-mono tabular-nums">{formatTimeMs(record.timeMs)}</h2>
+            <h2 className="text-white font-semibold text-base font-mono tabular-nums">
+              {moveCountOnly ? `${record.moveCount} moves` : formatTimeMs(record.timeMs)}
+            </h2>
             <p className="text-gray-400 text-xs mt-0.5">
-              {record.moveCount} moves · {record.tps.toFixed(2)} TPS
+              {moveCountOnly ? record.method : `${record.moveCount} moves · ${record.tps.toFixed(2)} TPS`}
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white transition-colors">
@@ -230,7 +251,12 @@ export function SolveAnalysis({ record, onClose, onUseScramble, moveTargets, onM
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 px-2.5">{method} steps</h3>
               <div className="flex flex-col gap-0.5">
                 {timings.map((t) => (
-                  <StageTimingRow key={t.stage} timing={t} onJump={(idx) => cubeRef.current?.setMoveIndex(idx)} />
+                  <StageTimingRow
+                    key={t.stage}
+                    timing={t}
+                    onJump={(idx) => cubeRef.current?.setMoveIndex(idx)}
+                    moveCountOnly={moveCountOnly}
+                  />
                 ))}
               </div>
             </div>

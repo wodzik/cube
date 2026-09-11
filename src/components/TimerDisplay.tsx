@@ -11,6 +11,9 @@ interface TimerDisplayProps {
   timeMs: number;
   state: TimerState;
   className?: string;
+  /** Show `moveCount` instead of `timeMs` — see StoredSession.moveCountOnly. */
+  moveCountOnly?: boolean;
+  moveCount?: number;
 }
 
 const STATE_CLASSES: Record<TimerState, string> = {
@@ -25,10 +28,19 @@ const STATE_CLASSES: Record<TimerState, string> = {
   dnf: "text-gray-600 line-through",
 };
 
-export function TimerDisplay({ timeMs, state, className = "" }: TimerDisplayProps) {
+export function TimerDisplay({ timeMs, state, className = "", moveCountOnly = false, moveCount = 0 }: TimerDisplayProps) {
   return (
     <div className={`font-mono tabular-nums select-none tracking-tight ${STATE_CLASSES[state]} ${className}`}>
-      {state === "dnf" ? <span className="text-gray-600">DNF</span> : formatTimeMs(timeMs)}
+      {state === "dnf" ? (
+        <span className="text-gray-600">DNF</span>
+      ) : moveCountOnly ? (
+        <>
+          {moveCount}
+          <span className="text-[0.35em] font-sans font-semibold text-gray-500 ml-2 tracking-wide uppercase align-middle">moves</span>
+        </>
+      ) : (
+        formatTimeMs(timeMs)
+      )}
     </div>
   );
 }

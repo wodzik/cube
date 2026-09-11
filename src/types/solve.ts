@@ -75,4 +75,11 @@ export interface StoredSession {
    * plug in without touching this field's meaning.
    */
   solveMethod: Exclude<SolveMethod, "unknown">;
+  /**
+   * Hides solve times everywhere this session is displayed (timer, last-solve
+   * result, history table, analysis) and shows move count in their place.
+   * Purely a display setting — timing is still recorded on every SolveRecord
+   * regardless, so turning this off later doesn't lose anything.
+   */
+  moveCountOnly: boolean;
 }

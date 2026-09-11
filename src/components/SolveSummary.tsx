@@ -19,13 +19,15 @@ interface SolveSummaryProps {
   record: SolveRecord;
   /** Open the full SolveAnalysis modal (3D playback, method toggle, per-stage jumps). */
   onOpenAnalysis: () => void;
+  /** Hide time (headline, TPS, per-stage recog/exec/total) and show move count instead — see StoredSession.moveCountOnly. */
+  moveCountOnly?: boolean;
 }
 
 function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(2)}`;
 }
 
-export function SolveSummary({ record, onOpenAnalysis }: SolveSummaryProps) {
+export function SolveSummary({ record, onOpenAnalysis, moveCountOnly = false }: SolveSummaryProps) {
   const detector = detectorForMethod(record.method);
   const boundaries =
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
@@ -36,9 +38,18 @@ export function SolveSummary({ record, onOpenAnalysis }: SolveSummaryProps) {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Last solve</p>
-          <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">{formatTimeMs(record.timeMs)}</p>
+          <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">
+            {moveCountOnly ? (
+              <>
+                {record.moveCount}
+                <span className="text-base font-sans font-semibold text-gray-500 ml-1.5 align-middle">moves</span>
+              </>
+            ) : (
+              formatTimeMs(record.timeMs)
+            )}
+          </p>
           <p className="text-sm text-gray-400 mt-1">
-            {record.moveCount} moves · {record.tps.toFixed(2)} TPS · {record.method}
+            {moveCountOnly ? record.method : `${record.moveCount} moves · ${record.tps.toFixed(2)} TPS · ${record.method}`}
           </p>
         </div>
         <button
@@ -59,9 +70,13 @@ export function SolveSummary({ record, onOpenAnalysis }: SolveSummaryProps) {
             <tr className="text-[10px] uppercase tracking-wider text-gray-500">
               <th className="text-left font-semibold pb-1">Stage</th>
               <th className="text-right font-semibold pb-1">Moves</th>
-              <th className="text-right font-semibold pb-1">Recog</th>
-              <th className="text-right font-semibold pb-1">Exec</th>
-              <th className="text-right font-semibold pb-1">Total</th>
+              {!moveCountOnly && (
+                <>
+                  <th className="text-right font-semibold pb-1">Recog</th>
+                  <th className="text-right font-semibold pb-1">Exec</th>
+                  <th className="text-right font-semibold pb-1">Total</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -71,9 +86,11 @@ export function SolveSummary({ record, onOpenAnalysis }: SolveSummaryProps) {
                 <tr key={t.stage} className={`border-t border-white/[0.04] ${skipped ? "text-gray-600" : "text-gray-300"}`}>
                   <td className="py-1.5 text-left font-sans font-medium">{stageDescription(t.stage, t.detail)}</td>
                   {skipped ? (
-                    <td colSpan={4} className="py-1.5 text-right text-[10px] uppercase tracking-wider text-amber-400/60">
+                    <td colSpan={moveCountOnly ? 1 : 4} className="py-1.5 text-right text-[10px] uppercase tracking-wider text-amber-400/60">
                       skip
                     </td>
+                  ) : moveCountOnly ? (
+                    <td className="py-1.5 text-right">{t.moveCount}</td>
                   ) : (
                     <>
                       <td className="py-1.5 text-right">{t.moveCount}</td>
