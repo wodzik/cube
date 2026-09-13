@@ -50,6 +50,7 @@ import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
 import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import { TrainerPanel } from "../components/TrainerPanel";
+import { CompactRecentList } from "../components/CompactRecentList";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CaseListItem } from "../components/CaseListItem";
 import { CaseEdit } from "../components/CaseEdit";
@@ -145,6 +146,10 @@ function AttackPageInner() {
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(sessionKey));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  // Recent attack sessions list: collapsed by default to the compact sidebar
+  // preview (CompactRecentList, in statsAside) — this flips it to the full
+  // sortable/paginated table below instead.
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   // Recent attack sessions pagination — page size persists across groups,
   // current page resets on group switch (armSession) and page-size change.
   const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number | "all">(readStoredPageSize);
@@ -525,6 +530,26 @@ function AttackPageInner() {
       timesMs={sessionTotalsMs}
       statsLabel="Attack times"
       showAo12={false}
+      statsAside={
+        history.length > 0 ? (
+          <CompactRecentList
+            title="Recent sessions"
+            items={sortedHistory}
+            keyOf={(s) => s.id}
+            expanded={historyExpanded}
+            onToggleExpand={() => setHistoryExpanded((v) => !v)}
+            renderRow={(s) => (
+              <div className="flex items-center gap-3 py-1.5">
+                <span className="text-[10px] text-gray-500 flex-1 truncate">
+                  {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="text-[10px] text-gray-700 shrink-0">{s.caseTimes.length}c</span>
+                <span className="text-xs font-mono tabular-nums text-white shrink-0">{formatTimeMs(s.totalMs)}</span>
+              </div>
+            )}
+          />
+        ) : undefined
+      }
       bottom={
         <div className="flex flex-col min-h-0">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -557,25 +582,33 @@ function AttackPageInner() {
               ))}
             </div>
           )}
-          {history.length > 0 && (
+          {historyExpanded && history.length > 0 && (
             <div className="border-t border-gray-800">
               <div className="px-4 pt-3 pb-1 flex items-center gap-3">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                   Recent {groupMeta?.name ?? group} attack sessions
                 </span>
-                <div className="ml-auto flex items-center gap-1">
-                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
-                  <select
-                    value={historyItemsPerPage}
-                    onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
-                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
+                <div className="ml-auto flex items-center gap-3">
+                  <button
+                    onClick={() => setHistoryExpanded(false)}
+                    className="text-[10px] font-semibold text-gray-500 hover:text-gray-200 transition-colors"
                   >
-                    {PAGE_SIZE_OPTIONS.map((n) => (
-                      <option key={n} value={n}>
-                        {n === "all" ? "All" : n}
-                      </option>
-                    ))}
-                  </select>
+                    Collapse
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                    <select
+                      value={historyItemsPerPage}
+                      onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                      className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
+                    >
+                      {PAGE_SIZE_OPTIONS.map((n) => (
+                        <option key={n} value={n}>
+                          {n === "all" ? "All" : n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
               <div className="divide-y divide-gray-800/40">

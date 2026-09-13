@@ -34,6 +34,7 @@ import { SolveControls } from "../components/SolveControls";
 import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
+import { CompactRecentList } from "../components/CompactRecentList";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
@@ -275,6 +276,11 @@ function SolvePageInner({
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
     return numbered;
   }, [solves, effectiveSortKey, sortAsc]);
+
+  // Recent solves list: collapsed by default to the compact sidebar preview
+  // (CompactRecentList, in statsAside) — this flips it to the full sortable/
+  // paginated table (the `bottom` block below) instead.
+  const [solvesExpanded, setSolvesExpanded] = useState(false);
 
   // Recent solves pagination — page size persists across sessions (csTimer-
   // style), current page does not (SolvePageInner remounts per session via
@@ -798,20 +804,48 @@ function SolvePageInner({
       moveCounts={sessionMoveCounts}
       statsLabel={`Session: ${session.name}`}
       statsAside={
-        summaryRecord ? (
-          <SolveSummary
-            record={summaryRecord}
-            onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
-            moveCountOnly={session.moveCountOnly}
-          />
+        summaryRecord || solves.length > 0 ? (
+          <div className="flex flex-col gap-4 h-full">
+            {summaryRecord && (
+              <SolveSummary
+                record={summaryRecord}
+                onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
+                moveCountOnly={session.moveCountOnly}
+              />
+            )}
+            <CompactRecentList
+              title="Recent solves"
+              items={sortedSolves}
+              keyOf={(e) => e.record.id}
+              expanded={solvesExpanded}
+              onToggleExpand={() => setSolvesExpanded((v) => !v)}
+              renderRow={(e) => (
+                <button
+                  onClick={() => setAnalysisRecord(e.record)}
+                  className="w-full flex items-center gap-3 py-1.5 text-left hover:bg-white/[0.03] transition-colors rounded-md px-1"
+                >
+                  <span className="text-[10px] font-mono tabular-nums text-gray-600 w-7 shrink-0">#{e.nr}</span>
+                  <span className="text-xs font-mono tabular-nums text-white flex-1">
+                    {session.moveCountOnly ? `${e.record.moveCount} mv` : formatTimeMs(e.record.timeMs)}
+                  </span>
+                </button>
+              )}
+            />
+          </div>
         ) : undefined
       }
       bottom={
-        solves.length > 0 ? (
+        solvesExpanded && solves.length > 0 ? (
           <div className="flex flex-col">
             <div className="px-4 sm:px-6 pt-3 pb-1 flex items-center gap-3">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent solves</span>
               <div className="ml-auto flex items-center gap-3">
+                <button
+                  onClick={() => setSolvesExpanded(false)}
+                  className="text-[10px] font-semibold text-gray-500 hover:text-gray-200 transition-colors"
+                >
+                  Collapse
+                </button>
                 <div className="flex items-center gap-1">
                   <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
                   <select
