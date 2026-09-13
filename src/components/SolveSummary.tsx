@@ -14,6 +14,7 @@ import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
 import { stageDescription } from "./stageDescriptions";
+import { SolveTimingBar } from "./SolveTimingBar";
 
 interface SolveSummaryProps {
   record: SolveRecord;
@@ -60,6 +61,8 @@ export function SolveSummary({ record, onOpenAnalysis, moveCountOnly = false }: 
           <Maximize2 size={15} />
         </button>
       </div>
+
+      {!moveCountOnly && <SolveTimingBar timings={timings} />}
 
       {/* flex-1 + h-full on the table lets the rows spread out over the
           whole panel height (which itself stretches to the chart column's

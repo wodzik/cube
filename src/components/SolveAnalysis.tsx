@@ -35,6 +35,7 @@ import type { SolveMethod, SolveRecord } from "../types/solve";
 import type { StageBoundary } from "../logic/stageDetection/types";
 import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisation";
 import { StageProgress } from "./StageProgress";
+import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { computeStageBoundaries } from "../logic/stageDetection/methodTracker";
@@ -246,6 +247,8 @@ export function SolveAnalysis({
             </div>
 
             <StageProgress label={method} stages={detector.stages} boundaries={boundaries} />
+
+            {!moveCountOnly && <SolveTimingBar timings={timings} />}
 
             <div>
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 px-2.5">{method} steps</h3>
