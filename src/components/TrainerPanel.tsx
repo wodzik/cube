@@ -9,7 +9,7 @@
  * setup, target moves), never in layout or in which components render.
  *
  *   sequence slot → MoveSequenceDisplay
- *   center  slot  → centerTop + TimerDisplay/InspectionCountdown + hintText + controls + centerBottom
+ *   center  slot  → centerTop + (centerReplacement, or TimerDisplay/InspectionCountdown) + hintText + controls + centerBottom
  *   cube    slot  → CubeVisualisation
  *   stats   slot  → StatsChart
  */
@@ -74,6 +74,8 @@ export interface TrainerPanelProps {
   hintText?: string | null;
   controls?: ReactNode;
   centerBottom?: ReactNode;
+  /** Replaces the inspection countdown / big timer entirely while set — e.g. SolvePage's just-finished solve summary, shown in place of the (already-reset) timer instead of as a separate panel beside the cube. */
+  centerReplacement?: ReactNode;
 
   // ── Cube ──
   cubeRef: RefObject<CubeVisualisationRef | null>;
@@ -118,7 +120,7 @@ export interface TrainerPanelProps {
   statsLabel?: string;
   statsHeight?: number;
   showAo12?: boolean;
-  /** Rendered BESIDE the chart (own sub-column, chart to its right; stacks above it on narrow screens) — e.g. the just-finished solve's inline summary (see SolvePage.tsx). */
+  /** Rendered ABOVE the chart, inside the same (now fixed-width, page-height) stats column — e.g. a page's own attempt-summary card. Not used by SolvePage, which shows its just-finished solve via `centerReplacement` instead (see SolvePage.tsx). */
   statsAside?: ReactNode;
 }
 
@@ -157,6 +159,7 @@ export function TrainerPanel({
   hintText,
   controls,
   centerBottom,
+  centerReplacement,
   cubeRef,
   visualization = "3D",
   stickering,
@@ -216,7 +219,9 @@ export function TrainerPanel({
         <>
           {centerTop}
 
-          {isInspecting ? (
+          {centerReplacement ? (
+            centerReplacement
+          ) : isInspecting ? (
             <InspectionCountdown secondsLeft={inspectionSecondsLeft} mode={inspectionMode} />
           ) : (
             <TimerDisplay
@@ -284,8 +289,8 @@ export function TrainerPanel({
         </div>
       }
       stats={
-        <div className="px-5 sm:px-6 py-6 flex flex-col xl:flex-row gap-5 h-full">
-          {statsAside && <div className="xl:w-80 shrink-0">{statsAside}</div>}
+        <div className="px-5 sm:px-6 py-6 flex flex-col gap-5 h-full">
+          {statsAside && <div className="shrink-0">{statsAside}</div>}
           <div className="flex-1 min-w-0 panel p-4 flex flex-col">
             <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
               {statsLabel}

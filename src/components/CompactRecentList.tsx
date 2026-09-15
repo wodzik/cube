@@ -26,8 +26,6 @@ interface CompactRecentListProps<T> {
   onToggleExpand: () => void;
   /** The page's full table — rendered only inside the overlay while `expanded`. */
   expandedContent: ReactNode;
-  /** Collapsed-state scroll cap, in rows-worth of height — older items scroll rather than growing the sidebar unboundedly. */
-  maxVisibleRows?: number;
   /** Extra classes on the (always narrow) root panel, e.g. its fixed width at the `lg` breakpoint. */
   className?: string;
 }
@@ -40,7 +38,6 @@ export function CompactRecentList<T>({
   expanded,
   onToggleExpand,
   expandedContent,
-  maxVisibleRows = 12,
   className = "",
 }: CompactRecentListProps<T>) {
   useEffect(() => {
@@ -56,7 +53,11 @@ export function CompactRecentList<T>({
 
   return (
     <>
-      <div className={`panel p-4 flex flex-col min-h-0 ${className}`}>
+      {/* h-full: the wrapping leftAside column now runs the full page height
+          (see TrainLayout) — without h-full here this card would size to its
+          rows and leave a chunk of bare column below it instead of reading
+          as one continuous panel. */}
+      <div className={`panel p-4 flex flex-col min-h-0 h-full ${className}`}>
         <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
           <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{title}</h3>
           <button
@@ -67,7 +68,7 @@ export function CompactRecentList<T>({
             <ChevronDown size={12} />
           </button>
         </div>
-        <div className="flex flex-col divide-y divide-gray-800/40 overflow-y-auto" style={{ maxHeight: `${maxVisibleRows * 2}rem` }}>
+        <div className="flex-1 min-h-0 flex flex-col divide-y divide-gray-800/40 overflow-y-auto">
           {items.map((item) => (
             <div key={keyOf(item)}>{renderRow(item)}</div>
           ))}

@@ -749,6 +749,15 @@ function SolvePageInner({
       moveCountOnly={session.moveCountOnly}
       moveCount={displayMoveCount}
       hintText={hintText}
+      centerReplacement={
+        holdingLastResult && summaryRecord ? (
+          <SolveSummary
+            record={summaryRecord}
+            onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
+            moveCountOnly={session.moveCountOnly}
+          />
+        ) : undefined
+      }
       controls={
         <div className="flex items-center gap-2">
           {state.phase !== "idle" && (
@@ -803,15 +812,6 @@ function SolvePageInner({
       timesMs={sessionTimesMs}
       moveCounts={sessionMoveCounts}
       statsLabel={`Session: ${session.name}`}
-      statsAside={
-        summaryRecord ? (
-          <SolveSummary
-            record={summaryRecord}
-            onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
-            moveCountOnly={session.moveCountOnly}
-          />
-        ) : undefined
-      }
       leftAside={
         solves.length > 0 ? (
           <CompactRecentList
@@ -820,14 +820,14 @@ function SolvePageInner({
             keyOf={(e) => e.record.id}
             expanded={solvesExpanded}
             onToggleExpand={() => setSolvesExpanded((v) => !v)}
-            className="w-full lg:w-64 xl:w-72"
+            className="w-full lg:w-56 xl:w-64"
             renderRow={(e) => (
               <button
                 onClick={() => setAnalysisRecord(e.record)}
                 className="w-full flex items-center gap-3 py-1.5 text-left hover:bg-white/[0.03] transition-colors rounded-md px-1"
               >
-                <span className="text-[10px] font-mono tabular-nums text-gray-600 w-7 shrink-0">#{e.nr}</span>
-                <span className="text-xs font-mono tabular-nums text-white flex-1">
+                <span className="text-xs font-mono tabular-nums text-gray-600 w-8 shrink-0">#{e.nr}</span>
+                <span className="text-sm font-mono tabular-nums text-white flex-1">
                   {session.moveCountOnly ? `${e.record.moveCount} mv` : formatTimeMs(e.record.timeMs)}
                 </span>
               </button>

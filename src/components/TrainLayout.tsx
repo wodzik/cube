@@ -7,17 +7,20 @@
  *   sequence  — full-width scramble/algorithm strip
  *   center    — col 1: timer, stage progress, controls (left, fixed width)
  *   cube      — col 2: 3-D visualisation (center, flex-1)
- *   stats     — col 3: statistics chart (right, fixed width, optional)
+ *   stats     — statistics chart, its own persistent column mirroring leftAside — runs the FULL height of everything below the header (right, fixed width, optional)
  *   bottom    — solves table / algorithm list / attack queue (full width, optional)
  *
- * Desktop (lg+): leftAside sits left of everything else (sequence strip
- * included), via `lg:order-1` on a DOM-last element — visual position is
- * CSS-only, so `expanded` content that pops out of it (see
- * CompactRecentList) can stay a `position: fixed` overlay without any
- * layout-shift math. Mobile/tablet: stacked in DOM order, which puts
- * leftAside LAST (i.e. below the solving UI, not above it) since it comes
- * after the main content in markup — matching where its content used to
- * live (the `bottom` slot) before it got a dedicated column.
+ * Desktop (lg+): leftAside and stats sit left/right of everything else
+ * (sequence strip included), via `lg:order-1` / `lg:order-3` on DOM-last
+ * elements — visual position is CSS-only, so `expanded` content that pops
+ * out of leftAside (see CompactRecentList) can stay a `position: fixed`
+ * overlay without any layout-shift math. Both side columns' tops line up
+ * with the sequence strip, not with center/cube (which sit one row below
+ * it). Mobile/tablet: stacked in DOM order, which puts leftAside/stats
+ * LAST (i.e. below the solving UI, not above it) since they come after the
+ * main content in markup — matching where their content used to live (the
+ * `bottom` slot / an inline column beside center+cube) before they got
+ * dedicated columns.
  *
  * Pure presentational component — no state, no hooks.
  */
@@ -60,8 +63,6 @@ export function TrainLayout({ header, sequence, leftAside, center, cube, stats, 
               />
               {cube}
             </div>
-
-            {stats != null && <div className="lg:flex-1 lg:min-w-0 flex flex-col">{stats}</div>}
           </div>
 
           {bottom != null && <div className="border-t border-white/[0.06] flex-1 overflow-y-auto">{bottom}</div>}
@@ -70,6 +71,12 @@ export function TrainLayout({ header, sequence, leftAside, center, cube, stats, 
         {leftAside != null && (
           <div className="lg:flex-none lg:order-1 border-t lg:border-t-0 lg:border-r border-white/[0.06] flex flex-col px-4 sm:px-5 py-4 lg:py-6 overflow-y-auto">
             {leftAside}
+          </div>
+        )}
+
+        {stats != null && (
+          <div className="lg:flex-none lg:w-96 xl:w-112 lg:order-3 border-t lg:border-t-0 lg:border-l border-white/[0.06] flex flex-col overflow-y-auto">
+            {stats}
           </div>
         )}
       </div>

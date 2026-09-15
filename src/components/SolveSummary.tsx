@@ -1,11 +1,12 @@
 /**
  * SolveSummary — compact inline stats for the solve that JUST finished,
- * shown in the stats column (between the cube and the session chart)
- * instead of a screen-covering modal, so the freshly generated next
- * scramble stays visible and the solver can roll straight into it. The
- * first move of the next scramble dismisses it (see SolvePage's effect);
- * the full SolveAnalysis modal stays available via the button here and via
- * clicking any solve in the history list.
+ * shown in place of the (already-reset, now-irrelevant) big timer in the
+ * center column — see TrainerPanel's `centerReplacement` — instead of a
+ * screen-covering modal, so the freshly generated next scramble stays
+ * visible and the solver can roll straight into it. The first move of the
+ * next scramble dismisses it (see SolvePage's effect); the full
+ * SolveAnalysis modal stays available via the button here and via clicking
+ * any solve in the history list.
  */
 
 import { Maximize2 } from "lucide-react";
