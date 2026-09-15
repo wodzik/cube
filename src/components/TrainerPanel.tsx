@@ -31,6 +31,8 @@ export interface TrainerPanelProps {
   // ── Layout ──
   header: ReactNode;
   bottom?: ReactNode;
+  /** A page's own persistent sidebar, in its own column left of everything else — e.g. a recent-times list (see TrainLayout). */
+  leftAside?: ReactNode;
 
   // ── Sequence bar ──
   sequenceContent?: ReactNode;
@@ -123,6 +125,7 @@ export interface TrainerPanelProps {
 export function TrainerPanel({
   header,
   bottom,
+  leftAside,
   sequenceContent,
   moves,
   progress,
@@ -182,6 +185,7 @@ export function TrainerPanel({
   return (
     <TrainLayout
       header={header}
+      leftAside={leftAside}
       sequence={
         <>
           {sequenceTop}
