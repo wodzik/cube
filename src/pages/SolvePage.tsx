@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Info, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
@@ -34,7 +34,7 @@ import { SolveControls } from "../components/SolveControls";
 import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
-import { recordRecognitionShare } from "../logic/stageDetection/recognitionShare";
+import { recordFluency, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { CompactRecentList } from "../components/CompactRecentList";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
 import { CaseViewToggles } from "../components/CaseViewToggles";
@@ -47,7 +47,7 @@ import { rouxStageDetector } from "../logic/stageDetection/rouxStages";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
-import { formatTimeMs } from "../logic/statistics";
+import { formatTimeMs, formatRelativeTime } from "../logic/statistics";
 import {
   CUSTOM_SCRAMBLES_SESSION_NAME,
   deleteSessionAndSolves,
@@ -76,27 +76,26 @@ function buildStartHint(methods: readonly StartMethod[]): string {
   return `${text[0].toUpperCase()}${text.slice(1)} to begin`;
 }
 
-type SolveSortKey = "nr" | "time" | "moves" | "tps" | "recognition";
+type SolveSortKey = "nr" | "time" | "moves" | "tps" | "fluency";
 
 /**
  * Sort options for the Recent solves list. `defaultAsc` is the direction a
  * FIRST click on that key gets — chosen per what a solver most likely wants
  * to see on top: newest solve (# desc), fastest time (asc), fewest moves
- * (asc), highest TPS (desc), lowest (best) recognition share (asc).
- * Clicking the already-active key flips it. Rendered as clickable column
- * headers in the expanded table (see SortableTh below), not a separate row
- * of chips.
+ * (asc), highest TPS (desc), highest (best) fluency (desc). Clicking the
+ * already-active key flips it. Rendered as clickable column headers in the
+ * expanded table (see SortableTh below), not a separate row of chips.
  */
 const SOLVE_SORT_OPTIONS: { key: SolveSortKey; label: string; defaultAsc: boolean }[] = [
   { key: "nr", label: "#", defaultAsc: false },
   { key: "time", label: "Time", defaultAsc: true },
   { key: "moves", label: "Moves", defaultAsc: true },
   { key: "tps", label: "TPS", defaultAsc: false },
-  { key: "recognition", label: "Recog", defaultAsc: true },
+  { key: "fluency", label: "Fluency", defaultAsc: false },
 ];
 
 /** Sort keys that need time data — unreachable (and irrelevant) in a moveCountOnly session; see effectiveSortKey. */
-const TIME_BASED_SORT_KEYS = new Set<SolveSortKey>(["time", "tps", "recognition"]);
+const TIME_BASED_SORT_KEYS = new Set<SolveSortKey>(["time", "tps", "fluency"]);
 
 /** A `<th>` that sorts the solves table by `sortKey` on click, showing an arrow when it's the active column. */
 function SortableTh({
@@ -106,6 +105,7 @@ function SortableTh({
   ascending,
   onSort,
   align = "left",
+  tooltip,
 }: {
   label: string;
   sortKey: SolveSortKey;
@@ -113,19 +113,28 @@ function SortableTh({
   ascending: boolean;
   onSort: (key: SolveSortKey) => void;
   align?: "left" | "right";
+  /** Explanation icon after the label — e.g. what "Fluency" means. */
+  tooltip?: string;
 }) {
   const active = activeKey === sortKey;
   return (
     <th className={`py-2 font-semibold ${align === "right" ? "text-right" : "text-left"}`}>
-      <button
-        onClick={() => onSort(sortKey)}
-        className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wider transition-colors hover:text-gray-200 ${
-          active ? "text-white" : "text-gray-500"
-        }`}
-      >
-        {label}
-        <span className="w-2.5 inline-block text-gray-400">{active ? (ascending ? "↑" : "↓") : ""}</span>
-      </button>
+      <span className="inline-flex items-center gap-1">
+        <button
+          onClick={() => onSort(sortKey)}
+          className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wider transition-colors hover:text-gray-200 ${
+            active ? "text-white" : "text-gray-500"
+          }`}
+        >
+          {label}
+          <span className="w-2.5 inline-block text-gray-400">{active ? (ascending ? "↑" : "↓") : ""}</span>
+        </button>
+        {tooltip && (
+          <span title={tooltip} className="inline-flex shrink-0">
+            <Info size={11} className="text-gray-600" />
+          </span>
+        )}
+      </span>
     </th>
   );
 }
@@ -330,10 +339,10 @@ function SolvePageInner({
           return e.record.moveCount;
         case "tps":
           return e.record.tps;
-        case "recognition":
-          // Solves with no recognition data (unknown method) sort last
+        case "fluency":
+          // Solves with no fluency data (unknown method) sort last
           // regardless of direction, rather than skewing among real values.
-          return recordRecognitionShare(e.record) ?? (sortAsc ? Infinity : -Infinity);
+          return recordFluency(e.record) ?? (sortAsc ? Infinity : -Infinity);
       }
     };
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
@@ -930,16 +939,24 @@ function SolvePageInner({
                           <SortableTh label="TPS" sortKey="tps" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
                         )}
                         {!session.moveCountOnly && (
-                          <SortableTh label="Recog" sortKey="recognition" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                          <SortableTh
+                            label="Fluency"
+                            sortKey="fluency"
+                            activeKey={effectiveSortKey}
+                            ascending={sortAsc}
+                            onSort={handleSort}
+                            tooltip={FLUENCY_TOOLTIP}
+                          />
                         )}
                         <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Method</th>
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Date</th>
                         <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Ended</th>
                         <th className="py-2 w-20" />
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800/40">
                       {pagedSolves.map(({ record: s, nr }) => {
-                        const recognitionPct = session.moveCountOnly ? null : recordRecognitionShare(s);
+                        const fluency = session.moveCountOnly ? null : recordFluency(s);
                         return (
                           <tr
                             key={s.id}
@@ -956,13 +973,14 @@ function SolvePageInner({
                             )}
                             {!session.moveCountOnly && (
                               <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-400">
-                                {recognitionPct === null ? "—" : `${recognitionPct}%`}
+                                {fluency === null ? "—" : `${fluency}%`}
                               </td>
                             )}
                             <td className="py-2.5 pr-4 text-sm text-gray-500">{s.method}</td>
-                            <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">
-                              {new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            <td className="py-2.5 pr-4 text-sm text-gray-500 whitespace-nowrap">
+                              {new Date(s.endedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                             </td>
+                            <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">{formatRelativeTime(s.endedAt)}</td>
                             <td className="py-2.5">
                               <div className="relative flex items-center justify-end gap-1">
                                 <button
