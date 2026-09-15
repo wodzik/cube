@@ -22,6 +22,37 @@ function writeJson<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function isQuotaExceededError(err: unknown): boolean {
+  return err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22);
+}
+
+/**
+ * Each SolveRecord carries a full per-move timestamped log (SolveRecord.moves),
+ * so the solves array can outgrow localStorage's quota after enough attempts.
+ * Rather than let that throw out of saveSolve mid-solve (crashing the app
+ * right after the user finishes a cube — see the QuotaExceededError reports),
+ * evict the oldest solves in increasing chunks and retry until the write
+ * fits or nothing is left to drop.
+ */
+function writeSolvesWithQuotaFallback(solves: SolveRecord[]): void {
+  let current = solves;
+  while (true) {
+    try {
+      writeJson(SOLVES_KEY, current);
+      if (current.length < solves.length) {
+        console.warn(
+          `nact_solves exceeded storage quota — dropped ${solves.length - current.length} oldest solve(s) to free up space.`
+        );
+      }
+      return;
+    } catch (err) {
+      if (!isQuotaExceededError(err) || current.length <= 1) throw err;
+      const dropCount = Math.max(1, Math.floor(current.length * 0.1));
+      current = current.slice(dropCount);
+    }
+  }
+}
+
 // ─── Solves ───
 
 export function getSolves(): SolveRecord[] {
@@ -35,7 +66,7 @@ export function getSolvesForSession(sessionId: string): SolveRecord[] {
 export function saveSolve(solve: SolveRecord): void {
   const solves = getSolves();
   solves.push(solve);
-  writeJson(SOLVES_KEY, solves);
+  writeSolvesWithQuotaFallback(solves);
 }
 
 /** Merge fields into an existing stored solve — used to self-heal legacy records (e.g. backfilling boundary lists added by newer builds, see SolveAnalysis). */
