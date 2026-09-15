@@ -62,6 +62,36 @@ describe("solveStore", () => {
     expect(healed.timeMs).toBe(solve.timeMs); // untouched fields preserved
   });
 
+  it("saveSolve evicts oldest solves and retries instead of throwing when localStorage quota is exceeded", () => {
+    for (let i = 0; i < 5; i++) saveSolve(makeSolve({ id: `old-${i}` }));
+    expect(getSolves()).toHaveLength(5);
+
+    const realSetItem = localStorage.setItem.bind(localStorage);
+    const originalWarn = console.warn;
+    console.warn = () => {};
+    // Simulate real browser quota behavior: any write of the full 6-record
+    // array is rejected, forcing saveSolve's fallback to drop old records
+    // and retry with a smaller array until one fits.
+    localStorage.setItem = (key: string, value: string) => {
+      if (key === "nact_solves" && JSON.parse(value).length > 3) {
+        throw new DOMException("quota exceeded", "QuotaExceededError");
+      }
+      realSetItem(key, value);
+    };
+
+    try {
+      const newSolve = makeSolve({ id: "new" });
+      expect(() => saveSolve(newSolve)).not.toThrow();
+    } finally {
+      localStorage.setItem = realSetItem;
+      console.warn = originalWarn;
+    }
+
+    const solves = getSolves();
+    expect(solves.length).toBeLessThanOrEqual(3);
+    expect(solves[solves.length - 1]?.id).toBe("new"); // the just-completed solve is never the one dropped
+  });
+
   it("deletes a solve by id", () => {
     const solve = makeSolve();
     saveSolve(solve);
