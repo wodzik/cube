@@ -20,6 +20,7 @@ import { useState } from "react";
 import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { groupStageTimings, stageGroupShades, stageSlotLabel } from "./stageGroups";
 import { stageDescription } from "./stageDescriptions";
+import { stageCubeColors } from "./cubeColors";
 
 interface SolveTimingBarProps {
   timings: StageTiming[];
@@ -119,6 +120,16 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
                 {visible.map((t, i) => {
                   const slotColor = i % 2 === 0 ? base : alt;
                   const recogWidthPct = (t.recognitionMs / t.totalMs) * 100;
+                  // Cube colors when the solve recorded which face/slot each
+                  // stage was about (see cubeColors.ts); a two-face slot is
+                  // its two sticker colors stacked. Otherwise the fixed
+                  // per-group palette.
+                  const cube = stageCubeColors(t, timings);
+                  const fill = cube
+                    ? cube.length > 1
+                      ? `linear-gradient(180deg, ${cube[0]} 0 50%, ${cube[1]} 50% 100%)`
+                      : cube[0]
+                    : slotColor;
                   return (
                     <div
                       key={t.stage}
@@ -126,13 +137,18 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
                       style={{
                         width: `${(t.totalMs / groupTotalMs) * 100}%`,
                         filter: hoveredStage === t.stage ? "brightness(1.25)" : undefined,
-                        borderRight: i < visible.length - 1 ? "1px solid rgba(0,0,0,0.35)" : undefined,
+                        borderRight: i < visible.length - 1 ? "1px solid rgba(0,0,0,0.45)" : undefined,
                       }}
                       onMouseEnter={() => setHoveredStage(t.stage)}
                       onMouseLeave={() => setHoveredStage((s) => (s === t.stage ? null : s))}
                     >
-                      <div className="h-full" style={{ width: `${recogWidthPct}%`, backgroundColor: recognitionShade(slotColor) }} />
-                      <div className="h-full" style={{ width: `${100 - recogWidthPct}%`, backgroundColor: slotColor }} />
+                      <div
+                        className="relative h-full"
+                        style={{ width: `${recogWidthPct}%`, background: cube ? fill : recognitionShade(slotColor) }}
+                      >
+                        {cube && <div className="absolute inset-0 bg-black/55" />}
+                      </div>
+                      <div className="h-full" style={{ width: `${100 - recogWidthPct}%`, background: fill }} />
                     </div>
                   );
                 })}
@@ -146,7 +162,10 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
             className="absolute top-full mt-2 z-40 w-56 rounded-xl border border-white/10 bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl shadow-black/60 pointer-events-none"
             style={{ left: `${Math.min(85, Math.max(15, hoveredCenterPct))}%`, transform: "translateX(-50%)" }}
           >
-            <p className="text-xs font-semibold mb-2" style={{ color: stageGroupShades(hoveredGroup.label)[1] }}>
+            <p
+              className="text-xs font-semibold mb-2"
+              style={{ color: stageCubeColors(hovered, timings)?.[0] ?? stageGroupShades(hoveredGroup.label)[1] }}
+            >
               {stageHeading(hoveredGroup.label, hovered, hoveredIsMultiPart)}
             </p>
             <div className="space-y-1">

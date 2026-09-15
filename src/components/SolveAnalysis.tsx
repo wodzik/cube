@@ -38,7 +38,7 @@ import { StageProgress } from "./StageProgress";
 import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
-import { computeStageBoundaries } from "../logic/stageDetection/methodTracker";
+import { cfopStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
@@ -151,15 +151,20 @@ export function SolveAnalysis({
   const [method, setMethod] = useState<DisplayMethod>(record.method !== "unknown" ? record.method : "CFOP");
   const cubeRef = useRef<CubeVisualisationRef>(null);
 
-  // Self-heal solves recorded before LBL tracking existed: their stored
-  // record has no `lbl` field at all (which used to white-screen this modal
-  // — undefined.map in computeStageTimings). The full move log + scramble
-  // are on the record, so the missing boundaries are recomputed exactly,
-  // shown, and written back to storage so it's a one-time cost per record.
-  const [healedLbl, setHealedLbl] = useState<StageBoundary[] | null>(null);
+  // Self-heal solves recorded by older builds: no `lbl` field at all (which
+  // used to white-screen this modal — undefined.map in computeStageTimings),
+  // or CFOP/LBL boundaries without the face/slot details the timing bar
+  // colors by (see cubeColors.ts). The full move log + scramble are on the
+  // record, so the boundaries are recomputed exactly, shown, and written
+  // back to storage so it's a one-time cost per record.
+  const [healed, setHealed] = useState<{ cfop: StageBoundary[]; lbl: StageBoundary[] } | null>(null);
   useEffect(() => {
-    setHealedLbl(null);
-    if (record.lbl !== undefined) return;
+    setHealed(null);
+    const lacksDetails = (bs: StageBoundary[] | undefined) => {
+      const cross = bs?.find((b) => b.stage === "cross");
+      return cross !== undefined && cross.detail === undefined;
+    };
+    if (record.lbl !== undefined && !lacksDetails(record.cfop) && !lacksDetails(record.lbl)) return;
     let cancelled = false;
     createSolvedState().then((solved) => {
       if (cancelled) return;
@@ -169,9 +174,10 @@ export function SolveAnalysis({
         .filter(Boolean)
         .reduce((s, m) => applyMoveToState(s, m), solved);
       const timedMoves = record.moves.map((m) => ({ move: m.move, relativeMs: m.relativeMs }));
+      const cfop = computeStageBoundaries(cfopStageDetector, timedMoves, startState);
       const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
-      setHealedLbl(lbl);
-      patchSolve(record.id, { lbl });
+      setHealed({ cfop, lbl });
+      patchSolve(record.id, { cfop, lbl });
     });
     return () => {
       cancelled = true;
@@ -179,7 +185,7 @@ export function SolveAnalysis({
   }, [record]);
 
   const detector = METHOD_DETECTORS[method];
-  const boundaries = BOUNDARIES_BY_METHOD[method](record) ?? healedLbl ?? [];
+  const boundaries = (method === "CFOP" || method === "LBL" ? healed?.[method === "CFOP" ? "cfop" : "lbl"] : undefined) ?? BOUNDARIES_BY_METHOD[method](record) ?? [];
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
 
   useEffect(() => {

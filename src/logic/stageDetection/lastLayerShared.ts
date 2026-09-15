@@ -20,6 +20,51 @@ export type Face = "U" | "D" | "F" | "B" | "L" | "R";
 export const FACES: readonly Face[] = ["U", "D", "F", "B", "L", "R"];
 export const OPPOSITE_FACE: Record<Face, Face> = { U: "D", D: "U", R: "L", L: "R", F: "B", B: "F" };
 
+/** The faces each corner slot touches, in the slot-name order of the verified mapping above. */
+export const CORNER_SLOT_FACES: readonly (readonly Face[])[] = [
+  ["U", "R", "F"], // 0 URF
+  ["U", "B", "R"], // 1 UBR
+  ["U", "L", "B"], // 2 ULB
+  ["U", "F", "L"], // 3 UFL
+  ["D", "F", "R"], // 4 DFR
+  ["D", "L", "F"], // 5 DLF
+  ["D", "B", "L"], // 6 DBL
+  ["D", "R", "B"], // 7 DRB
+];
+
+/** The faces each edge slot touches. */
+export const EDGE_SLOT_FACES: readonly (readonly Face[])[] = [
+  ["U", "F"], ["U", "R"], ["U", "B"], ["U", "L"], // 0-3
+  ["D", "F"], ["D", "R"], ["D", "B"], ["D", "L"], // 4-7
+  ["F", "R"], ["F", "L"], ["B", "R"], ["B", "L"], // 8-11
+];
+
+/**
+ * A slot's identity as the side faces it sits between, with the cross face
+ * (and its opposite) stripped — e.g. corner URF with the cross on U -> "RF".
+ * Recorded as a StageBoundary.detail so a display can color that stage by
+ * the physical slot (see components/cubeColors.ts).
+ */
+export function slotSideFaces(faces: readonly Face[], crossFace: Face): string {
+  return faces.filter((f) => f !== crossFace && f !== OPPOSITE_FACE[crossFace]).join("");
+}
+
+/**
+ * Of `slots` (the ones solved right now, per the detector's own check), the
+ * first not yet in `seen` — recorded into `seen` — so a count-based stage
+ * ("f2l-2" = any 2 pairs) can still say WHICH slot just completed. Null
+ * when nothing new (a stage satisfied by an earlier move, re-checked).
+ */
+export function takeNewlySolvedSlot(seen: Set<number>, slots: readonly number[]): number | null {
+  for (const slot of slots) {
+    if (!seen.has(slot)) {
+      seen.add(slot);
+      return slot;
+    }
+  }
+  return null;
+}
+
 export interface FaceSlots {
   /** The 4 edge slots touching this face — cross for this face, OLL-orientation-check for its opposite. */
   edgeSlots: number[];
