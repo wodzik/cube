@@ -143,7 +143,7 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
 
         {hovered && hoveredGroup && (
           <div
-            className="absolute top-full mt-2 z-10 w-56 rounded-xl border border-white/10 bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl shadow-black/60 pointer-events-none"
+            className="absolute top-full mt-2 z-40 w-56 rounded-xl border border-white/10 bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl shadow-black/60 pointer-events-none"
             style={{ left: `${Math.min(85, Math.max(15, hoveredCenterPct))}%`, transform: "translateX(-50%)" }}
           >
             <p className="text-xs font-semibold mb-2" style={{ color: stageGroupShades(hoveredGroup.label)[1] }}>
