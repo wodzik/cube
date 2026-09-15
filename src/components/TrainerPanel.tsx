@@ -9,13 +9,13 @@
  * setup, target moves), never in layout or in which components render.
  *
  *   sequence slot → MoveSequenceDisplay
- *   center  slot  → centerTop + TimerDisplay/InspectionCountdown + hintText + controls + centerBottom
- *   cube    slot  → CubeVisualisation
+ *   center  slot  → centerTop + [TimerDisplay/InspectionCountdown | controls + centerBottom] row + summary + hintText
+ *   cube    slot  → CubeVisualisation (+ flat view beside it) + cubeToolbar
  *   stats   slot  → StatsChart
  */
 
 import type { ReactNode, RefObject } from "react";
-import { TrainLayout } from "./TrainLayout";
+import { TrainLayout, type TrainLayoutMode } from "./TrainLayout";
 import { MoveSequenceDisplay } from "./MoveSequenceDisplay";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
 import type { StickeringMaskOrbits } from "../types/cube";
@@ -27,10 +27,29 @@ import type { SequenceProgress } from "../logic/sequenceTracker";
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
 const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(2));
 
+/** Wraps children in a real button only when there's something to do on click — otherwise a plain container, so idle timers aren't announced as buttons. */
+function Tap({ onClick, className = "", children }: { onClick?: () => void; className?: string; children: ReactNode }) {
+  if (!onClick) return <div className={className}>{children}</div>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Open solve analysis"
+      className={`text-left rounded-xl transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export interface TrainerPanelProps {
   // ── Layout ──
   header: ReactNode;
   bottom?: ReactNode;
+  /** A page's own persistent sidebar, in its own column left of everything else — e.g. a recent-times list (see TrainLayout). */
+  leftAside?: ReactNode;
+  /** "stack" (default): timer above the cube, chart as a right column. "side": timer beside the cube, chart + bottom list across the full width — see TrainLayout. */
+  layout?: TrainLayoutMode;
 
   // ── Sequence bar ──
   sequenceContent?: ReactNode;
@@ -72,6 +91,10 @@ export interface TrainerPanelProps {
   hintText?: string | null;
   controls?: ReactNode;
   centerBottom?: ReactNode;
+  /** Rendered directly UNDER the timer row — e.g. SolvePage's just-finished solve summary (TPS · turns · stage bar). */
+  summary?: ReactNode;
+  /** Makes the timer and `summary` clickable (e.g. to open the full solve analysis while the last result is being held). */
+  onCenterClick?: () => void;
 
   // ── Cube ──
   cubeRef: RefObject<CubeVisualisationRef | null>;
@@ -116,13 +139,15 @@ export interface TrainerPanelProps {
   statsLabel?: string;
   statsHeight?: number;
   showAo12?: boolean;
-  /** Rendered BESIDE the chart (own sub-column, chart to its right; stacks above it on narrow screens) — e.g. the just-finished solve's inline summary (see SolvePage.tsx). */
+  /** Rendered ABOVE the chart, inside the same (now fixed-width, page-height) stats column — e.g. a page's own attempt-summary card. Not used by SolvePage, which shows its just-finished solve via `centerReplacement` instead (see SolvePage.tsx). */
   statsAside?: ReactNode;
 }
 
 export function TrainerPanel({
   header,
   bottom,
+  leftAside,
+  layout,
   sequenceContent,
   moves,
   progress,
@@ -154,6 +179,8 @@ export function TrainerPanel({
   hintText,
   controls,
   centerBottom,
+  summary,
+  onCenterClick,
   cubeRef,
   visualization = "3D",
   stickering,
@@ -182,6 +209,8 @@ export function TrainerPanel({
   return (
     <TrainLayout
       header={header}
+      leftAside={leftAside}
+      layout={layout}
       sequence={
         <>
           {sequenceTop}
@@ -212,77 +241,96 @@ export function TrainerPanel({
         <>
           {centerTop}
 
-          {isInspecting ? (
-            <InspectionCountdown secondsLeft={inspectionSecondsLeft} mode={inspectionMode} />
-          ) : (
-            <TimerDisplay
-              timeMs={timeMs}
-              state={timerState}
-              className={timerClassName}
-              moveCountOnly={moveCountOnly}
-              moveCount={moveCount}
-            />
-          )}
-
-          {hintText && <p className="text-gray-500 text-sm tracking-wide animate-pulse">{hintText}</p>}
-
-          {controls}
-
-          {centerBottom}
-        </>
-      }
-      cube={
-        <div className="w-full max-w-90 lg:max-w-none flex flex-col items-center">
-          <div className="relative w-full aspect-square">
-            <CubeVisualisation
-              ref={cubeRef}
-              visualization={visualization}
-              stickering={stickering}
-              stickeringMaskOrbits={stickeringMaskOrbits}
-              background={background}
-              controlPanel={controlPanel}
-              dragInput={dragInput}
-              hintFacelets={hintFacelets}
-              hintFaceletsElevation={hintFaceletsElevation}
-              cameraLatitude={cameraLatitude}
-              cameraLongitude={cameraLongitude}
-              setupAlg={cubeSetupAlg}
-              setupAnchor={cubeSetupAnchor}
-              alg={cubeAlg}
-              className="size-full"
-            />
-            {cubeOverlay && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-gray-950/70 backdrop-blur-sm">
-                {cubeOverlay}
+          {/* Timer row: the big number with its controls (reset/cancel/ready)
+              sitting BESIDE it, so the column under the scramble stays one
+              compact block instead of a tall stack of separate rows. On
+              narrow screens the controls wrap under the timer. */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            <Tap onClick={onCenterClick}>
+              {isInspecting ? (
+                <InspectionCountdown secondsLeft={inspectionSecondsLeft} mode={inspectionMode} />
+              ) : (
+                <TimerDisplay
+                  timeMs={timeMs}
+                  state={timerState}
+                  className={timerClassName}
+                  moveCountOnly={moveCountOnly}
+                  moveCount={moveCount}
+                />
+              )}
+            </Tap>
+            {(controls || centerBottom) && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {controls}
+                {centerBottom}
               </div>
             )}
           </div>
-          {flatCubeRef && (
-            <div className={`w-full h-48 sm:h-64 -mt-4 ${showFlatView ? "" : "hidden"}`}>
+
+          {summary && (
+            <Tap onClick={onCenterClick} className="w-full flex justify-center">
+              {summary}
+            </Tap>
+          )}
+
+          {hintText && <p className="text-gray-500 text-sm tracking-wide animate-pulse">{hintText}</p>}
+        </>
+      }
+      cube={
+        <div className="flex flex-col items-center gap-3">
+          {/* Cube alone: centered. With the flat view shown: the two sit
+              side by side as equal cells, symmetric about the column's
+              center (stacked on phones). */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+            <div className="relative w-72 sm:w-80 xl:w-96 aspect-square">
               <CubeVisualisation
-                ref={flatCubeRef}
-                visualization="2D"
+                ref={cubeRef}
+                visualization={visualization}
                 stickering={stickering}
                 stickeringMaskOrbits={stickeringMaskOrbits}
-                background="none"
-                controlPanel="none"
-                dragInput="none"
+                background={background}
+                controlPanel={controlPanel}
+                dragInput={dragInput}
+                hintFacelets={hintFacelets}
+                hintFaceletsElevation={hintFaceletsElevation}
+                cameraLatitude={cameraLatitude}
+                cameraLongitude={cameraLongitude}
                 setupAlg={cubeSetupAlg}
                 setupAnchor={cubeSetupAnchor}
                 alg={cubeAlg}
                 className="size-full"
               />
+              {cubeOverlay && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-gray-950/70 backdrop-blur-sm">
+                  {cubeOverlay}
+                </div>
+              )}
             </div>
-          )}
-          {cubeToolbar && (
-            <div className="mt-1 flex items-center justify-center gap-2">{cubeToolbar}</div>
-          )}
+            {flatCubeRef && (
+              <div className={`w-72 sm:w-80 xl:w-96 aspect-square ${showFlatView ? "" : "hidden"}`}>
+                <CubeVisualisation
+                  ref={flatCubeRef}
+                  visualization="2D"
+                  stickering={stickering}
+                  stickeringMaskOrbits={stickeringMaskOrbits}
+                  background="none"
+                  controlPanel="none"
+                  dragInput="none"
+                  setupAlg={cubeSetupAlg}
+                  setupAnchor={cubeSetupAnchor}
+                  alg={cubeAlg}
+                  className="size-full"
+                />
+              </div>
+            )}
+          </div>
+          {cubeToolbar && <div className="flex items-center justify-center gap-2">{cubeToolbar}</div>}
         </div>
       }
       stats={
-        <div className="px-5 sm:px-6 py-6 flex flex-col xl:flex-row gap-5 h-full">
-          {statsAside && <div className="xl:w-80 shrink-0">{statsAside}</div>}
-          <div className="flex-1 min-w-0 panel p-4 flex flex-col">
+        <div className="px-4 sm:px-6 py-6 flex flex-col gap-6 h-full">
+          {statsAside && <div className="shrink-0">{statsAside}</div>}
+          <div className="flex-1 min-w-0 flex flex-col">
             <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
               {statsLabel}
             </h3>

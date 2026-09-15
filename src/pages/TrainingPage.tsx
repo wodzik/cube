@@ -632,6 +632,7 @@ function TrainingPageInner() {
         timesMs={attemptsForSource(variant?.times ?? [], "training").map((t) => t.time * 1000)}
         statsLabel={currentCase ? `Times — ${currentCase.name}` : "Statistics"}
         showAo12={false}
+        layout="side"
         bottom={
           <AlgorithmListView
             group={group}

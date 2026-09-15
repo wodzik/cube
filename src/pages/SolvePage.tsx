@@ -34,6 +34,7 @@ import { SolveControls } from "../components/SolveControls";
 import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
+import { CompactRecentList } from "../components/CompactRecentList";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
@@ -275,6 +276,11 @@ function SolvePageInner({
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
     return numbered;
   }, [solves, effectiveSortKey, sortAsc]);
+
+  // Recent solves list: collapsed by default to the compact sidebar preview
+  // (CompactRecentList, in statsAside) — this flips it to the full sortable/
+  // paginated table (the `bottom` block below) instead.
+  const [solvesExpanded, setSolvesExpanded] = useState(false);
 
   // Recent solves pagination — page size persists across sessions (csTimer-
   // style), current page does not (SolvePageInner remounts per session via
@@ -743,6 +749,12 @@ function SolvePageInner({
       moveCountOnly={session.moveCountOnly}
       moveCount={displayMoveCount}
       hintText={hintText}
+      summary={
+        holdingLastResult && summaryRecord ? (
+          <SolveSummary record={summaryRecord} moveCountOnly={session.moveCountOnly} />
+        ) : undefined
+      }
+      onCenterClick={holdingLastResult && summaryRecord ? () => setAnalysisRecord(summaryRecord) : undefined}
       controls={
         <div className="flex items-center gap-2">
           {state.phase !== "idle" && (
@@ -797,146 +809,154 @@ function SolvePageInner({
       timesMs={sessionTimesMs}
       moveCounts={sessionMoveCounts}
       statsLabel={`Session: ${session.name}`}
-      statsAside={
-        summaryRecord ? (
-          <SolveSummary
-            record={summaryRecord}
-            onOpenAnalysis={() => setAnalysisRecord(summaryRecord)}
-            moveCountOnly={session.moveCountOnly}
-          />
-        ) : undefined
-      }
-      bottom={
+      leftAside={
         solves.length > 0 ? (
-          <div className="flex flex-col">
-            <div className="px-4 sm:px-6 pt-3 pb-1 flex items-center gap-3">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent solves</span>
-              <div className="ml-auto flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
-                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
-                  >
-                    {PAGE_SIZE_OPTIONS.map((n) => (
-                      <option key={n} value={n}>
-                        {n === "all" ? "All" : n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
-                  {SOLVE_SORT_OPTIONS.filter((o) => !session.moveCountOnly || (o.key !== "time" && o.key !== "tps")).map((o) => (
-                    <button
-                      key={o.key}
-                      onClick={() => {
-                        if (effectiveSortKey === o.key) setSortAsc((v) => !v);
-                        else {
-                          setSortKey(o.key);
-                          setSortAsc(o.defaultAsc);
-                        }
-                        setPage(1);
-                      }}
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
-                        effectiveSortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
-                      }`}
+          <CompactRecentList
+            title="Recent solves"
+            items={sortedSolves}
+            keyOf={(e) => e.record.id}
+            expanded={solvesExpanded}
+            onToggleExpand={() => setSolvesExpanded((v) => !v)}
+            className="w-full lg:w-44 xl:w-48"
+            renderRow={(e) => (
+              <button
+                onClick={() => setAnalysisRecord(e.record)}
+                className="w-full flex items-center gap-3 py-1.5 text-left hover:bg-white/[0.03] transition-colors rounded-md px-1"
+              >
+                <span className="text-sm font-mono tabular-nums text-gray-600 w-9 shrink-0">#{e.nr}</span>
+                <span className="text-base font-mono tabular-nums text-white flex-1">
+                  {session.moveCountOnly ? `${e.record.moveCount} mv` : formatTimeMs(e.record.timeMs)}
+                </span>
+              </button>
+            )}
+            expandedContent={
+              <div className="flex flex-col min-h-0">
+                <div className="flex items-center gap-3 pb-2 shrink-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                      className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
                     >
-                      {o.label}
-                      {effectiveSortKey === o.key && (sortAsc ? " ↑" : " ↓")}
-                    </button>
+                      {PAGE_SIZE_OPTIONS.map((n) => (
+                        <option key={n} value={n}>
+                          {n === "all" ? "All" : n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="ml-auto flex items-center gap-1">
+                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
+                    {SOLVE_SORT_OPTIONS.filter((o) => !session.moveCountOnly || (o.key !== "time" && o.key !== "tps")).map((o) => (
+                      <button
+                        key={o.key}
+                        onClick={() => {
+                          if (effectiveSortKey === o.key) setSortAsc((v) => !v);
+                          else {
+                            setSortKey(o.key);
+                            setSortAsc(o.defaultAsc);
+                          }
+                          setPage(1);
+                        }}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                          effectiveSortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
+                        }`}
+                      >
+                        {o.label}
+                        {effectiveSortKey === o.key && (sortAsc ? " ↑" : " ↓")}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col overflow-y-auto divide-y divide-gray-800/40" style={{ maxHeight: "36rem" }}>
+                  {pagedSolves.map(({ record: s, nr }) => (
+                    <div key={s.id} className="relative flex items-center gap-1 py-1.5 hover:bg-white/[0.03] transition-colors">
+                      <button onClick={() => setAnalysisRecord(s)} className="flex-1 min-w-0 flex items-center gap-3 py-1 text-left">
+                        <span className="text-[10px] font-mono tabular-nums text-gray-600 w-9 shrink-0">#{nr}</span>
+                        <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">
+                          {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
+                        </span>
+                        <span className="text-xs text-gray-500 flex-1 truncate">
+                          {session.moveCountOnly ? s.method : `${s.moveCount} moves · ${s.tps.toFixed(2)} TPS · ${s.method}`}
+                        </span>
+                        <span className="text-[10px] text-gray-700 shrink-0">
+                          {new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setMoveMenuSolveId(moveMenuSolveId === s.id ? null : s.id)}
+                        className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
+                        title="Move to another session"
+                      >
+                        <FolderInput size={13} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirmDeleteSolveId === s.id) handleDeleteSolve(s);
+                          else setConfirmDeleteSolveId(s.id);
+                        }}
+                        className={`shrink-0 p-1.5 transition-colors ${
+                          confirmDeleteSolveId === s.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
+                        }`}
+                        title={confirmDeleteSolveId === s.id ? "Click again to delete" : "Delete solve"}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                      {moveMenuSolveId === s.id && (
+                        <div className="absolute right-12 top-full -mt-1 z-50 w-52 bg-gray-800 border border-white/15 rounded-xl shadow-2xl shadow-black/80 py-1">
+                          <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">Move to session</p>
+                          {sessions
+                            .filter((x) => x.id !== s.sessionId)
+                            .map((x) => (
+                              <button
+                                key={x.id}
+                                onClick={() => handleMoveSolve(s, x.id)}
+                                className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 transition-colors"
+                              >
+                                {x.name}
+                              </button>
+                            ))}
+                          <button
+                            onClick={() => {
+                              setCreateSessionForSolve(s);
+                              setMoveMenuSolveId(null);
+                            }}
+                            className="w-full flex items-center gap-1.5 text-left px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 border-t border-white/[0.06] mt-1 pt-1.5 transition-colors"
+                          >
+                            <Plus size={12} /> New session…
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
-              </div>
-            </div>
-            <div className="divide-y divide-gray-800/40">
-            {pagedSolves.map(({ record: s, nr }) => (
-              <div key={s.id} className="relative flex items-center gap-1 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
-                <button
-                  onClick={() => setAnalysisRecord(s)}
-                  className="flex-1 min-w-0 flex items-center gap-3 py-1 text-left"
-                >
-                  <span className="text-[10px] font-mono tabular-nums text-gray-600 w-9 shrink-0">#{nr}</span>
-                  <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">
-                    {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
-                  </span>
-                  <span className="text-xs text-gray-500 flex-1 truncate">
-                    {session.moveCountOnly ? s.method : `${s.moveCount} moves · ${s.tps.toFixed(2)} TPS · ${s.method}`}
-                  </span>
-                  <span className="text-[10px] text-gray-700 shrink-0">{new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                </button>
-                <button
-                  onClick={() => setMoveMenuSolveId(moveMenuSolveId === s.id ? null : s.id)}
-                  className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
-                  title="Move to another session"
-                >
-                  <FolderInput size={13} />
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirmDeleteSolveId === s.id) handleDeleteSolve(s);
-                    else setConfirmDeleteSolveId(s.id);
-                  }}
-                  className={`shrink-0 p-1.5 transition-colors ${
-                    confirmDeleteSolveId === s.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
-                  }`}
-                  title={confirmDeleteSolveId === s.id ? "Click again to delete" : "Delete solve"}
-                >
-                  <Trash2 size={13} />
-                </button>
-                {moveMenuSolveId === s.id && (
-                  <div className="absolute right-12 top-full -mt-1 z-50 w-52 bg-gray-800 border border-white/15 rounded-xl shadow-2xl shadow-black/80 py-1">
-                    <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">Move to session</p>
-                    {sessions
-                      .filter((x) => x.id !== s.sessionId)
-                      .map((x) => (
-                        <button
-                          key={x.id}
-                          onClick={() => handleMoveSolve(s, x.id)}
-                          className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 transition-colors"
-                        >
-                          {x.name}
-                        </button>
-                      ))}
+                {itemsPerPage !== "all" && totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 pt-2 border-t border-gray-800/40 shrink-0">
                     <button
-                      onClick={() => {
-                        setCreateSessionForSolve(s);
-                        setMoveMenuSolveId(null);
-                      }}
-                      className="w-full flex items-center gap-1.5 text-left px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 border-t border-white/[0.06] mt-1 pt-1.5 transition-colors"
+                      onClick={() => setPage(clampedPage - 1)}
+                      disabled={clampedPage <= 1}
+                      className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Previous page"
                     >
-                      <Plus size={12} /> New session…
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-[10px] font-mono tabular-nums text-gray-500">
+                      Page {clampedPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setPage(clampedPage + 1)}
+                      disabled={clampedPage >= totalPages}
+                      className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Next page"
+                    >
+                      <ChevronRight size={14} />
                     </button>
                   </div>
                 )}
               </div>
-            ))}
-            </div>
-            {itemsPerPage !== "all" && totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 px-4 sm:px-6 py-2 border-t border-gray-800/40">
-                <button
-                  onClick={() => setPage(clampedPage - 1)}
-                  disabled={clampedPage <= 1}
-                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                  title="Previous page"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                <span className="text-[10px] font-mono tabular-nums text-gray-500">
-                  Page {clampedPage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(clampedPage + 1)}
-                  disabled={clampedPage >= totalPages}
-                  className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                  title="Next page"
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            )}
-          </div>
+            }
+          />
         ) : undefined
       }
     />

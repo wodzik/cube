@@ -1372,6 +1372,7 @@ function CaseTrainerInner() {
             : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
       }
       showAo12={false}
+      layout="side"
       statsAside={
         summary ? (
           <TrainerSummary

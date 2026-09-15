@@ -50,6 +50,7 @@ import { usePendingMoveBuffer } from "../hooks/usePendingMoveBuffer";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
 import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import { TrainerPanel } from "../components/TrainerPanel";
+import { CompactRecentList } from "../components/CompactRecentList";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CaseListItem } from "../components/CaseListItem";
 import { CaseEdit } from "../components/CaseEdit";
@@ -145,6 +146,10 @@ function AttackPageInner() {
   const [history, setHistory] = useState<AttackSession[]>(() => getAttackSessions(sessionKey));
   const [editingCase, setEditingCase] = useState<AlgorithmCase | null>(null);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  // Recent attack sessions list: collapsed by default to the compact sidebar
+  // preview (CompactRecentList, in statsAside) — this flips it to the full
+  // sortable/paginated table below instead.
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   // Recent attack sessions pagination — page size persists across groups,
   // current page resets on group switch (armSession) and page-size change.
   const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number | "all">(readStoredPageSize);
@@ -524,7 +529,100 @@ function AttackPageInner() {
       cubeSetupAlg=""
       timesMs={sessionTotalsMs}
       statsLabel="Attack times"
+      layout="side"
       showAo12={false}
+      leftAside={
+        history.length > 0 ? (
+          <CompactRecentList
+            title="Recent sessions"
+            items={sortedHistory}
+            keyOf={(s) => s.id}
+            expanded={historyExpanded}
+            onToggleExpand={() => setHistoryExpanded((v) => !v)}
+            className="w-full lg:w-48 xl:w-52"
+            renderRow={(s) => (
+              <div className="flex items-center gap-3 py-1.5">
+                <span className="text-sm text-gray-500 flex-1 truncate">
+                  {new Date(s.date).toLocaleDateString()}
+                </span>
+                <span className="text-sm text-gray-700 shrink-0">{s.caseTimes.length}c</span>
+                <span className="text-base font-mono tabular-nums text-white shrink-0">{formatTimeMs(s.totalMs)}</span>
+              </div>
+            )}
+            expandedContent={
+              <div className="flex flex-col min-h-0">
+                <div className="flex items-center gap-1 pb-2 shrink-0">
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                  <select
+                    value={historyItemsPerPage}
+                    onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
+                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
+                  >
+                    {PAGE_SIZE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>
+                        {n === "all" ? "All" : n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col overflow-y-auto divide-y divide-gray-800/40" style={{ maxHeight: "36rem" }}>
+                  {pagedHistory.map((s) => {
+                    const isExpanded = expandedSessionId === s.id;
+                    return (
+                      <div key={s.id}>
+                        <button
+                          onClick={() => setExpandedSessionId(isExpanded ? null : s.id)}
+                          className="w-full flex items-center gap-3 py-2 text-left hover:bg-white/[0.03] transition-colors"
+                        >
+                          <ChevronRight size={11} className={`shrink-0 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                          <span className="flex-1 text-xs text-gray-500">
+                            {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          <span className="text-[10px] text-gray-700">{s.caseTimes.length} cases</span>
+                          <span className="text-xs font-mono tabular-nums text-gray-300">{formatTimeMs(s.totalMs)}</span>
+                        </button>
+                        {isExpanded && (
+                          <div className="pl-8 pr-2 pb-2 divide-y divide-gray-800/30">
+                            {s.caseTimes.map((c, i) => (
+                              <div key={`${c.caseName}-${i}`} className="flex items-center gap-3 py-1.5">
+                                <span className="flex-1 text-[11px] text-gray-500 truncate">{c.caseName}</span>
+                                <span className="text-[11px] font-mono tabular-nums text-gray-400">{formatTimeMs(c.timeMs)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {historyItemsPerPage !== "all" && historyTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 pt-2 border-t border-gray-800/40 shrink-0">
+                    <button
+                      onClick={() => setHistoryPage(clampedHistoryPage - 1)}
+                      disabled={clampedHistoryPage <= 1}
+                      className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Previous page"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-[10px] font-mono tabular-nums text-gray-500">
+                      Page {clampedHistoryPage} / {historyTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setHistoryPage(clampedHistoryPage + 1)}
+                      disabled={clampedHistoryPage >= historyTotalPages}
+                      className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                      title="Next page"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            }
+          />
+        ) : undefined
+      }
       bottom={
         <div className="flex flex-col min-h-0">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -555,82 +653,6 @@ function AttackPageInner() {
                   <span className="text-xs font-mono tabular-nums">{formatTimeMs(entry.timeMs)}</span>
                 </div>
               ))}
-            </div>
-          )}
-          {history.length > 0 && (
-            <div className="border-t border-gray-800">
-              <div className="px-4 pt-3 pb-1 flex items-center gap-3">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                  Recent {groupMeta?.name ?? group} attack sessions
-                </span>
-                <div className="ml-auto flex items-center gap-1">
-                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
-                  <select
-                    value={historyItemsPerPage}
-                    onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
-                    className="bg-gray-950/60 border border-white/10 rounded-md text-[10px] font-semibold text-gray-300 px-1.5 py-0.5 focus:outline-none focus:border-white/30"
-                  >
-                    {PAGE_SIZE_OPTIONS.map((n) => (
-                      <option key={n} value={n}>
-                        {n === "all" ? "All" : n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-800/40">
-                {pagedHistory.map((s) => {
-                    const isExpanded = expandedSessionId === s.id;
-                    return (
-                      <div key={s.id}>
-                        <button
-                          onClick={() => setExpandedSessionId(isExpanded ? null : s.id)}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-white/[0.03] transition-colors"
-                        >
-                          <ChevronRight size={11} className={`shrink-0 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                          <span className="flex-1 text-xs text-gray-500">
-                            {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                          <span className="text-[10px] text-gray-700">{s.caseTimes.length} cases</span>
-                          <span className="text-xs font-mono tabular-nums text-gray-300">{formatTimeMs(s.totalMs)}</span>
-                        </button>
-                        {isExpanded && (
-                          <div className="pl-8 pr-4 pb-2 divide-y divide-gray-800/30">
-                            {s.caseTimes.map((c, i) => (
-                              <div key={`${c.caseName}-${i}`} className="flex items-center gap-3 py-1.5">
-                                <span className="flex-1 text-[11px] text-gray-500 truncate">{c.caseName}</span>
-                                <span className="text-[11px] font-mono tabular-nums text-gray-400">{formatTimeMs(c.timeMs)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-              {historyItemsPerPage !== "all" && historyTotalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 px-4 py-2 border-t border-gray-800/40">
-                  <button
-                    onClick={() => setHistoryPage(clampedHistoryPage - 1)}
-                    disabled={clampedHistoryPage <= 1}
-                    className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                    title="Previous page"
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  <span className="text-[10px] font-mono tabular-nums text-gray-500">
-                    Page {clampedHistoryPage} / {historyTotalPages}
-                  </span>
-                  <button
-                    onClick={() => setHistoryPage(clampedHistoryPage + 1)}
-                    disabled={clampedHistoryPage >= historyTotalPages}
-                    className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                    title="Next page"
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>

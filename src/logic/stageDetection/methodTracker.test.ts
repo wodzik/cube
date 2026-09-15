@@ -146,14 +146,24 @@ describe("rouxStageDetector — verified against known single-move effects", () 
     }
   });
 
-  it("a single R keeps fb (each block is intact on its own side) but breaks sb — no SHARED offset aligns both blocks at once", async () => {
+  it("a single R: the L/R-with-D-floor pair is broken, but the U/D-with-L-floor pair is intact — and R is that grip's last layer, so it's a valid F2B + CMLL-done state", async () => {
     const solved = await createSolvedState();
     const state = applyMoveToState(solved, "R");
-    // Left block untouched (home at offset 0); right block intact but
-    // rotated (home at offset 3) — fb accepts either. sb requires one k
-    // that fits BOTH, and 0 ≠ 3: physically this is a right layer twisted
-    // relative to the left block's plane, which is NOT two aligned blocks.
+    // In the canonical grip this is a right layer twisted against the left
+    // block (NOT two aligned blocks). But a solver gripping L as the floor
+    // with U/D as their block sides has both blocks untouched by R — R is
+    // simply their U layer, one AUF away from solved: sb and cmll hold, lse
+    // (fully solved) does not.
     expect(rouxStageDetector.isStageSolved("fb", state)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("sb", state)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("cmll", state)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("lse", state)).toBe(false);
+  });
+
+  it("R then F: the R layer twist now also breaks the U/D-with-L-floor pair — no pair position + shared offset fits sb", async () => {
+    const solved = await createSolvedState();
+    const state = applyMoveToState(applyMoveToState(solved, "R"), "F");
+    expect(rouxStageDetector.isStageSolved("fb", state)).toBe(true); // the L block (floor D) is still untouched
     expect(rouxStageDetector.isStageSolved("sb", state)).toBe(false);
   });
 
@@ -180,15 +190,17 @@ describe("rouxStageDetector — verified against known single-move effects", () 
     expect(rouxStageDetector.isStageSolved("lse", state)).toBe(false);
   });
 
-  it("blocks are required on the L/R faces — a block pair living on U/D is out of scope by design (see rouxStages doc comment)", async () => {
+  it("a block pair living on U/D (different physical pieces than the L/R blocks) is accepted — the grip is orientation-agnostic", async () => {
     const solved = await createSolvedState();
-    // U + D' leaves intact rotated block pairs on the U and D faces — but
-    // those are made of different physical pieces than the L/R blocks, and
-    // this detector deliberately only tracks the display-matching grip.
-    // Meanwhile the L/R blocks themselves are genuinely broken here (their
-    // D-layer corners moved), so everything past fb reads false.
+    // U + D' breaks the L/R blocks (their D-layer corners moved) but is
+    // exactly an E-slice offset of intact U/D-side blocks — what a solver
+    // who gripped the cube with U/D as their block faces produces. Smart
+    // cubes never report the rotation that put the blocks there, so the
+    // detector must find them on any axis (see rouxStages doc comment).
     const state = applyMoveToState(applyMoveToState(solved, "U"), "D'");
-    expect(rouxStageDetector.isStageSolved("sb", state)).toBe(false);
+    expect(rouxStageDetector.isStageSolved("sb", state)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("cmll", state)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("lse", state)).toBe(false);
   });
 
   it("CFOP and Roux track the SAME move stream independently and can disagree — the core requirement", async () => {
