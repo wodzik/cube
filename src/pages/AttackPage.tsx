@@ -529,6 +529,7 @@ function AttackPageInner() {
       cubeSetupAlg=""
       timesMs={sessionTotalsMs}
       statsLabel="Attack times"
+      layout="side"
       showAo12={false}
       leftAside={
         history.length > 0 ? (
@@ -538,14 +539,14 @@ function AttackPageInner() {
             keyOf={(s) => s.id}
             expanded={historyExpanded}
             onToggleExpand={() => setHistoryExpanded((v) => !v)}
-            className="w-full lg:w-56 xl:w-64"
+            className="w-full lg:w-48 xl:w-52"
             renderRow={(s) => (
               <div className="flex items-center gap-3 py-1.5">
-                <span className="text-xs text-gray-500 flex-1 truncate">
-                  {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                <span className="text-sm text-gray-500 flex-1 truncate">
+                  {new Date(s.date).toLocaleDateString()}
                 </span>
-                <span className="text-xs text-gray-700 shrink-0">{s.caseTimes.length}c</span>
-                <span className="text-sm font-mono tabular-nums text-white shrink-0">{formatTimeMs(s.totalMs)}</span>
+                <span className="text-sm text-gray-700 shrink-0">{s.caseTimes.length}c</span>
+                <span className="text-base font-mono tabular-nums text-white shrink-0">{formatTimeMs(s.totalMs)}</span>
               </div>
             )}
             expandedContent={

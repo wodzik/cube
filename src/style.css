@@ -7,36 +7,50 @@
 
   /* Signature accent — used for the active nav, primary buttons, and the
      "next move" / "current" highlights across scramble, algorithm and
-     stage-progress displays. One accent, used consistently everywhere. */
-  --accent: #6366f1;
-  --accent-bright: #818cf8;
-  --accent-glow: rgba(99, 102, 241, 0.35);
+     stage-progress displays. Deliberately near-white: the app's chrome is
+     a flat black/gray, so "current" reads as the brightest thing on screen
+     rather than as a second hue. */
+  --accent: #f5f5f5;
+  --accent-bright: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.18);
+
+  /* Neutral (hue-less) gray scale in place of Tailwind's slightly blue
+     gray-NNN — every panel/border/text color in this app is written as a
+     gray-NNN class or a white/N% overlay, so remapping the variables here
+     flips the whole app to a plain black/gray look without touching
+     individual components. */
+  --color-gray-950: oklch(14.5% 0 0);
+  --color-gray-900: oklch(20.5% 0 0);
+  --color-gray-800: oklch(26.9% 0 0);
+  --color-gray-700: oklch(37.1% 0 0);
+  --color-gray-600: oklch(43.9% 0 0);
+  --color-gray-500: oklch(55.6% 0 0);
+  --color-gray-400: oklch(70.8% 0 0);
+  --color-gray-300: oklch(87% 0 0);
+  --color-gray-200: oklch(92.2% 0 0);
+  --color-gray-100: oklch(97% 0 0);
 }
 
 /* ─── Light theme ───
-   Every panel/border/text color in this app is written as a Tailwind
-   gray-NNN class or a white/N% opacity overlay — both of which Tailwind v4
-   compiles to `var(--color-gray-NNN)` / `color-mix(..., var(--color-white)
-   N%, transparent)`. Redefining those variables here is enough to flip the
-   whole app's chrome (panels, borders, hover states, secondary text) without
-   touching individual components: each numbered step just swaps for its
-   mirror across the scale (950↔100, 900↔100 tier, etc.), and `--color-white`
-   (used for "loudest" foreground text and the lightest overlays) becomes the
-   near-black that used to be gray-950. `--color-black` and the indigo accent
-   are left as-is — modal scrims stay dark in both themes, and the accent
-   already reads fine on a light background. */
+   Same trick as the dark remap above, mirrored across the scale (950↔100
+   tier etc.); `--color-white` (used for "loudest" foreground text and the
+   lightest overlays) becomes near-black. `--color-black` is left as-is so
+   modal scrims stay dark in both themes. */
 [data-theme="light"] {
-  --color-gray-950: oklch(98.5% 0.002 264.542);
-  --color-gray-900: oklch(96.7% 0.003 264.542);
-  --color-gray-800: oklch(92.8% 0.006 264.531);
-  --color-gray-700: oklch(87.2% 0.01 258.338);
-  --color-gray-600: oklch(70.7% 0.022 261.325);
-  --color-gray-500: oklch(55.1% 0.027 264.364);
-  --color-gray-400: oklch(44.6% 0.03 256.802);
-  --color-gray-300: oklch(37.3% 0.034 259.733);
-  --color-gray-200: oklch(27.8% 0.033 256.848);
-  --color-gray-100: oklch(21% 0.034 264.665);
-  --color-white: oklch(13% 0.028 261.692);
+  --color-gray-950: oklch(98.5% 0 0);
+  --color-gray-900: oklch(97% 0 0);
+  --color-gray-800: oklch(92.2% 0 0);
+  --color-gray-700: oklch(87% 0 0);
+  --color-gray-600: oklch(70.8% 0 0);
+  --color-gray-500: oklch(55.6% 0 0);
+  --color-gray-400: oklch(43.9% 0 0);
+  --color-gray-300: oklch(37.1% 0 0);
+  --color-gray-200: oklch(26.9% 0 0);
+  --color-gray-100: oklch(20.5% 0 0);
+  --color-white: oklch(14.5% 0 0);
+  --accent: #171717;
+  --accent-bright: #0a0a0a;
+  --accent-glow: rgba(0, 0, 0, 0.12);
 }
 
 .font-mono,
@@ -74,19 +88,14 @@
 }
 
 /* ─── App shell background ───
-   Layered radial glows (indigo top, faint violet lower-right) over a
-   near-black base — replaces the flat single-tone background. */
+   One flat tone everywhere — no glows, no per-section surfaces. */
 .app-bg {
-  background:
-    radial-gradient(ellipse 90% 40% at 50% -5%, rgba(99, 102, 241, 0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 60%),
-    var(--color-gray-950);
-  background-attachment: fixed;
+  background: var(--color-gray-950);
 }
 
 /* ─── Top nav pill ─── */
 .nav-pill {
-  @apply flex gap-1 p-1.5 rounded-2xl border border-white/5 bg-gray-900/70 backdrop-blur-xl shadow-[0_8px_30px_-8px_rgba(0,0,0,0.6)];
+  @apply flex gap-1 p-1;
 }
 
 /* Header tab strip on phones: scrolls horizontally without showing a
@@ -103,8 +112,7 @@
 }
 
 .nav-tab-active {
-  @apply text-white shadow-[0_2px_12px_-2px_var(--accent-glow)];
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  @apply text-white bg-white/10;
 }
 
 .nav-tab-inactive {
@@ -112,11 +120,12 @@
 }
 
 /* ─── Generic panel / card ───
-   One consistent "surface" treatment (subtle gradient + hairline border +
-   soft shadow) reused for the stats panel, scramble bar, settings rows,
-   and anywhere else that needs to read as a distinct card. */
+   Deliberately chrome-less: the app has ONE flat background and sections
+   are separated by whitespace and typography, not by boxes or hairlines.
+   The class stays so callers keep a single hook for any future surface
+   treatment. */
 .panel {
-  @apply relative rounded-2xl border border-white/[0.06] bg-gradient-to-b from-gray-900/70 to-gray-900/30 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset];
+  @apply relative;
 }
 
 /* ─── Buttons ───
@@ -124,8 +133,7 @@
    classes — so the shared base is duplicated into each variant rather than
    composed via a `.btn` class.) */
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none text-white px-4 py-2 shadow-[0_4px_16px_-4px_var(--accent-glow)] hover:brightness-110;
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  @apply inline-flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none px-4 py-2 bg-gray-100 text-gray-950 hover:bg-white;
 }
 
 .btn-secondary {
@@ -162,7 +170,7 @@
 /* ─── MoveSequenceDisplay ─── */
 
 .scramble-card {
-  @apply relative rounded-2xl border border-white/[0.06] bg-gradient-to-b from-gray-900/70 to-gray-900/30 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset] px-4 py-3.5;
+  @apply relative px-2 py-2;
 }
 
 .scramble-layout {
@@ -202,11 +210,16 @@
 }
 
 .scramble-moves {
-  @apply flex flex-wrap gap-x-2.5 gap-y-1.5;
+  @apply flex flex-wrap justify-center gap-x-2.5 gap-y-1.5;
 }
 
+/* Size via a variable so a layout can shrink it (TrainLayout's "side" mode
+   sets --scramble-size on its wrapper) — a plain unlayered rule like this
+   would otherwise beat any Tailwind utility override on the parent. */
 .scramble-move {
-  @apply font-mono text-3xl font-bold transition-colors select-none;
+  @apply font-mono font-bold transition-colors select-none;
+  font-size: var(--scramble-size, 1.875rem);
+  line-height: 1.2;
 }
 
 .scramble-move.correct {
@@ -215,7 +228,6 @@
 
 .scramble-move.current {
   color: var(--accent-bright);
-  text-shadow: 0 0 24px var(--accent-glow);
 }
 
 .scramble-move.error {

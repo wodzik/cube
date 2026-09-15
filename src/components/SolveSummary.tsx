@@ -1,114 +1,50 @@
 /**
- * SolveSummary — compact inline stats for the solve that JUST finished,
- * shown in place of the (already-reset, now-irrelevant) big timer in the
- * center column — see TrainerPanel's `centerReplacement` — instead of a
- * screen-covering modal, so the freshly generated next scramble stays
- * visible and the solver can roll straight into it. The first move of the
- * next scramble dismisses it (see SolvePage's effect); the full
- * SolveAnalysis modal stays available via the button here and via clicking
- * any solve in the history list.
+ * SolveSummary — the just-finished solve, condensed to one line of numbers
+ * (TPS · turns · method) with the segmented per-stage SolveTimingBar under
+ * it. Rendered directly beneath the big timer (TrainerPanel's `summary`
+ * slot) while the last result is being held there, so the freshly
+ * generated next scramble stays visible and the solver can roll straight
+ * into it. The first move of the next scramble dismisses it (see
+ * SolvePage's effect); the wrapping Tap in TrainerPanel opens the full
+ * SolveAnalysis modal on click.
  */
 
-import { Maximize2 } from "lucide-react";
 import type { SolveRecord } from "../types/solve";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
-import { formatTimeMs } from "../logic/statistics";
-import { stageDescription } from "./stageDescriptions";
 import { SolveTimingBar } from "./SolveTimingBar";
 
 interface SolveSummaryProps {
   record: SolveRecord;
-  /** Open the full SolveAnalysis modal (3D playback, method toggle, per-stage jumps). */
-  onOpenAnalysis: () => void;
-  /** Hide time (headline, TPS, per-stage recog/exec/total) and show move count instead — see StoredSession.moveCountOnly. */
+  /** Hide time-derived stats (TPS, per-stage bar) and show move count only — see StoredSession.moveCountOnly. */
   moveCountOnly?: boolean;
 }
 
-function formatMs(ms: number): string {
-  return `${(ms / 1000).toFixed(2)}`;
-}
-
-export function SolveSummary({ record, onOpenAnalysis, moveCountOnly = false }: SolveSummaryProps) {
+export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProps) {
   const detector = detectorForMethod(record.method);
   const boundaries =
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
   const timings = computeStageTimings(detector.stages, boundaries ?? [], record.moves);
 
+  const parts = moveCountOnly
+    ? [`${record.moveCount} turns`, record.method]
+    : [`${record.tps.toFixed(2)} TPS`, `${record.moveCount} turns`, record.method];
+
   return (
-    <div className="panel p-5 h-full flex flex-col">
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div>
-          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Last solve</p>
-          <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">
-            {moveCountOnly ? (
-              <>
-                {record.moveCount}
-                <span className="text-base font-sans font-semibold text-gray-500 ml-1.5 align-middle">moves</span>
-              </>
-            ) : (
-              formatTimeMs(record.timeMs)
-            )}
-          </p>
-          <p className="text-sm text-gray-400 mt-1">
-            {moveCountOnly ? record.method : `${record.moveCount} moves · ${record.tps.toFixed(2)} TPS · ${record.method}`}
-          </p>
+    <div className="w-full max-w-2xl flex flex-col items-center gap-4">
+      <p className="text-sm font-mono tabular-nums text-gray-400 tracking-wide">
+        {parts.map((p, i) => (
+          <span key={p}>
+            {i > 0 && <span className="text-gray-700 mx-2.5">|</span>}
+            {p}
+          </span>
+        ))}
+      </p>
+      {!moveCountOnly && (
+        <div className="w-full">
+          <SolveTimingBar timings={timings} />
         </div>
-        <button
-          onClick={onOpenAnalysis}
-          className="shrink-0 p-1.5 text-gray-500 hover:text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
-          title="Open full analysis (3D playback, method comparison)"
-        >
-          <Maximize2 size={15} />
-        </button>
-      </div>
-
-      {!moveCountOnly && <SolveTimingBar timings={timings} />}
-
-      {/* flex-1 + h-full on the table lets the rows spread out over the
-          whole panel height (which itself stretches to the chart column's
-          height) instead of bunching at the top. */}
-      <div className="flex-1 min-h-0">
-        <table className="w-full h-full text-sm font-mono tabular-nums">
-          <thead>
-            <tr className="text-[10px] uppercase tracking-wider text-gray-500">
-              <th className="text-left font-semibold pb-1">Stage</th>
-              <th className="text-right font-semibold pb-1">Moves</th>
-              {!moveCountOnly && (
-                <>
-                  <th className="text-right font-semibold pb-1">Recog</th>
-                  <th className="text-right font-semibold pb-1">Exec</th>
-                  <th className="text-right font-semibold pb-1">Total</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {timings.map((t) => {
-              const skipped = t.moveCount === 0;
-              return (
-                <tr key={t.stage} className={`border-t border-white/[0.04] ${skipped ? "text-gray-600" : "text-gray-300"}`}>
-                  <td className="py-1.5 text-left font-sans font-medium">{stageDescription(t.stage, t.detail)}</td>
-                  {skipped ? (
-                    <td colSpan={moveCountOnly ? 1 : 4} className="py-1.5 text-right text-[10px] uppercase tracking-wider text-amber-400/60">
-                      skip
-                    </td>
-                  ) : moveCountOnly ? (
-                    <td className="py-1.5 text-right">{t.moveCount}</td>
-                  ) : (
-                    <>
-                      <td className="py-1.5 text-right">{t.moveCount}</td>
-                      <td className="py-1.5 text-right">{formatMs(t.recognitionMs)}</td>
-                      <td className="py-1.5 text-right">{formatMs(t.executionMs)}</td>
-                      <td className="py-1.5 text-right text-white">{formatMs(t.totalMs)}</td>
-                    </>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      )}
     </div>
   );
 }

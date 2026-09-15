@@ -41,7 +41,7 @@ export default function App() {
   return (
     <SmartCubeProvider>
       <div className="app-bg min-h-screen flex flex-col">
-        <header className="sticky top-0 z-50 h-16 flex items-center px-2 sm:px-6 border-b border-white/5 bg-gray-950/75 backdrop-blur-xl">
+        <header className="sticky top-0 z-50 h-16 flex items-center px-2 sm:px-6 bg-gray-950/85 backdrop-blur-xl">
           {/* Phones: brand hidden, the tab pill scrolls horizontally (it is
               wider than the viewport). ≥sm: the original centered grid. */}
           <div className="w-full max-w-7xl mx-auto flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">

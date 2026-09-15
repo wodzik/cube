@@ -9,9 +9,10 @@
  */
 
 import { useEffect, useState } from "react";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ao5, ao12, ao100, best, mean, formatTimeMs } from "../logic/statistics";
+import { OverlayModal } from "./OverlayModal";
 
 interface StatsChartProps {
   /** Values in chronological order (oldest first) — solve times in ms by default; anything where lower is better works (e.g. move counts) given a matching `formatValue`. */
@@ -207,29 +208,18 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
 
   useEffect(() => {
     if (!fullscreen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFullscreen(false);
-    };
     const onResize = () => setViewportHeight(window.innerHeight);
-    window.addEventListener("keydown", onKey);
     window.addEventListener("resize", onResize);
     onResize();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
-    };
+    return () => window.removeEventListener("resize", onResize);
   }, [fullscreen]);
 
   const toggle = (metric: Metric) => setVisible((v) => ({ ...v, [metric]: !v[metric] }));
 
-  if (values.length === 0) {
-    return (
-      <div className="flex items-center justify-center text-gray-600 text-sm" style={{ height }}>
-        No data yet
-      </div>
-    );
-  }
-
+  // With no data the chart still renders its frame (grid, axes, empty stat
+  // cards) with a "No data yet" overlay — so the page shows WHERE the times
+  // will land instead of a blank gap that looks like a missing feature.
+  const empty = values.length === 0;
   const data = buildChartData(values);
   const currentAo5 = ao5(values);
   const currentAo12 = ao12(values);
@@ -238,7 +228,7 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
   const avg = mean(values);
 
   const yMin = Math.max(0, (pb ?? 0) * 0.9);
-  const yMax = Math.max(...values) * 1.05;
+  const yMax = empty ? 1 : Math.max(...values) * 1.05;
 
   const bodyProps = { data, visible, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue };
 
@@ -257,32 +247,28 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
         </button>
       </div>
 
-      <ChartBody {...bodyProps} height={height} />
+      <div className="relative">
+        <ChartBody {...bodyProps} height={height} />
+        {empty && (
+          <div className="absolute inset-x-0 top-0 flex items-center justify-center text-gray-600 text-sm pointer-events-none" style={{ height }}>
+            No data yet
+          </div>
+        )}
+      </div>
 
       {fullscreen && (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3"
-          onClick={() => setFullscreen(false)}
+        <OverlayModal
+          onClose={() => setFullscreen(false)}
+          className="w-[94vw] h-[90vh]"
+          header={(["single", "ao5", "ao12", "ao100"] as const).map((m) => (
+            <MetricChip key={m} metric={m} active={visible[m]} onClick={() => toggle(m)} />
+          ))}
         >
-          <div
-            className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-[97vw] h-[95vh] flex flex-col overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
-              <div className="flex items-center gap-1">
-                {(["single", "ao5", "ao12", "ao100"] as const).map((m) => (
-                  <MetricChip key={m} metric={m} active={visible[m]} onClick={() => toggle(m)} />
-                ))}
-              </div>
-              <button onClick={() => setFullscreen(false)} className="p-1.5 text-gray-500 hover:text-gray-200 transition-colors shrink-0">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="flex-1 min-h-0 p-5 overflow-y-auto">
-              <ChartBody {...bodyProps} height={Math.max(280, viewportHeight * 0.95 - 64 - 40)} />
-            </div>
-          </div>
-        </div>
+          {/* Chart height = card height minus header (≈64px), body padding
+              (40px) and the Ao5/Ao12/... stat row under the chart (≈80px
+              incl. gap) — so the whole thing fits without scrolling. */}
+          <ChartBody {...bodyProps} height={Math.max(240, viewportHeight * 0.9 - 64 - 40 - 80)} />
+        </OverlayModal>
       )}
     </div>
   );
