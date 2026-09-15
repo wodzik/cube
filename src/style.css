@@ -13,6 +13,11 @@
   --accent: #f5f5f5;
   --accent-bright: #ffffff;
   --accent-glow: rgba(255, 255, 255, 0.18);
+  /* The one exception to the neutral palette: the move to perform NEXT in
+     the scramble/algorithm strip. Near-white didn't stand out enough from
+     the pending gray, so it keeps the old indigo. */
+  --move-current: #818cf8;
+  --move-current-glow: rgba(99, 102, 241, 0.35);
 
   /* Neutral (hue-less) gray scale in place of Tailwind's slightly blue
      gray-NNN — every panel/border/text color in this app is written as a
@@ -51,6 +56,8 @@
   --accent: #171717;
   --accent-bright: #0a0a0a;
   --accent-glow: rgba(0, 0, 0, 0.12);
+  --move-current: #4f46e5;
+  --move-current-glow: rgba(79, 70, 229, 0.25);
 }
 
 .font-mono,
@@ -227,7 +234,8 @@
 }
 
 .scramble-move.current {
-  color: var(--accent-bright);
+  color: var(--move-current);
+  text-shadow: 0 0 24px var(--move-current-glow);
 }
 
 .scramble-move.error {
