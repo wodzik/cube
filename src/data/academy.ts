@@ -53,13 +53,15 @@ export interface AcademyStep {
   /**
    * Cube view for this step + its card previews, resolved to a mask by
    * trainerMasks.academyStepMask: "first-layer" = only the first layer's
-   * pieces, "f2l" = first two layers (last layer greyed out),
-   * "oll-corners" = OLL stickers with the LL edges blacked out (orient
+   * pieces, "f2l" = first two layers (last layer greyed out), "f2l-edges"
+   * = the same with every corner greyed out too (Zeta Slotting's edges
+   * step — corners aren't placed yet), "oll-corners" = OLL stickers with
+   * the LL edges blacked out (orient
    * corners), "oll" = classic OLL stickers, "corners" = full-color LL
    * corners with edges blacked out (permute corners — edge permutation is
    * ignored there), "full" = plain cube.
    */
-  view: "first-layer" | "f2l" | "oll-corners" | "oll" | "corners" | "full";
+  view: "first-layer" | "f2l" | "f2l-edges" | "oll-corners" | "oll" | "corners" | "full";
   algs: AcademyAlg[];
 }
 
@@ -330,7 +332,9 @@ const ZETA_EDGES_STEP: AcademyStep = {
     "Edge at the top-front with its front sticker matching the front centre: goes right or left. If instead its " +
     "front-colour sticker is on TOP — no amount of turning U lines it up the normal way — the sledgehammer inserts " +
     "it directly.",
-  view: "f2l",
+  // Corners aren't placed yet in this method — grey them all out so a
+  // first-layer corner never reads as "should be solved" (see trainerMasks).
+  view: "f2l-edges",
   algs: [
     { id: "edge-right", name: "Goes right", alg: SECOND_LAYER.steps[0].algs[0].alg, required: true, description: "Top sticker matches the centre on the right." },
     { id: "edge-left", name: "Goes left", alg: SECOND_LAYER.steps[0].algs[1].alg, required: true, description: "Top sticker matches the centre on the left." },

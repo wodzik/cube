@@ -53,7 +53,7 @@ export function crossStickeringMask(face: Face): StickeringMaskOrbits {
   return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set(), undefined, true);
 }
 
-export type AcademyView = "first-layer" | "f2l" | "oll-corners" | "oll" | "corners" | "full";
+export type AcademyView = "first-layer" | "f2l" | "f2l-edges" | "oll-corners" | "oll" | "corners" | "full";
 
 /**
  * Academy step views (see data/academy.ts). ALL of them are MASKS — even
@@ -76,6 +76,10 @@ export type AcademyView = "first-layer" | "f2l" | "oll-corners" | "oll" | "corne
  *                   greyed out.
  *  - "f2l":         first two layers in full color, the last layer greyed
  *                   out — the second-layer edges drill.
+ *  - "f2l-edges":   like "f2l" but EVERY corner greyed out — Zeta
+ *                   Slotting's edges step, where no corner has been placed
+ *                   yet and a first-layer corner in view would read as
+ *                   "supposed to be solved".
  *
  * Frame: the drill applies the inverse of the algorithm to a solved cube
  * with no rotation, and every Academy algorithm (like every OLL) acts on U
@@ -89,12 +93,13 @@ export function academyStepMask(view: AcademyView): StickeringMaskOrbits {
   const D_PIECES = new Set([4, 5, 6, 7]);
   const edge = (p: number): ("regular" | "ignored")[] => {
     if (view === "first-layer") return D_PIECES.has(p) ? ["regular", "regular"] : ["ignored", "ignored"];
-    if (view === "f2l") return U_PIECES.has(p) ? ["ignored", "ignored"] : ["regular", "regular"];
+    if (view === "f2l" || view === "f2l-edges") return U_PIECES.has(p) ? ["ignored", "ignored"] : ["regular", "regular"];
     if (view === "full" || !U_PIECES.has(p)) return ["regular", "regular"];
     if (view === "oll") return ["regular", "ignored"];
     return ["ignored", "ignored"]; // oll-corners, corners
   };
   const corner = (p: number): ("regular" | "ignored")[] => {
+    if (view === "f2l-edges") return ["ignored", "ignored", "ignored"];
     if (view === "first-layer") return D_PIECES.has(p) ? ["regular", "regular", "regular"] : ["ignored", "ignored", "ignored"];
     if (view === "f2l") return U_PIECES.has(p) ? ["ignored", "ignored", "ignored"] : ["regular", "regular", "regular"];
     if (view === "full" || view === "corners" || !U_PIECES.has(p)) return ["regular", "regular", "regular"];

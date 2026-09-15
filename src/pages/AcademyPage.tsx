@@ -121,7 +121,7 @@ function AcademyInner() {
   // to the SIDE of the cube (white right vs. up vs. front) — invisible from
   // the flat top-down 2D-LL angle every other step uses. Those two steps
   // get a 3D card instead.
-  const cardVisualization = step.view === "first-layer" || step.view === "f2l" ? "3D" : "experimental-2D-LL";
+  const cardVisualization = step.view === "first-layer" || step.view === "f2l" || step.view === "f2l-edges" ? "3D" : "experimental-2D-LL";
   const selectedIds = useMemo(() => selectedInStep(step, stored), [step, stored]);
   const selectedAlgs = useMemo(() => step.algs.filter((a) => selectedIds.includes(a.id)), [step, selectedIds]);
   const alg = selectedAlgs[Math.min(drillIdx, Math.max(selectedAlgs.length - 1, 0))];
