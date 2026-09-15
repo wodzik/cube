@@ -226,10 +226,7 @@ function SplitRow({
           chart); the chart is the one that yields — it shrinks below its
           dragged width when the window gets narrower. */}
       <div className="flex-1 min-w-0 lg:min-w-fit flex flex-col gap-6">
-        {/* One size down from the Solve page: block 1 shares the row with the chart, so a 20-move scramble has to fit ~900px. */}
-        <div className="w-full" style={{ "--scramble-size": "1.5rem" } as CSSProperties}>
-          {sequence}
-        </div>
+        <div className="w-full">{sequence}</div>
         <div ref={timerCubeRowRef} className="flex flex-col sm:flex-row items-center justify-evenly gap-8">
           <div className="flex flex-col items-center gap-4 sm:w-80 shrink-0">{center}</div>
           {cube}
