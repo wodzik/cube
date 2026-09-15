@@ -54,6 +54,10 @@ import {
   isPllSolvedOnFace,
   lockFaceIfUnset,
   resolveFace,
+  slotSideFaces,
+  takeNewlySolvedSlot,
+  CORNER_SLOT_FACES,
+  EDGE_SLOT_FACES,
   FACES,
   FACE_SLOTS,
   MIDDLE_LAYER_EDGE_SLOTS,
@@ -65,6 +69,9 @@ import type { StageDetector } from "./types";
 interface LblContext extends LockedFaceContext {
   /** Which half oll-first turned out to be, once recorded — so oll-second's stageDetail can report the complement. */
   ollFirstDetail: "corners" | "edges" | null;
+  /** Corner / edge slots already attributed to a first-layer-n / second-layer-n boundary — so each reports the piece that NEWLY completed. */
+  seenCorners: Set<number>;
+  seenEdges: Set<number>;
 }
 
 function isLblContext(context: unknown): context is LblContext {
@@ -109,7 +116,7 @@ export const lblStageDetector: StageDetector = {
     "pll-edges",
     "auf",
   ],
-  createContext: (): LblContext => ({ lockedFace: null, ollFirstDetail: null }),
+  createContext: (): LblContext => ({ lockedFace: null, ollFirstDetail: null, seenCorners: new Set(), seenEdges: new Set() }),
   isStageSolved(stage, state, context) {
     switch (stage) {
       case "cross": {
@@ -158,6 +165,24 @@ export const lblStageDetector: StageDetector = {
     }
   },
   stageDetail(stage, state, context) {
+    // Cross face and per-piece slot faces — the same details cfopStages
+    // records, so the timing bar can color LBL's stages by cube colors too.
+    if (stage === "cross" || stage.startsWith("first-layer-") || stage.startsWith("second-layer-")) {
+      const face = resolveFace(context, state, detectActiveFace);
+      if (!face) return undefined;
+      if (stage === "cross") return face;
+      if (!isLblContext(context)) return undefined;
+      if (stage.startsWith("first-layer-")) {
+        const corners = state.patternData.CORNERS;
+        const solved = FACE_SLOTS[face].cornerSlots.filter((slot) => isSlotSolved(corners, slot));
+        const slot = takeNewlySolvedSlot(context.seenCorners, solved);
+        return slot === null ? undefined : slotSideFaces(CORNER_SLOT_FACES[slot], face);
+      }
+      const edges = state.patternData.EDGES;
+      const solved = MIDDLE_LAYER_EDGE_SLOTS[face].filter((slot) => isSlotSolved(edges, slot));
+      const slot = takeNewlySolvedSlot(context.seenEdges, solved);
+      return slot === null ? undefined : slotSideFaces(EDGE_SLOT_FACES[slot], face);
+    }
     if (stage === "oll-first") {
       const face = resolveFace(context, state, detectActiveFace);
       if (!face) return undefined;

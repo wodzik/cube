@@ -49,6 +49,9 @@ import {
   isPllSolvedOnFace,
   lockFaceIfUnset,
   resolveFace,
+  slotSideFaces,
+  takeNewlySolvedSlot,
+  CORNER_SLOT_FACES,
   FACES,
   FACE_SLOTS,
   MIDDLE_LAYER_EDGE_SLOTS,
@@ -56,6 +59,15 @@ import {
   type LockedFaceContext,
 } from "./lastLayerShared";
 import type { StageDetector } from "./types";
+
+interface CfopContext extends LockedFaceContext {
+  /** Corner slots of the F2L pairs already attributed to an "f2l-n" boundary — so each one reports the pair that NEWLY completed. */
+  seenPairs: Set<number>;
+}
+
+function isCfopContext(context: unknown): context is CfopContext {
+  return typeof context === "object" && context !== null && "seenPairs" in context;
+}
 
 /**
  * Each face's 4 first-layer corners paired with the middle-layer edge that
@@ -90,7 +102,7 @@ function detectActiveFace(state: LiveCubeState): Face | null {
 export const cfopStageDetector: StageDetector = {
   method: "CFOP",
   stages: ["cross", "f2l-1", "f2l-2", "f2l-3", "f2l-4", "oll", "pll", "auf"],
-  createContext: (): LockedFaceContext => ({ lockedFace: null }),
+  createContext: (): CfopContext => ({ lockedFace: null, seenPairs: new Set() }),
   isStageSolved(stage, state, context) {
     switch (stage) {
       case "cross": {
@@ -122,5 +134,21 @@ export const cfopStageDetector: StageDetector = {
       default:
         return false;
     }
+  },
+  // Details name the physical piece set behind a count-based stage — the
+  // cross face ("U") and, per F2L stage, the side faces of the pair that
+  // just completed ("RF") — so a display can color stages by cube colors.
+  stageDetail(stage, state, context) {
+    const face = resolveFace(context, state, detectActiveFace);
+    if (!face) return undefined;
+    if (stage === "cross") return face;
+    if (!stage.startsWith("f2l-") || !isCfopContext(context)) return undefined;
+    const corners = state.patternData.CORNERS;
+    const edges = state.patternData.EDGES;
+    const solved = F2L_PAIRS[face]
+      .filter(({ corner, edge }) => isSlotSolved(corners, corner) && isSlotSolved(edges, edge))
+      .map(({ corner }) => corner);
+    const slot = takeNewlySolvedSlot(context.seenPairs, solved);
+    return slot === null ? undefined : slotSideFaces(CORNER_SLOT_FACES[slot], face);
   },
 };
