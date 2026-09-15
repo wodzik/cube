@@ -31,11 +31,15 @@ const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) 
 function Tap({ onClick, className = "", children }: { onClick?: () => void; className?: string; children: ReactNode }) {
   if (!onClick) return <div className={className}>{children}</div>;
   return (
+    // No opacity/filter hover effect on purpose: either would create a
+    // stacking context, which pushed the timing bar's hover popup (inside
+    // this button) behind the cube rendered next in the DOM. No native
+    // `title` either — its tooltip sat on top of that same popup.
     <button
       type="button"
       onClick={onClick}
-      title="Open solve analysis"
-      className={`text-left rounded-xl transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${className}`}
+      aria-label="Open solve analysis"
+      className={`text-left rounded-xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${className}`}
     >
       {children}
     </button>
