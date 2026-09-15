@@ -49,19 +49,103 @@ interface TrainLayoutProps {
   layout?: TrainLayoutMode;
 }
 
-const CHART_WIDTH_KEY = "nact_side_chart_width";
 const CHART_MIN_PX = 240;
-/** Smallest width block 1 (scramble + timer/cube) keeps — timer (20rem) + cube (20rem) — mirrored by its lg:min-w class below. */
+const HANDLE_PX = 32;
+/** Side mode: smallest width block 1 (scramble + timer/cube) keeps — timer (20rem) + cube (20rem). */
 const MAIN_MIN_PX = 640;
-const CHART_DEFAULT_PX = 480;
+/** Stack mode: smallest width the main column (timer over the cube, up to xl:w-96 + padding) keeps. */
+const STACK_MAIN_MIN_PX = 560;
 
-function readStoredChartWidth(): number {
+function readStoredWidth(key: string, fallback: number): number {
   try {
-    const v = Number(localStorage.getItem(CHART_WIDTH_KEY));
-    return Number.isFinite(v) && v >= CHART_MIN_PX ? v : CHART_DEFAULT_PX;
+    const v = Number(localStorage.getItem(key));
+    return Number.isFinite(v) && v >= CHART_MIN_PX ? v : fallback;
   } catch {
-    return CHART_DEFAULT_PX;
+    return fallback;
   }
+}
+
+/**
+ * A user-dragged chart width, persisted per browser under `storageKey`.
+ * `startDrag` takes the x of the chart's right edge (the handle drags its
+ * LEFT edge) and the largest width the row can currently spare.
+ */
+function useDraggedWidth(storageKey: string, fallback: number) {
+  const [width, setWidth] = useState(() => readStoredWidth(storageKey, fallback));
+  const startDrag = (e: ReactPointerEvent, rightEdgeX: number, maxWidth: number) => {
+    e.preventDefault();
+    let latest = width;
+    const move = (ev: PointerEvent) => {
+      latest = Math.min(Math.max(CHART_MIN_PX, maxWidth), Math.max(CHART_MIN_PX, rightEdgeX - ev.clientX));
+      setWidth(latest);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      try {
+        localStorage.setItem(storageKey, String(Math.round(latest)));
+      } catch {
+        /* per-browser convenience only */
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+  return { width, startDrag };
+}
+
+function DragHandle({ onPointerDown, className = "" }: { onPointerDown: (e: ReactPointerEvent) => void; className?: string }) {
+  return (
+    <div
+      onPointerDown={onPointerDown}
+      title="Drag to resize the chart"
+      className={`self-stretch items-center justify-center w-6 mx-1 shrink-0 cursor-col-resize select-none touch-none group ${className}`}
+    >
+      <div className="h-10 w-1 rounded-full bg-white/10 group-hover:bg-white/30 group-active:bg-white/40 transition-colors" />
+    </div>
+  );
+}
+
+/**
+ * "stack" mode's columns: [recent list] [main: timer over cube] [handle]
+ * [chart]. The handle resizes the chart column, clamped so the main
+ * column never squeezes the cube.
+ */
+function StackColumns({ leftAside, main, stats }: { leftAside?: ReactNode; main: ReactNode; stats?: ReactNode }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const { width: chartWidth, startDrag } = useDraggedWidth("nact_solve_chart_width", 448);
+
+  const onHandleDown = (e: ReactPointerEvent) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const rect = row.getBoundingClientRect();
+    const leftAsideWidth = row.querySelector<HTMLElement>("[data-left-aside]")?.getBoundingClientRect().width ?? 0;
+    startDrag(e, rect.right, rect.width - leftAsideWidth - HANDLE_PX - STACK_MAIN_MIN_PX);
+  };
+
+  return (
+    <div ref={rowRef} className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 min-w-0 lg:min-w-[560px] flex flex-col lg:order-2">{main}</div>
+
+      {leftAside != null && (
+        <div data-left-aside className="lg:flex-none lg:order-1 flex flex-col px-4 sm:px-6 py-4 lg:py-6 overflow-y-auto">
+          {leftAside}
+        </div>
+      )}
+
+      {stats != null && (
+        <>
+          <DragHandle onPointerDown={onHandleDown} className="hidden lg:flex lg:order-3" />
+          <div
+            className="w-full lg:w-auto lg:basis-[var(--chart-w)] lg:grow-0 lg:shrink lg:min-w-[240px] min-w-0 lg:order-4 flex flex-col overflow-y-auto"
+            style={{ "--chart-w": `${chartWidth}px` } as CSSProperties}
+          >
+            {stats}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -79,7 +163,7 @@ function SplitRow({
 }: Pick<TrainLayoutProps, "leftAside" | "sequence" | "center" | "cube" | "stats">) {
   const rowRef = useRef<HTMLDivElement>(null);
   const timerCubeRowRef = useRef<HTMLDivElement>(null);
-  const [chartWidth, setChartWidth] = useState(readStoredChartWidth);
+  const { width: chartWidth, startDrag } = useDraggedWidth("nact_side_chart_width", 480);
   // True when the row can't fit block 1 + handle + a minimum-width chart:
   // the chart then drops UNDER block 1 at full width instead of the two
   // overlapping or the row overflowing the viewport.
@@ -99,9 +183,8 @@ function SplitRow({
       ? Array.from(inner.children).reduce((sum, c) => sum + c.getBoundingClientRect().width, 0) +
         (parseFloat(getComputedStyle(inner).columnGap) || 0) * Math.max(0, inner.children.length - 1)
       : 0;
-    const handleWidth = 32;
     const leftAsideWidth = row.querySelector<HTMLElement>("[data-left-aside]")?.getBoundingClientRect().width ?? 0;
-    return rect.width - rowPadding - handleWidth - leftAsideWidth - Math.max(MAIN_MIN_PX, innerMin);
+    return rect.width - rowPadding - HANDLE_PX - leftAsideWidth - Math.max(MAIN_MIN_PX, innerMin);
   };
 
   useEffect(() => {
@@ -120,29 +203,12 @@ function SplitRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startDrag = (e: ReactPointerEvent) => {
+  const onHandleDown = (e: ReactPointerEvent) => {
     const row = rowRef.current;
     if (!row) return;
-    e.preventDefault();
     const rect = row.getBoundingClientRect();
     const rowPaddingRight = parseFloat(getComputedStyle(row).paddingRight) || 0;
-    const maxWidth = Math.max(CHART_MIN_PX, availableChartWidth());
-    let latest = chartWidth;
-    const move = (ev: PointerEvent) => {
-      latest = Math.min(maxWidth, Math.max(CHART_MIN_PX, rect.right - rowPaddingRight - ev.clientX));
-      setChartWidth(latest);
-    };
-    const up = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      try {
-        localStorage.setItem(CHART_WIDTH_KEY, String(Math.round(latest)));
-      } catch {
-        /* per-browser convenience only */
-      }
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
+    startDrag(e, rect.right - rowPaddingRight, availableChartWidth());
   };
 
   return (
@@ -172,13 +238,7 @@ function SplitRow({
 
       {stats != null && (
         <>
-          <div
-            onPointerDown={startDrag}
-            title="Drag to resize the chart"
-            className={`${stacked ? "hidden" : "hidden lg:flex"} self-stretch items-center justify-center w-6 mx-1 shrink-0 cursor-col-resize select-none touch-none group`}
-          >
-            <div className="h-10 w-1 rounded-full bg-white/10 group-hover:bg-white/30 group-active:bg-white/40 transition-colors" />
-          </div>
+          <DragHandle onPointerDown={onHandleDown} className={stacked ? "hidden" : "hidden lg:flex"} />
           <div
             // Remount on mode switch: recharts' ResponsiveContainer keeps the
             // width it measured in the previous mode otherwise.
@@ -231,28 +291,20 @@ export function TrainLayout({ header, sequence, leftAside, center, cube, stats, 
 
       {sequenceRow}
 
-      <div className="flex-1 flex flex-col lg:flex-row">
-        <div className="flex-1 min-w-0 flex flex-col lg:order-2">
-          <div className="flex flex-col items-center gap-8 px-4 sm:px-6 py-6">
-            <div className="w-full max-w-3xl flex flex-col items-center gap-4">{center}</div>
-            <div className="w-full flex justify-center">{cube}</div>
-          </div>
+      <StackColumns
+        leftAside={leftAside}
+        stats={stats}
+        main={
+          <>
+            <div className="flex flex-col items-center gap-8 px-4 sm:px-6 py-6">
+              <div className="w-full max-w-3xl flex flex-col items-center gap-4">{center}</div>
+              <div className="w-full flex justify-center">{cube}</div>
+            </div>
 
-          {bottom != null && <div className="flex-1 overflow-y-auto">{bottom}</div>}
-        </div>
-
-        {leftAside != null && (
-          <div className="lg:flex-none lg:order-1 flex flex-col px-4 sm:px-6 py-4 lg:py-6 overflow-y-auto">
-            {leftAside}
-          </div>
-        )}
-
-        {stats != null && (
-          <div className="lg:flex-none lg:w-96 xl:w-112 lg:order-3 flex flex-col overflow-y-auto">
-            {stats}
-          </div>
-        )}
-      </div>
+            {bottom != null && <div className="flex-1 overflow-y-auto">{bottom}</div>}
+          </>
+        }
+      />
     </div>
   );
 }
