@@ -12,7 +12,7 @@
 import type { SolveRecord } from "../types/solve";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
-import { recognitionSharePercent } from "../logic/stageDetection/recognitionShare";
+import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { SolveTimingBar } from "./SolveTimingBar";
 
 interface SolveSummaryProps {
@@ -26,24 +26,24 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
   const boundaries =
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
   const timings = computeStageTimings(detector.stages, boundaries ?? [], record.moves);
-  const recognitionShare = moveCountOnly ? null : recognitionSharePercent(timings, record.timeMs);
+  const fluency = moveCountOnly ? null : fluencyPercent(timings, record.timeMs);
 
-  const parts = moveCountOnly
-    ? [`${record.moveCount} turns`, record.method]
+  const parts: { text: string; title?: string }[] = moveCountOnly
+    ? [{ text: `${record.moveCount} turns` }, { text: record.method }]
     : [
-        `${record.tps.toFixed(2)} TPS`,
-        `${record.moveCount} turns`,
-        recognitionShare === null ? null : `${recognitionShare}% recognition`,
-        record.method,
-      ].filter((p): p is string => p !== null);
+        { text: `${record.tps.toFixed(2)} TPS` },
+        { text: `${record.moveCount} turns` },
+        fluency === null ? null : { text: `${fluency}% fluency`, title: FLUENCY_TOOLTIP },
+        { text: record.method },
+      ].filter((p): p is { text: string; title?: string } => p !== null);
 
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-4">
       <p className="text-sm font-mono tabular-nums text-gray-400 tracking-wide">
         {parts.map((p, i) => (
-          <span key={p}>
+          <span key={p.text}>
             {i > 0 && <span className="text-gray-700 mx-2.5">|</span>}
-            {p}
+            <span title={p.title}>{p.text}</span>
           </span>
         ))}
       </p>

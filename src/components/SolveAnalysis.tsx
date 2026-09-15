@@ -39,7 +39,7 @@ import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { cfopStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
-import { recognitionSharePercent } from "../logic/stageDetection/recognitionShare";
+import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
@@ -189,7 +189,7 @@ export function SolveAnalysis({
   const boundaries = (method === "CFOP" || method === "LBL" ? healed?.[method === "CFOP" ? "cfop" : "lbl"] : undefined) ?? BOUNDARIES_BY_METHOD[method](record) ?? [];
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
   // For the method currently shown (its stage split defines the pauses).
-  const recognitionShare = recognitionSharePercent(timings, record.timeMs);
+  const fluency = fluencyPercent(timings, record.timeMs);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -210,15 +210,21 @@ export function SolveAnalysis({
               {moveCountOnly ? `${record.moveCount} moves` : formatTimeMs(record.timeMs)}
             </h2>
             <p className="text-gray-400 text-xs mt-0.5">
-              {moveCountOnly
-                ? record.method
-                : [
-                    `${record.moveCount} moves`,
-                    `${record.tps.toFixed(2)} TPS`,
-                    recognitionShare === null ? null : `${recognitionShare}% recognition`,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
+              {moveCountOnly ? (
+                record.method
+              ) : (
+                <>
+                  {record.moveCount} moves · {record.tps.toFixed(2)} TPS
+                  {fluency !== null && (
+                    <>
+                      {" · "}
+                      <span title={FLUENCY_TOOLTIP}>
+                        {fluency}% fluency
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white transition-colors">

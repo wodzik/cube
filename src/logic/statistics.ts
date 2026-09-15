@@ -168,3 +168,21 @@ export function formatTime(seconds: number): string {
   const secs = seconds % 60;
   return `${mins}:${secs.toFixed(2).padStart(5, "0")}`;
 }
+
+/**
+ * Coarse "how long ago" for a solve timestamp — a solve's exact minute
+ * doesn't matter, only roughly when it happened ("3 hours ago", "2 days
+ * ago"). Falls back to a calendar date past a week, where "9 days ago"
+ * stops being a useful unit at a glance.
+ */
+export function formatRelativeTime(epochMs: number): string {
+  const diffMs = Date.now() - epochMs;
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} ${days === 1 ? "day" : "days"} ago`;
+  return new Date(epochMs).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
