@@ -53,11 +53,18 @@ export function CompactRecentList<T>({
 
   return (
     <>
-      {/* h-full: the wrapping leftAside column now runs the full page height
-          (see TrainLayout) — without h-full here this card would size to its
-          rows and leave a chunk of bare column below it instead of reading
-          as one continuous panel. */}
-      <div className={`panel p-4 flex flex-col min-h-0 h-full ${className}`}>
+      {/* h-full: the wrapping leftAside column runs the full page height (see
+          TrainLayout) — without h-full here this card would size to its rows
+          and leave a chunk of bare column below it instead of reading as one
+          continuous panel. max-h caps that at the viewport instead of letting
+          `h-full` resolve against an indefinite ancestor: with enough items
+          the rows below would otherwise have no bound to scroll against
+          (percentage heights on an auto-sized flex ancestor compute as
+          "auto"), so this panel's own hypothetical height became "however
+          tall every row is" — which then dragged the WHOLE row's stretched
+          height (and the cube/timer column centered within it) down with it,
+          off the bottom of the screen. */}
+      <div className={`panel p-4 flex flex-col min-h-0 h-full max-h-[calc(100vh-8rem)] ${className}`}>
         <div className="flex items-center justify-between gap-2 mb-2 shrink-0">
           <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{title}</h3>
           <button
