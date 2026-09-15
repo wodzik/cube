@@ -34,6 +34,7 @@ import { SolveControls } from "../components/SolveControls";
 import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
+import { recordRecognitionShare } from "../logic/stageDetection/recognitionShare";
 import { CompactRecentList } from "../components/CompactRecentList";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
 import { CaseViewToggles } from "../components/CaseViewToggles";
@@ -75,20 +76,59 @@ function buildStartHint(methods: readonly StartMethod[]): string {
   return `${text[0].toUpperCase()}${text.slice(1)} to begin`;
 }
 
-type SolveSortKey = "nr" | "time" | "moves" | "tps";
+type SolveSortKey = "nr" | "time" | "moves" | "tps" | "recognition";
 
 /**
  * Sort options for the Recent solves list. `defaultAsc` is the direction a
  * FIRST click on that key gets — chosen per what a solver most likely wants
  * to see on top: newest solve (# desc), fastest time (asc), fewest moves
- * (asc), highest TPS (desc). Clicking the already-active key flips it.
+ * (asc), highest TPS (desc), lowest (best) recognition share (asc).
+ * Clicking the already-active key flips it. Rendered as clickable column
+ * headers in the expanded table (see SortableTh below), not a separate row
+ * of chips.
  */
 const SOLVE_SORT_OPTIONS: { key: SolveSortKey; label: string; defaultAsc: boolean }[] = [
   { key: "nr", label: "#", defaultAsc: false },
   { key: "time", label: "Time", defaultAsc: true },
   { key: "moves", label: "Moves", defaultAsc: true },
   { key: "tps", label: "TPS", defaultAsc: false },
+  { key: "recognition", label: "Recog", defaultAsc: true },
 ];
+
+/** Sort keys that need time data — unreachable (and irrelevant) in a moveCountOnly session; see effectiveSortKey. */
+const TIME_BASED_SORT_KEYS = new Set<SolveSortKey>(["time", "tps", "recognition"]);
+
+/** A `<th>` that sorts the solves table by `sortKey` on click, showing an arrow when it's the active column. */
+function SortableTh({
+  label,
+  sortKey,
+  activeKey,
+  ascending,
+  onSort,
+  align = "left",
+}: {
+  label: string;
+  sortKey: SolveSortKey;
+  activeKey: SolveSortKey;
+  ascending: boolean;
+  onSort: (key: SolveSortKey) => void;
+  align?: "left" | "right";
+}) {
+  const active = activeKey === sortKey;
+  return (
+    <th className={`py-2 font-semibold ${align === "right" ? "text-right" : "text-left"}`}>
+      <button
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1 text-[10px] uppercase tracking-wider transition-colors hover:text-gray-200 ${
+          active ? "text-white" : "text-gray-500"
+        }`}
+      >
+        {label}
+        <span className="w-2.5 inline-block text-gray-400">{active ? (ascending ? "↑" : "↓") : ""}</span>
+      </button>
+    </th>
+  );
+}
 
 // Recent solves list page size — persisted (shared across sessions) so it
 // doesn't have to be re-picked every time.
@@ -264,15 +304,38 @@ function SolvePageInner({
   // they stay stable across re-sorts (and renumber on deletion, csTimer-style).
   const [sortKey, setSortKey] = useState<SolveSortKey>("nr");
   const [sortAsc, setSortAsc] = useState(false);
-  // A "time"/"tps" sort chosen before Move count only was switched on stays
-  // applied (nothing to reset it), just no longer reachable via a button —
-  // fall back to session order so the un-highlighted list isn't silently
-  // sorted by a metric the UI no longer shows a control for.
-  const effectiveSortKey = session.moveCountOnly && (sortKey === "time" || sortKey === "tps") ? "nr" : sortKey;
+  // A "time"/"tps"/"recognition" sort chosen before Move count only was
+  // switched on stays applied (nothing to reset it), just no longer
+  // reachable via a header — fall back to session order so the
+  // un-highlighted list isn't silently sorted by a metric the UI no longer
+  // shows a column for.
+  const effectiveSortKey = session.moveCountOnly && TIME_BASED_SORT_KEYS.has(sortKey) ? "nr" : sortKey;
+  const handleSort = (key: SolveSortKey) => {
+    if (effectiveSortKey === key) setSortAsc((v) => !v);
+    else {
+      setSortKey(key);
+      setSortAsc(SOLVE_SORT_OPTIONS.find((o) => o.key === key)!.defaultAsc);
+    }
+    setPage(1);
+  };
   const sortedSolves = useMemo(() => {
     const numbered = solves.map((record, i) => ({ record, nr: i + 1 }));
-    const value = (e: (typeof numbered)[number]): number =>
-      effectiveSortKey === "nr" ? e.nr : effectiveSortKey === "time" ? e.record.timeMs : effectiveSortKey === "moves" ? e.record.moveCount : e.record.tps;
+    const value = (e: (typeof numbered)[number]): number => {
+      switch (effectiveSortKey) {
+        case "nr":
+          return e.nr;
+        case "time":
+          return e.record.timeMs;
+        case "moves":
+          return e.record.moveCount;
+        case "tps":
+          return e.record.tps;
+        case "recognition":
+          // Solves with no recognition data (unknown method) sort last
+          // regardless of direction, rather than skewing among real values.
+          return recordRecognitionShare(e.record) ?? (sortAsc ? Infinity : -Infinity);
+      }
+    };
     numbered.sort((a, b) => (value(a) - value(b)) * (sortAsc ? 1 : -1));
     return numbered;
   }, [solves, effectiveSortKey, sortAsc]);
@@ -813,7 +876,7 @@ function SolvePageInner({
         solves.length > 0 ? (
           <CompactRecentList
             title="Recent solves"
-            items={sortedSolves}
+            items={sortedSolves.slice(0, 25)}
             keyOf={(e) => e.record.id}
             expanded={solvesExpanded}
             onToggleExpand={() => setSolvesExpanded((v) => !v)}
@@ -830,8 +893,8 @@ function SolvePageInner({
               </button>
             )}
             expandedContent={
-              <div className="flex flex-col min-h-0">
-                <div className="flex items-center gap-3 pb-2 shrink-0">
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex items-center gap-3 pb-3 shrink-0">
                   <div className="flex items-center gap-1">
                     <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
                     <select
@@ -846,90 +909,120 @@ function SolvePageInner({
                       ))}
                     </select>
                   </div>
-                  <div className="ml-auto flex items-center gap-1">
-                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Sort</span>
-                    {SOLVE_SORT_OPTIONS.filter((o) => !session.moveCountOnly || (o.key !== "time" && o.key !== "tps")).map((o) => (
-                      <button
-                        key={o.key}
-                        onClick={() => {
-                          if (effectiveSortKey === o.key) setSortAsc((v) => !v);
-                          else {
-                            setSortKey(o.key);
-                            setSortAsc(o.defaultAsc);
-                          }
-                          setPage(1);
-                        }}
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
-                          effectiveSortKey === o.key ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"
-                        }`}
-                      >
-                        {o.label}
-                        {effectiveSortKey === o.key && (sortAsc ? " ↑" : " ↓")}
-                      </button>
-                    ))}
-                  </div>
+                  <span className="ml-auto text-[10px] text-gray-600">Click a column to sort</span>
                 </div>
-                <div className="flex flex-col overflow-y-auto divide-y divide-gray-800/40" style={{ maxHeight: "36rem" }}>
-                  {pagedSolves.map(({ record: s, nr }) => (
-                    <div key={s.id} className="relative flex items-center gap-1 py-1.5 hover:bg-white/[0.03] transition-colors">
-                      <button onClick={() => setAnalysisRecord(s)} className="flex-1 min-w-0 flex items-center gap-3 py-1 text-left">
-                        <span className="text-[10px] font-mono tabular-nums text-gray-600 w-9 shrink-0">#{nr}</span>
-                        <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">
-                          {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
-                        </span>
-                        <span className="text-xs text-gray-500 flex-1 truncate">
-                          {session.moveCountOnly ? s.method : `${s.moveCount} moves · ${s.tps.toFixed(2)} TPS · ${s.method}`}
-                        </span>
-                        <span className="text-[10px] text-gray-700 shrink-0">
-                          {new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setMoveMenuSolveId(moveMenuSolveId === s.id ? null : s.id)}
-                        className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
-                        title="Move to another session"
-                      >
-                        <FolderInput size={13} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirmDeleteSolveId === s.id) handleDeleteSolve(s);
-                          else setConfirmDeleteSolveId(s.id);
-                        }}
-                        className={`shrink-0 p-1.5 transition-colors ${
-                          confirmDeleteSolveId === s.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
-                        }`}
-                        title={confirmDeleteSolveId === s.id ? "Click again to delete" : "Delete solve"}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                      {moveMenuSolveId === s.id && (
-                        <div className="absolute right-12 top-full -mt-1 z-50 w-52 bg-gray-800 border border-white/15 rounded-xl shadow-2xl shadow-black/80 py-1">
-                          <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">Move to session</p>
-                          {sessions
-                            .filter((x) => x.id !== s.sessionId)
-                            .map((x) => (
-                              <button
-                                key={x.id}
-                                onClick={() => handleMoveSolve(s, x.id)}
-                                className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 transition-colors"
-                              >
-                                {x.name}
-                              </button>
-                            ))}
-                          <button
-                            onClick={() => {
-                              setCreateSessionForSolve(s);
-                              setMoveMenuSolveId(null);
-                            }}
-                            className="w-full flex items-center gap-1.5 text-left px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 border-t border-white/[0.06] mt-1 pt-1.5 transition-colors"
+                <div className="flex-1 min-h-0 overflow-auto">
+                  <table className="w-full border-collapse">
+                    <thead className="sticky top-0 z-10 bg-gray-900">
+                      <tr className="border-b border-gray-800">
+                        <SortableTh label="#" sortKey="nr" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                        <SortableTh
+                          label={session.moveCountOnly ? "Moves" : "Time"}
+                          sortKey={session.moveCountOnly ? "moves" : "time"}
+                          activeKey={effectiveSortKey}
+                          ascending={sortAsc}
+                          onSort={handleSort}
+                        />
+                        {!session.moveCountOnly && (
+                          <SortableTh label="Moves" sortKey="moves" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                        )}
+                        {!session.moveCountOnly && (
+                          <SortableTh label="TPS" sortKey="tps" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                        )}
+                        {!session.moveCountOnly && (
+                          <SortableTh label="Recog" sortKey="recognition" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                        )}
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Method</th>
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Ended</th>
+                        <th className="py-2 w-20" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800/40">
+                      {pagedSolves.map(({ record: s, nr }) => {
+                        const recognitionPct = session.moveCountOnly ? null : recordRecognitionShare(s);
+                        return (
+                          <tr
+                            key={s.id}
+                            onClick={() => setAnalysisRecord(s)}
+                            className="relative cursor-pointer hover:bg-white/[0.03] transition-colors"
                           >
-                            <Plus size={12} /> New session…
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                            <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-500">#{nr}</td>
+                            <td className="py-2.5 pr-4 text-base font-mono tabular-nums text-white whitespace-nowrap">
+                              {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
+                            </td>
+                            {!session.moveCountOnly && <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-400">{s.moveCount}</td>}
+                            {!session.moveCountOnly && (
+                              <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-400">{s.tps.toFixed(2)}</td>
+                            )}
+                            {!session.moveCountOnly && (
+                              <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-400">
+                                {recognitionPct === null ? "—" : `${recognitionPct}%`}
+                              </td>
+                            )}
+                            <td className="py-2.5 pr-4 text-sm text-gray-500">{s.method}</td>
+                            <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">
+                              {new Date(s.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </td>
+                            <td className="py-2.5">
+                              <div className="relative flex items-center justify-end gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMoveMenuSolveId(moveMenuSolveId === s.id ? null : s.id);
+                                  }}
+                                  className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
+                                  title="Move to another session"
+                                >
+                                  <FolderInput size={13} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirmDeleteSolveId === s.id) handleDeleteSolve(s);
+                                    else setConfirmDeleteSolveId(s.id);
+                                  }}
+                                  className={`shrink-0 p-1.5 transition-colors ${
+                                    confirmDeleteSolveId === s.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
+                                  }`}
+                                  title={confirmDeleteSolveId === s.id ? "Click again to delete" : "Delete solve"}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                                {moveMenuSolveId === s.id && (
+                                  <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="absolute right-0 top-full mt-1 z-50 w-52 bg-gray-800 border border-white/15 rounded-xl shadow-2xl shadow-black/80 py-1"
+                                  >
+                                    <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">Move to session</p>
+                                    {sessions
+                                      .filter((x) => x.id !== s.sessionId)
+                                      .map((x) => (
+                                        <button
+                                          key={x.id}
+                                          onClick={() => handleMoveSolve(s, x.id)}
+                                          className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 transition-colors"
+                                        >
+                                          {x.name}
+                                        </button>
+                                      ))}
+                                    <button
+                                      onClick={() => {
+                                        setCreateSessionForSolve(s);
+                                        setMoveMenuSolveId(null);
+                                      }}
+                                      className="w-full flex items-center gap-1.5 text-left px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 border-t border-white/[0.06] mt-1 pt-1.5 transition-colors"
+                                    >
+                                      <Plus size={12} /> New session…
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
                 {itemsPerPage !== "all" && totalPages > 1 && (
                   <div className="flex items-center justify-center gap-3 pt-2 border-t border-gray-800/40 shrink-0">

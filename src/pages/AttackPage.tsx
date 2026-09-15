@@ -550,8 +550,8 @@ function AttackPageInner() {
               </div>
             )}
             expandedContent={
-              <div className="flex flex-col min-h-0">
-                <div className="flex items-center gap-1 pb-2 shrink-0">
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex items-center gap-1 pb-3 shrink-0">
                   <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
                   <select
                     value={historyItemsPerPage}
@@ -565,28 +565,28 @@ function AttackPageInner() {
                     ))}
                   </select>
                 </div>
-                <div className="flex flex-col overflow-y-auto divide-y divide-gray-800/40" style={{ maxHeight: "36rem" }}>
+                <div className="flex-1 min-h-0 flex flex-col overflow-y-auto divide-y divide-gray-800/40">
                   {pagedHistory.map((s) => {
                     const isExpanded = expandedSessionId === s.id;
                     return (
                       <div key={s.id}>
                         <button
                           onClick={() => setExpandedSessionId(isExpanded ? null : s.id)}
-                          className="w-full flex items-center gap-3 py-2 text-left hover:bg-white/[0.03] transition-colors"
+                          className="w-full flex items-center gap-3 py-2.5 text-left hover:bg-white/[0.03] transition-colors"
                         >
-                          <ChevronRight size={11} className={`shrink-0 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                          <span className="flex-1 text-xs text-gray-500">
+                          <ChevronRight size={13} className={`shrink-0 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                          <span className="flex-1 text-sm text-gray-500">
                             {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
-                          <span className="text-[10px] text-gray-700">{s.caseTimes.length} cases</span>
-                          <span className="text-xs font-mono tabular-nums text-gray-300">{formatTimeMs(s.totalMs)}</span>
+                          <span className="text-xs text-gray-700">{s.caseTimes.length} cases</span>
+                          <span className="text-base font-mono tabular-nums text-gray-300">{formatTimeMs(s.totalMs)}</span>
                         </button>
                         {isExpanded && (
                           <div className="pl-8 pr-2 pb-2 divide-y divide-gray-800/30">
                             {s.caseTimes.map((c, i) => (
                               <div key={`${c.caseName}-${i}`} className="flex items-center gap-3 py-1.5">
-                                <span className="flex-1 text-[11px] text-gray-500 truncate">{c.caseName}</span>
-                                <span className="text-[11px] font-mono tabular-nums text-gray-400">{formatTimeMs(c.timeMs)}</span>
+                                <span className="flex-1 text-sm text-gray-500 truncate">{c.caseName}</span>
+                                <span className="text-sm font-mono tabular-nums text-gray-400">{formatTimeMs(c.timeMs)}</span>
                               </div>
                             ))}
                           </div>

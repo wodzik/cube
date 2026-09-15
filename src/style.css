@@ -37,17 +37,32 @@
 }
 
 /* ─── Light theme ───
-   Same trick as the dark remap above, mirrored across the scale (950↔100
-   tier etc.); `--color-white` (used for "loudest" foreground text and the
-   lightest overlays) becomes near-black. `--color-black` is left as-is so
-   modal scrims stay dark in both themes. */
+   NOT a plain numeric mirror of the dark scale (950↔100 etc.) for the
+   500/600/700 tier: those are the "quiet/secondary" text tones (icons,
+   uppercase labels, de-emphasized columns — see grep of text-gray-500/600/700
+   across src/), and a straight mirror put them at 55.6/70.8/87% lightness —
+   i.e. light-to-very-light gray ON a near-white page background. Light text
+   on white reads far weaker than the equivalent dark text on black at the
+   same WCAG contrast RATIO (a well-known asymmetry — bright surfaces cause
+   more perceptual "irradiation"/veiling than dark ones), so those numbers
+   visually washed out to the point of being unreadable (measured: 4.54:1,
+   2.48:1, 1.42:1 against the actual rendered page background — see the
+   contrast-check script referenced in git history). Values below are
+   independently chosen (via binary search against the real rendered
+   background) to land near 6:1 / 4.8:1 / 3.8:1 instead, while keeping the
+   500 < 600 < 700 "increasingly quiet" ordering intact. 800/900/950 stay a
+   straight mirror — those are pure background/border surfaces (never text;
+   verified via grep), where the same asymmetry doesn't apply. `--color-white`
+   (used for "loudest" foreground text and the lightest overlays) becomes
+   near-black. `--color-black` is left as-is so modal scrims stay dark in
+   both themes. */
 [data-theme="light"] {
   --color-gray-950: oklch(98.5% 0 0);
   --color-gray-900: oklch(97% 0 0);
   --color-gray-800: oklch(92.2% 0 0);
-  --color-gray-700: oklch(87% 0 0);
-  --color-gray-600: oklch(70.8% 0 0);
-  --color-gray-500: oklch(55.6% 0 0);
+  --color-gray-700: oklch(59.8% 0 0);
+  --color-gray-600: oklch(54.3% 0 0);
+  --color-gray-500: oklch(49.1% 0 0);
   --color-gray-400: oklch(43.9% 0 0);
   --color-gray-300: oklch(37.1% 0 0);
   --color-gray-200: oklch(26.9% 0 0);

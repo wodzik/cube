@@ -69,7 +69,11 @@ export function CompactRecentList<T>({
       {expanded && (
         <OverlayModal
           onClose={onToggleExpand}
-          className="w-[min(97vw,44rem)] max-h-[90vh]"
+          // Near-fullscreen (matches the chart's own fullscreen) — this is a
+          // full session log, not a small lookup popup, so it should read as
+          // its own page rather than a dialog floating over the app.
+          className="w-[97vw] h-[95vh]"
+          bodyClassName="p-5 flex flex-col min-h-0"
           header={<h3 className="text-xs font-semibold text-gray-300 uppercase tracking-widest">{title}</h3>}
         >
           {expandedContent}

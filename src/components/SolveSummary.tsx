@@ -12,6 +12,7 @@
 import type { SolveRecord } from "../types/solve";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
+import { recognitionSharePercent } from "../logic/stageDetection/recognitionShare";
 import { SolveTimingBar } from "./SolveTimingBar";
 
 interface SolveSummaryProps {
@@ -25,10 +26,16 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
   const boundaries =
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
   const timings = computeStageTimings(detector.stages, boundaries ?? [], record.moves);
+  const recognitionShare = moveCountOnly ? null : recognitionSharePercent(timings, record.timeMs);
 
   const parts = moveCountOnly
     ? [`${record.moveCount} turns`, record.method]
-    : [`${record.tps.toFixed(2)} TPS`, `${record.moveCount} turns`, record.method];
+    : [
+        `${record.tps.toFixed(2)} TPS`,
+        `${record.moveCount} turns`,
+        recognitionShare === null ? null : `${recognitionShare}% recognition`,
+        record.method,
+      ].filter((p): p is string => p !== null);
 
   return (
     <div className="w-full max-w-2xl flex flex-col items-center gap-4">
