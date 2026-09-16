@@ -43,6 +43,48 @@ function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
 }
 
+function isQuotaExceededError(err: unknown): boolean {
+  return err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22);
+}
+
+/**
+ * Every recorded attempt appends to a variant's `times` forever, so a
+ * heavily-drilled group (many cases × many variants × months of practice)
+ * can outgrow localStorage's quota (see the QuotaExceededError reports for
+ * alg_group_second-block-last-slot). Rather than let that throw out of
+ * saveAlgGroup mid-attempt, cap every variant's `times` to an ever-smaller
+ * number of its MOST RECENT entries and retry until the write fits — ao100
+ * (the widest moving average this app computes) only ever looks at the last
+ * 100 anyway, so a moderate cap costs nothing until quota is genuinely
+ * exhausted. The already-computed ao5/ao12/ao100/bestTime on each variant
+ * (set by recalcStats from the FULL history before this ever runs) are
+ * saved as-is — only the raw per-attempt log is trimmed, so a variant's
+ * current stats stay accurate; a future attempt just starts averaging over
+ * a shorter retained window instead of the variant's whole history.
+ */
+function writeAlgGroupWithQuotaFallback(key: string, cases: AlgorithmCase[]): void {
+  const CAPS = [500, 200, 100, 50, 20, 5, 1];
+  let current = cases;
+  let capIndex = -1;
+  while (true) {
+    try {
+      localStorage.setItem(key, JSON.stringify(current));
+      if (capIndex >= 0) {
+        console.warn(`${key} exceeded storage quota — trimmed attempt history to the most recent ${CAPS[capIndex]} per variant.`);
+      }
+      return;
+    } catch (err) {
+      if (!isQuotaExceededError(err) || capIndex >= CAPS.length - 1) throw err;
+      capIndex++;
+      const cap = CAPS[capIndex];
+      current = current.map((c) => ({
+        ...c,
+        algList: c.algList.map((v) => (v.times.length > cap ? { ...v, times: v.times.slice(-cap) } : v)),
+      }));
+    }
+  }
+}
+
 export interface RawVariant {
   name: string;
   alg: string;
@@ -135,7 +177,7 @@ export function loadAlgGroup(group: AlgGroup): AlgorithmCase[] {
 }
 
 export function saveAlgGroup(group: AlgGroup, cases: AlgorithmCase[]): void {
-  localStorage.setItem(storageKey(group), JSON.stringify(cases));
+  writeAlgGroupWithQuotaFallback(storageKey(group), cases);
 }
 
 /** Wipe localStorage and reload from the original JSON files. */
