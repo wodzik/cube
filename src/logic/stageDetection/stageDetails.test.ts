@@ -69,19 +69,19 @@ describe("stage details name the cross face and each slot's side faces", () => {
     expect(stageCubeColors(byStage.cross, timings.map((t) => ({ ...t, detail: undefined })))).toBeNull();
   });
 
-  it("Roux: fb/sb/cmll/lse resolve to real cube colors from a fully solved state (identity grip: floor D, left L, right R)", async () => {
+  it("Roux: fb/sb/cmll/lse resolve to real cube colors from a fully solved state, all sharing the SAME floor+wall scheme (identity grip: floor D, fb's wall L, sb's own NEW wall R — not a restatement of fb's L)", async () => {
     const solved = await createSolvedState();
     const boundaries = computeStageBoundaries(rouxStageDetector, [], solved);
     const detail = Object.fromEntries(boundaries.map((b) => [b.stage, b.detail]));
     expect(detail.fb).toBe("DL");
-    expect(detail.sb).toBe("LR");
+    expect(detail.sb).toBe("DR");
     expect(detail.cmll).toBe("D");
     expect(detail.lse).toBe("D");
 
     const timings = computeStageTimings(rouxStageDetector.stages, boundaries, []);
     const byStage = Object.fromEntries(timings.map((t) => [t.stage, t]));
     expect(stageCubeColors(byStage.fb, timings)).toEqual([FACE_COLORS.D, FACE_COLORS.L]);
-    expect(stageCubeColors(byStage.sb, timings)).toEqual([FACE_COLORS.L, FACE_COLORS.R]);
+    expect(stageCubeColors(byStage.sb, timings)).toEqual([FACE_COLORS.D, FACE_COLORS.R]);
     expect(stageCubeColors(byStage.cmll, timings)).toEqual([FACE_COLORS.U]);
     expect(stageCubeColors(byStage.lse, timings)).toEqual([darken(FACE_COLORS.U, 0.58)]);
   });

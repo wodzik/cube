@@ -50,6 +50,8 @@ interface MoveSequenceDisplayProps {
    */
   loading?: boolean;
   loadingText?: string;
+  /** Set false when `loadingText` is a static message that isn't actually waiting on anything (e.g. "no scramble for this case type — recognise it on the cube instead") — a spinning icon next to it wrongly suggests more is about to load. Default true (genuine loading/generation states keep the spinner). */
+  loadingSpinner?: boolean;
   completeText?: string;
   errorLabel?: string;
   className?: string;
@@ -78,6 +80,7 @@ export function MoveSequenceDisplay({
   showErrorCount = false,
   loading = false,
   loadingText,
+  loadingSpinner = true,
   completeText = "Complete!",
   errorLabel = "Undo:",
   className = "",
@@ -109,7 +112,7 @@ export function MoveSequenceDisplay({
     <div className={`scramble-card ${className} ${showLoadingOverlay && moves.length === 0 ? "min-h-16" : ""}`}>
       {showLoadingOverlay && (
         <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-gray-950/70 backdrop-blur-sm">
-          <RefreshCw size={16} className="text-gray-500 animate-spin" />
+          {loadingSpinner && <RefreshCw size={16} className="text-gray-500 animate-spin" />}
           <span className="text-sm font-medium text-gray-400">{loadingText}</span>
         </div>
       )}
