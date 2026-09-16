@@ -1275,6 +1275,7 @@ function CaseTrainerInner() {
       onRefresh={regenerate}
       loading={isGenerating}
       loadingText={loadingText}
+      loadingSpinner={isGenerating}
       sequenceTop={
         info || (summary && state.phase === "setup") ? (
           <div className="mb-1.5 px-1 flex items-center gap-3">

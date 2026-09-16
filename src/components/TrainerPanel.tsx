@@ -67,6 +67,8 @@ export interface TrainerPanelProps {
   /** Force the scramble/algorithm loading overlay even while `moves` still shows the previous (stale) sequence — see MoveSequenceDisplay. */
   loading?: boolean;
   loadingText?: string;
+  /** See MoveSequenceDisplay — false for a static loadingText that isn't actually waiting on anything. */
+  loadingSpinner?: boolean;
   completeText?: string;
   /** Show the eye icon that toggles maskMoves. */
   showMaskToggle?: boolean;
@@ -163,6 +165,7 @@ export function TrainerPanel({
   onReset,
   loading,
   loadingText,
+  loadingSpinner,
   completeText,
   showMaskToggle,
   maskMoves,
@@ -231,6 +234,7 @@ export function TrainerPanel({
               onReset={onReset}
               loading={loading}
               loadingText={loadingText}
+              loadingSpinner={loadingSpinner}
               completeText={completeText}
               showMaskToggle={showMaskToggle}
               maskMoves={maskMoves}
@@ -333,7 +337,7 @@ export function TrainerPanel({
         </div>
       }
       stats={
-        <div className="px-4 sm:px-6 py-6 flex flex-col gap-6 h-full">
+        <div className="px-4 sm:px-6 pt-6 pb-8 flex flex-col gap-6 h-full">
           {statsAside && <div className="shrink-0">{statsAside}</div>}
           <div className="flex-1 min-w-0 flex flex-col">
             <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
