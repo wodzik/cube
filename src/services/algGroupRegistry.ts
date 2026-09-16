@@ -12,14 +12,17 @@
  * learning-status data is never touched by anything in this file.
  *
  * A group with `hasSubgroups: true` is necessarily user-created (built-ins
- * never have subgroups) and stores its subgroups' case lists INSIDE this
- * registry entry (in `nact_alg_groups`, alongside every group's metadata),
- * not in a separate alg_group_{id} key. UNLIKE algorithmStore's flat
- * groups, this embeds the WHOLE case list verbatim (no sparse
- * times/learningStatus-only overlay against a bundled JSON base) — bundled
- * subgroup sets like ZBLL (472 cases) or Advanced F2L are the likely next
- * place to look if localStorage quota pressure recurs after algorithmStore's
- * 2026-09 sparse-overlay change.
+ * never have subgroups) and has its subgroups listed here (id, name,
+ * displayConfig, ...) — but each subgroup's CASE DATA lives in its own
+ * `alg_subgroup_{groupId}_{subgroupId}` key via algOverlayStore's sparse
+ * overlay engine (same one algorithmStore.ts uses for flat groups), NOT
+ * embedded in this registry. `AlgGroupMeta.subgroups[].cases` from
+ * `listGroups()` is therefore a cheap `[]` PLACEHOLDER — only `getGroupMeta`
+ * (one group) and `getSubgroupCases` (one subgroup) actually hydrate real
+ * case data, and only for what they were asked for. This is what keeps
+ * `nact_alg_groups` itself small even for a huge bundled set like ZBLL
+ * (472 cases) or Advanced F2L (216) — see subgroupBase()/subgroupKey()
+ * below for the mechanics.
  *
  * PURE FUNCTIONS — no React hooks.
  */
@@ -27,6 +30,7 @@
 import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, DisplayConfig, LearningStatus, StickeringConfig, AlgCategory } from "../types/algorithm";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { loadAlgGroup, saveAlgGroupStructural, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
+import { loadOverlayed, saveOverlay, saveOverlayStructural } from "./algOverlayStore";
 import { buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
 import { rouxBlocksStickeringMask } from "../logic/trainer/trainerMasks";
 import {
@@ -44,6 +48,34 @@ import vlsJson from "../algs/vls.json";
 
 const REGISTRY_KEY = "nact_alg_groups";
 
+function subgroupKey(groupId: string, subgroupId: string): string {
+  return `alg_subgroup_${groupId}_${subgroupId}`;
+}
+
+/** Per-groupId cache of a bundled subgroup set's hydrated cases, keyed by subgroup id — computed once (not once per subgroup lookup), since the bundled JSON never changes at runtime. */
+const bundledSubgroupCache = new Map<string, Map<string, AlgorithmCase[]>>();
+
+function bundledSubgroupCases(groupId: string, rawSubgroups: { id: string; cases: RawCase[] }[]): Map<string, AlgorithmCase[]> {
+  let cache = bundledSubgroupCache.get(groupId);
+  if (!cache) {
+    cache = new Map(rawSubgroups.map((sg) => [sg.id, hydrateCasesFromRaw(sg.cases, sg.id)]));
+    bundledSubgroupCache.set(groupId, cache);
+  }
+  return cache;
+}
+
+/** The bundled/default case list for one (groupId, subgroupId) pair — [] for a subgroup with no bundled base (a user-created group's own subgroup), which is always in "full" mode from its first case (see algOverlayStore.ts). */
+function subgroupBase(groupId: string, subgroupId: string): AlgorithmCase[] {
+  if (groupId === "zbll") return bundledSubgroupCases("zbll", (zbllJson as { subgroups: RawSubgroup[] }).subgroups).get(subgroupId) ?? [];
+  if (groupId === "advanced-f2l")
+    return bundledSubgroupCases("advanced-f2l", (advancedF2lJson as { subgroups: RawSubgroup[] }).subgroups).get(subgroupId) ?? [];
+  if (groupId === "vls") return bundledSubgroupCases("vls", (vlsJson as { subgroups: RawSubgroup[] }).subgroups).get(subgroupId) ?? [];
+  // F2L's "bundled base" is the pre-merge flat groups' own JSON, already
+  // wired up through algorithmStore's (already sparse-overlaid) flat store.
+  if (groupId === "f2l") return loadAlgGroup(`f2l-${subgroupId}`);
+  return [];
+}
+
 interface RawSubgroup {
   id: string;
   name: string;
@@ -55,11 +87,14 @@ interface RawSubgroup {
 
 /** ZBLL — bundled like OLL/PLL/F2L, but shipped pre-split into its 7 top-pattern subgroups (see scrape-zbll.mjs in the repo root). Built fresh from the bundled JSON on demand so "reset" can rebuild it exactly like the flat built-ins reload from their JSON. */
 function buildZbllMeta(): AlgGroupMeta {
+  // cases: [] — a cheap metadata-only placeholder; real case data is
+  // hydrated on demand from alg_subgroup_zbll_{id} + the bundled JSON (see
+  // subgroupBase/getGroupMeta/getSubgroupCases), never eagerly here.
   const subgroups: AlgSubgroup[] = (zbllJson as { subgroups: RawSubgroup[] }).subgroups.map((sg) => ({
     id: sg.id,
     name: sg.name,
     previewAlg: sg.previewAlg,
-    cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    cases: [],
     displayConfig: sg.displayConfig,
     availableInAttack: sg.availableInAttack,
   }));
@@ -102,6 +137,10 @@ const F2L_SLOT_LABELS: Record<(typeof F2L_SLOT_IDS)[number], string> = {
  * the same as loadAlgGroup already was for the old flat groups.
  */
 function buildF2LMeta(): AlgGroupMeta {
+  // cases: [] — see buildZbllMeta's comment; previewAlg still needs a real
+  // read since (unlike the bundled JSON subgroups) F2L's slots don't carry
+  // their own previewAlg field, but that's a cheap single loadAlgGroup call
+  // (already sparse-overlaid), not embedding the whole slot into the meta.
   const subgroups: AlgSubgroup[] = F2L_SLOT_IDS.map((oldId) => {
     const cases = loadAlgGroup(oldId);
     const previewAlg = cases[0]?.algList.find((v) => v.isDefault)?.alg ?? cases[0]?.algList[0]?.alg ?? "";
@@ -110,7 +149,7 @@ function buildF2LMeta(): AlgGroupMeta {
       id,
       name: F2L_SLOT_LABELS[oldId],
       previewAlg,
-      cases,
+      cases: [],
       // Front Right is Attack's curated default (see AlgSubgroup.availableInAttack) — the other 3 slots are off until the user opts them in.
       ...(id === "front-right" ? { availableInAttack: true } : {}),
     };
@@ -133,7 +172,7 @@ function buildAdvancedF2LMeta(): AlgGroupMeta {
     id: sg.id,
     name: sg.name,
     previewAlg: sg.previewAlg,
-    cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    cases: [],
     displayConfig: sg.displayConfig,
     availableInAttack: sg.availableInAttack,
   }));
@@ -156,7 +195,7 @@ function buildVlsMeta(): AlgGroupMeta {
     id: sg.id,
     name: sg.name,
     previewAlg: sg.previewAlg,
-    cases: hydrateCasesFromRaw(sg.cases, sg.id),
+    cases: [],
     displayConfig: sg.displayConfig,
     availableInAttack: sg.availableInAttack,
   }));
@@ -184,10 +223,13 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   }
 
   if (!next.some((g) => g.id === "f2l")) {
-    // Drop the 4 old flat slot groups (if present) — their data was already
-    // folded into buildF2LMeta()'s subgroups via loadAlgGroup above.
+    // Drop the 4 old flat slot groups' TAB-BAR entries (if present) — they
+    // no longer show up as their own group. Their underlying alg_group_{id}
+    // DATA is deliberately left alone: it's F2L's subgroups' permanent
+    // backing store going forward (see subgroupBase), not a one-time
+    // migration snapshot to discard — clearing it here would erase
+    // whatever progress a user already had on these slots.
     next = [...next.filter((g) => !(F2L_SLOT_IDS as readonly string[]).includes(g.id)), buildF2LMeta()];
-    F2L_SLOT_IDS.forEach(resetAlgGroup);
     changed = true;
   }
 
@@ -514,8 +556,12 @@ function readRegistry(): AlgGroupMeta[] | null {
   }
 }
 
+/** Strips subgroups' case data before persisting — it lives in its own alg_subgroup_{groupId}_{subgroupId} overlay key (see file doc comment), never embedded here. Every writeRegistry call site keeps passing fully-hydrated AlgGroupMeta[] around in memory; only the on-disk copy is thinned. */
 function writeRegistry(groups: AlgGroupMeta[]): void {
-  localStorage.setItem(REGISTRY_KEY, JSON.stringify(groups));
+  const stripped = groups.map((g) =>
+    g.hasSubgroups && g.subgroups ? { ...g, subgroups: g.subgroups.map((sg) => ({ ...sg, cases: [] })) } : g
+  );
+  localStorage.setItem(REGISTRY_KEY, JSON.stringify(stripped));
 }
 
 function seedRegistry(): AlgGroupMeta[] {
@@ -569,30 +615,49 @@ function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {
   });
 }
 
-/** All registered groups, built-in + user-created, seeding the built-ins on first call. */
+/**
+ * All registered groups, built-in + user-created, seeding the built-ins on
+ * first call. Subgroups' `cases` are a cheap `[]` placeholder — nothing at
+ * this level (tab bars, group lists) ever reads them; use getGroupMeta for
+ * one group's hydrated subgroups (needed for e.g. SubgroupCard's case
+ * count) or getSubgroupCases for one subgroup's actual cases.
+ */
 export function listGroups(): AlgGroupMeta[] {
   return sortGroups(ensureBuiltInExtras(readRegistry() ?? seedRegistry()));
 }
 
+/** One group's metadata, with its subgroups' `cases` (if any) fully hydrated from their overlay + bundled base — unlike listGroups(), which leaves them as placeholders. */
 export function getGroupMeta(id: string): AlgGroupMeta | undefined {
-  return listGroups().find((g) => g.id === id);
+  const meta = listGroups().find((g) => g.id === id);
+  if (!meta?.hasSubgroups || !meta.subgroups) return meta;
+  return {
+    ...meta,
+    subgroups: meta.subgroups.map((sg) => ({ ...sg, cases: loadOverlayed(subgroupKey(id, sg.id), subgroupBase(id, sg.id)) })),
+  };
 }
 
-/** Reload a built-in group from its bundled data, discarding any recorded times/learning status — the built-in equivalent of algorithmStore's resetAlgGroup, extended to cover subgroup-based built-ins (whose cases live in the registry, not an alg_group_{id} key). */
+/** Reload a built-in group from its bundled data, discarding any recorded times/learning status — the built-in equivalent of algorithmStore's resetAlgGroup, extended to cover subgroup-based built-ins (whose cases live in their own alg_subgroup_{groupId}_{subgroupId} overlay keys, not embedded in the registry — see file doc comment). */
 export function resetBuiltInGroup(id: string): void {
   const meta = getGroupMeta(id);
   if (!meta?.isBuiltIn) return;
-  if (id === "zbll") {
+  if (!meta.hasSubgroups) {
+    resetAlgGroup(id);
+    return;
+  }
+  // Clear every subgroup's own overlay — updateGroupMeta below only resets
+  // METADATA (previewAlg, displayConfig), and cases no longer live there.
+  for (const sg of meta.subgroups ?? []) localStorage.removeItem(subgroupKey(id, sg.id));
+  if (id === "f2l") {
+    // F2L's subgroups are additionally based on the pre-merge flat groups'
+    // own data (see subgroupBase) — clear that too so "reset" is complete.
+    F2L_SLOT_IDS.forEach(resetAlgGroup);
+    updateGroupMeta(id, { subgroups: buildF2LMeta().subgroups });
+  } else if (id === "zbll") {
     updateGroupMeta(id, { subgroups: buildZbllMeta().subgroups });
   } else if (id === "advanced-f2l") {
     updateGroupMeta(id, { subgroups: buildAdvancedF2LMeta().subgroups });
   } else if (id === "vls") {
     updateGroupMeta(id, { subgroups: buildVlsMeta().subgroups });
-  } else if (id === "f2l") {
-    F2L_SLOT_IDS.forEach(resetAlgGroup);
-    updateGroupMeta(id, { subgroups: buildF2LMeta().subgroups });
-  } else {
-    resetAlgGroup(id);
   }
 }
 
@@ -639,7 +704,7 @@ export function createGroup(
     ...(hasSubgroups ? { subgroups: [] } : {}),
   };
   writeRegistry([...groups, meta]);
-  if (!hasSubgroups) saveAlgGroupStructural(id, []); // fresh flat group starts with no cases; subgroup groups keep cases inside the registry entry
+  if (!hasSubgroups) saveAlgGroupStructural(id, []); // fresh flat group starts with no cases; a subgroup group starts with no subgroups at all, so nothing to initialize yet
   return id;
 }
 
@@ -657,7 +722,11 @@ export function deleteGroup(id: string): boolean {
   const meta = groups.find((g) => g.id === id);
   if (!meta || meta.isBuiltIn) return false;
   writeRegistry(groups.filter((g) => g.id !== id));
-  if (!meta.hasSubgroups) resetAlgGroup(id);
+  if (meta.hasSubgroups) {
+    for (const sg of meta.subgroups ?? []) localStorage.removeItem(subgroupKey(id, sg.id));
+  } else {
+    resetAlgGroup(id);
+  }
   return true;
 }
 
@@ -687,19 +756,22 @@ export function deleteSubgroup(groupId: string, subgroupId: string): void {
   if (gi < 0 || !groups[gi].subgroups) return;
   groups[gi] = { ...groups[gi], subgroups: groups[gi].subgroups!.filter((s) => s.id !== subgroupId) };
   writeRegistry(groups);
+  localStorage.removeItem(subgroupKey(groupId, subgroupId));
 }
 
+/** One subgroup's cases, hydrated from its own overlay + bundled base — the targeted read, doesn't touch any sibling subgroup. */
 export function getSubgroupCases(groupId: string, subgroupId: string): AlgorithmCase[] {
-  return getGroupMeta(groupId)?.subgroups?.find((s) => s.id === subgroupId)?.cases ?? [];
+  return loadOverlayed(subgroupKey(groupId, subgroupId), subgroupBase(groupId, subgroupId));
 }
 
+/** For dynamic-only subgroup mutations (attempts, learning status, selection) — stays in whichever mode (sparse overlay or full) this subgroup is already in. */
 export function saveSubgroupCases(groupId: string, subgroupId: string, cases: AlgorithmCase[]): void {
-  const groups = listGroups();
-  const gi = groups.findIndex((g) => g.id === groupId);
-  if (gi < 0 || !groups[gi].subgroups) return;
-  const subgroups = groups[gi].subgroups!.map((s) => (s.id === subgroupId ? { ...s, cases } : s));
-  groups[gi] = { ...groups[gi], subgroups };
-  writeRegistry(groups);
+  saveOverlay(subgroupKey(groupId, subgroupId), cases);
+}
+
+/** For structural subgroup mutations (case added/updated/deleted) — see algorithmStore's saveAlgGroupStructural. */
+export function saveSubgroupCasesStructural(groupId: string, subgroupId: string, cases: AlgorithmCase[]): void {
+  saveOverlayStructural(subgroupKey(groupId, subgroupId), cases);
 }
 
 // ─── Subgroup case mutations — same transforms as algorithmStore.ts's
@@ -729,20 +801,22 @@ export function setSubgroupLearningStatus(
   );
 }
 
+/** Structural (see saveSubgroupCasesStructural): the edited case's variant set/algs no longer necessarily matches the bundled base. */
 export function updateSubgroupCase(groupId: string, subgroupId: string, updated: AlgorithmCase): void {
-  saveSubgroupCases(groupId, subgroupId, applyUpdateCase(getSubgroupCases(groupId, subgroupId), updated));
+  saveSubgroupCasesStructural(groupId, subgroupId, applyUpdateCase(getSubgroupCases(groupId, subgroupId), updated));
 }
 
-/** Rejects a duplicate name (same semantics as algorithmStore's addCase). */
+/** Rejects a duplicate name (same semantics as algorithmStore's addCase). Structural (see updateSubgroupCase). */
 export function addSubgroupCase(groupId: string, subgroupId: string, newCase: AlgorithmCase): boolean {
   const next = applyAddCase(getSubgroupCases(groupId, subgroupId), newCase);
   if (!next) return false;
-  saveSubgroupCases(groupId, subgroupId, next);
+  saveSubgroupCasesStructural(groupId, subgroupId, next);
   return true;
 }
 
+/** Structural (see updateSubgroupCase). */
 export function deleteSubgroupCase(groupId: string, subgroupId: string, caseName: string): void {
-  saveSubgroupCases(groupId, subgroupId, applyDeleteCase(getSubgroupCases(groupId, subgroupId), caseName));
+  saveSubgroupCasesStructural(groupId, subgroupId, applyDeleteCase(getSubgroupCases(groupId, subgroupId), caseName));
 }
 
 export function setSubgroupCaseSelected(groupId: string, subgroupId: string, caseName: string, selected: boolean): void {
@@ -840,6 +914,14 @@ export function importGroup(json: string, fallbackName: string, fallbackCategory
     ...(file.hasSubgroups ? { subgroups: file.subgroups ?? [] } : {}),
   };
   writeRegistry([...groups, meta]);
-  if (!file.hasSubgroups) saveAlgGroupStructural(id, file.cases ?? []);
+  if (file.hasSubgroups) {
+    // writeRegistry strips subgroups' `cases` before persisting (see its
+    // own doc comment) — an imported group has no bundled base to fall
+    // back to, so each subgroup's cases must be saved into its own overlay
+    // key explicitly, in full/structural mode, or they'd be silently lost.
+    for (const sg of file.subgroups ?? []) saveOverlayStructural(subgroupKey(id, sg.id), sg.cases);
+  } else {
+    saveAlgGroupStructural(id, file.cases ?? []);
+  }
   return id;
 }
