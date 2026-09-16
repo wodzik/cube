@@ -31,7 +31,7 @@
  */
 
 import { applyMoveToState, isFullySolved, isSlotSolved, type LiveCubeState } from "./liveCubeState";
-import { CORNER_SLOT_FACES, OPPOSITE_FACE, type Face } from "./lastLayerShared";
+import { CORNER_SLOT_FACES, FACES, OPPOSITE_FACE, type Face } from "./lastLayerShared";
 import type { StageDetector } from "./types";
 
 // Slot indices — see liveCubeState.ts doc comment for the verified mapping.
@@ -211,6 +211,18 @@ function resolvePosition(
 
 const isCmllPosition = (s: LiveCubeState, p: BlockPairPosition) => bothBlocksSolved(s, p) && cornersSolvedUpToAuf(s, p);
 
+/**
+ * Bump whenever stageDetail's encoding changes shape (a stored SolveRecord
+ * predating a bump has real-looking but STALE detail strings, so a bare
+ * presence check can't tell it apart from current data) — see SolveRecord
+ * .rouxDetailVersion and SolveAnalysis's self-heal effect, which recomputes
+ * and re-stamps any record whose version doesn't match this constant.
+ * History: 2 = sb reported both walls with no floor, cmll a bare floor
+ * letter; 3 = sb reports floor + its own new wall (matching fb), cmll the
+ * wall pair fb/sb didn't touch.
+ */
+export const ROUX_DETAIL_VERSION = 3;
+
 /** First (orientation, position, side) satisfying FB — same search FB's isStageSolved does, but keeping which SIDE (left/right) matched, so both fb's own detail and sb's "which side is NEW" logic can use it. */
 function findFbMatch(
   orientations: LiveCubeState[],
@@ -257,13 +269,16 @@ export const rouxStageDetector: StageDetector = {
     }
   },
   // Details name the physical faces behind fb/sb/cmll/lse so a display can
-  // color stages by cube colors (components/cubeColors.ts) — all four use
-  // the SAME "floor + this stage's own wall" scheme: fb/sb are floor + the
-  // side wall of whichever block just completed (fb's own side for fb, the
-  // OTHER side for sb, so the two blocks read as two different colors
-  // rather than sb restating fb's), cmll/lse are just the floor face (the
-  // display derives the opposite/last-layer color from it, same as CFOP's
-  // cross-face convention).
+  // color stages by cube colors (components/cubeColors.ts): fb/sb are floor
+  // + the side wall of whichever block just completed (fb's own side for
+  // fb, the OTHER side for sb, so the two blocks read as two different
+  // colors rather than sb restating fb's). Floor/its-opposite and left/
+  // right are then both "spoken for" by fb+sb, so cmll — which touches all
+  // 4 top-layer corners, i.e. both of the walls fb/sb DIDN'T use — gets
+  // that remaining pair (e.g. fb white-orange + sb white-red leaves cmll
+  // green-blue). lse is just the floor face (the display derives the
+  // opposite/last-layer color from it, same as CFOP's cross-face
+  // convention) since by then the whole cube (all 6 faces) is in play.
   stageDetail(stage, state, context) {
     const positions = getBlockPairPositions(state);
     const orientations = allOrientations(state);
@@ -279,7 +294,13 @@ export const rouxStageDetector: StageDetector = {
         const newSide = fbSide === p.leftFace ? p.rightFace : p.leftFace;
         return p.floorFace + newSide;
       }
-      case "cmll":
+      case "cmll": {
+        const p = resolvePosition(context, orientations, positions, isCmllPosition);
+        if (!p) return undefined;
+        const auf = OPPOSITE_FACE[p.floorFace];
+        const remaining = FACES.filter((f) => f !== p.floorFace && f !== auf && f !== p.leftFace && f !== p.rightFace);
+        return remaining.join("");
+      }
       case "lse": {
         const p = resolvePosition(context, orientations, positions, isCmllPosition);
         return p?.floorFace;

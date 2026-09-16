@@ -4,18 +4,19 @@
  * the pieces it was about: the cross in the cross face's color, each F2L
  * slot split into its two side-face colors, the last layer in the color
  * opposite the cross (white cross -> the bar ends yellow), and Roux's
- * fb/sb blocks split into their floor + side-wall colors with cmll/lse
- * taking the color opposite the floor.
+ * fb/sb blocks split into their floor + side-wall colors, with cmll taking
+ * the OTHER pair of walls (the two fb/sb didn't touch) and lse the color
+ * opposite the floor.
  *
  * Which face a stage was solved on comes from StageBoundary.detail as
  * recorded by cfopStages / lblStages ("U" for the cross, "RF"-style side
- * faces for a slot) or rouxStages ("DL"-style floor+side for fb/sb, a bare
- * floor letter for cmll/lse); records from before those details existed
- * get no cube colors and fall back to the fixed group palette in
- * stageGroups.ts. PLL is the one exception: it's a permutation, not a
- * piece color, and darkening the last-layer color for it read as "2x
- * yellow" next to OLL — so it gets a fixed accent hue instead, distinct
- * from every real face color.
+ * faces for a slot) or rouxStages ("DL"-style floor+side for fb/sb and the
+ * same 2-letter shape for cmll's remaining wall pair, a bare floor letter
+ * for lse); records from before those details existed get no cube colors
+ * and fall back to the fixed group palette in stageGroups.ts. PLL is the
+ * one exception: it's a permutation, not a piece color, and darkening the
+ * last-layer color for it read as "2x yellow" next to OLL — so it gets a
+ * fixed accent hue instead, distinct from every real face color.
  */
 
 import type { StageTiming } from "../logic/stageDetection/stageTiming";
@@ -60,17 +61,16 @@ export function crossFaceOf(timings: readonly StageTiming[]): Face | null {
 export function stageCubeColors(timing: StageTiming, timings: readonly StageTiming[]): string[] | null {
   const { stage, detail } = timing;
 
-  // Roux: fb/sb carry their own floor+side detail (no shared "cross" stage
-  // to look up), cmll/lse carry just the floor letter.
-  if (stage === "fb" || stage === "sb") {
+  // Roux: fb/sb/cmll carry a 1-2 letter face detail directly (no shared
+  // "cross" stage to look up) — fb/sb their floor+side wall, cmll the pair
+  // of walls fb/sb didn't touch. lse carries just the floor letter.
+  if (stage === "fb" || stage === "sb" || stage === "cmll") {
     const faces = (detail ?? "").split("").filter(isFace);
     return faces.length > 0 ? faces.map((f) => FACE_COLORS[f]) : null;
   }
-  if (stage === "cmll" || stage === "lse") {
+  if (stage === "lse") {
     const floor = detail && isFace(detail) ? detail : null;
-    if (!floor) return null;
-    const last = FACE_COLORS[OPPOSITE_FACE[floor]];
-    return [stage === "cmll" ? last : darken(last, 0.58)];
+    return floor ? [darken(FACE_COLORS[OPPOSITE_FACE[floor]], 0.58)] : null;
   }
 
   const cross = crossFaceOf(timings);

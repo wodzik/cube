@@ -43,7 +43,7 @@ import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
 import type { SessionConfig, StartMethod } from "../types/session";
 import type { SolveRecord, StoredSession } from "../types/solve";
 import { cfopStageDetector } from "../logic/stageDetection/cfopStages";
-import { rouxStageDetector } from "../logic/stageDetection/rouxStages";
+import { rouxStageDetector, ROUX_DETAIL_VERSION } from "../logic/stageDetection/rouxStages";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
@@ -648,6 +648,7 @@ function SolvePageInner({
       tps: tps ?? 0,
       cfop: freshCfop,
       roux: freshRoux,
+      rouxDetailVersion: ROUX_DETAIL_VERSION,
       lbl: freshLbl,
       isDNF: false,
     };

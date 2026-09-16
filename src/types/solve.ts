@@ -43,6 +43,8 @@ export interface SolveRecord {
   cfop: StageBoundary[];
   roux: StageBoundary[];
   lbl: StageBoundary[];
+  /** Which version of rouxStageDetector's stageDetail encoding `roux` was computed with — see ROUX_DETAIL_VERSION (rouxStages.ts) and SolveAnalysis's self-heal effect. Missing on any record older than this field itself. */
+  rouxDetailVersion?: number;
 
   isDNF: boolean;
 }
