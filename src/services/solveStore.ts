@@ -4,6 +4,8 @@
  */
 
 import type { SolveRecord, StoredSession } from "../types/solve";
+import type { MoveRecord } from "../types/session";
+import { collapseIdenticalMoves } from "../logic/moveReduction";
 
 const SOLVES_KEY = "nact_solves";
 const SESSIONS_KEY = "nact_sessions";
@@ -26,13 +28,60 @@ function isQuotaExceededError(err: unknown): boolean {
   return err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22);
 }
 
+// ─── Solves: compact on-disk shape ───
+//
+// A SolveRecord as used by the rest of the app carries three fields that
+// are pure, cheap-to-recompute functions of the others: every persisted
+// move's `phase` is always "active" (moves are only appended once the
+// timed solve itself starts — scrambling-phase moves never reach a saved
+// record), `timestamp` is exactly `timerStartedAt + relativeMs`, and
+// `reducedMoves`/`scrambleMoves` are exactly `collapseIdenticalMoves(...)`/
+// a split of `scramble`. Storing all four anyway roughly doubled every
+// solve's on-disk footprint for no benefit — across enough solves that's
+// most of what pushes nact_solves toward localStorage's quota (see the
+// QuotaExceededError reports, and writeSolvesWithQuotaFallback below).
+// Persisted records drop them; getSolves() reconstructs the full
+// SolveRecord shape on read, so every OTHER file keeps working unchanged.
+type StoredMoveRecord = Pick<MoveRecord, "move" | "relativeMs">;
+type StoredSolveRecord = Omit<SolveRecord, "moves" | "reducedMoves" | "scrambleMoves"> & {
+  moves: StoredMoveRecord[];
+};
+
+function compactSolve(record: SolveRecord): StoredSolveRecord {
+  const { reducedMoves: _reducedMoves, scrambleMoves: _scrambleMoves, moves, ...rest } = record;
+  return { ...rest, moves: moves.map(({ move, relativeMs }) => ({ move, relativeMs })) };
+}
+
+function hydrateSolve(stored: StoredSolveRecord): SolveRecord {
+  const moves: MoveRecord[] = stored.moves.map(({ move, relativeMs }) => ({
+    move,
+    relativeMs,
+    timestamp: stored.timerStartedAt + relativeMs,
+    phase: "active",
+  }));
+  return {
+    ...stored,
+    moves,
+    reducedMoves: collapseIdenticalMoves(moves.map((m) => m.move)),
+    scrambleMoves: stored.scramble.trim().split(/\s+/).filter(Boolean),
+  };
+}
+
+/** True if a raw parsed record still carries the old, bigger shape (pre-compaction) — see getSolves()'s self-heal. */
+function isLegacyShape(raw: unknown): boolean {
+  const r = raw as { reducedMoves?: unknown; scrambleMoves?: unknown; moves?: { phase?: unknown; timestamp?: unknown }[] };
+  if (r.reducedMoves !== undefined || r.scrambleMoves !== undefined) return true;
+  return r.moves?.some((m) => m.phase !== undefined || m.timestamp !== undefined) ?? false;
+}
+
 /**
- * Each SolveRecord carries a full per-move timestamped log (SolveRecord.moves),
- * so the solves array can outgrow localStorage's quota after enough attempts.
+ * Even after dropping the redundant fields above, the raw per-move log
+ * (SolveRecord.moves) still dominates a heavily-used session's storage, so
+ * the solves array can still outgrow localStorage's quota eventually.
  * Rather than let that throw out of saveSolve mid-solve (crashing the app
- * right after the user finishes a cube — see the QuotaExceededError reports),
- * evict the oldest solves in increasing chunks and retry until the write
- * fits.
+ * right after the user finishes a cube — see the QuotaExceededError
+ * reports), evict the oldest solves in increasing chunks and retry until
+ * the write fits.
  *
  * If it still doesn't fit down to just the brand-new solve alone, the real
  * problem is the ORIGIN's total localStorage usage (every session's other
@@ -43,7 +92,7 @@ function isQuotaExceededError(err: unknown): boolean {
  * is exhausted.
  */
 function writeSolvesWithQuotaFallback(solves: SolveRecord[]): void {
-  let current = solves;
+  let current = solves.map(compactSolve);
   while (true) {
     try {
       writeJson(SOLVES_KEY, current);
@@ -72,7 +121,14 @@ function writeSolvesWithQuotaFallback(solves: SolveRecord[]): void {
 // ─── Solves ───
 
 export function getSolves(): SolveRecord[] {
-  return readJson<SolveRecord[]>(SOLVES_KEY, []);
+  const raw = readJson<StoredSolveRecord[]>(SOLVES_KEY, []);
+  const hydrated = raw.map(hydrateSolve);
+  // Self-heal once: a record saved by an older build still carries the
+  // bigger shape on disk — shrink everything to the compact form
+  // immediately (via the same writer used for every other mutation)
+  // instead of waiting for each solve to be individually re-saved.
+  if (raw.some(isLegacyShape)) writeSolvesWithQuotaFallback(hydrated);
+  return hydrated;
 }
 
 export function getSolvesForSession(sessionId: string): SolveRecord[] {
@@ -91,22 +147,16 @@ export function patchSolve(id: string, patch: Partial<Omit<SolveRecord, "id">>):
   const idx = solves.findIndex((s) => s.id === id);
   if (idx >= 0) {
     solves[idx] = { ...solves[idx], ...patch };
-    writeJson(SOLVES_KEY, solves);
+    writeSolvesWithQuotaFallback(solves);
   }
 }
 
 export function deleteSolve(id: string): void {
-  writeJson(
-    SOLVES_KEY,
-    getSolves().filter((s) => s.id !== id)
-  );
+  writeSolvesWithQuotaFallback(getSolves().filter((s) => s.id !== id));
 }
 
 export function clearSolvesForSession(sessionId: string): void {
-  writeJson(
-    SOLVES_KEY,
-    getSolves().filter((s) => s.sessionId !== sessionId)
-  );
+  writeSolvesWithQuotaFallback(getSolves().filter((s) => s.sessionId !== sessionId));
 }
 
 // ─── Sessions ───
