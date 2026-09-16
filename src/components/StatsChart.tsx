@@ -22,7 +22,8 @@ interface StatsChartProps {
   showAo5?: boolean;
   showAo12?: boolean;
   showAo100?: boolean;
-  height?: number;
+  /** A fixed pixel height, or "fill" to stretch to whatever height the parent gives it (needs a sized flex ancestor — see TrainerPanel's stats column, used by SolvePage's "stack" layout so the chart matches the timer+cube column's height instead of sitting at a fixed size). */
+  height?: number | "fill";
 }
 
 type Metric = "single" | "ao5" | "ao12" | "ao100";
@@ -104,7 +105,7 @@ function CustomTooltip({
 interface ChartBodyProps {
   data: ChartPoint[];
   visible: Record<Metric, boolean>;
-  height: number;
+  height: number | "fill";
   yMin: number;
   yMax: number;
   currentAo5: number | null;
@@ -116,72 +117,75 @@ interface ChartBodyProps {
 }
 
 function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue }: ChartBodyProps) {
+  const fill = height === "fill";
   return (
-    <div className="flex flex-col gap-4">
-      <ResponsiveContainer width="100%" height={height}>
-        <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke="var(--color-gray-700)" strokeDasharray="3 3" />
-          <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
-          <YAxis
-            domain={[yMin, yMax]}
-            tickFormatter={formatValue}
-            tick={{ fill: "var(--color-gray-500)", fontSize: 10 }}
-            tickLine={false}
-            axisLine={false}
-            width={52}
-          />
-          <Tooltip content={<CustomTooltip formatValue={formatValue} />} />
-          {visible.single && (
-            <Line
-              type="monotone"
-              dataKey="single"
-              stroke={METRIC_COLOR.single}
-              strokeWidth={1}
-              dot={{ r: 2, fill: METRIC_COLOR.single }}
-              name="Single"
-              isAnimationActive={false}
+    <div className={`flex flex-col gap-4 ${fill ? "h-full" : ""}`}>
+      <div className={fill ? "flex-1 min-h-0" : "shrink-0"}>
+        <ResponsiveContainer width="100%" height={fill ? "100%" : height}>
+          <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <CartesianGrid stroke="var(--color-gray-700)" strokeDasharray="3 3" />
+            <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
+            <YAxis
+              domain={[yMin, yMax]}
+              tickFormatter={formatValue}
+              tick={{ fill: "var(--color-gray-500)", fontSize: 10 }}
+              tickLine={false}
+              axisLine={false}
+              width={52}
             />
-          )}
-          {visible.ao5 && (
-            <Line
-              type="monotone"
-              dataKey="ao5"
-              stroke={METRIC_COLOR.ao5}
-              strokeWidth={2}
-              dot={false}
-              name="Ao5"
-              connectNulls
-              isAnimationActive={false}
-            />
-          )}
-          {visible.ao12 && (
-            <Line
-              type="monotone"
-              dataKey="ao12"
-              stroke={METRIC_COLOR.ao12}
-              strokeWidth={2}
-              dot={false}
-              name="Ao12"
-              connectNulls
-              isAnimationActive={false}
-            />
-          )}
-          {visible.ao100 && (
-            <Line
-              type="monotone"
-              dataKey="ao100"
-              stroke={METRIC_COLOR.ao100}
-              strokeWidth={2}
-              dot={false}
-              name="Ao100"
-              connectNulls
-              isAnimationActive={false}
-            />
-          )}
-        </ComposedChart>
-      </ResponsiveContainer>
+            <Tooltip content={<CustomTooltip formatValue={formatValue} />} />
+            {visible.single && (
+              <Line
+                type="monotone"
+                dataKey="single"
+                stroke={METRIC_COLOR.single}
+                strokeWidth={1}
+                dot={{ r: 2, fill: METRIC_COLOR.single }}
+                name="Single"
+                isAnimationActive={false}
+              />
+            )}
+            {visible.ao5 && (
+              <Line
+                type="monotone"
+                dataKey="ao5"
+                stroke={METRIC_COLOR.ao5}
+                strokeWidth={2}
+                dot={false}
+                name="Ao5"
+                connectNulls
+                isAnimationActive={false}
+              />
+            )}
+            {visible.ao12 && (
+              <Line
+                type="monotone"
+                dataKey="ao12"
+                stroke={METRIC_COLOR.ao12}
+                strokeWidth={2}
+                dot={false}
+                name="Ao12"
+                connectNulls
+                isAnimationActive={false}
+              />
+            )}
+            {visible.ao100 && (
+              <Line
+                type="monotone"
+                dataKey="ao100"
+                stroke={METRIC_COLOR.ao100}
+                strokeWidth={2}
+                dot={false}
+                name="Ao100"
+                connectNulls
+                isAnimationActive={false}
+              />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
 
-      <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3">
+      <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3 shrink-0">
         <StatCard label="Ao5" value={currentAo5 ? formatValue(currentAo5) : null} accent={METRIC_COLOR.ao5} />
         <StatCard label="Ao12" value={currentAo12 ? formatValue(currentAo12) : null} accent={METRIC_COLOR.ao12} />
         <StatCard label="Ao100" value={currentAo100 ? formatValue(currentAo100) : null} accent={METRIC_COLOR.ao100} />
@@ -231,10 +235,11 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
   const yMax = empty ? 1 : Math.max(...values) * 1.05;
 
   const bodyProps = { data, visible, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue };
+  const fill = height === "fill";
 
   return (
-    <div>
-      <div className="flex items-center gap-1 mb-2">
+    <div className={fill ? "h-full flex flex-col" : ""}>
+      <div className="flex items-center gap-1 mb-2 shrink-0">
         {(["single", "ao5", "ao12", "ao100"] as const).map((m) => (
           <MetricChip key={m} metric={m} active={visible[m]} onClick={() => toggle(m)} />
         ))}
@@ -247,10 +252,13 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
         </button>
       </div>
 
-      <div className="relative">
+      <div className={`relative ${fill ? "flex-1 min-h-0" : ""}`}>
         <ChartBody {...bodyProps} height={height} />
         {empty && (
-          <div className="absolute inset-x-0 top-0 flex items-center justify-center text-gray-600 text-sm pointer-events-none" style={{ height }}>
+          <div
+            className="absolute inset-x-0 top-0 flex items-center justify-center text-gray-600 text-sm pointer-events-none"
+            style={fill ? { height: "100%" } : { height }}
+          >
             No data yet
           </div>
         )}

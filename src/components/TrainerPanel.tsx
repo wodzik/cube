@@ -141,7 +141,8 @@ export interface TrainerPanelProps {
   /** Per-solve move counts, same order as `timesMs` — charted instead of times when `moveCountOnly` is set. */
   moveCounts?: number[];
   statsLabel?: string;
-  statsHeight?: number;
+  /** Defaults to "fill" (matches the timer+cube column's height) in "stack" layout (Solve), or 280px in "side" layout (drill/skill trainers/attack), where the chart is a fixed-height block above the case list. */
+  statsHeight?: number | "fill";
   showAo12?: boolean;
   /** Rendered ABOVE the chart, inside the same (now fixed-width, page-height) stats column — e.g. a page's own attempt-summary card. Not used by SolvePage, which shows its just-finished solve via `centerReplacement` instead (see SolvePage.tsx). */
   statsAside?: ReactNode;
@@ -206,7 +207,7 @@ export function TrainerPanel({
   timesMs,
   moveCounts = [],
   statsLabel = "Statistics",
-  statsHeight = 280,
+  statsHeight = layout === "side" ? 280 : "fill",
   showAo12,
   statsAside,
 }: TrainerPanelProps) {
