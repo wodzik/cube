@@ -31,6 +31,7 @@
  */
 
 import { applyMoveToState, isFullySolved, isSlotSolved, type LiveCubeState } from "./liveCubeState";
+import { CORNER_SLOT_FACES, OPPOSITE_FACE, type Face } from "./lastLayerShared";
 import type { StageDetector } from "./types";
 
 // Slot indices — see liveCubeState.ts doc comment for the verified mapping.
@@ -100,6 +101,17 @@ interface BlockPairPosition {
   right: Block;
   /** The face turn of this pair's last layer (its "U") in the sim frame — the AUF axis for CMLL. */
   aufFace: string;
+  /** The real face this position's blocks sit on ("D" in the canonical grip) — opposite aufFace. For cube-coloring the timing bar (components/cubeColors.ts). */
+  floorFace: Face;
+  /** The real side-wall face of the left/right block at this position ("L"/"R" in the canonical grip) — for cube-coloring. */
+  leftFace: Face;
+  rightFace: Face;
+}
+
+/** The 1-2 real faces two corner slots have in common — a block's two corners always share the floor face and, for one block, its own side-wall face. */
+function sharedCornerFaces(slots: number[]): Set<Face> {
+  const [a, b] = slots;
+  return new Set(CORNER_SLOT_FACES[a].filter((f) => (CORNER_SLOT_FACES[b] as readonly Face[]).includes(f)));
 }
 
 let blockPairPositions: BlockPairPosition[] | null = null;
@@ -127,7 +139,13 @@ function getBlockPairPositions(state: LiveCubeState): BlockPairPosition[] {
     const uCornerSlots = slotsOf(rotated.patternData.CORNERS.pieces, U_CORNERS).sort((a, b) => a - b).join(",");
     const aufFace = cornerSlotsOfFace.get(uCornerSlots);
     if (!aufFace) throw new Error(`rouxStages: no face owns corner slots ${uCornerSlots}`);
-    return { left: carry(rotated, LEFT_BLOCK), right: carry(rotated, RIGHT_BLOCK), aufFace };
+    const left = carry(rotated, LEFT_BLOCK);
+    const right = carry(rotated, RIGHT_BLOCK);
+    const floorFace = OPPOSITE_FACE[aufFace as Face];
+    const leftFace = [...sharedCornerFaces(left.corners)].find((f) => f !== floorFace);
+    const rightFace = [...sharedCornerFaces(right.corners)].find((f) => f !== floorFace);
+    if (!leftFace || !rightFace) throw new Error(`rouxStages: could not resolve side faces for rotation ${r.join(" ") || "identity"}`);
+    return { left, right, aufFace, floorFace, leftFace, rightFace };
   });
   return blockPairPositions;
 }
@@ -152,10 +170,51 @@ function cornersSolvedUpToAuf(state: LiveCubeState, p: BlockPairPosition): boole
   return false;
 }
 
+/** Per-walk context: remembers which block-pair position SB/CMLL solved at, so CMLL/LSE's stageDetail can report the same real faces rather than re-searching (and risking a different, equally-valid position). */
+interface RouxContext {
+  lockedPosition: BlockPairPosition | null;
+}
+
+function isRouxContext(context: unknown): context is RouxContext {
+  return typeof context === "object" && context !== null && "lockedPosition" in context;
+}
+
+function lockPositionIfUnset(context: unknown, position: BlockPairPosition): void {
+  if (isRouxContext(context) && !context.lockedPosition) context.lockedPosition = position;
+}
+
+/** First (orientation, position) pair satisfying `predicate` — same iteration order as the equivalent `.some(...)` check, so it returns the exact position that made isStageSolved true. */
+function findBlockPosition(
+  orientations: LiveCubeState[],
+  positions: BlockPairPosition[],
+  predicate: (s: LiveCubeState, p: BlockPairPosition) => boolean
+): BlockPairPosition | null {
+  for (const s of orientations) {
+    for (const p of positions) {
+      if (predicate(s, p)) return p;
+    }
+  }
+  return null;
+}
+
+/** The locked position from context if this call is part of a tracked walk, otherwise a fresh best-effort search (standalone/test calls with no context). */
+function resolvePosition(
+  context: unknown,
+  orientations: LiveCubeState[],
+  positions: BlockPairPosition[],
+  predicate: (s: LiveCubeState, p: BlockPairPosition) => boolean
+): BlockPairPosition | null {
+  if (isRouxContext(context) && context.lockedPosition) return context.lockedPosition;
+  return findBlockPosition(orientations, positions, predicate);
+}
+
+const isCmllPosition = (s: LiveCubeState, p: BlockPairPosition) => bothBlocksSolved(s, p) && cornersSolvedUpToAuf(s, p);
+
 export const rouxStageDetector: StageDetector = {
   method: "Roux",
   stages: ["fb", "sb", "cmll", "lse"],
-  isStageSolved(stage, state) {
+  createContext: (): RouxContext => ({ lockedPosition: null }),
+  isStageSolved(stage, state, context) {
     if (stage === "lse") return isFullySolved(state);
     const positions = getBlockPairPositions(state);
     const orientations = allOrientations(state);
@@ -164,13 +223,50 @@ export const rouxStageDetector: StageDetector = {
         // Either side counts as "first" — left vs right is the solver's
         // choice (mirror-grip Roux). Positions already cover every face pair.
         return orientations.some((s) => positions.some((p) => isBlockSolved(s, p.left) || isBlockSolved(s, p.right)));
-      case "sb":
+      case "sb": {
         // Both blocks of ONE pair position under ONE shared offset.
-        return orientations.some((s) => positions.some((p) => bothBlocksSolved(s, p)));
-      case "cmll":
-        return orientations.some((s) => positions.some((p) => bothBlocksSolved(s, p) && cornersSolvedUpToAuf(s, p)));
+        const found = findBlockPosition(orientations, positions, bothBlocksSolved);
+        if (found) lockPositionIfUnset(context, found);
+        return found !== null;
+      }
+      case "cmll": {
+        const found = findBlockPosition(orientations, positions, isCmllPosition);
+        if (found) lockPositionIfUnset(context, found);
+        return found !== null;
+      }
       default:
         return false;
+    }
+  },
+  // Details name the physical faces behind fb/sb/cmll/lse so a display can
+  // color stages by cube colors (components/cubeColors.ts): fb/sb get the
+  // floor + side-wall colors of whichever block(s) just completed, cmll/lse
+  // get just the floor face (the display derives the opposite/last-layer
+  // color from it, same as CFOP's cross-face convention).
+  stageDetail(stage, state, context) {
+    const positions = getBlockPairPositions(state);
+    const orientations = allOrientations(state);
+    switch (stage) {
+      case "fb": {
+        for (const s of orientations) {
+          for (const p of positions) {
+            if (isBlockSolved(s, p.left)) return p.floorFace + p.leftFace;
+            if (isBlockSolved(s, p.right)) return p.floorFace + p.rightFace;
+          }
+        }
+        return undefined;
+      }
+      case "sb": {
+        const p = resolvePosition(context, orientations, positions, bothBlocksSolved);
+        return p ? p.leftFace + p.rightFace : undefined;
+      }
+      case "cmll":
+      case "lse": {
+        const p = resolvePosition(context, orientations, positions, isCmllPosition);
+        return p?.floorFace;
+      }
+      default:
+        return undefined;
     }
   },
 };

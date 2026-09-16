@@ -3,8 +3,16 @@ import { applyMoveToState, createSolvedState } from "./liveCubeState";
 import { computeStageBoundaries } from "./methodTracker";
 import { cfopStageDetector } from "./cfopStages";
 import { lblStageDetector } from "./lblStages";
+import { rouxStageDetector } from "./rouxStages";
 import { stageCubeColors, FACE_COLORS } from "../../components/cubeColors";
 import { computeStageTimings } from "./stageTiming";
+
+/** Mirrors cubeColors.ts's private darken() so tests can assert the exact darkened hex without exporting an internal. */
+function darken(hex: string, factor: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (shift: number) => Math.round(((n >> shift) & 0xff) * factor);
+  return `#${[ch(16), ch(8), ch(0)].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
 
 describe("stage details name the cross face and each slot's side faces", () => {
   it("CFOP on a solved cube: cross on U, then the four U-layer slots, each reported once", async () => {
@@ -43,7 +51,7 @@ describe("stage details name the cross face and each slot's side faces", () => {
     expect(detail["second-layer-1"]).toBe("FR"); // MIDDLE_LAYER_EDGE_SLOTS.U[0] = FR
   });
 
-  it("stageCubeColors: cross face color, two colors per slot, last layer in the opposite face's color", async () => {
+  it("stageCubeColors: cross face color, two colors per slot, last layer in the opposite face's color, PLL its own accent (not a shade of OLL's color)", async () => {
     const solved = await createSolvedState();
     const boundaries = computeStageBoundaries(cfopStageDetector, [], solved);
     const timings = computeStageTimings(cfopStageDetector.stages, boundaries, []);
@@ -51,8 +59,39 @@ describe("stage details name the cross face and each slot's side faces", () => {
     expect(stageCubeColors(byStage.cross, timings)).toEqual([FACE_COLORS.U]);
     expect(stageCubeColors(byStage["f2l-1"], timings)).toEqual([FACE_COLORS.R, FACE_COLORS.F]);
     expect(stageCubeColors(byStage.oll, timings)).toEqual([FACE_COLORS.D]);
+    // PLL must NOT be a shade of OLL's (last-layer) color — that's the "2x
+    // yellow" bug this fixed. It's a fixed accent, independent of the cross.
+    const pllColor = stageCubeColors(byStage.pll, timings)!;
+    expect(pllColor).not.toEqual([FACE_COLORS.D]);
+    expect(pllColor[0].toLowerCase()).not.toContain("ffd5"); // not a shade of D's yellow hex
     // No details (e.g. a record from before they existed) -> no cube colors.
     expect(stageCubeColors({ ...byStage["f2l-1"], detail: undefined }, timings)).toBeNull();
     expect(stageCubeColors(byStage.cross, timings.map((t) => ({ ...t, detail: undefined })))).toBeNull();
+  });
+
+  it("Roux: fb/sb/cmll/lse resolve to real cube colors from a fully solved state (identity grip: floor D, left L, right R)", async () => {
+    const solved = await createSolvedState();
+    const boundaries = computeStageBoundaries(rouxStageDetector, [], solved);
+    const detail = Object.fromEntries(boundaries.map((b) => [b.stage, b.detail]));
+    expect(detail.fb).toBe("DL");
+    expect(detail.sb).toBe("LR");
+    expect(detail.cmll).toBe("D");
+    expect(detail.lse).toBe("D");
+
+    const timings = computeStageTimings(rouxStageDetector.stages, boundaries, []);
+    const byStage = Object.fromEntries(timings.map((t) => [t.stage, t]));
+    expect(stageCubeColors(byStage.fb, timings)).toEqual([FACE_COLORS.D, FACE_COLORS.L]);
+    expect(stageCubeColors(byStage.sb, timings)).toEqual([FACE_COLORS.L, FACE_COLORS.R]);
+    expect(stageCubeColors(byStage.cmll, timings)).toEqual([FACE_COLORS.U]);
+    expect(stageCubeColors(byStage.lse, timings)).toEqual([darken(FACE_COLORS.U, 0.58)]);
+  });
+
+  it("Roux: fb reports the block that actually completed — left block solved, right scrambled by R/U turns that never touch left's pieces", async () => {
+    const solved = await createSolvedState();
+    const scrambled = "R U R' U' R U R' U'".split(" ").reduce((s, m) => applyMoveToState(s, m), solved);
+    const context = rouxStageDetector.createContext!();
+    expect(rouxStageDetector.isStageSolved("fb", scrambled, context)).toBe(true);
+    expect(rouxStageDetector.isStageSolved("sb", scrambled, context)).toBe(false);
+    expect(rouxStageDetector.stageDetail!("fb", scrambled, context)).toBe("DL");
   });
 });

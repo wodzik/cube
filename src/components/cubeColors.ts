@@ -3,13 +3,19 @@
  * (cubing.js's default) paints the cube with, so a stage's segment matches
  * the pieces it was about: the cross in the cross face's color, each F2L
  * slot split into its two side-face colors, the last layer in the color
- * opposite the cross (white cross -> the bar ends yellow).
+ * opposite the cross (white cross -> the bar ends yellow), and Roux's
+ * fb/sb blocks split into their floor + side-wall colors with cmll/lse
+ * taking the color opposite the floor.
  *
  * Which face a stage was solved on comes from StageBoundary.detail as
  * recorded by cfopStages / lblStages ("U" for the cross, "RF"-style side
- * faces for a slot); records from before those details existed, and
- * methods that don't record them (Roux), get no cube colors and fall back
- * to the fixed group palette in stageGroups.ts.
+ * faces for a slot) or rouxStages ("DL"-style floor+side for fb/sb, a bare
+ * floor letter for cmll/lse); records from before those details existed
+ * get no cube colors and fall back to the fixed group palette in
+ * stageGroups.ts. PLL is the one exception: it's a permutation, not a
+ * piece color, and darkening the last-layer color for it read as "2x
+ * yellow" next to OLL — so it gets a fixed accent hue instead, distinct
+ * from every real face color.
  */
 
 import type { StageTiming } from "../logic/stageDetection/stageTiming";
@@ -24,6 +30,9 @@ export const FACE_COLORS: Record<Face, string> = {
   R: "#ff0000",
   L: "#ff8000",
 };
+
+/** PLL's dedicated color — not a real sticker color, chosen to read clearly against any last-layer face color. */
+const PLL_ACCENT = "#a855f7";
 
 const FACES = new Set<string>(["U", "D", "F", "B", "L", "R"]);
 
@@ -49,9 +58,23 @@ export function crossFaceOf(timings: readonly StageTiming[]): Face | null {
  * solve carries no face details for it (fall back to the group palette).
  */
 export function stageCubeColors(timing: StageTiming, timings: readonly StageTiming[]): string[] | null {
+  const { stage, detail } = timing;
+
+  // Roux: fb/sb carry their own floor+side detail (no shared "cross" stage
+  // to look up), cmll/lse carry just the floor letter.
+  if (stage === "fb" || stage === "sb") {
+    const faces = (detail ?? "").split("").filter(isFace);
+    return faces.length > 0 ? faces.map((f) => FACE_COLORS[f]) : null;
+  }
+  if (stage === "cmll" || stage === "lse") {
+    const floor = detail && isFace(detail) ? detail : null;
+    if (!floor) return null;
+    const last = FACE_COLORS[OPPOSITE_FACE[floor]];
+    return [stage === "cmll" ? last : darken(last, 0.58)];
+  }
+
   const cross = crossFaceOf(timings);
   if (!cross) return null;
-  const { stage, detail } = timing;
   if (stage === "cross") return [FACE_COLORS[cross]];
   if (/^(f2l|first-layer|second-layer)-\d$/.test(stage)) {
     const faces = (detail ?? "").split("").filter(isFace);
@@ -59,7 +82,7 @@ export function stageCubeColors(timing: StageTiming, timings: readonly StageTimi
   }
   const last = FACE_COLORS[OPPOSITE_FACE[cross]];
   if (stage.startsWith("oll")) return [last];
-  if (stage.startsWith("pll")) return [darken(last, 0.78)];
+  if (stage.startsWith("pll")) return [PLL_ACCENT];
   if (stage === "auf") return [darken(last, 0.58)];
   return null;
 }
