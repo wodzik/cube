@@ -39,6 +39,7 @@ import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { cfopStageDetector, rouxStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
+import { ROUX_DETAIL_VERSION } from "../logic/stageDetection/rouxStages";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
@@ -154,19 +155,18 @@ export function SolveAnalysis({
 
   // Self-heal solves recorded by older builds: no `lbl` field at all (which
   // used to white-screen this modal — undefined.map in computeStageTimings),
-  // or CFOP/LBL/Roux boundaries without the face/slot details the timing bar
-  // colors by (see cubeColors.ts) — Roux's fb/sb/cmll/lse details are newer
-  // than the fields themselves, so plenty of stored solves have a `roux`
-  // array whose entries simply predate stageDetail. Also catches Roux's own
-  // detail FORMAT changing later (sb used to report both blocks' walls with
-  // no floor; now it reports floor + its own new wall, matching fb) — a
-  // record healed under the old format has real detail strings, so the
-  // presence check above wouldn't re-heal it on its own. fb/sb always share
-  // one physical floor, so under the current format their detail's first
-  // character always matches; a mismatch means it's the stale format.
-  // The full move log + scramble are on the record, so the boundaries are
-  // recomputed exactly, shown, and written back to storage — a one-time
-  // cost per record each time this needs re-running.
+  // or CFOP/LBL boundaries without the face/slot details the timing bar
+  // colors by (see cubeColors.ts). Roux's own stageDetail encoding is
+  // versioned separately (ROUX_DETAIL_VERSION) rather than presence-checked
+  // like cfop/lbl: it has already changed shape twice (detail added, then
+  // sb/cmll's exact letters redefined) since the `roux` field itself
+  // shipped, and each time, a record already healed under the OLDER shape
+  // has real-looking detail strings that a bare "is detail present" check
+  // can't tell apart from current data — it would stay stuck on the stale
+  // colors forever instead of healing on next open. The full move log +
+  // scramble are on the record, so the boundaries are recomputed exactly,
+  // shown, and written back to storage (re-stamped with the current
+  // version) — a one-time cost per record each time this needs re-running.
   const [healed, setHealed] = useState<{ cfop: StageBoundary[]; lbl: StageBoundary[]; roux: StageBoundary[] } | null>(null);
   useEffect(() => {
     setHealed(null);
@@ -174,15 +174,11 @@ export function SolveAnalysis({
       const b = bs?.find((x) => x.stage === stage);
       return b !== undefined && b.detail === undefined;
     };
-    const rouxFbDetail = record.roux?.find((b) => b.stage === "fb")?.detail;
-    const rouxSbDetail = record.roux?.find((b) => b.stage === "sb")?.detail;
-    const staleRouxSbFormat = rouxFbDetail !== undefined && rouxSbDetail !== undefined && rouxFbDetail[0] !== rouxSbDetail[0];
     if (
       record.lbl !== undefined &&
       !lacksDetail(record.cfop, "cross") &&
       !lacksDetail(record.lbl, "cross") &&
-      !lacksDetail(record.roux, "fb") &&
-      !staleRouxSbFormat
+      record.rouxDetailVersion === ROUX_DETAIL_VERSION
     )
       return;
     let cancelled = false;
@@ -198,7 +194,7 @@ export function SolveAnalysis({
       const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
       const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
       setHealed({ cfop, lbl, roux });
-      patchSolve(record.id, { cfop, lbl, roux });
+      patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION });
     });
     return () => {
       cancelled = true;
