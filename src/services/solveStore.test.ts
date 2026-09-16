@@ -92,6 +92,57 @@ describe("solveStore", () => {
     expect(solves[solves.length - 1]?.id).toBe("new"); // the just-completed solve is never the one dropped
   });
 
+  it("persists solves in a compact on-disk shape and reconstructs the full SolveRecord on read", () => {
+    const solve = makeSolve({
+      timerStartedAt: 5000,
+      scramble: "R U R' U' F2",
+      scrambleMoves: ["R", "U", "R'", "U'", "F2"],
+      moves: [
+        { move: "R", timestamp: 5100, relativeMs: 100, phase: "active" },
+        { move: "R", timestamp: 5250, relativeMs: 250, phase: "active" }, // collapses with the previous R -> R2
+        { move: "U'", timestamp: 5400, relativeMs: 400, phase: "active" },
+      ],
+      reducedMoves: ["R2", "U'"],
+    });
+    saveSolve(solve);
+
+    // What's ACTUALLY on disk drops the redundant fields entirely.
+    const raw = JSON.parse(localStorage.getItem("nact_solves")!);
+    expect(raw[0].reducedMoves).toBeUndefined();
+    expect(raw[0].scrambleMoves).toBeUndefined();
+    expect(raw[0].moves[0]).toEqual({ move: "R", relativeMs: 100 });
+
+    // getSolves() reconstructs everything exactly.
+    const [reloaded] = getSolves();
+    expect(reloaded.scrambleMoves).toEqual(["R", "U", "R'", "U'", "F2"]);
+    expect(reloaded.reducedMoves).toEqual(["R2", "U'"]);
+    expect(reloaded.moves).toEqual([
+      { move: "R", relativeMs: 100, timestamp: 5100, phase: "active" },
+      { move: "R", relativeMs: 250, timestamp: 5250, phase: "active" },
+      { move: "U'", relativeMs: 400, timestamp: 5400, phase: "active" },
+    ]);
+  });
+
+  it("self-heals solves saved by an older build (full shape on disk) into the compact shape, on the very next read", () => {
+    const legacy = {
+      ...makeSolve({
+        timerStartedAt: 0,
+        moves: [{ move: "R", timestamp: 100, relativeMs: 100, phase: "active" }],
+      }),
+    };
+    localStorage.setItem("nact_solves", JSON.stringify([legacy]));
+
+    const [hydrated] = getSolves();
+    expect(hydrated.reducedMoves).toEqual(["R"]);
+    expect(hydrated.moves).toEqual([{ move: "R", relativeMs: 100, timestamp: 100, phase: "active" }]);
+
+    // The self-heal write-back already shrank what's on disk — no need to wait for a future save/delete/patch.
+    const raw = JSON.parse(localStorage.getItem("nact_solves")!);
+    expect(raw[0].reducedMoves).toBeUndefined();
+    expect(raw[0].scrambleMoves).toBeUndefined();
+    expect(raw[0].moves[0]).toEqual({ move: "R", relativeMs: 100 });
+  });
+
   it("saveSolve gives up quietly (never throws) when even the newest solve alone can't fit — origin quota is exhausted, not just this array", () => {
     const realSetItem = localStorage.setItem.bind(localStorage);
     const originalError = console.error;
