@@ -1,16 +1,28 @@
 /**
  * Persistent storage for algorithm cases and execution times.
  *
- * localStorage key: alg_group_{group} -> AlgorithmCase[]
+ * Case/variant STRUCTURE (name, algorithm text, category, YouTube link, ...)
+ * lives in the bundled JSON files for the built-in groups — it never
+ * changes at runtime, so it's re-hydrated fresh on every load instead of
+ * being duplicated into localStorage. Only what a user actually DOES
+ * (attempt times, learning status, which cases are selected) is persisted,
+ * as a sparse overlay keyed by variant id / case name — see AlgGroupOverlay.
  *
- * On first load, if no key exists, data is imported from the static JSON
- * files (source of truth for case structure) and saved. All subsequent
- * reads/writes go to localStorage only.
+ * localStorage key: alg_group_{group} -> AlgGroupOverlay
+ *
+ * A group loses this distinction the moment its case/variant SET itself is
+ * edited (addCase/updateCase/deleteCase, or a whole-group import) — there's
+ * no way to express "case #14 was renamed" as a delta against the bundled
+ * JSON, so from that point on the overlay's `full` field holds the WHOLE
+ * case list verbatim (this file's pre-2026-09 behavior) and the sparse
+ * fields are ignored. A user-created group (no bundled JSON at all) is
+ * always in this "full" mode, from its very first case.
  *
  * PURE FUNCTIONS — no React hooks.
  */
 
 import type { AlgGroup, AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus, DisplayConfig } from "../types/algorithm";
+import { computeVariantStatsAttempts } from "../logic/statistics";
 import {
   applyRecordAttempt,
   applySetLearningStatus,
@@ -47,35 +59,116 @@ function isQuotaExceededError(err: unknown): boolean {
   return err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22);
 }
 
+// ─── On-disk overlay shape ───
+
+interface StoredVariantOverlay {
+  times: AlgorithmAttempt[];
+  learningStatus: LearningStatus;
+}
+interface StoredCaseOverlay {
+  selected: boolean;
+}
+interface AlgGroupOverlay {
+  /** Non-default variant state (times.length > 0 or learningStatus !== "not-started"), keyed by variant id. */
+  variants?: Record<string, StoredVariantOverlay>;
+  /** Non-default case state (selected explicitly set), keyed by case name. */
+  cases?: Record<string, StoredCaseOverlay>;
+  /** Present once this group has been structurally edited — see file doc comment. When set, this IS the whole group; variants/cases above are unused. */
+  full?: AlgorithmCase[];
+}
+
+/** Parses whatever's on disk for `group`, transparently accepting the pre-refactor bare-`AlgorithmCase[]` format as full-mode data. Null if nothing's stored yet. */
+function readRawGroupData(group: AlgGroup): AlgGroupOverlay | null {
+  try {
+    const raw = localStorage.getItem(storageKey(group));
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed)) return { full: parsed as AlgorithmCase[] };
+    return parsed as AlgGroupOverlay;
+  } catch {
+    return null;
+  }
+}
+
+/** Recomputes a variant's moving averages from `times` — done at merge time so the overlay never needs to store them (see hydrateVariant's defaults for the shape being extended). */
+function withRecalculatedStats(variant: AlgorithmVariant, times: AlgorithmAttempt[], learningStatus: LearningStatus): AlgorithmVariant {
+  return { ...variant, times, learningStatus, ...computeVariantStatsAttempts(times) };
+}
+
+/** Applies a sparse overlay onto freshly-hydrated bundled cases — `base` is never mutated. */
+function applyOverlay(base: AlgorithmCase[], overlay: AlgGroupOverlay): AlgorithmCase[] {
+  if (!overlay.variants && !overlay.cases) return base;
+  return base.map((c) => {
+    const caseOverlay = overlay.cases?.[c.name];
+    const algList = c.algList.map((v) => {
+      const vOverlay = overlay.variants?.[v.id];
+      return vOverlay ? withRecalculatedStats(v, vOverlay.times, vOverlay.learningStatus) : v;
+    });
+    return caseOverlay ? { ...c, algList, selected: caseOverlay.selected } : { ...c, algList };
+  });
+}
+
+/** The overlay that reproduces `cases`' dynamic state — everything derivable (stats) or matching the bundled default is left out. */
+function buildOverlay(cases: AlgorithmCase[]): AlgGroupOverlay {
+  const overlay: AlgGroupOverlay = {};
+  for (const c of cases) {
+    if (c.selected !== undefined) {
+      overlay.cases ??= {};
+      overlay.cases[c.name] = { selected: c.selected };
+    }
+    for (const v of c.algList) {
+      if (v.times.length > 0 || v.learningStatus !== "not-started") {
+        overlay.variants ??= {};
+        overlay.variants[v.id] = { times: v.times, learningStatus: v.learningStatus };
+      }
+    }
+  }
+  return overlay;
+}
+
+/** Caps every `times` array in an overlay (whichever shape it's in) to its `cap` most recent entries — see writeAlgGroupWithQuotaFallback. */
+function capOverlayTimes(data: AlgGroupOverlay, cap: number): AlgGroupOverlay {
+  if (data.full) {
+    return {
+      ...data,
+      full: data.full.map((c) => ({
+        ...c,
+        algList: c.algList.map((v) => (v.times.length > cap ? { ...v, times: v.times.slice(-cap) } : v)),
+      })),
+    };
+  }
+  if (!data.variants) return data;
+  const variants: Record<string, StoredVariantOverlay> = {};
+  for (const [id, v] of Object.entries(data.variants)) {
+    variants[id] = v.times.length > cap ? { ...v, times: v.times.slice(-cap) } : v;
+  }
+  return { ...data, variants };
+}
+
 /**
  * Every recorded attempt appends to a variant's `times` forever, so a
  * heavily-drilled group (many cases × many variants × months of practice)
  * can outgrow localStorage's quota (see the QuotaExceededError reports for
- * alg_group_second-block-last-slot). Rather than let that throw out of
+ * alg_group_second-block-last-slot — though storing only the sparse
+ * overlay, per this file's whole design, should make that dramatically
+ * rarer than it used to be). Rather than let that throw out of
  * saveAlgGroup mid-attempt, cap every variant's `times` to an ever-smaller
  * number of its MOST RECENT entries and retry until the write fits — ao100
  * (the widest moving average this app computes) only ever looks at the last
  * 100 anyway, so a moderate cap costs nothing until quota is genuinely
- * exhausted. The already-computed ao5/ao12/ao100/bestTime on each variant
- * (set by recalcStats from the FULL history before this ever runs) are
- * saved as-is — only the raw per-attempt log is trimmed, so a variant's
- * current stats stay accurate; a future attempt just starts averaging over
- * a shorter retained window instead of the variant's whole history.
- *
- * A single group's own payload is small even fully populated (e.g. SBLS is
- * 65 cases / 350 variants — well under 100KB even at generous history
- * lengths), so if trimming even down to ONE attempt per variant still
- * doesn't fit, the real problem is the ORIGIN's total localStorage usage
- * (this key plus every solve/every other algorithm group), not this group
- * alone — nothing left to cut here will fix that. Giving up by re-throwing
- * would crash the app on every future attempt in this group, which is
- * strictly worse than silently not persisting one save, so this logs
- * loudly and returns instead of throwing once the cap fallback is
  * exhausted.
+ *
+ * If trimming even down to ONE attempt per variant still doesn't fit, the
+ * real problem is the ORIGIN's total localStorage usage (this key plus
+ * every solve/every other algorithm group), not this group alone —
+ * nothing left to cut here will fix that. Giving up by re-throwing would
+ * crash the app on every future attempt in this group, which is strictly
+ * worse than silently not persisting one save, so this logs loudly and
+ * returns instead of throwing once the cap fallback is exhausted.
  */
-function writeAlgGroupWithQuotaFallback(key: string, cases: AlgorithmCase[]): void {
+function writeAlgGroupWithQuotaFallback(key: string, data: AlgGroupOverlay): void {
   const CAPS = [500, 200, 100, 50, 20, 5, 1];
-  let current = cases;
+  let current = data;
   let capIndex = -1;
   while (true) {
     try {
@@ -95,11 +188,7 @@ function writeAlgGroupWithQuotaFallback(key: string, cases: AlgorithmCase[]): vo
         return;
       }
       capIndex++;
-      const cap = CAPS[capIndex];
-      current = current.map((c) => ({
-        ...c,
-        algList: c.algList.map((v) => (v.times.length > cap ? { ...v, times: v.times.slice(-cap) } : v)),
-      }));
+      current = capOverlayTimes(current, CAPS[capIndex]);
     }
   }
 }
@@ -178,28 +267,43 @@ export function hydrateCasesFromRaw(raw: RawCase[], group: AlgGroup): AlgorithmC
 // ─── Public API ───
 
 /**
- * A group id is either one of the 7 built-ins (bundled JSON as the initial
+ * A group id is either one of the built-ins (bundled JSON is the structure
  * source of truth) or any user-created id (algGroupRegistry.createGroup) —
- * for those there is no bundled JSON, a localStorage miss just means "brand
- * new, no cases yet".
+ * for those there is no bundled JSON, so they're always in "full" mode
+ * (see file doc comment) from their first case onward.
  */
 export function loadAlgGroup(group: AlgGroup): AlgorithmCase[] {
-  try {
-    const raw = localStorage.getItem(storageKey(group));
-    if (raw) return JSON.parse(raw) as AlgorithmCase[];
-  } catch {
-    // fall through to JSON import / empty
-  }
-  const cases = loadFromJson(group);
-  saveAlgGroup(group, cases);
-  return cases;
+  const raw = readRawGroupData(group);
+  if (raw?.full) return raw.full;
+  const base = loadFromJson(group);
+  // Nothing stored at all — pure bundled defaults. Deliberately NOT written
+  // to localStorage here: merely visiting/hydrating a never-touched group
+  // used to eagerly persist its full default state, which is exactly what
+  // was tipping already-near-full origins over quota on a cold page visit
+  // (see the alg_group_second-block-last-slot reports) with nothing to show
+  // for it — nothing has actually changed yet.
+  if (!raw) return base;
+  return applyOverlay(base, raw);
 }
 
+/** For dynamic-only mutations (attempts, learning status, selection) — stays in whichever mode (sparse overlay or full) the group is already in. */
 export function saveAlgGroup(group: AlgGroup, cases: AlgorithmCase[]): void {
-  writeAlgGroupWithQuotaFallback(storageKey(group), cases);
+  const raw = readRawGroupData(group);
+  const data: AlgGroupOverlay = raw?.full ? { full: cases } : buildOverlay(cases);
+  writeAlgGroupWithQuotaFallback(storageKey(group), data);
 }
 
-/** Wipe localStorage and reload from the original JSON files. */
+/**
+ * For structural mutations — the case/variant SET itself changed (added,
+ * edited, deleted, or replaced wholesale by an import), which can't be
+ * expressed as a delta against the bundled JSON. Switches (or keeps) the
+ * group in "full" mode from now on.
+ */
+export function saveAlgGroupStructural(group: AlgGroup, cases: AlgorithmCase[]): void {
+  writeAlgGroupWithQuotaFallback(storageKey(group), { full: cases });
+}
+
+/** Wipe localStorage and reload from the original JSON files (or, for a user-created group, back to empty). */
 export function resetAlgGroup(group: AlgGroup): void {
   localStorage.removeItem(storageKey(group));
 }
@@ -218,22 +322,22 @@ export function clearVariantTimes(group: AlgGroup, caseName: string, variantId: 
   saveAlgGroup(group, applyClearVariantTimes(loadAlgGroup(group), caseName, variantId));
 }
 
-/** Replace a full case (used by CaseEdit after editing variants). */
+/** Replace a full case (used by CaseEdit after editing variants) — structural: the edited case's variant set/algs no longer necessarily matches the bundled JSON. */
 export function updateCase(group: AlgGroup, updated: AlgorithmCase): void {
-  saveAlgGroup(group, applyUpdateCase(loadAlgGroup(group), updated));
+  saveAlgGroupStructural(group, applyUpdateCase(loadAlgGroup(group), updated));
 }
 
-/** Append a brand-new case — the "add algorithm" primitive (no equivalent existed before). Rejects a duplicate name. */
+/** Append a brand-new case — the "add algorithm" primitive. Rejects a duplicate name. Structural (see updateCase). */
 export function addCase(group: AlgGroup, newCase: AlgorithmCase): boolean {
   const next = applyAddCase(loadAlgGroup(group), newCase);
   if (!next) return false;
-  saveAlgGroup(group, next);
+  saveAlgGroupStructural(group, next);
   return true;
 }
 
-/** Remove a whole case (all its variants) from a group. */
+/** Remove a whole case (all its variants) from a group. Structural (see updateCase). */
 export function deleteCase(group: AlgGroup, caseName: string): void {
-  saveAlgGroup(group, applyDeleteCase(loadAlgGroup(group), caseName));
+  saveAlgGroupStructural(group, applyDeleteCase(loadAlgGroup(group), caseName));
 }
 
 export function setCaseSelected(group: AlgGroup, caseName: string, selected: boolean): void {
