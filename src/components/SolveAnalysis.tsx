@@ -38,7 +38,7 @@ import { StageProgress } from "./StageProgress";
 import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
-import { cfopStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
+import { cfopStageDetector, rouxStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
@@ -154,18 +154,26 @@ export function SolveAnalysis({
 
   // Self-heal solves recorded by older builds: no `lbl` field at all (which
   // used to white-screen this modal — undefined.map in computeStageTimings),
-  // or CFOP/LBL boundaries without the face/slot details the timing bar
-  // colors by (see cubeColors.ts). The full move log + scramble are on the
-  // record, so the boundaries are recomputed exactly, shown, and written
-  // back to storage so it's a one-time cost per record.
-  const [healed, setHealed] = useState<{ cfop: StageBoundary[]; lbl: StageBoundary[] } | null>(null);
+  // or CFOP/LBL/Roux boundaries without the face/slot details the timing bar
+  // colors by (see cubeColors.ts) — Roux's fb/sb/cmll/lse details are newer
+  // than the fields themselves, so plenty of stored solves have a `roux`
+  // array whose entries simply predate stageDetail. The full move log +
+  // scramble are on the record, so the boundaries are recomputed exactly,
+  // shown, and written back to storage so it's a one-time cost per record.
+  const [healed, setHealed] = useState<{ cfop: StageBoundary[]; lbl: StageBoundary[]; roux: StageBoundary[] } | null>(null);
   useEffect(() => {
     setHealed(null);
-    const lacksDetails = (bs: StageBoundary[] | undefined) => {
-      const cross = bs?.find((b) => b.stage === "cross");
-      return cross !== undefined && cross.detail === undefined;
+    const lacksDetail = (bs: StageBoundary[] | undefined, stage: string) => {
+      const b = bs?.find((x) => x.stage === stage);
+      return b !== undefined && b.detail === undefined;
     };
-    if (record.lbl !== undefined && !lacksDetails(record.cfop) && !lacksDetails(record.lbl)) return;
+    if (
+      record.lbl !== undefined &&
+      !lacksDetail(record.cfop, "cross") &&
+      !lacksDetail(record.lbl, "cross") &&
+      !lacksDetail(record.roux, "fb")
+    )
+      return;
     let cancelled = false;
     createSolvedState().then((solved) => {
       if (cancelled) return;
@@ -177,8 +185,9 @@ export function SolveAnalysis({
       const timedMoves = record.moves.map((m) => ({ move: m.move, relativeMs: m.relativeMs }));
       const cfop = computeStageBoundaries(cfopStageDetector, timedMoves, startState);
       const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
-      setHealed({ cfop, lbl });
-      patchSolve(record.id, { cfop, lbl });
+      const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
+      setHealed({ cfop, lbl, roux });
+      patchSolve(record.id, { cfop, lbl, roux });
     });
     return () => {
       cancelled = true;
@@ -186,7 +195,8 @@ export function SolveAnalysis({
   }, [record]);
 
   const detector = METHOD_DETECTORS[method];
-  const boundaries = (method === "CFOP" || method === "LBL" ? healed?.[method === "CFOP" ? "cfop" : "lbl"] : undefined) ?? BOUNDARIES_BY_METHOD[method](record) ?? [];
+  const HEALED_KEY: Record<DisplayMethod, keyof NonNullable<typeof healed>> = { CFOP: "cfop", LBL: "lbl", Roux: "roux" };
+  const boundaries = healed?.[HEALED_KEY[method]] ?? BOUNDARIES_BY_METHOD[method](record) ?? [];
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
   // For the method currently shown (its stage split defines the pauses).
   const fluency = fluencyPercent(timings, record.timeMs);
