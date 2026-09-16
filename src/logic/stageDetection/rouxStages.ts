@@ -170,9 +170,10 @@ function cornersSolvedUpToAuf(state: LiveCubeState, p: BlockPairPosition): boole
   return false;
 }
 
-/** Per-walk context: remembers which block-pair position SB/CMLL solved at, so CMLL/LSE's stageDetail can report the same real faces rather than re-searching (and risking a different, equally-valid position). */
+/** Per-walk context: remembers which block-pair position SB/CMLL solved at (so CMLL/LSE's stageDetail can report the same real faces rather than re-searching a different, equally-valid position) and which side FB's block was on (so SB's detail can report its OWN, newly-added side instead of re-stating FB's). */
 interface RouxContext {
   lockedPosition: BlockPairPosition | null;
+  fbSide: Face | null;
 }
 
 function isRouxContext(context: unknown): context is RouxContext {
@@ -210,19 +211,36 @@ function resolvePosition(
 
 const isCmllPosition = (s: LiveCubeState, p: BlockPairPosition) => bothBlocksSolved(s, p) && cornersSolvedUpToAuf(s, p);
 
+/** First (orientation, position, side) satisfying FB — same search FB's isStageSolved does, but keeping which SIDE (left/right) matched, so both fb's own detail and sb's "which side is NEW" logic can use it. */
+function findFbMatch(
+  orientations: LiveCubeState[],
+  positions: BlockPairPosition[]
+): { position: BlockPairPosition; face: Face } | null {
+  for (const s of orientations) {
+    for (const p of positions) {
+      if (isBlockSolved(s, p.left)) return { position: p, face: p.leftFace };
+      if (isBlockSolved(s, p.right)) return { position: p, face: p.rightFace };
+    }
+  }
+  return null;
+}
+
 export const rouxStageDetector: StageDetector = {
   method: "Roux",
   stages: ["fb", "sb", "cmll", "lse"],
-  createContext: (): RouxContext => ({ lockedPosition: null }),
+  createContext: (): RouxContext => ({ lockedPosition: null, fbSide: null }),
   isStageSolved(stage, state, context) {
     if (stage === "lse") return isFullySolved(state);
     const positions = getBlockPairPositions(state);
     const orientations = allOrientations(state);
     switch (stage) {
-      case "fb":
+      case "fb": {
         // Either side counts as "first" — left vs right is the solver's
         // choice (mirror-grip Roux). Positions already cover every face pair.
-        return orientations.some((s) => positions.some((p) => isBlockSolved(s, p.left) || isBlockSolved(s, p.right)));
+        const found = findFbMatch(orientations, positions);
+        if (found && isRouxContext(context) && !context.fbSide) context.fbSide = found.face;
+        return found !== null;
+      }
       case "sb": {
         // Both blocks of ONE pair position under ONE shared offset.
         const found = findBlockPosition(orientations, positions, bothBlocksSolved);
@@ -239,26 +257,27 @@ export const rouxStageDetector: StageDetector = {
     }
   },
   // Details name the physical faces behind fb/sb/cmll/lse so a display can
-  // color stages by cube colors (components/cubeColors.ts): fb/sb get the
-  // floor + side-wall colors of whichever block(s) just completed, cmll/lse
-  // get just the floor face (the display derives the opposite/last-layer
-  // color from it, same as CFOP's cross-face convention).
+  // color stages by cube colors (components/cubeColors.ts) — all four use
+  // the SAME "floor + this stage's own wall" scheme: fb/sb are floor + the
+  // side wall of whichever block just completed (fb's own side for fb, the
+  // OTHER side for sb, so the two blocks read as two different colors
+  // rather than sb restating fb's), cmll/lse are just the floor face (the
+  // display derives the opposite/last-layer color from it, same as CFOP's
+  // cross-face convention).
   stageDetail(stage, state, context) {
     const positions = getBlockPairPositions(state);
     const orientations = allOrientations(state);
     switch (stage) {
       case "fb": {
-        for (const s of orientations) {
-          for (const p of positions) {
-            if (isBlockSolved(s, p.left)) return p.floorFace + p.leftFace;
-            if (isBlockSolved(s, p.right)) return p.floorFace + p.rightFace;
-          }
-        }
-        return undefined;
+        const found = findFbMatch(orientations, positions);
+        return found ? found.position.floorFace + found.face : undefined;
       }
       case "sb": {
         const p = resolvePosition(context, orientations, positions, bothBlocksSolved);
-        return p ? p.leftFace + p.rightFace : undefined;
+        if (!p) return undefined;
+        const fbSide = isRouxContext(context) ? context.fbSide : null;
+        const newSide = fbSide === p.leftFace ? p.rightFace : p.leftFace;
+        return p.floorFace + newSide;
       }
       case "cmll":
       case "lse": {
