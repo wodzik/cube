@@ -139,12 +139,6 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.visualization = visualization as TwistyPlayer["visualization"];
       player.experimentalSetupAnchor = setupAnchor as TwistyPlayer["experimentalSetupAnchor"];
       player.background = background as TwistyPlayer["background"];
-      // Defaults to "auto", which cubing.js's control panel actually treats
-      // as light — its disabled-button style is then a near-opaque black
-      // blotch (rgba(0,0,0,0.4)) that reads as a rendering glitch against
-      // this app's dark theme. "dark" switches it to a lighter, visibly
-      // still-a-button gray instead.
-      player.colorScheme = "dark";
       player.controlPanel = controlPanel as TwistyPlayer["controlPanel"];
       player.viewerLink = viewerLink as TwistyPlayer["viewerLink"];
       player.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
