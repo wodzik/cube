@@ -5,23 +5,28 @@
  * The 7 originally-hardcoded groups (oll/pll/f2l-front-right/f2l-front-left/
  * f2l-back-right/f2l-back-left/f2l-advanced) keep their exact ids and their
  * CASE DATA keeps living at the existing `alg_group_{id}` localStorage key,
- * read via algorithmStore's loadAlgGroup/saveAlgGroup exactly as before —
- * this registry only adds METADATA (display config) alongside it, seeded
- * once from what used to be algGroupConfig.ts's hardcoded tables. Existing
- * stats/learning-status data is never touched by anything in this file.
+ * read/written via algorithmStore's loadAlgGroup/saveAlgGroup/
+ * saveAlgGroupStructural exactly as any other flat group — this registry
+ * only adds METADATA (display config) alongside it, seeded once from what
+ * used to be algGroupConfig.ts's hardcoded tables. Existing stats/
+ * learning-status data is never touched by anything in this file.
  *
  * A group with `hasSubgroups: true` is necessarily user-created (built-ins
  * never have subgroups) and stores its subgroups' case lists INSIDE this
- * registry entry, not in a separate alg_group_{id} key — there is no
- * pre-existing data to preserve for those, so it's simplest to keep it
- * self-contained.
+ * registry entry (in `nact_alg_groups`, alongside every group's metadata),
+ * not in a separate alg_group_{id} key. UNLIKE algorithmStore's flat
+ * groups, this embeds the WHOLE case list verbatim (no sparse
+ * times/learningStatus-only overlay against a bundled JSON base) — bundled
+ * subgroup sets like ZBLL (472 cases) or Advanced F2L are the likely next
+ * place to look if localStorage quota pressure recurs after algorithmStore's
+ * 2026-09 sparse-overlay change.
  *
  * PURE FUNCTIONS — no React hooks.
  */
 
 import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, DisplayConfig, LearningStatus, StickeringConfig, AlgCategory } from "../types/algorithm";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
-import { loadAlgGroup, saveAlgGroup, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
+import { loadAlgGroup, saveAlgGroupStructural, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
 import { buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
 import { rouxBlocksStickeringMask } from "../logic/trainer/trainerMasks";
 import {
@@ -634,7 +639,7 @@ export function createGroup(
     ...(hasSubgroups ? { subgroups: [] } : {}),
   };
   writeRegistry([...groups, meta]);
-  if (!hasSubgroups) saveAlgGroup(id, []); // fresh flat group starts with no cases; subgroup groups keep cases inside the registry entry
+  if (!hasSubgroups) saveAlgGroupStructural(id, []); // fresh flat group starts with no cases; subgroup groups keep cases inside the registry entry
   return id;
 }
 
@@ -814,7 +819,7 @@ export function importGroup(json: string, fallbackName: string, fallbackCategory
 
   if (Array.isArray(parsed)) {
     const id = createGroup(fallbackName, undefined, false, "", fallbackCategory);
-    saveAlgGroup(id, hydrateCasesFromRaw(parsed as RawCase[], id));
+    saveAlgGroupStructural(id, hydrateCasesFromRaw(parsed as RawCase[], id));
     return id;
   }
 
@@ -835,6 +840,6 @@ export function importGroup(json: string, fallbackName: string, fallbackCategory
     ...(file.hasSubgroups ? { subgroups: file.subgroups ?? [] } : {}),
   };
   writeRegistry([...groups, meta]);
-  if (!file.hasSubgroups) saveAlgGroup(id, file.cases ?? []);
+  if (!file.hasSubgroups) saveAlgGroupStructural(id, file.cases ?? []);
   return id;
 }
