@@ -157,9 +157,16 @@ export function SolveAnalysis({
   // or CFOP/LBL/Roux boundaries without the face/slot details the timing bar
   // colors by (see cubeColors.ts) — Roux's fb/sb/cmll/lse details are newer
   // than the fields themselves, so plenty of stored solves have a `roux`
-  // array whose entries simply predate stageDetail. The full move log +
-  // scramble are on the record, so the boundaries are recomputed exactly,
-  // shown, and written back to storage so it's a one-time cost per record.
+  // array whose entries simply predate stageDetail. Also catches Roux's own
+  // detail FORMAT changing later (sb used to report both blocks' walls with
+  // no floor; now it reports floor + its own new wall, matching fb) — a
+  // record healed under the old format has real detail strings, so the
+  // presence check above wouldn't re-heal it on its own. fb/sb always share
+  // one physical floor, so under the current format their detail's first
+  // character always matches; a mismatch means it's the stale format.
+  // The full move log + scramble are on the record, so the boundaries are
+  // recomputed exactly, shown, and written back to storage — a one-time
+  // cost per record each time this needs re-running.
   const [healed, setHealed] = useState<{ cfop: StageBoundary[]; lbl: StageBoundary[]; roux: StageBoundary[] } | null>(null);
   useEffect(() => {
     setHealed(null);
@@ -167,11 +174,15 @@ export function SolveAnalysis({
       const b = bs?.find((x) => x.stage === stage);
       return b !== undefined && b.detail === undefined;
     };
+    const rouxFbDetail = record.roux?.find((b) => b.stage === "fb")?.detail;
+    const rouxSbDetail = record.roux?.find((b) => b.stage === "sb")?.detail;
+    const staleRouxSbFormat = rouxFbDetail !== undefined && rouxSbDetail !== undefined && rouxFbDetail[0] !== rouxSbDetail[0];
     if (
       record.lbl !== undefined &&
       !lacksDetail(record.cfop, "cross") &&
       !lacksDetail(record.lbl, "cross") &&
-      !lacksDetail(record.roux, "fb")
+      !lacksDetail(record.roux, "fb") &&
+      !staleRouxSbFormat
     )
       return;
     let cancelled = false;
