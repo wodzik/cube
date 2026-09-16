@@ -61,6 +61,17 @@ function isQuotaExceededError(err: unknown): boolean {
  * saved as-is — only the raw per-attempt log is trimmed, so a variant's
  * current stats stay accurate; a future attempt just starts averaging over
  * a shorter retained window instead of the variant's whole history.
+ *
+ * A single group's own payload is small even fully populated (e.g. SBLS is
+ * 65 cases / 350 variants — well under 100KB even at generous history
+ * lengths), so if trimming even down to ONE attempt per variant still
+ * doesn't fit, the real problem is the ORIGIN's total localStorage usage
+ * (this key plus every solve/every other algorithm group), not this group
+ * alone — nothing left to cut here will fix that. Giving up by re-throwing
+ * would crash the app on every future attempt in this group, which is
+ * strictly worse than silently not persisting one save, so this logs
+ * loudly and returns instead of throwing once the cap fallback is
+ * exhausted.
  */
 function writeAlgGroupWithQuotaFallback(key: string, cases: AlgorithmCase[]): void {
   const CAPS = [500, 200, 100, 50, 20, 5, 1];
@@ -74,7 +85,15 @@ function writeAlgGroupWithQuotaFallback(key: string, cases: AlgorithmCase[]): vo
       }
       return;
     } catch (err) {
-      if (!isQuotaExceededError(err) || capIndex >= CAPS.length - 1) throw err;
+      if (!isQuotaExceededError(err)) throw err;
+      if (capIndex >= CAPS.length - 1) {
+        console.error(
+          `${key}: storage quota exhausted even with only 1 attempt kept per variant — this browser's total ` +
+            "localStorage for this site is full (not just this group). This save was dropped; free up space via " +
+            "Settings -> Clear all solve history / Reset all algorithm progress."
+        );
+        return;
+      }
       capIndex++;
       const cap = CAPS[capIndex];
       current = current.map((c) => ({

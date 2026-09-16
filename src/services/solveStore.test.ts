@@ -92,6 +92,30 @@ describe("solveStore", () => {
     expect(solves[solves.length - 1]?.id).toBe("new"); // the just-completed solve is never the one dropped
   });
 
+  it("saveSolve gives up quietly (never throws) when even the newest solve alone can't fit — origin quota is exhausted, not just this array", () => {
+    const realSetItem = localStorage.setItem.bind(localStorage);
+    const originalError = console.error;
+    let loggedError = false;
+    console.error = () => {
+      loggedError = true;
+    };
+    // Every write to nact_solves fails, no matter how small — simulates the
+    // total-origin-quota-exhausted case (other keys, not this array, are
+    // what's actually full).
+    localStorage.setItem = (key: string, value: string) => {
+      if (key === "nact_solves") throw new DOMException("quota exceeded", "QuotaExceededError");
+      realSetItem(key, value);
+    };
+
+    try {
+      expect(() => saveSolve(makeSolve({ id: "only" }))).not.toThrow();
+    } finally {
+      localStorage.setItem = realSetItem;
+      console.error = originalError;
+    }
+    expect(loggedError).toBe(true);
+  });
+
   it("deletes a solve by id", () => {
     const solve = makeSolve();
     saveSolve(solve);

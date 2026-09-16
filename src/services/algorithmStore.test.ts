@@ -73,4 +73,32 @@ describe("algorithmStore", () => {
     expect(times.length).toBeLessThanOrEqual(3);
     expect(times[times.length - 1]?.time).toBe(99); // the just-recorded attempt is never the one dropped
   });
+
+  it("recordAttempt gives up quietly (never throws) when even 1 attempt per variant can't fit — origin quota is exhausted, not just this group", () => {
+    const cases = loadAlgGroup("pll");
+    const caseName = cases[0].name;
+    const variantId = cases[0].algList[0].id;
+
+    const realSetItem = localStorage.setItem.bind(localStorage);
+    const originalError = console.error;
+    let loggedError = false;
+    console.error = () => {
+      loggedError = true;
+    };
+    // Every write to this group fails, no matter how small — simulates the
+    // total-origin-quota-exhausted case (other keys, not this group, are
+    // what's actually full).
+    localStorage.setItem = (key: string, value: string) => {
+      if (key === "alg_group_pll") throw new DOMException("quota exceeded", "QuotaExceededError");
+      realSetItem(key, value);
+    };
+
+    try {
+      expect(() => recordAttempt("pll", caseName, variantId, { time: 1, hadErrors: false })).not.toThrow();
+    } finally {
+      localStorage.setItem = realSetItem;
+      console.error = originalError;
+    }
+    expect(loggedError).toBe(true);
+  });
 });

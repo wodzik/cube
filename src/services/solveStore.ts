@@ -32,7 +32,15 @@ function isQuotaExceededError(err: unknown): boolean {
  * Rather than let that throw out of saveSolve mid-solve (crashing the app
  * right after the user finishes a cube — see the QuotaExceededError reports),
  * evict the oldest solves in increasing chunks and retry until the write
- * fits or nothing is left to drop.
+ * fits.
+ *
+ * If it still doesn't fit down to just the brand-new solve alone, the real
+ * problem is the ORIGIN's total localStorage usage (every session's other
+ * keys — algorithm groups, etc.), not this one array — nothing left to cut
+ * here will fix that. Giving up by re-throwing would crash the app on
+ * every future solve, which is strictly worse than silently not persisting
+ * one, so this logs loudly and returns instead of throwing once eviction
+ * is exhausted.
  */
 function writeSolvesWithQuotaFallback(solves: SolveRecord[]): void {
   let current = solves;
@@ -46,7 +54,15 @@ function writeSolvesWithQuotaFallback(solves: SolveRecord[]): void {
       }
       return;
     } catch (err) {
-      if (!isQuotaExceededError(err) || current.length <= 1) throw err;
+      if (!isQuotaExceededError(err)) throw err;
+      if (current.length <= 1) {
+        console.error(
+          "nact_solves: storage quota exhausted even with only the newest solve kept — this browser's total " +
+            "localStorage for this site is full (not just solve history). This solve was not saved; free up " +
+            "space via Settings -> Clear all solve history / Reset all algorithm progress."
+        );
+        return;
+      }
       const dropCount = Math.max(1, Math.floor(current.length * 0.1));
       current = current.slice(dropCount);
     }
