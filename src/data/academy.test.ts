@@ -106,12 +106,14 @@ describe("4LLL corners-first lesson data", () => {
     expect(TWO_FIRST_LAYERS.steps[1]).toBe(SECOND_LAYER.steps[0]);
     expect(ZETA_SLOTTING.steps.map((s) => s.id)).toEqual(["zeta-edges", "zeta-corners"]);
     expect(ZETA_SLOTTING.steps[0]).not.toBe(SECOND_LAYER.steps[0]);
-    // Same alg text for the two shared cases, sourced from SECOND_LAYER so they can't drift.
+    // Corner-blind edge inserts: three-move inserts for oriented edges, the hedgeslammer for unoriented ones.
     const zetaEdges = ZETA_SLOTTING.steps[0].algs;
-    expect(zetaEdges.find((a) => a.id === "edge-right")!.alg).toBe(SECOND_LAYER.steps[0].algs[0].alg);
-    expect(zetaEdges.find((a) => a.id === "edge-left")!.alg).toBe(SECOND_LAYER.steps[0].algs[1].alg);
-    // Plus the two new sledgehammer cases, absent from Two first layers' own edges step.
-    expect(zetaEdges.some((a) => a.id === "edge-unoriented-right")).toBe(true);
+    expect(zetaEdges.map((a) => [a.id, a.alg])).toEqual([
+      ["edge-right", "R U' R'"],
+      ["edge-left", "L' U L"],
+      ["edge-unoriented-right", "F R' F' R"],
+      ["edge-unoriented-left", "F' L F L'"],
+    ]);
     expect(SECOND_LAYER.steps[0].algs.some((a) => a.id === "edge-unoriented-right")).toBe(false);
     // No lesson shares last-layer steps anymore — it's its own top-level lesson.
     for (const lesson of [TWO_FIRST_LAYERS, ZETA_SLOTTING, F2L_METHOD]) {
@@ -119,20 +121,19 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("Zeta Slotting's sledgehammer edge cases insert without disturbing the cross", async () => {
+  it("Zeta Slotting's edge cases insert without disturbing the cross; oriented ones start with orientation 0, unoriented with 1", async () => {
     const kpuzzle = await cube3x3x3.kpuzzle();
-    for (const id of ["edge-unoriented-right", "edge-unoriented-left"]) {
+    for (const id of ["edge-right", "edge-left", "edge-unoriented-right", "edge-unoriented-left"]) {
       const alg = ZETA_SLOTTING.steps[0].algs.find((a) => a.id === id)!;
       const { tokens } = parseDecoratedAlg(alg.alg);
       const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
       const crossOk = [4, 5, 6, 7].every((e) => p.patternData.EDGES.pieces[e] === e && p.patternData.EDGES.orientation[e] === 0);
-      expect(`${id}: cross intact`).toBe(`${id}: cross intact`);
-      expect(crossOk).toBe(true);
+      expect(`${id}: cross intact ${crossOk}`).toBe(`${id}: cross intact true`);
       // Before insertion the edge sits up in the last layer (U-index slots), same as any other not-yet-placed piece.
-      const edgeId = id === "edge-unoriented-left" ? 9 : 8;
+      const edgeId = id.endsWith("left") ? 9 : 8;
       const slot = p.patternData.EDGES.pieces.indexOf(edgeId);
       expect([0, 1, 2, 3]).toContain(slot);
-      expect(p.patternData.EDGES.orientation[slot]).toBe(0);
+      expect(p.patternData.EDGES.orientation[slot]).toBe(id.includes("unoriented") ? 1 : 0);
     }
   });
 
@@ -173,12 +174,13 @@ describe("4LLL corners-first lesson data", () => {
       const { tokens } = parseDecoratedAlg(a.alg);
       const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
       const d = setup.patternData;
-      const frEdgeHome = a.id === "left-up" ? d.EDGES.pieces[9] === 9 && d.EDGES.orientation[9] === 0 : d.EDGES.pieces[8] === 8 && d.EDGES.orientation[8] === 0;
+      const isLeft = a.id.startsWith("left-");
+      const frEdgeHome = isLeft ? d.EDGES.pieces[9] === 9 && d.EDGES.orientation[9] === 0 : d.EDGES.pieces[8] === 8 && d.EDGES.orientation[8] === 0;
       expect(`${a.id}: FR/FL edge home`).toBe(`${a.id}: FR/FL edge home`);
       expect(frEdgeHome).toBe(true);
       for (let c = 4; c < 8; c++) {
         // the target corner (4 for right-hand cases, 5 for the mirror) is allowed to move; the other 3 D-corners must not.
-        if ((a.id === "left-up" && c === 5) || (a.id !== "left-up" && c === 4)) continue;
+        if ((isLeft && c === 5) || (!isLeft && c === 4)) continue;
         expect(`${a.id}: corner ${c} untouched`).toBe(`${a.id}: corner ${c} untouched`);
         expect(d.CORNERS.pieces[c] === c && d.CORNERS.orientation[c] === 0).toBe(true);
       }
@@ -199,6 +201,21 @@ describe("4LLL corners-first lesson data", () => {
       faces.add(CORNER_FACES[slot][ori % 3]);
     }
     expect(faces).toEqual(new Set(["U", "F", "R"]));
+  });
+
+  it("Zeta Slotting's 3 left-hand corner cases cover white pointing up / front / left", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const CORNER_FACES = CORNERS.map((n) => n.split(""));
+    const faces = new Set<string>();
+    for (const id of ["left-up", "left-front", "left-left"]) {
+      const alg = zetaCornersStep().algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(5);
+      faces.add(CORNER_FACES[slot][setup.patternData.CORNERS.orientation[slot] % 3]);
+    }
+    expect(faces).toEqual(new Set(["U", "F", "L"]));
   });
 
   it("F2L lesson's set-up cases each reduce to a basic insert without moving the cross", async () => {

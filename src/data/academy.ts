@@ -16,9 +16,9 @@
  *    the same last layer. Mirrors "The last layer, corners first" guide.
  *  - "Zeta Slotting": edges first (its own step — NOT the same object as
  *    "Two first layers"'s edges step, since Zeta Slotting's edge step
- *    additionally covers the two sledgehammer "unoriented" cases, which
- *    would misleadingly show a first-layer corner getting disturbed if
- *    reused in the corner-first method), then ZETA_CORNERS (F2L's "Edge
+ *    uses shorter, corner-blind edge inserts (plus the two hedgeslammer
+ *    "unoriented" cases), which would misleadingly show a first-layer
+ *    corner getting disturbed if reused in the corner-first method), then ZETA_CORNERS (F2L's "Edge
  *    In Slot" cases: insert the corner around an edge that's already
  *    seated). Mirrors the "Zeta Slotting" guide.
  *  - "F2L": the intuitive-F2L curriculum from the "Beginner F2L" guide —
@@ -312,34 +312,40 @@ const ZETA_CORNERS_STEP: AcademyStep = {
     { id: "front", name: "White front", alg: "U' R U' R' U2 R U' R'", required: true, description: "The corner's white sticker points at you. F2L 33." },
     { id: "right", name: "White right", alg: "U R U R' U2 R U R'", required: true, description: "The corner's white sticker points right. F2L 34." },
     { id: "left-up", name: "Left hand · white up", alg: "(U' L' U L) (U' L' U L) (U' L' U L)", required: false, description: "Same as \"white up\", mirrored: slot at the front-left." },
+    { id: "left-front", name: "Left hand · white front", alg: "U L' U L U2 L' U L", required: false, description: "Mirror of \"white front\": slot at the front-left, the corner's white sticker points at you." },
+    { id: "left-left", name: "Left hand · white left", alg: "U' L' U' L U2 L' U' L", required: false, description: "Mirror of \"white right\": slot at the front-left, the corner's white sticker points left." },
   ],
 };
 
 /**
- * Zeta Slotting's OWN edges step — NOT the same object as SECOND_LAYER's
- * (deliberately: this one adds the two sledgehammer "unoriented" cases,
- * whose set-up disturbs a first-layer corner in passing, which would look
- * like a broken first layer if it showed up under "Two first layers",
- * where corners are supposed to already be solved by this point. Sharing
- * storage/attempts with that lesson would also be wrong once the case
- * sets differ). The two base algorithms are still sourced from
- * SECOND_LAYER so the text can't drift.
+ * Zeta Slotting's OWN edges step — NOT the same object as SECOND_LAYER's:
+ * with no corner to protect, an edge goes in with a much shorter algorithm
+ * than the corner-first method's second-layer step. Every alg here
+ * disturbs a first-layer corner in passing, which would look like a broken
+ * first layer under "Two first layers" (where corners are already solved
+ * by this point). Sharing storage/attempts with that lesson would also be
+ * wrong now that the case sets differ.
+ *
+ * "Oriented" = the edge's top sticker is the front (or back) centre's
+ * colour: it can always be inserted with L, U and R alone. "Unoriented"
+ * = the top sticker matches a side centre and the front sticker matches
+ * the front centre: it needs F (the hedgeslammer).
  */
 const ZETA_EDGES_STEP: AcademyStep = {
   id: "zeta-edges",
   title: "Edges",
   description:
-    "Edge at the top-front with its front sticker matching the front centre: goes right or left. If instead its " +
-    "front-colour sticker is on TOP — no amount of turning U lines it up the normal way — the sledgehammer inserts " +
-    "it directly.",
+    "Edge above the front face. If its top sticker matches the front centre (oriented), its front sticker matches " +
+    "the centre on the right or left, and a three-move insert sends it that way. If instead its front sticker " +
+    "matches the front centre (unoriented), the hedgeslammer inserts it directly.",
   // Corners aren't placed yet in this method — grey them all out so a
   // first-layer corner never reads as "should be solved" (see trainerMasks).
   view: "f2l-edges",
   algs: [
-    { id: "edge-right", name: "Goes right", alg: SECOND_LAYER.steps[0].algs[0].alg, required: true, description: "Top sticker matches the centre on the right." },
-    { id: "edge-left", name: "Goes left", alg: SECOND_LAYER.steps[0].algs[1].alg, required: true, description: "Top sticker matches the centre on the left." },
-    { id: "edge-unoriented-right", name: "Unoriented · right", alg: "R' F R F'", required: true, description: "Front-colour sticker on top, at the top-right. The sledgehammer, used directly." },
-    { id: "edge-unoriented-left", name: "Unoriented · left", alg: "L F' L' F", required: false, description: "Mirror of \"unoriented · right\" — the left sledgehammer." },
+    { id: "edge-right", name: "Oriented · goes right", alg: "R U' R'", required: true, description: "Top sticker matches the front centre, front sticker matches the centre on the right." },
+    { id: "edge-left", name: "Oriented · goes left", alg: "L' U L", required: true, description: "Top sticker matches the front centre, front sticker matches the centre on the left." },
+    { id: "edge-unoriented-right", name: "Unoriented · goes right", alg: "F R' F' R", required: true, description: "Front sticker matches the front centre, top sticker matches the centre on the right. The hedgeslammer." },
+    { id: "edge-unoriented-left", name: "Unoriented · goes left", alg: "F' L F L'", required: false, description: "Front sticker matches the front centre, top sticker matches the centre on the left. The left hedgeslammer." },
   ],
 };
 

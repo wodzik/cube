@@ -8,25 +8,21 @@
  *
  * Zeta Slotting is a genuinely DIFFERENT method from "Two first layers"
  * (Layer by layer's corner-first order), and has its own Academy lesson
- * (ZETA_SLOTTING, data/academy.ts) rather than sharing steps with it — its
- * edge step additionally covers the two "unoriented" sledgehammer cases,
- * whose setup disturbs a first-layer corner in passing (harmless here,
- * since corners aren't addressed yet either way, but would look like a
- * broken first layer under the corner-first method).
+ * (ZETA_SLOTTING, data/academy.ts) rather than sharing steps with it. With
+ * no corner to protect, its edge inserts are much shorter than the
+ * second-layer step's (R U' R', or the hedgeslammer for an unoriented
+ * edge) — and they disturb a first-layer corner in passing, which is why
+ * the demos hide every corner.
  *
- * The base two edge-insertion algorithms are still identical text to
- * "Layer by layer"'s second-layer step — sourced from SECOND_LAYER
- * (data/academy.ts) via helpers.academyAlg so the two guides can't drift
- * apart. The sledgehammer and corner-insertion algorithms come from
- * ZETA_SLOTTING the same way.
+ * All algorithms come from ZETA_SLOTTING via helpers.academyAlg, so guide
+ * and drill can't drift apart.
  */
 
 import type { Guide } from "./types";
 import { academyAlg, solveCase, SOLVED_SETUP } from "./helpers";
-import { SECOND_LAYER, ZETA_SLOTTING } from "../academy";
+import { ZETA_SLOTTING } from "../academy";
 
-const EDGE = (algId: string) => academyAlg("edges", algId, SECOND_LAYER);
-const SLEDGE = (algId: string) => academyAlg("zeta-edges", algId, ZETA_SLOTTING);
+const EDGE = (algId: string) => academyAlg("zeta-edges", algId, ZETA_SLOTTING);
 const CORNER = (algId: string) => academyAlg("zeta-corners", algId, ZETA_SLOTTING);
 
 export const ZETA_SLOTTING_GUIDE: Guide = {
@@ -57,22 +53,24 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
       title: "Insert the edges",
       eyebrow: "Step 1",
       blocks: [
-        { kind: "p", text: "With no corners in the way yet, this is identical to Layer by layer's second-layer step: find a non-yellow edge in the top layer, line its front sticker up with the matching centre, then send it right or left depending on which centre its top sticker matches." },
+        { kind: "p", text: "With no corners in the way yet, an edge goes in with a very short move. Find a non-yellow edge in the top layer and turn `U` until it sits above the front face. The corners are greyed out in the demos — they get disturbed in passing, and you'll deal with them in the next step." },
+        { kind: "p", text: "**Simple inserts: the top sticker matches the front centre.** The edge's front sticker matches the centre on the right or on the left — that tells you which way to send it." },
         {
           kind: "cases",
           cases: [
-            solveCase("edge-right", "Goes right", "Front sticker matches the front centre; the top sticker matches the centre on the right.", "The matching T at the front.", EDGE("edge-right"), "cross-edge", { note: "Same two triggers as Layer by layer's second-layer step." }),
-            solveCase("edge-left", "Goes left", "Front sticker matches the front centre; the top sticker matches the centre on the left.", "The matching T at the front.", EDGE("edge-left"), "cross-edge", { note: "The exact mirror of \"goes right\"." }),
+            solveCase("edge-right", "Goes right", "The edge is above the front face. Its top sticker matches the front centre, its front sticker matches the centre on the right.", "Slot at the front-right.", EDGE("edge-right"), "cross-edge", { note: "Three moves: `R` lifts the slot out of the way, `U'` brings the edge over, `R'` drops it in." }),
+            solveCase("edge-left", "Goes left", "The edge is above the front face. Its top sticker matches the front centre, its front sticker matches the centre on the left.", "Slot at the front-left.", EDGE("edge-left"), "cross-edge-left", { note: "The exact mirror of \"goes right\"." }),
           ],
         },
-        { kind: "p", text: "Sometimes neither side face shows the front colour at all — the edge's front-colour sticker is sitting on TOP instead, so no amount of turning U lines it up the normal way. The sledgehammer inserts it directly, no alignment needed." },
+        { kind: "p", text: "**Unoriented edges: the front sticker matches the front centre.** Now the top sticker is a side colour, so the edge is the wrong way round for the simple inserts — they would put it in flipped. The hedgeslammer from the Triggers section inserts it directly, right way round." },
         {
           kind: "cases",
           cases: [
-            solveCase("edge-unoriented-right", "Unoriented · right", "The edge sits at the top-right with its front-colour sticker on top, not on a side face.", "Slot at the front-right.", SLEDGE("edge-unoriented-right"), "cross-edge", { note: "The sledgehammer, used directly — no U alignment first." }),
-            solveCase("edge-unoriented-left", "Unoriented · left", "Mirrored: the edge sits at the top-left with its front-colour sticker on top.", "Slot at the front-left.", SLEDGE("edge-unoriented-left"), "cross-edge", { note: "The left sledgehammer." }),
+            solveCase("edge-unoriented-right", "Unoriented · goes right", "The edge is above the front face. Its front sticker matches the front centre, its top sticker matches the centre on the right.", "Slot at the front-right.", EDGE("edge-unoriented-right"), "cross-edge", { note: "The hedgeslammer, used directly — no `U` alignment beyond getting the edge above the front face." }),
+            solveCase("edge-unoriented-left", "Unoriented · goes left", "The edge is above the front face. Its front sticker matches the front centre, its top sticker matches the centre on the left.", "Slot at the front-left.", EDGE("edge-unoriented-left"), "cross-edge-left", { note: "The left hedgeslammer." }),
           ],
         },
+        { kind: "callout", tone: "tip", title: "Oriented or not?", text: ["An edge is **oriented** when its top sticker is the same colour as the front or back centre. An oriented edge can always be inserted with `L`, `U` and `R` moves alone — no `F` or `B`. An **unoriented** edge (top sticker matches a side centre) needs `F` or `B`, which is what the hedgeslammer does."] },
         { kind: "callout", tone: "note", title: "Edge already in the slot, but flipped", text: ["Insert any other top-layer non-yellow edge into that slot with one of the two triggers above — it kicks the wrong edge back out to the top, same fix as Layer by layer. With no corner there yet, ANY spare edge works, not just a yellow one."] },
         { kind: "practice", lessonId: "zeta-slotting", stepId: "zeta-edges", label: "Drill both inserts in the Academy" },
         { kind: "callout", tone: "checkpoint", title: "Checkpoint — cross plus four edges", text: ["All four middle-layer edges seated and correctly oriented. Every corner is still wherever it started — the top layer looks untouched, and that's exactly right."], demo: { setup: SOLVED_SETUP, alg: "", mask: "f2l", label: "Edges done — corners still to come" } },
@@ -93,7 +91,15 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
             solveCase("right", "White right", "The corner sits above its slot, white sticker pointing right.", "Slot at the front-right.", CORNER("right"), "f2l-pair", { note: "F2L 34 — the mirror-shaped sibling of \"white front\"." }),
           ],
         },
-        { kind: "callout", tone: "tip", title: "Left-hand version", text: ["Same three cases work on the front-left slot with the left sexy move family: `(U' L' U L)` repeated three times for \"white up\", and the mirrored 8-move algorithms for the other two."] },
+        { kind: "p", text: "**Left-hand versions.** The same three cases for the front-left slot — the mirror image of each algorithm, so the left hand does the work. Drill both sides so you never regrip to reach a slot." },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("left-up", "White up · left slot", "The corner sits above the front-left slot, white sticker on top.", "Slot at the front-left.", CORNER("left-up"), "f2l-pair", { note: "Left reverse sexy move, three times." }),
+            solveCase("left-front", "White front · left slot", "The corner sits above the front-left slot, white sticker pointing at you.", "Slot at the front-left.", CORNER("left-front"), "f2l-pair", { note: "The mirror of \"white front\"." }),
+            solveCase("left-left", "White left · left slot", "The corner sits above the front-left slot, white sticker pointing left.", "Slot at the front-left.", CORNER("left-left"), "f2l-pair", { note: "The mirror of \"white right\"." }),
+          ],
+        },
         { kind: "practice", lessonId: "zeta-slotting", stepId: "zeta-corners", label: "Drill the three corner cases in the Academy" },
         { kind: "callout", tone: "checkpoint", title: "Checkpoint — first two layers", text: ["Same finish line as Layer by layer: two full layers solved, every side showing two rows of its own colour under a mixed top row."], demo: { setup: SOLVED_SETUP, alg: "", mask: "f2l", label: "First two layers done" } },
       ],

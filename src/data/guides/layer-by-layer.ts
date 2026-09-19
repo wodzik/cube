@@ -35,14 +35,39 @@ export const LAYER_BY_LAYER_GUIDE: Guide = {
       blocks: [
         { kind: "p", text: "**Goal:** the four white edges on the bottom, forming a plus, with each edge's other colour matching the centre next to it. This is the one step with no algorithms — you work it out edge by edge, and it gets easier every solve." },
         { kind: "p", text: "The easiest route is in two stages. First make a **daisy**: get all four white edges around the yellow centre on top, white stickers facing up. Then turn each petal down onto the bottom." },
-        { kind: "p", text: "**Stage 1 — the daisy.** Find a white edge. Depending on where it is, one of these brings it to the top with white facing up. Only the white edges are shown in the demos; the rest of the cube is greyed out." },
+        { kind: "p", text: "**Stage 1 — the daisy.** Find a white edge and bring it to the top, white facing up, next to the yellow centre. If you ignore every other piece — nothing you've already placed needs protecting — a white edge gets there in **one move, or two at most**. The demos below show only the centres and that one white edge; the rest of the cube is greyed out." },
+        { kind: "p", text: "**One move: the edge is in the middle layer.** Turn the face that carries the edge's *coloured* sticker, in the direction that lifts the edge to the top — the white sticker rides up with it." },
         {
           kind: "cases",
           cases: [
-            solveCase("daisy-middle", "In the middle layer", "The white sticker faces front (or any side), the edge sits between two centres.", "Hold it at the front-right.", "R U R'", "cross", { note: "Turn the side face up (`R`), move the petal out of the way (`U`), turn the side back (`R'`) so you don't lose anything already on the bottom.", setup: "z2 F2 R U' R'" }),
-            solveCase("daisy-bottom-flipped", "On the bottom, white facing sideways", "The edge is already on the bottom layer, but its white sticker is on the side instead of underneath.", "Hold it at the front.", "F' R U R'", "cross", { note: "`F'` lifts it into the middle layer; then it's the case on the left.", setup: "z2 F2 R U' R' F" }),
-            solveCase("daisy-top-sideways", "On top, white facing sideways", "The edge is in the top layer but its white sticker points at you instead of up.", "Hold it at the front.", "F R U R'", "cross", { note: "`F` drops it into the middle layer; the rest is the middle-layer case.", setup: "z2 F2 R U' R' F'" }),
-            solveCase("daisy-bottom-wrong", "On the bottom, white down, wrong spot", "White faces down but the side colour doesn't match its centre.", "Hold it at the right.", "R2", "cross", { note: "A half turn brings it straight up as a petal.", setup: "z2 F2 U' R2" }),
+            solveCase("daisy-mid-right", "Middle layer, front-right", "The edge sits in the middle layer at the front-right. Its white sticker faces you, the other colour faces right.", undefined, "R", "white-edge-0", { note: "The coloured sticker is on the right face, so turn `R`: the edge rides up to the top.", setup: "z2 D R" }),
+            solveCase("daisy-mid-left", "Middle layer, front-left", "The edge sits in the middle layer at the front-left. Its white sticker faces you, the other colour faces left.", undefined, "L'", "white-edge-0", { note: "The mirror image: the coloured sticker is on the left face, so turn `L'`.", setup: "z2 D' L'" }),
+            solveCase("daisy-mid-front", "Middle layer, white facing sideways", "The edge sits in the middle layer at the front-left, but its white sticker points left; the other colour faces you.", undefined, "F", "white-edge-0", { note: "This time the coloured sticker is on the front face, so turn `F`.", setup: "z2 F" }),
+          ],
+        },
+        { kind: "p", text: "**Half turns count as one move.** An edge on the bottom layer with its white sticker facing down needs just one half turn of the face it's on:" },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("daisy-half-right", "Bottom, at the right", "The edge is on the bottom layer at the right, white facing down.", undefined, "R2", "white-edge-0", { setup: "z2 D" }),
+            solveCase("daisy-half-left", "Bottom, at the left", "The edge is on the bottom layer at the left, white facing down.", undefined, "L2", "white-edge-0", { setup: "z2 D'" }),
+            solveCase("daisy-half-front", "Bottom, at the front", "The edge is on the bottom layer at the front, white facing down.", undefined, "F2", "white-edge-0", { setup: "z2" }),
+          ],
+        },
+        { kind: "p", text: "**Two moves: white facing sideways at the top or bottom.** No single turn lifts these. Make the first move `F` or `F'` to drop the edge into the middle layer — that turns it into one of the one-move cases above — and finish with that move." },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("daisy-bottom-flipped", "On the bottom, white facing sideways", "The edge is on the bottom layer at the front, but its white sticker faces you instead of down.", undefined, "F' R", "white-edge-0", { note: "`F'` sends it to the middle layer at the front-right, white still facing you — the first one-move case, so `R` finishes it. Going the other way works just as well: `F`, then `L'`.", setup: "z2 D R F" }),
+            solveCase("daisy-top-sideways", "On top, white facing sideways", "The edge is in the top layer at the front, but its white sticker faces you instead of up.", undefined, "F R", "white-edge-0", { note: "`F` drops it into the middle layer at the front-right, white still facing you — then `R` lifts it. The mirror route: `F'`, then `L'`.", setup: "z2 D R F'" }),
+          ],
+        },
+        { kind: "p", text: "**When petals are in the way.** Once some petals are up, a plain lift would knock one of them back down. Turn `U` first to slide the petals aside, so the slot the edge is heading for is empty — every top edge is shown from here on." },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("daisy-blocked-one", "A petal in the way", "Three petals are up. The fourth white edge is in the middle layer at the front-right, white facing you — but `R` alone would push the petal above it out of the top layer.", undefined, "U' R", "cross", { note: "`U'` turns the top until the gap between the petals sits above the edge, then `R` lifts it into the gap. That's the daisy.", setup: "z2 R2 L2 B2 D U' R U" }),
+            solveCase("daisy-blocked-two", "Two moves, both in the way", "Three petals are up and the last white edge is on the bottom, white facing you. It needs `F'` then `R` — and each of them would push a petal out of the top layer.", undefined, "U' F' U' R", "cross", { note: "Clear the top before **each** lifting move: `U'` so the front-top slot is empty for `F'`, then `U'` again so the front-right one is empty for `R`.", setup: "z2 R2 L2 B2 D U' R U F U" }),
           ],
         },
         { kind: "p", text: "**Stage 2 — daisy to cross.** Take any petal. Turn the top (`U`) until the petal's **side** colour sits directly above the centre of the same colour. Then turn that face twice: the petal goes down onto the bottom, white facing down, side colour matching. Repeat for all four." },
@@ -51,6 +76,13 @@ export const LAYER_BY_LAYER_GUIDE: Guide = {
           cases: [
             solveCase("cross-aligned", "Petal above its centre", "The petal's side colour matches the centre right below it.", "Hold that side at the front.", "F2", "cross", { setup: "z2 F2" }),
             solveCase("cross-unaligned", "Petal above the wrong centre", "The petal's side colour doesn't match the centre below it.", undefined, "U' F2", "cross", { note: "Turn the top until it matches, then the half turn.", setup: "z2 F2 U" }),
+          ],
+        },
+        { kind: "p", text: "**A trickier daisy.** Sometimes no petal is lined up the easy way. Don't plan all four at once — do the same two-step rhythm once per petal: `U` until one petal is above its own centre, `F2` to send it down, then turn the whole cube (`y`) so the next centre faces you and repeat." },
+        {
+          kind: "cases",
+          cases: [
+            solveCase("cross-advanced", "All four petals, two swapped", "All four petals are up. Two of them sit above their own centres; the other two are swapped with each other.", undefined, "U F2 y U2 F2 y U F2 y F2", "cross", { note: "Each `F2` sends one petal down; the `y` between them brings the next centre to the front. The cube ends turned a quarter — that's fine, the cross is what matters.", setup: "z2 R2 U B2 U F2 U' L2" }),
           ],
         },
         { kind: "callout", tone: "checkpoint", title: "Checkpoint — white cross", text: ["A white plus on the bottom, and around the sides, each cross edge's colour matches the centre above it (green edge under the green centre, and so on). A white plus whose side colours don't match the centres is not a cross yet — turn the petals back up and redo those."], demo: { setup: SOLVED_SETUP, alg: "", mask: "cross", view: "bottom", label: "The finished cross, seen from below" } },

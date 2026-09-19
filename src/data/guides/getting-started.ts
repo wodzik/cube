@@ -95,6 +95,7 @@ export const GETTING_STARTED_GUIDE: Guide = {
       eyebrow: "Beyond the basics",
       blocks: [
         { kind: "p", text: "A lowercase letter turns **two layers together**: the face and the slice next to it. `r` is R plus the middle layer, in R's direction — the same as `R M'`. Wide turns are what make the OLL 28 / OLL 57 edge algorithms comfortable to perform." },
+        { kind: "p", text: "You'll also see wide turns written with a **w** after an uppercase letter: `Rw`, `Lw`, `Uw`, `Dw`, `Fw`, `Bw` (\"right wide\", \"left wide\" and so on). It's just another spelling — `Rw` is exactly `r`, and `Rw'` is `r'`. This app uses the lowercase form." },
         { kind: "demoGrid", columns: 3, demos: [loop("r"), loop("l"), loop("u"), loop("r'"), loop("l'"), loop("f")] },
       ],
     },
@@ -114,7 +115,7 @@ export const GETTING_STARTED_GUIDE: Guide = {
       eyebrow: "Building blocks",
       blocks: [
         { kind: "p", text: "A trigger is a short move combination that your hands learn as one unit. Most algorithms are just a few triggers glued together — once you know these, a 10-move algorithm reads as \"sexy move, sledgehammer\" instead of ten separate letters." },
-        { kind: "p", text: "Each one below is a 3-cycle: it moves three pieces around and leaves the rest alone, so repeating it 6 times brings the cube back to where it started — press play and watch it happen." },
+        { kind: "p", text: "Every trigger below returns the cube to exactly where it started if you perform it 6 times in a row — watch the demo play all six. That makes them ideal for practice: repeat one six times and the cube is back in the same state, ready for the next round. Hit **Try this** and connect your smart cube to drill it." },
         {
           kind: "cases",
           cases: [

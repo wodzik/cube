@@ -28,8 +28,10 @@ export type GuideMaskKind =
   | "cross"
   /** White layer (cross + corners) + centers. */
   | "first-layer"
-  /** White cross + the one front-right middle edge (F2L_PAIR.edge), plus every first-layer (white) corner — last-layer corners hidden. For "insert the edges" scenes (Zeta Slotting), where some first-layer corners may already be sitting there even though this method doesn't address them yet. */
+  /** White cross + the one front-right middle edge (F2L_PAIR.edge). Every corner hidden — for "insert the edges" scenes (Zeta Slotting), where corners aren't addressed yet and the edge algs disturb them in passing. */
   | "cross-edge"
+  /** Same as "cross-edge", for the front-left middle edge (F2L_PAIR_LEFT.edge). */
+  | "cross-edge-left"
   /** First two layers in color, last layer greyed out — cubing.js's "F2L" stickering look. */
   | "f2l"
   /** Same as "f2l" in the guides — kept as a distinct kind so the F2L guide can be re-styled later without touching layer-by-layer. */
@@ -42,7 +44,15 @@ export type GuideMaskKind =
   | "ll-corners"
   /** Whole last layer in full color. */
   | "ll"
-  | "full";
+  | "full"
+  /** Centres + ONE white edge (piece 0-3, the cubing.js index), everything else greyed — for "where does this one edge go" scenes. */
+  | SingleWhiteEdgeKind;
+
+export type SingleWhiteEdgeKind = `white-edge-${0 | 1 | 2 | 3}`;
+
+function isSingleWhiteEdge(kind: GuideMaskKind): kind is SingleWhiteEdgeKind {
+  return kind.startsWith("white-edge-");
+}
 
 const WHITE_EDGES = new Set([0, 1, 2, 3]);
 const WHITE_CORNERS = new Set([0, 1, 2, 3]);
@@ -51,12 +61,15 @@ const YELLOW_CORNERS = new Set([4, 5, 6, 7]);
 const MIDDLE_EDGES = new Set([8, 9, 10, 11]);
 /** Front-right slot in the z2 frame (see file comment). */
 const F2L_PAIR = { corner: 3, edge: 9 };
+/** Front-left slot in the z2 frame — the mirror of F2L_PAIR. */
+const F2L_PAIR_LEFT = { corner: 0, edge: 8 };
 
 const REG: FaceletMask = "regular";
 const OFF: FaceletMask = "ignored";
 
 export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
   const edge = (p: number): FaceletMask[] => {
+    if (isSingleWhiteEdge(kind)) return p === Number(kind.slice(-1)) ? [REG, REG] : [OFF, OFF];
     const yellow = YELLOW_EDGES.has(p);
     switch (kind) {
       case "full":
@@ -67,6 +80,8 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
         return WHITE_EDGES.has(p) ? [REG, REG] : [OFF, OFF];
       case "cross-edge":
         return WHITE_EDGES.has(p) || p === F2L_PAIR.edge ? [REG, REG] : [OFF, OFF];
+      case "cross-edge-left":
+        return WHITE_EDGES.has(p) || p === F2L_PAIR_LEFT.edge ? [REG, REG] : [OFF, OFF];
       case "f2l":
       case "f2l-pair":
         return yellow ? [OFF, OFF] : [REG, REG];
@@ -78,6 +93,7 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
     }
   };
   const corner = (p: number): FaceletMask[] => {
+    if (isSingleWhiteEdge(kind)) return [OFF, OFF, OFF];
     const yellow = YELLOW_CORNERS.has(p);
     switch (kind) {
       case "full":
@@ -85,10 +101,11 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
       case "ll-corners":
         return [REG, REG, REG];
       case "cross":
+      case "cross-edge":
+      case "cross-edge-left":
         return [OFF, OFF, OFF];
       case "first-layer":
         return WHITE_CORNERS.has(p) ? [REG, REG, REG] : [OFF, OFF, OFF];
-      case "cross-edge":
       case "f2l":
       case "f2l-pair":
         return yellow ? [OFF, OFF, OFF] : [REG, REG, REG];
@@ -108,4 +125,4 @@ export function guideMask(kind: GuideMaskKind): StickeringMaskOrbits {
 }
 
 /** Exported for tests — which pieces a mask kind is "about". */
-export const GUIDE_MASK_GROUPS = { WHITE_EDGES, WHITE_CORNERS, YELLOW_EDGES, YELLOW_CORNERS, MIDDLE_EDGES, F2L_PAIR };
+export const GUIDE_MASK_GROUPS = { WHITE_EDGES, WHITE_CORNERS, YELLOW_EDGES, YELLOW_CORNERS, MIDDLE_EDGES, F2L_PAIR, F2L_PAIR_LEFT };

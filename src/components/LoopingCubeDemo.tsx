@@ -9,9 +9,10 @@
  * TwistyPlayer has no loop/replay event to hook (see git history for the
  * investigation), so re-triggering playback periodically stands in for a
  * true infinite loop without reaching into cubing.js internals. The
- * restart is invisible for these demos: every rep of a single move looks
- * identical, so snapping back to the start mid-cycle reads as continuous
- * motion, not a jump.
+ * restart is invisible for single moves: every rep looks identical, so
+ * snapping back mid-cycle reads as continuous motion, not a jump. A demo
+ * with a finite `repeat` (triggers, which return to solved) instead plays
+ * the whole run before restarting, so the full cycle is seen.
  *
  * The player is only mounted while the demo is on screen (useInView) — a
  * guide page shows dozens of these at once.
@@ -31,12 +32,25 @@ interface LoopingCubeDemoProps {
   className?: string;
 }
 
-/** Comfortably shorter than any repeat*move-count could plausibly take to play out, so a restart always lands well before playback would otherwise idle out. */
+/** Restart period for the open-ended loops (single moves, repeat 60): comfortably shorter than the full repeat, and a multiple of 4 quarter turns so the snap back looks continuous. */
 const RESTART_INTERVAL_MS = 8000;
+/** A demo with a finite `repeat` (a trigger that returns to solved after 6) restarts only once the whole run has played, plus this pause. */
+const FULL_RUN_PAUSE_MS = 1500;
+/** TwistyPlayer plays a quarter turn in 1s and a half turn in 1.5s at tempoScale 1 (see cubing.js AlgDuration). */
+const MS_PER_MOVE = 1000;
+const MS_PER_HALF_TURN = 1500;
+const OPEN_ENDED_REPEAT = 60;
+
+function playbackMs(alg: string, repeat: number): number {
+  const once = alg.split(/\s+/).filter(Boolean).reduce((ms, move) => ms + (move.endsWith("2") ? MS_PER_HALF_TURN : MS_PER_MOVE), 0);
+  return once * repeat;
+}
 
 function Player({ alg, setupAlg, repeat, mask, cameraLatitude }: Omit<LoopingCubeDemoProps, "label" | "className">) {
   const cubeRef = useRef<CubeVisualisationRef>(null);
-  const repeatedAlg = useMemo(() => Array(Math.max(repeat ?? 60, 1)).fill(alg).join(" "), [alg, repeat]);
+  const repeats = Math.max(repeat ?? OPEN_ENDED_REPEAT, 1);
+  const repeatedAlg = useMemo(() => Array(repeats).fill(alg).join(" "), [alg, repeats]);
+  const restartMs = repeats < OPEN_ENDED_REPEAT ? Math.max(RESTART_INTERVAL_MS, playbackMs(alg, repeats) + FULL_RUN_PAUSE_MS) : RESTART_INTERVAL_MS;
 
   useEffect(() => {
     const restart = () => {
@@ -44,9 +58,9 @@ function Player({ alg, setupAlg, repeat, mask, cameraLatitude }: Omit<LoopingCub
       cubeRef.current?.play();
     };
     restart();
-    const intervalId = setInterval(restart, RESTART_INTERVAL_MS);
+    const intervalId = setInterval(restart, restartMs);
     return () => clearInterval(intervalId);
-  }, [repeatedAlg, setupAlg]);
+  }, [repeatedAlg, setupAlg, restartMs]);
 
   return (
     <CubeVisualisation
