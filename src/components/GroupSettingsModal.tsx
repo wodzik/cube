@@ -11,6 +11,8 @@ import { createPortal } from "react-dom";
 import { X, Trash2, Download } from "lucide-react";
 import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { DisplayConfigFields } from "./DisplayConfigFields";
+import { useT } from "../i18n/useT";
+import { categoryLabel } from "../i18n/labels";
 
 const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
 
@@ -44,6 +46,7 @@ const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
 export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, onExport, onClose }: GroupSettingsModalProps) {
+  const { t } = useT();
   const [name, setName] = useState(group?.name ?? "");
   const [config, setConfig] = useState<DisplayConfig>(group?.displayConfig ?? DEFAULT_DISPLAY_CONFIG);
   const [category, setCategory] = useState<AlgCategory>(group?.category ?? defaultCategory);
@@ -74,7 +77,7 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
-          <h2 className="text-white font-semibold text-base">{group ? "Group settings" : "New group"}</h2>
+          <h2 className="text-white font-semibold text-base">{group ? t("groupModal.title") : t("groups.new")}</h2>
           <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-gray-200 transition-colors">
             <X size={18} />
           </button>
@@ -82,33 +85,33 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
-            <p className="text-xs font-semibold text-gray-400 mb-1.5">Name</p>
+            <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("common.name")}</p>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. ZBLL"
+              placeholder={t("groupModal.namePlaceholder")}
               className={inputClass}
               autoFocus
             />
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-gray-400 mb-1.5">Preview algorithm</p>
+            <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("groupModal.preview")}</p>
             <input
               type="text"
               value={previewAlg}
               onChange={(e) => setPreviewAlg(e.target.value)}
-              placeholder="e.g. R U R' U R U2 R' (optional — blank shows a solved cube)"
+              placeholder={t("groupModal.previewPlaceholder")}
               className={`${inputClass} font-mono`}
             />
             <p className="text-[11px] text-gray-600 mt-1">
-              A representative case for this group's own tab/folder-card icon — same idea as a case card's preview.
+              {t("groupModal.previewHint")}
             </p>
           </div>
 
           <div className="border-t border-white/[0.06] pt-4">
-            <p className="text-xs font-semibold text-gray-400 mb-1.5">Category</p>
+            <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("list.category")}</p>
             <div className="flex gap-1.5">
               {CATEGORIES.map((c) => (
                 <button
@@ -120,7 +123,7 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                   }`}
                   style={category === c ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                 >
-                  {c}
+                  {categoryLabel(c)}
                 </button>
               ))}
             </div>
@@ -135,7 +138,7 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                 className="w-3.5 h-3.5 rounded cursor-pointer"
                 style={{ accentColor: "var(--accent)" }}
               />
-              Organize as subgroups (folders), e.g. ZBLL split by top pattern
+              {t("groupModal.subgroups")}
             </label>
           )}
 
@@ -148,12 +151,12 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                 className="w-3.5 h-3.5 rounded cursor-pointer"
                 style={{ accentColor: "var(--accent)" }}
               />
-              Available in Attack
+              {t("groupModal.attack")}
             </label>
           )}
           {hasSubgroups && (
             <p className="text-[11px] text-gray-600 border-t border-white/[0.06] pt-4">
-              Attack availability is set per subgroup — open a subgroup's own settings (the gear on its folder card) to opt it in.
+              {t("groupModal.attackPerSubgroup")}
             </p>
           )}
 
@@ -167,7 +170,7 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                 onClick={onExport}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 hover:text-gray-200 rounded-xl transition-colors"
               >
-                <Download size={14} /> Export
+                <Download size={14} /> {t("common.export")}
               </button>
             )}
             {onDelete && (
@@ -183,20 +186,20 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                   confirmDelete ? "text-red-400 bg-red-500/10" : "text-gray-500 hover:text-red-400"
                 }`}
               >
-                <Trash2 size={14} /> {confirmDelete ? "Click again to delete" : "Delete group"}
+                <Trash2 size={14} /> {confirmDelete ? t("common.clickToDelete") : t("groupModal.delete")}
               </button>
             )}
           </div>
           <div className="flex gap-2">
             <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors">
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               onClick={() => canSave && onSave(name.trim(), config, hasSubgroups, previewAlg.trim(), availableInAttack, category)}
               disabled={!canSave}
               className="btn-primary"
             >
-              Save
+              {t("common.save")}
             </button>
           </div>
         </div>

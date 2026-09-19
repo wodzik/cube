@@ -9,16 +9,18 @@ import { useState } from "react";
 import type { DisplayConfig, StickeringConfig } from "../types/algorithm";
 import type { VisualizationMode } from "../types/cube";
 import { MaskPicker } from "./MaskPicker";
+import { useT } from "../i18n/useT";
+import type { MessageKey } from "../i18n/i18n";
 
 interface DisplayConfigFieldsProps {
   config: DisplayConfig;
   onChange: (next: DisplayConfig) => void;
 }
 
-const VISUALIZATIONS: { id: VisualizationMode; label: string }[] = [
-  { id: "3D", label: "3D" },
-  { id: "2D", label: "2D (flat net)" },
-  { id: "experimental-2D-LL", label: "2D last layer" },
+const VISUALIZATIONS: { id: VisualizationMode; label: MessageKey | null }[] = [
+  { id: "3D", label: null },
+  { id: "2D", label: "display.viz2d" },
+  { id: "experimental-2D-LL", label: "display.vizLL" },
 ];
 
 const NAMED_PRESETS = ["full", "OLL", "PLL", "F2L", "CLL", "ELL", "COLL", "WV", "VLS", "ZBLL", "OLLCP"];
@@ -27,6 +29,7 @@ const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
 export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsProps) {
+  const { t } = useT();
   const [useMask, setUseMask] = useState(config.stickering.kind === "mask");
 
   const setStickering = (stickering: StickeringConfig) => onChange({ ...config, stickering });
@@ -34,8 +37,8 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-semibold text-gray-400 mb-1.5">Card visualization</p>
-        <p className="text-[11px] text-gray-600 mb-1.5">Shown on the compact case/subgroup cards in the list.</p>
+        <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("display.cardViz")}</p>
+        <p className="text-[11px] text-gray-600 mb-1.5">{t("display.cardViz.hint")}</p>
         <div className="flex gap-1.5">
           {VISUALIZATIONS.map((v) => (
             <button
@@ -47,15 +50,15 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
                   : "border-white/[0.06] bg-white/[0.02] text-gray-300 hover:border-white/15"
               }`}
             >
-              {v.label}
+              {v.label ? t(v.label) : v.id}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-400 mb-1.5">Cube preview visualization</p>
-        <p className="text-[11px] text-gray-600 mb-1.5">Shown on the big cube during practice/editing.</p>
+        <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("display.cubeViz")}</p>
+        <p className="text-[11px] text-gray-600 mb-1.5">{t("display.cubeViz.hint")}</p>
         <div className="flex gap-1.5">
           {VISUALIZATIONS.map((v) => (
             <button
@@ -67,17 +70,17 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
                   : "border-white/[0.06] bg-white/[0.02] text-gray-300 hover:border-white/15"
               }`}
             >
-              {v.label}
+              {v.label ? t(v.label) : v.id}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-400 mb-1.5">Camera angle</p>
+        <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("display.camera")}</p>
         <div className="flex gap-2">
           <label className="flex-1 text-[11px] text-gray-500">
-            Latitude
+            {t("display.latitude")}
             <input
               type="number"
               value={config.cameraLatitude}
@@ -86,7 +89,7 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
             />
           </label>
           <label className="flex-1 text-[11px] text-gray-500">
-            Longitude
+            {t("display.longitude")}
             <input
               type="number"
               value={config.cameraLongitude}
@@ -99,7 +102,7 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
 
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <p className="text-xs font-semibold text-gray-400">Stickering</p>
+          <p className="text-xs font-semibold text-gray-400">{t("display.stickering")}</p>
           <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.03] p-0.5">
             <button
               onClick={() => {
@@ -110,7 +113,7 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
                 !useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
               }`}
             >
-              Named
+              {t("display.named")}
             </button>
             <button
               onClick={() => {
@@ -121,7 +124,7 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
                 useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
               }`}
             >
-              Mask
+              {t("display.mask")}
             </button>
           </div>
         </div>
@@ -150,7 +153,7 @@ export function DisplayConfigFields({ config, onChange }: DisplayConfigFieldsPro
               type="text"
               value={config.stickering.kind === "named" ? config.stickering.value : ""}
               onChange={(e) => setStickering({ kind: "named", value: e.target.value })}
-              placeholder="or type a scheme"
+              placeholder={t("display.schemePlaceholder")}
               className={`${inputClass} flex-1 min-w-[8rem]`}
             />
           </div>

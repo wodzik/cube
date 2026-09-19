@@ -10,6 +10,8 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { MASK_PIECE_GROUPS, CENTER_GROUPS, buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
 import type { StickeringConfig } from "../types/algorithm";
+import { useT } from "../i18n/useT";
+import { pieceGroupLabel, centerGroupLabel } from "../i18n/labels";
 
 type MaskConfig = Extract<StickeringConfig, { kind: "mask" }>;
 
@@ -19,6 +21,7 @@ interface MaskPickerProps {
 }
 
 export function MaskPicker({ value, onChange }: MaskPickerProps) {
+  const { t } = useT();
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(value.rawOverride));
   const [jsonText, setJsonText] = useState(() =>
     JSON.stringify(value.rawOverride ?? buildMaskFromPieceGroups(value.pieceGroups, value.showCenters, value.hiddenCenters), null, 2)
@@ -44,7 +47,7 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
       setJsonError(null);
       onChange({ ...value, rawOverride: parsed });
     } catch {
-      setJsonError("Not valid JSON.");
+      setJsonError(t("mask.invalidJson"));
     }
   };
 
@@ -68,12 +71,12 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
               }`}
               style={active ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
             >
-              {g.label}
+              {pieceGroupLabel(g)}
             </button>
           );
         })}
         {value.pieceGroups.length === 0 && !value.rawOverride && (
-          <p className="text-[11px] text-gray-600 self-center">Pick at least one, or use the JSON override below.</p>
+          <p className="text-[11px] text-gray-600 self-center">{t("mask.pickOne")}</p>
         )}
       </div>
 
@@ -88,11 +91,11 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
           onChange={(e) => onChange({ ...value, showCenters: e.target.checked })}
           className="accent-[var(--accent)]"
         />
-        Show centers (don't dim)
+        {t("mask.showCenters")}
       </label>
 
       <p className={`mt-2.5 text-[11px] text-gray-500 ${value.rawOverride ? "opacity-40 pointer-events-none" : ""}`}>
-        Hide individual centers (overrides "Show centers" per face):
+        {t("mask.hideCenters")}
       </p>
       <div className={`flex flex-wrap gap-1.5 mt-1 ${value.rawOverride ? "opacity-40 pointer-events-none" : ""}`}>
         {CENTER_GROUPS.map((g) => {
@@ -106,7 +109,7 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
               }`}
               style={active ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
             >
-              {g.label}
+              {centerGroupLabel(g)}
             </button>
           );
         })}
@@ -117,7 +120,7 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
         className="flex items-center gap-1 mt-3 text-[11px] font-semibold text-gray-500 hover:text-gray-300 transition-colors"
       >
         {advancedOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        Advanced: edit mask JSON{value.rawOverride ? " (active)" : ""}
+        {value.rawOverride ? t("mask.advancedActive") : t("mask.advanced")}
       </button>
 
       {advancedOpen && (
@@ -135,11 +138,11 @@ export function MaskPicker({ value, onChange }: MaskPickerProps) {
           {jsonError && <p className="text-[11px] text-red-400">{jsonError}</p>}
           <div className="flex gap-2">
             <button onClick={applyJson} className="btn-secondary text-xs">
-              Apply override
+              {t("mask.apply")}
             </button>
             {value.rawOverride && (
               <button onClick={clearOverride} className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                Clear override (use chips above)
+                {t("mask.clear")}
               </button>
             )}
           </div>

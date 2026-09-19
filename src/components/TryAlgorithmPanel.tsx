@@ -43,11 +43,13 @@ import { parseDecoratedAlg } from "../data/academy";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import type { StickeringConfig } from "../types/algorithm";
 import type { VisualizationMode } from "../types/cube";
+import { useT } from "../i18n/useT";
+import type { MessageKey } from "../i18n/i18n";
 
-const VISUALIZATIONS: { id: VisualizationMode; label: string }[] = [
-  { id: "3D", label: "3D" },
-  { id: "2D", label: "2D (flat net)" },
-  { id: "experimental-2D-LL", label: "2D last layer" },
+const VISUALIZATIONS: { id: VisualizationMode; label: MessageKey | null }[] = [
+  { id: "3D", label: null },
+  { id: "2D", label: "display.viz2d" },
+  { id: "experimental-2D-LL", label: "display.vizLL" },
 ];
 
 const NAMED_PRESETS = ["full", "OLL", "PLL", "F2L", "CLL", "ELL", "COLL", "WV", "VLS", "ZBLL", "OLLCP"];
@@ -61,6 +63,7 @@ function tokenizeAndValidate(text: string): { tokens: string[]; invalid: string[
 }
 
 export function TryAlgorithmPanel() {
+  const { t } = useT();
   const [algInput, setAlgInput] = useState("");
   const [setupInput, setSetupInput] = useState("");
   const [solvesTheCube, setSolvesTheCube] = useState(false);
@@ -146,30 +149,30 @@ export function TryAlgorithmPanel() {
       </div>
 
       <div className="flex-1 px-4 sm:px-6 py-4 max-w-2xl">
-        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Setup moves</label>
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">{t("try.setup")}</label>
         <input
           type="text"
           value={setupInput}
           onChange={(e) => setSetupInput(e.target.value)}
-          placeholder="Optional — moves applied before the algorithm, e.g. a scramble"
+          placeholder={t("try.setupPlaceholder")}
           spellCheck={false}
           className={inputClass}
         />
         {invalidSetupTokens.length > 0 && (
-          <p className="text-xs text-red-400 mt-1.5">Not valid cube notation: {invalidSetupTokens.join(" ")}</p>
+          <p className="text-xs text-red-400 mt-1.5">{t("try.invalidNotation", { moves: invalidSetupTokens.join(" ") })}</p>
         )}
 
-        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">Algorithm</label>
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">{t("common.algorithm")}</label>
         <textarea
           value={algInput}
           onChange={(e) => setAlgInput(e.target.value)}
-          placeholder="e.g. R U R' U' R' F R2 U' R' U' R U R' F'"
+          placeholder={t("try.algPlaceholder")}
           rows={3}
           spellCheck={false}
           className={`${inputClass} resize-none`}
         />
         {invalidAlgTokens.length > 0 && (
-          <p className="text-xs text-red-400 mt-1.5">Not valid cube notation: {invalidAlgTokens.join(" ")}</p>
+          <p className="text-xs text-red-400 mt-1.5">{t("try.invalidNotation", { moves: invalidAlgTokens.join(" ") })}</p>
         )}
 
         <label className="flex items-center gap-2 mt-3 text-xs text-gray-300 cursor-pointer select-none">
@@ -179,12 +182,12 @@ export function TryAlgorithmPanel() {
             onChange={(e) => setSolvesTheCube(e.target.checked)}
             className="accent-[var(--accent)]"
           />
-          This algorithm solves the cube (start scrambled, end solved — instead of starting solved)
+          {t("try.solvesCube")}
         </label>
 
         <div className="flex items-center gap-2 mt-3">
           <button onClick={clearAll} disabled={!algInput && !setupInput} className="btn-secondary text-xs">
-            <RotateCcw size={12} /> Clear
+            <RotateCcw size={12} /> {t("try.clear")}
           </button>
         </div>
 
@@ -193,13 +196,13 @@ export function TryAlgorithmPanel() {
           className="flex items-center gap-1 mt-5 text-xs font-semibold text-gray-400 hover:text-gray-200 transition-colors"
         >
           {displayOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          Display: visualization, camera, stickering
+          {t("try.display")}
         </button>
 
         {displayOpen && (
           <div className="mt-3 space-y-4">
             <div>
-              <p className="text-xs font-semibold text-gray-400 mb-1.5">Visualization</p>
+              <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("try.visualization")}</p>
               <div className="flex gap-1.5">
                 {VISUALIZATIONS.map((v) => (
                   <button
@@ -211,17 +214,17 @@ export function TryAlgorithmPanel() {
                         : "border-white/[0.06] bg-white/[0.02] text-gray-300 hover:border-white/15"
                     }`}
                   >
-                    {v.label}
+                    {v.label ? t(v.label) : v.id}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-gray-400 mb-1.5">Camera angle</p>
+              <p className="text-xs font-semibold text-gray-400 mb-1.5">{t("display.camera")}</p>
               <div className="flex gap-2">
                 <label className="flex-1 text-[11px] text-gray-500">
-                  Latitude
+                  {t("display.latitude")}
                   <input
                     type="number"
                     value={cameraLatitude}
@@ -230,7 +233,7 @@ export function TryAlgorithmPanel() {
                   />
                 </label>
                 <label className="flex-1 text-[11px] text-gray-500">
-                  Longitude
+                  {t("display.longitude")}
                   <input
                     type="number"
                     value={cameraLongitude}
@@ -243,7 +246,7 @@ export function TryAlgorithmPanel() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs font-semibold text-gray-400">Stickering</p>
+                <p className="text-xs font-semibold text-gray-400">{t("display.stickering")}</p>
                 <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.03] p-0.5">
                   <button
                     onClick={() => {
@@ -254,7 +257,7 @@ export function TryAlgorithmPanel() {
                       !useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
                     }`}
                   >
-                    Named
+                    {t("display.named")}
                   </button>
                   <button
                     onClick={() => {
@@ -294,7 +297,7 @@ export function TryAlgorithmPanel() {
                     type="text"
                     value={stickering.kind === "named" ? stickering.value : ""}
                     onChange={(e) => setStickering({ kind: "named", value: e.target.value })}
-                    placeholder="or type a scheme"
+                    placeholder={t("display.schemePlaceholder")}
                     className={`${inputClass} flex-1 min-w-[8rem] py-1.5`}
                   />
                 </div>
@@ -309,8 +312,7 @@ export function TryAlgorithmPanel() {
         )}
 
         <p className="text-[11px] text-gray-600 mt-4">
-          Press play or step through the moves with the controls under the cube. Drag the cube to change the view.
-          Trigger grouping ("(...)") is accepted and ignored for playback.
+          {t("try.hint")}
         </p>
       </div>
     </div>

@@ -33,6 +33,7 @@ import { ConnectionPanel } from "./ConnectionPanel";
 import { TimerDisplay } from "./TimerDisplay";
 import type { SessionConfig } from "../types/session";
 import type { DisplayConfig } from "../types/algorithm";
+import { useT } from "../i18n/useT";
 
 const TEST_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -59,6 +60,7 @@ export function VariantTest(props: VariantTestProps) {
 }
 
 function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }: VariantTestProps) {
+  const { t } = useT();
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const [attemptsMs, setAttemptsMs] = useState<number[]>([]);
@@ -134,11 +136,11 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
   const hintText = !cube.connected
-    ? "Connect your cube to try this variant"
+    ? t("variantTest.connect")
     : state.phase === "setup"
-      ? "Make a move on the cube to start"
+      ? t("variantTest.start")
       : state.phase === "done"
-        ? "Nice — resetting for another go…"
+        ? t("variantTest.again")
         : null;
 
   return (
@@ -146,9 +148,9 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
       <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-white font-semibold text-base">Test variant — {variantName}</h2>
+            <h2 className="text-white font-semibold text-base">{t("variantTest.title", { variant: variantName })}</h2>
             <p className="text-gray-500 text-xs mt-0.5">
-              {caseName} · attempts here are not saved to its stats
+              {t("variantTest.notSaved", { case: caseName })}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -160,7 +162,7 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
         </div>
 
         <div className="p-5 border-b border-white/[0.06]">
-          <MoveSequenceDisplay moves={tokens} progress={progress} completeText="Variant complete!" />
+          <MoveSequenceDisplay moves={tokens} progress={progress} completeText={t("variantTest.complete")} />
         </div>
 
         <div className="flex flex-col sm:flex-row flex-1 overflow-y-auto">
