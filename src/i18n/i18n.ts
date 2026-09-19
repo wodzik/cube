@@ -102,3 +102,12 @@ export function tn(base: PluralBase, count: number, params?: Params, lang: Lang 
 
 /** Message keys that end in `.other` are plural bases: "solves.count.other" → "solves.count". */
 export type PluralBase = { [K in MessageKey]: K extends `${infer B}.other` ? B : never }[MessageKey];
+
+/** Locale-aware date/time in the app language (not the browser's), e.g. formatDate(ms, { month: "short", day: "numeric" }). */
+export function formatDate(epochMs: number, options?: Intl.DateTimeFormatOptions, lang: Lang = current): string {
+  return new Date(epochMs).toLocaleDateString(lang, options);
+}
+
+export function formatTime(epochMs: number, options?: Intl.DateTimeFormatOptions, lang: Lang = current): string {
+  return new Date(epochMs).toLocaleTimeString(lang, options);
+}

@@ -34,7 +34,7 @@ import { SolveControls } from "../components/SolveControls";
 import { StageStepper } from "../components/StageStepper";
 import { SolveAnalysis } from "../components/SolveAnalysis";
 import { SolveSummary } from "../components/SolveSummary";
-import { recordFluency, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
+import { recordFluency } from "../logic/stageDetection/fluency";
 import { CompactRecentList } from "../components/CompactRecentList";
 import { SessionPicker, SessionEditModal } from "../components/SessionManager";
 import { CaseViewToggles } from "../components/CaseViewToggles";
@@ -48,6 +48,8 @@ import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { formatTimeMs, formatRelativeTime } from "../logic/statistics";
+import { formatDate, t } from "../i18n/i18n";
+import { useT } from "../i18n/useT";
 import {
   CUSTOM_SCRAMBLES_SESSION_NAME,
   deleteSessionAndSolves,
@@ -63,17 +65,18 @@ import {
 
 function buildStartHint(methods: readonly StartMethod[]): string {
   const labels: string[] = [];
-  if (methods.includes("cube-move")) labels.push("make a move");
-  if (methods.includes("spacebar")) labels.push("press space");
-  if (methods.includes("timer-device")) labels.push("start the timer");
+  if (methods.includes("cube-move")) labels.push(t("solve.hint.makeMove"));
+  if (methods.includes("spacebar")) labels.push(t("solve.hint.pressSpace"));
+  if (methods.includes("timer-device")) labels.push(t("solve.hint.startTimer"));
   if (labels.length === 0) return "";
   const text =
     labels.length === 1
       ? labels[0]
       : labels.length === 2
-        ? `${labels[0]} or ${labels[1]}`
-        : `${labels.slice(0, -1).join(", ")}, or ${labels[labels.length - 1]}`;
-  return `${text[0].toUpperCase()}${text.slice(1)} to begin`;
+        ? t("solve.hint.or2", { a: labels[0], b: labels[1] })
+        : t("solve.hint.or3", { list: labels.slice(0, -1).join(", "), last: labels[labels.length - 1] });
+  const sentence = t("solve.hint.toBegin", { text });
+  return `${sentence[0].toUpperCase()}${sentence.slice(1)}`;
 }
 
 type SolveSortKey = "nr" | "time" | "moves" | "tps" | "fluency";
@@ -273,6 +276,7 @@ function SolvePageInner({
   onDeleteSession,
   onSessionsChanged,
 }: SolvePageInnerProps) {
+  const { t, tn } = useT();
   const { state, submitCubeMove, startInspection, setTarget, confirmManualSetup } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const viewPrefs = useCaseViewPrefs(false, "solve");
@@ -503,12 +507,12 @@ function SolvePageInner({
   function applyCustomScramble() {
     const tokens = pasteInput.trim().split(/\s+/).filter(Boolean);
     if (tokens.length === 0) {
-      setPasteError("Enter at least one move.");
+      setPasteError(t("solve.paste.empty"));
       return;
     }
     const invalid = tokens.filter((t) => !parseMove(t));
     if (invalid.length > 0) {
-      setPasteError(`Not valid cube notation: ${invalid.join(" ")}`);
+      setPasteError(t("solve.paste.invalid", { moves: invalid.join(" ") }));
       return;
     }
     isCustomScrambleRef.current = true;
@@ -701,18 +705,18 @@ function SolvePageInner({
   const hintText =
     state.phase === "setup"
       ? session.startingStage === "scratch"
-        ? "Perform the scramble shown above"
-        : "Set up your cube by hand, then tap Ready"
+        ? t("solve.hint.scramble")
+        : t("solve.hint.manualSetup")
       : state.phase === "ready" || state.phase === "inspecting"
         ? pressState === "armed"
-          ? "Release to start!"
+          ? t("solve.hint.release")
           : pressState === "holding"
-            ? "Keep holding…"
+            ? t("solve.hint.holding")
             : buildStartHint(state.config.startMethod)
         : state.phase === "done"
           ? session.moveCountOnly
-            ? `${moveCount} moves`
-            : `${moveCount} moves · ${tps ? tps.toFixed(2) : "—"} TPS`
+            ? tn("count.moves", moveCount)
+            : t("solve.movesTps", { moves: tn("count.moves", moveCount), tps: tps ? tps.toFixed(2) : "—" })
           : null;
 
   // The scramble notation is only useful while it's actually being
@@ -729,7 +733,7 @@ function SolvePageInner({
       layout="side"
       header={
         <div className="flex items-center gap-3 w-full">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Speed Solve</span>
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{t("solve.title")}</span>
           <div className="ml-auto flex items-center gap-2">
             <SessionPicker
               sessions={sessions}
@@ -757,13 +761,13 @@ function SolvePageInner({
       onToggleMask={toggleMaskMoves}
       showRefresh
       onRefresh={startNextAttempt}
-      loadingText={isGenerating ? "Generating scramble…" : (scrambleError ?? undefined)}
+      loadingText={isGenerating ? t("solve.generating") : (scrambleError ?? undefined)}
       sequenceTop={
         // While the previous solve's summary is still up, make it obvious
         // the bar already shows the NEXT attempt's scramble — disappears
         // together with the summary on the first scrambling move.
         summaryRecord && state.phase === "setup" ? (
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 px-1">Next scramble</p>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 px-1">{t("solve.nextScramble")}</p>
         ) : undefined
       }
       sequenceTrailing={
@@ -774,7 +778,7 @@ function SolvePageInner({
               setPasteInput("");
               setPasteError(null);
             }}
-            title="Paste or type a custom scramble"
+            title={t("solve.paste.title")}
             className="control-button"
           >
             <ClipboardPaste size={20} />
@@ -797,14 +801,14 @@ function SolvePageInner({
                   if (e.key === "Enter") applyCustomScramble();
                   if (e.key === "Escape") setIsPasteOpen(false);
                 }}
-                placeholder="Paste or type a scramble, e.g. R U2 R' F D2…"
+                placeholder={t("solve.paste.placeholder")}
                 className="flex-1 bg-gray-950/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
               <button onClick={applyCustomScramble} disabled={!pasteInput.trim()} className="btn-primary py-2">
-                <CheckCircle2 size={13} /> Apply
+                <CheckCircle2 size={13} /> {t("solve.paste.apply")}
               </button>
               <button onClick={() => setIsPasteOpen(false)} className="btn-secondary py-2">
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
             {pasteError && <p className="px-3 pb-3 text-xs text-red-400">{pasteError}</p>}
@@ -835,9 +839,9 @@ function SolvePageInner({
             <button
               onClick={resetAttempt}
               className="btn-secondary text-xs"
-              title="Restart this scramble from the beginning"
+              title={t("solve.reset.title")}
             >
-              <RotateCcw size={13} /> Reset
+              <RotateCcw size={13} /> {t("solve.reset")}
             </button>
           )}
           <SolveControls
@@ -865,11 +869,11 @@ function SolvePageInner({
             className="btn-secondary text-xs"
             title={
               session.startingStage === "scratch"
-                ? "Skip matching the shown scramble exactly — use whatever's been scrambled by hand so far"
-                : "Lock in the position you've just set up by hand as the start of this attempt"
+                ? t("solve.ready.titleScratch")
+                : t("solve.ready.title")
             }
           >
-            <CheckCircle2 size={13} /> {session.startingStage === "scratch" ? "Scrambled by hand — ready" : "Ready"}
+            <CheckCircle2 size={13} /> {session.startingStage === "scratch" ? t("solve.readyScratch") : t("solve.ready")}
           </button>
         ) : undefined
       }
@@ -882,11 +886,11 @@ function SolvePageInner({
       cubeSetupAlg=""
       timesMs={sessionTimesMs}
       moveCounts={sessionMoveCounts}
-      statsLabel={`Session: ${session.name}`}
+      statsLabel={t("solve.statsLabel", { name: session.name })}
       leftAside={
         solves.length > 0 ? (
           <CompactRecentList
-            title="Recent solves"
+            title={t("solve.recent")}
             items={sortedSolves.slice(0, 25)}
             keyOf={(e) => e.record.id}
             expanded={solvesExpanded}
@@ -899,7 +903,7 @@ function SolvePageInner({
               >
                 <span className="text-sm font-mono tabular-nums text-gray-600 w-9 shrink-0">#{e.nr}</span>
                 <span className="text-base font-mono tabular-nums text-white flex-1">
-                  {session.moveCountOnly ? `${e.record.moveCount} mv` : formatTimeMs(e.record.timeMs)}
+                  {session.moveCountOnly ? t("solve.mv", { n: e.record.moveCount }) : formatTimeMs(e.record.timeMs)}
                 </span>
               </button>
             )}
@@ -907,7 +911,7 @@ function SolvePageInner({
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center gap-3 pb-3 shrink-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                    <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("solve.perPage")}</span>
                     <select
                       value={itemsPerPage}
                       onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
@@ -915,12 +919,12 @@ function SolvePageInner({
                     >
                       {PAGE_SIZE_OPTIONS.map((n) => (
                         <option key={n} value={n}>
-                          {n === "all" ? "All" : n}
+                          {n === "all" ? t("solve.all") : n}
                         </option>
                       ))}
                     </select>
                   </div>
-                  <span className="ml-auto text-[10px] text-gray-600">Click a column to sort</span>
+                  <span className="ml-auto text-[10px] text-gray-600">{t("solve.clickToSort")}</span>
                 </div>
                 <div className="flex-1 min-h-0 overflow-auto">
                   <table className="w-full border-collapse">
@@ -928,31 +932,31 @@ function SolvePageInner({
                       <tr className="border-b border-gray-800">
                         <SortableTh label="#" sortKey="nr" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
                         <SortableTh
-                          label={session.moveCountOnly ? "Moves" : "Time"}
+                          label={session.moveCountOnly ? t("solve.col.moves") : t("solve.col.time")}
                           sortKey={session.moveCountOnly ? "moves" : "time"}
                           activeKey={effectiveSortKey}
                           ascending={sortAsc}
                           onSort={handleSort}
                         />
                         {!session.moveCountOnly && (
-                          <SortableTh label="Moves" sortKey="moves" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
+                          <SortableTh label={t("solve.col.moves")} sortKey="moves" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
                         )}
                         {!session.moveCountOnly && (
                           <SortableTh label="TPS" sortKey="tps" activeKey={effectiveSortKey} ascending={sortAsc} onSort={handleSort} />
                         )}
                         {!session.moveCountOnly && (
                           <SortableTh
-                            label="Fluency"
+                            label={t("solve.col.fluency")}
                             sortKey="fluency"
                             activeKey={effectiveSortKey}
                             ascending={sortAsc}
                             onSort={handleSort}
-                            tooltip={FLUENCY_TOOLTIP}
+                            tooltip={t("fluency.tooltip")}
                           />
                         )}
-                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Method</th>
-                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">Ended</th>
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t("solve.col.method")}</th>
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t("solve.col.date")}</th>
+                        <th className="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t("solve.col.ended")}</th>
                         <th className="py-2 w-20" />
                       </tr>
                     </thead>
@@ -967,7 +971,7 @@ function SolvePageInner({
                           >
                             <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-500">#{nr}</td>
                             <td className="py-2.5 pr-4 text-base font-mono tabular-nums text-white whitespace-nowrap">
-                              {session.moveCountOnly ? `${s.moveCount} mv` : formatTimeMs(s.timeMs)}
+                              {session.moveCountOnly ? t("solve.mv", { n: s.moveCount }) : formatTimeMs(s.timeMs)}
                             </td>
                             {!session.moveCountOnly && <td className="py-2.5 pr-4 text-sm font-mono tabular-nums text-gray-400">{s.moveCount}</td>}
                             {!session.moveCountOnly && (
@@ -980,7 +984,7 @@ function SolvePageInner({
                             )}
                             <td className="py-2.5 pr-4 text-sm text-gray-500">{s.method}</td>
                             <td className="py-2.5 pr-4 text-sm text-gray-500 whitespace-nowrap">
-                              {new Date(s.endedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              {formatDate(s.endedAt, { month: "short", day: "numeric" })}
                             </td>
                             <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">{formatRelativeTime(s.endedAt)}</td>
                             <td className="py-2.5">
@@ -991,7 +995,7 @@ function SolvePageInner({
                                     setMoveMenuSolveId(moveMenuSolveId === s.id ? null : s.id);
                                   }}
                                   className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
-                                  title="Move to another session"
+                                  title={t("solve.moveToOther")}
                                 >
                                   <FolderInput size={13} />
                                 </button>
@@ -1004,7 +1008,7 @@ function SolvePageInner({
                                   className={`shrink-0 p-1.5 transition-colors ${
                                     confirmDeleteSolveId === s.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
                                   }`}
-                                  title={confirmDeleteSolveId === s.id ? "Click again to delete" : "Delete solve"}
+                                  title={confirmDeleteSolveId === s.id ? t("solve.confirmDelete") : t("solve.delete")}
                                 >
                                   <Trash2 size={13} />
                                 </button>
@@ -1013,7 +1017,7 @@ function SolvePageInner({
                                     onClick={(e) => e.stopPropagation()}
                                     className="absolute right-0 top-full mt-1 z-50 w-52 bg-gray-800 border border-white/15 rounded-xl shadow-2xl shadow-black/80 py-1"
                                   >
-                                    <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">Move to session</p>
+                                    <p className="px-3 py-1 text-[9px] font-bold text-gray-500 uppercase tracking-wider">{t("solve.moveToSession")}</p>
                                     {sessions
                                       .filter((x) => x.id !== s.sessionId)
                                       .map((x) => (
@@ -1032,7 +1036,7 @@ function SolvePageInner({
                                       }}
                                       className="w-full flex items-center gap-1.5 text-left px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 border-t border-white/[0.06] mt-1 pt-1.5 transition-colors"
                                     >
-                                      <Plus size={12} /> New session…
+                                      <Plus size={12} /> {t("solve.newSession")}
                                     </button>
                                   </div>
                                 )}
@@ -1050,18 +1054,18 @@ function SolvePageInner({
                       onClick={() => setPage(clampedPage - 1)}
                       disabled={clampedPage <= 1}
                       className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                      title="Previous page"
+                      title={t("solve.prevPage")}
                     >
                       <ChevronLeft size={14} />
                     </button>
                     <span className="text-[10px] font-mono tabular-nums text-gray-500">
-                      Page {clampedPage} / {totalPages}
+                      {t("solve.page", { n: clampedPage, total: totalPages })}
                     </span>
                     <button
                       onClick={() => setPage(clampedPage + 1)}
                       disabled={clampedPage >= totalPages}
                       className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                      title="Next page"
+                      title={t("solve.nextPage")}
                     >
                       <ChevronRight size={14} />
                     </button>

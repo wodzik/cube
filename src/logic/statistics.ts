@@ -1,4 +1,5 @@
 import type { AlgorithmAttempt, AttemptSource } from "../types/algorithm";
+import { formatDate, t, tn } from "../i18n/i18n";
 
 /**
  * WCA-style statistics for solve times.
@@ -178,11 +179,11 @@ export function formatTime(seconds: number): string {
 export function formatRelativeTime(epochMs: number): string {
   const diffMs = Date.now() - epochMs;
   const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 1) return t("time.justNow");
+  if (minutes < 60) return t("time.minutesAgo", { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  if (hours < 24) return tn("time.hoursAgo", hours);
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} ${days === 1 ? "day" : "days"} ago`;
-  return new Date(epochMs).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (days < 7) return tn("time.daysAgo", days);
+  return formatDate(epochMs, { month: "short", day: "numeric" });
 }
