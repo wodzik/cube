@@ -14,6 +14,7 @@
 import type { ReactNode } from "react";
 import { Maximize2 } from "lucide-react";
 import { OverlayModal } from "./OverlayModal";
+import { useT } from "../i18n/useT";
 
 interface CompactRecentListProps<T> {
   title: string;
@@ -38,6 +39,7 @@ export function CompactRecentList<T>({
   expandedContent,
   className = "",
 }: CompactRecentListProps<T>) {
+  const { t } = useT();
   if (items.length === 0) return null;
 
   return (
@@ -53,7 +55,7 @@ export function CompactRecentList<T>({
           <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{title}</h3>
           <button
             onClick={onToggleExpand}
-            title="Show all"
+            title={t("recentList.showAll")}
             className="p-1 rounded-md text-gray-600 hover:text-gray-200 hover:bg-white/[0.06] transition-colors shrink-0"
           >
             <Maximize2 size={13} />

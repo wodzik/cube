@@ -9,6 +9,7 @@ import { Settings } from "lucide-react";
 import type { AlgSubgroup, DisplayConfig } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
+import { useT } from "../i18n/useT";
 
 interface SubgroupCardProps {
   subgroup: AlgSubgroup;
@@ -20,6 +21,7 @@ interface SubgroupCardProps {
 }
 
 export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSettings }: SubgroupCardProps) {
+  const { t, tn } = useT();
   const displayConfig: DisplayConfig = { ...groupDisplayConfig, ...subgroup.displayConfig };
   const cleanAlg = subgroup.previewAlg.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
 
@@ -36,7 +38,7 @@ export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSetti
               e.stopPropagation();
               onEditSettings();
             }}
-            title="Subgroup settings"
+            title={t("subgroup.settings")}
             className="p-1 rounded text-gray-700 hover:text-gray-300 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
           >
             <Settings size={11} />
@@ -59,7 +61,7 @@ export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSetti
 
       <div className="px-2.5 py-2 mt-auto">
         <span className="text-[10px] text-gray-500">
-          {subgroup.cases.length} case{subgroup.cases.length === 1 ? "" : "s"}
+          {tn("subgroup.cases", subgroup.cases.length)}
         </span>
       </div>
     </div>

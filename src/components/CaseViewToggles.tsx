@@ -5,6 +5,7 @@
  */
 
 import { Eye, Grid3x3 } from "lucide-react";
+import { useT } from "../i18n/useT";
 import {
   MAX_HINT_ELEVATION,
   MIN_HINT_ELEVATION,
@@ -19,6 +20,7 @@ export function CaseViewToggles({
   toggleFlatView,
   setHintElevation,
 }: CaseViewPrefs) {
+  const { t } = useT();
   return (
     <>
       <button
@@ -26,9 +28,9 @@ export function CaseViewToggles({
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
           backStickers ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
         }`}
-        title="Show translucent copies of the hidden faces' stickers"
+        title={t("caseView.backStickers.title")}
       >
-        <Eye size={12} /> Back stickers
+        <Eye size={12} /> {t("caseView.backStickers")}
       </button>
       {backStickers && (
         <input
@@ -39,8 +41,8 @@ export function CaseViewToggles({
           value={hintElevation}
           onChange={(e) => setHintElevation(Number(e.target.value))}
           className="w-20 accent-sky-400"
-          title="How far the back stickers float from the cube"
-          aria-label="Back sticker distance"
+          title={t("caseView.backDistance.title")}
+          aria-label={t("caseView.backDistance.label")}
         />
       )}
       <button
@@ -48,9 +50,9 @@ export function CaseViewToggles({
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
           flatView ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
         }`}
-        title="Show a flat unfolded view of the whole cube under the 3D one"
+        title={t("caseView.flatView.title")}
       >
-        <Grid3x3 size={12} /> Flat view
+        <Grid3x3 size={12} /> {t("caseView.flatView")}
       </button>
     </>
   );

@@ -40,12 +40,13 @@ import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { cfopStageDetector, rouxStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { ROUX_DETAIL_VERSION } from "../logic/stageDetection/rouxStages";
-import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
+import { fluencyPercent } from "../logic/stageDetection/fluency";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
 import { patchSolve } from "../services/solveStore";
 import { stageDescription } from "./stageDescriptions";
+import { useT } from "../i18n/useT";
 
 interface SolveAnalysisProps {
   record: SolveRecord;
@@ -88,6 +89,7 @@ function StageTimingRow({
   onJump: (moveIndex: number) => void;
   moveCountOnly?: boolean;
 }) {
+  const { t, tn } = useT();
   const reached = timing.startMoveIndex !== null;
   // A stage with 0 moves either completed as a side effect of the previous
   // stage's last move (cascade — one turn satisfied two stages at once) or
@@ -101,7 +103,7 @@ function StageTimingRow({
         reached ? "hover:bg-white/[0.05] cursor-pointer" : "opacity-60"
       }`}
       onClick={reached ? () => onJump(timing.startMoveIndex!) : undefined}
-      title={reached ? "Jump the player to this stage" : undefined}
+      title={reached ? t("analysis.jump") : undefined}
     >
       {reached && (
         <Play size={11} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--accent-bright)" }} fill="currentColor" />
@@ -110,22 +112,22 @@ function StageTimingRow({
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage, timing.detail)}</span>
           {skipped ? (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">{t("analysis.skip")}</span>
           ) : (
-            <span className="text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
+            <span className="text-[11px] text-gray-400 font-mono tabular-nums">{tn("count.moves", timing.moveCount)}</span>
           )}
         </div>
         {timing.moves.length > 0 && <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{timing.moves.join(" ")}</p>}
       </div>
       {!skipped && !moveCountOnly && (
         <div className="shrink-0 flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-right">
-          <span className="text-gray-400" title="Recognition time">
-            recog {formatMs(timing.recognitionMs)}
+          <span className="text-gray-400" title={t("analysis.recog.title")}>
+            {t("analysis.recog")} {formatMs(timing.recognitionMs)}
           </span>
-          <span className="text-gray-400" title="Execution time">
-            exec {formatMs(timing.executionMs)}
+          <span className="text-gray-400" title={t("analysis.exec.title")}>
+            {t("analysis.exec")} {formatMs(timing.executionMs)}
           </span>
-          <span className="text-gray-100 font-semibold w-14" title="Total time for this stage">
+          <span className="text-gray-100 font-semibold w-14" title={t("analysis.stageTotal")}>
             {formatMs(timing.totalMs)}
           </span>
         </div>
@@ -144,6 +146,7 @@ export function SolveAnalysis({
   onDelete,
   moveCountOnly = false,
 }: SolveAnalysisProps) {
+  const { t, tn } = useT();
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Display text: collapsed, compact (R2 instead of R R).
   const displayAlg = record.reducedMoves.join(" ");
@@ -224,19 +227,19 @@ export function SolveAnalysis({
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
             <h2 className="text-white font-semibold text-base font-mono tabular-nums">
-              {moveCountOnly ? `${record.moveCount} moves` : formatTimeMs(record.timeMs)}
+              {moveCountOnly ? tn("count.moves", record.moveCount) : formatTimeMs(record.timeMs)}
             </h2>
             <p className="text-gray-400 text-xs mt-0.5">
               {moveCountOnly ? (
                 record.method
               ) : (
                 <>
-                  {record.moveCount} moves · {record.tps.toFixed(2)} TPS
+                  {tn("count.moves", record.moveCount)} · {record.tps.toFixed(2)} TPS
                   {fluency !== null && (
                     <>
                       {" · "}
-                      <span title={FLUENCY_TOOLTIP}>
-                        {fluency}% fluency
+                      <span title={t("fluency.tooltip")}>
+                        {t("summary.fluency", { n: fluency })}
                       </span>
                     </>
                   )}
@@ -266,9 +269,9 @@ export function SolveAnalysis({
               <button
                 onClick={() => onUseScramble(record.scramble)}
                 className="btn-secondary py-1.5 text-[11px] w-full"
-                title="Re-scramble to this exact scramble and attempt it again"
+                title={t("analysis.useScramble.title")}
               >
-                <RotateCcw size={12} /> Use this scramble
+                <RotateCcw size={12} /> {t("analysis.useScramble")}
               </button>
             )}
           </div>
@@ -293,7 +296,7 @@ export function SolveAnalysis({
             {!moveCountOnly && <SolveTimingBar timings={timings} />}
 
             <div>
-              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 px-2.5">{method} steps</h3>
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 px-2.5">{t("analysis.steps", { method })}</h3>
               <div className="flex flex-col gap-0.5">
                 {timings.map((t) => (
                   <StageTimingRow
@@ -307,7 +310,7 @@ export function SolveAnalysis({
             </div>
 
             <div>
-              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Solve moves</h3>
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t("analysis.solveMoves")}</h3>
               <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayAlg || "—"}</p>
             </div>
           </div>
@@ -326,14 +329,14 @@ export function SolveAnalysis({
                 className="bg-gray-950/60 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-[var(--accent)] transition-colors"
               >
                 <option value="" disabled>
-                  Move to session…
+                  {t("analysis.moveToSession")}
                 </option>
                 {(moveTargets ?? []).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
                 ))}
-                {onMoveToNewSession && <option value="__new__">+ New session…</option>}
+                {onMoveToNewSession && <option value="__new__">{t("analysis.newSession")}</option>}
               </select>
             ) : (
               <span />
@@ -346,7 +349,7 @@ export function SolveAnalysis({
                 }}
                 className="btn-danger"
               >
-                <Trash2 size={13} /> {confirmDelete ? "Click again to delete" : "Delete solve"}
+                <Trash2 size={13} /> {confirmDelete ? t("analysis.confirmDelete") : t("analysis.delete")}
               </button>
             )}
           </div>

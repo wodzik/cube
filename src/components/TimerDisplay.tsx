@@ -4,6 +4,7 @@
  */
 
 import { formatTimeMs } from "../logic/statistics";
+import { useT } from "../i18n/useT";
 
 type TimerState = "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
 
@@ -29,6 +30,7 @@ const STATE_CLASSES: Record<TimerState, string> = {
 };
 
 export function TimerDisplay({ timeMs, state, className = "", moveCountOnly = false, moveCount = 0 }: TimerDisplayProps) {
+  const { tn } = useT();
   return (
     <div className={`font-mono tabular-nums select-none tracking-tight ${STATE_CLASSES[state]} ${className}`}>
       {state === "dnf" ? (
@@ -36,7 +38,7 @@ export function TimerDisplay({ timeMs, state, className = "", moveCountOnly = fa
       ) : moveCountOnly ? (
         <>
           {moveCount}
-          <span className="text-[0.35em] font-sans font-semibold text-gray-500 ml-2 tracking-wide uppercase align-middle">moves</span>
+          <span className="text-[0.35em] font-sans font-semibold text-gray-500 ml-2 tracking-wide uppercase align-middle">{tn("unit.moves", moveCount)}</span>
         </>
       ) : (
         formatTimeMs(timeMs)

@@ -12,8 +12,9 @@
 import type { SolveRecord } from "../types/solve";
 import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
-import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
+import { fluencyPercent } from "../logic/stageDetection/fluency";
 import { SolveTimingBar } from "./SolveTimingBar";
+import { useT } from "../i18n/useT";
 
 interface SolveSummaryProps {
   record: SolveRecord;
@@ -22,6 +23,7 @@ interface SolveSummaryProps {
 }
 
 export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProps) {
+  const { t, tn } = useT();
   const detector = detectorForMethod(record.method);
   const boundaries =
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
@@ -29,11 +31,11 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
   const fluency = moveCountOnly ? null : fluencyPercent(timings, record.timeMs);
 
   const parts: { text: string; title?: string }[] = moveCountOnly
-    ? [{ text: `${record.moveCount} turns` }, { text: record.method }]
+    ? [{ text: tn("count.moves", record.moveCount) }, { text: record.method }]
     : [
         { text: `${record.tps.toFixed(2)} TPS` },
-        { text: `${record.moveCount} turns` },
-        fluency === null ? null : { text: `${fluency}% fluency`, title: FLUENCY_TOOLTIP },
+        { text: tn("count.moves", record.moveCount) },
+        fluency === null ? null : { text: t("summary.fluency", { n: fluency }), title: t("fluency.tooltip") },
         { text: record.method },
       ].filter((p): p is { text: string; title?: string } => p !== null);
 

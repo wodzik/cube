@@ -7,8 +7,10 @@
 import { RotateCcw, X } from "lucide-react";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { acknowledgeAlgorithmDataVersion } from "../hooks/useAlgorithmDataVersionCheck";
+import { useT } from "../i18n/useT";
 
 export function AlgorithmDataUpdateNotice({ onClose }: { onClose: () => void }) {
+  const { t } = useT();
   const dismiss = () => {
     acknowledgeAlgorithmDataVersion();
     onClose();
@@ -28,21 +30,20 @@ export function AlgorithmDataUpdateNotice({ onClose }: { onClose: () => void }) 
         <button
           onClick={dismiss}
           className="absolute top-3 right-3 p-1 rounded text-gray-600 hover:text-gray-300 transition-colors"
-          title="Dismiss"
+          title={t("common.dismiss")}
         >
           <X size={15} />
         </button>
-        <h2 className="text-white font-semibold text-lg">Default algorithms updated</h2>
+        <h2 className="text-white font-semibold text-lg">{t("algUpdate.title")}</h2>
         <p className="text-sm text-gray-400 mt-1.5 mb-5">
-          Some built-in algorithm sets changed in this update. Your learning progress and times are untouched — but if
-          you'd rather start fresh on the new defaults, you can reset built-in groups now.
+          {t("algUpdate.body")}
         </p>
         <div className="flex flex-col gap-2">
           <button onClick={resetAndReload} className="btn-danger w-full justify-center">
-            <RotateCcw size={13} /> Clear built-in progress &amp; reload
+            <RotateCcw size={13} /> {t("algUpdate.reset")}
           </button>
           <button onClick={dismiss} className="btn-secondary w-full justify-center">
-            Keep my progress
+            {t("algUpdate.keep")}
           </button>
         </div>
       </div>

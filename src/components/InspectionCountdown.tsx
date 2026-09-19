@@ -1,3 +1,4 @@
+import { useT } from "../i18n/useT";
 /**
  * Inspection countdown display.
  *
@@ -26,24 +27,25 @@ function getColorClass(secondsLeft: number, mode: InspectionCountdownProps["mode
   return "text-white";
 }
 
-function getLabel(secondsLeft: number, mode: InspectionCountdownProps["mode"]): string {
-  if (mode === "unlimited") return "INSPECT";
+function getLabel(secondsLeft: number, mode: InspectionCountdownProps["mode"], inspectLabel: string): string {
+  if (mode === "unlimited") return inspectLabel;
   if (secondsLeft <= 0) return mode === "wca" ? "DNF" : "0";
   return String(Math.ceil(secondsLeft));
 }
 
 export function InspectionCountdown({ secondsLeft, mode }: InspectionCountdownProps) {
+  const { t } = useT();
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="text-xs text-gray-500 uppercase tracking-widest">Inspection</span>
+      <span className="text-xs text-gray-500 uppercase tracking-widest">{t("inspection.label")}</span>
       <span className={`font-mono text-6xl tabular-nums font-bold ${getColorClass(secondsLeft, mode)}`}>
-        {getLabel(secondsLeft, mode)}
+        {getLabel(secondsLeft, mode, t("inspection.inspect"))}
       </span>
       {mode === "wca" && secondsLeft <= 3 && secondsLeft > 0 && (
-        <span className="text-xs text-orange-400">+2 if you start now</span>
+        <span className="text-xs text-orange-400">{t("inspection.plusTwo")}</span>
       )}
-      {mode === "wca" && secondsLeft <= 0 && <span className="text-xs text-red-500">Stop or DNF!</span>}
-      {mode === "custom" && secondsLeft <= 0 && <span className="text-xs text-red-500">Time's up!</span>}
+      {mode === "wca" && secondsLeft <= 0 && <span className="text-xs text-red-500">{t("inspection.stopOrDnf")}</span>}
+      {mode === "custom" && secondsLeft <= 0 && <span className="text-xs text-red-500">{t("inspection.timesUp")}</span>}
     </div>
   );
 }

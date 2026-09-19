@@ -13,6 +13,7 @@ import { Maximize2 } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ao5, ao12, ao100, best, mean, formatTimeMs } from "../logic/statistics";
 import { OverlayModal } from "./OverlayModal";
+import { useT } from "../i18n/useT";
 
 interface StatsChartProps {
   /** Values in chronological order (oldest first) — solve times in ms by default; anything where lower is better works (e.g. move counts) given a matching `formatValue`. */
@@ -117,6 +118,7 @@ interface ChartBodyProps {
 }
 
 function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue }: ChartBodyProps) {
+  const { t } = useT();
   const fill = height === "fill";
   return (
     <div className={`flex flex-col gap-4 ${fill ? "h-full" : ""}`}>
@@ -189,7 +191,7 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
         <StatCard label="Ao5" value={currentAo5 ? formatValue(currentAo5) : null} accent={METRIC_COLOR.ao5} />
         <StatCard label="Ao12" value={currentAo12 ? formatValue(currentAo12) : null} accent={METRIC_COLOR.ao12} />
         <StatCard label="Ao100" value={currentAo100 ? formatValue(currentAo100) : null} accent={METRIC_COLOR.ao100} />
-        <StatCard label="Mean" value={avg ? formatValue(avg) : null} />
+        <StatCard label={t("stats.mean")} value={avg ? formatValue(avg) : null} />
         <StatCard label="PB" value={pb ? formatValue(pb) : null} accent="#34d399" />
       </div>
     </div>
@@ -197,6 +199,7 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
 }
 
 export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true, showAo12 = true, showAo100 = false, height = 200 }: StatsChartProps) {
+  const { t } = useT();
   const [visible, setVisible] = useState<Record<Metric, boolean>>({
     single: true,
     ao5: showAo5,
@@ -245,7 +248,7 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
         ))}
         <button
           onClick={() => setFullscreen(true)}
-          title="Open fullscreen"
+          title={t("stats.fullscreen")}
           className="ml-auto p-1 rounded-md text-gray-600 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
         >
           <Maximize2 size={13} />
@@ -259,7 +262,7 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
             className="absolute inset-x-0 top-0 flex items-center justify-center text-gray-600 text-sm pointer-events-none"
             style={fill ? { height: "100%" } : { height }}
           >
-            No data yet
+            {t("stats.noData")}
           </div>
         )}
       </div>

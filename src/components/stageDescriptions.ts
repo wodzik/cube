@@ -18,19 +18,23 @@
  * stages use their own "-first"/"-second"/"-corners"/"-edges" ids
  * specifically so they never collide with CFOP's single-stage names here.
  */
-const OLL_DETAIL_LABELS: Record<string, string> = {
-  corners: "Orient corners",
-  edges: "Orient edges",
+
+import { t, type MessageKey } from "../i18n/i18n";
+const OLL_DETAIL_LABELS: Record<string, MessageKey> = {
+  corners: "stage.orientCorners",
+  edges: "stage.orientEdges",
 };
 
-const STAGE_DESCRIPTIONS: Record<string, string> = {
-  "pll-corners": "Permute corners",
-  "pll-edges": "Permute edges",
+const STAGE_DESCRIPTIONS: Record<string, MessageKey> = {
+  "pll-corners": "stage.permuteCorners",
+  "pll-edges": "stage.permuteEdges",
 };
 
+/** Reads the current language — callers should render under `useT()` so they re-render on a language switch. */
 export function stageDescription(stage: string, detail?: string): string {
   if (stage === "oll-first" || stage === "oll-second") {
-    return (detail && OLL_DETAIL_LABELS[detail]) ?? "Orient corners/edges";
+    return t((detail && OLL_DETAIL_LABELS[detail]) || "stage.orientEither");
   }
-  return STAGE_DESCRIPTIONS[stage] ?? stage;
+  const key = STAGE_DESCRIPTIONS[stage];
+  return key ? t(key) : stage;
 }

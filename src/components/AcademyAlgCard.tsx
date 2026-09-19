@@ -15,6 +15,7 @@ import { AlgPlaybackModal } from "./AlgPlaybackModal";
 import { parseDecoratedAlg, type AcademyAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
 import type { VisualizationMode } from "../types/cube";
+import { useT } from "../i18n/useT";
 
 interface AcademyAlgCardProps {
   alg: AcademyAlg;
@@ -34,6 +35,7 @@ interface AcademyAlgCardProps {
 }
 
 export function AcademyAlgCard({ alg, stickeringMaskOrbits, visualization = "experimental-2D-LL", selected, onSelectedChange, onPractice }: AcademyAlgCardProps) {
+  const { t } = useT();
   const plainAlg = parseDecoratedAlg(alg.alg).tokens.join(" ");
   const [showPlayback, setShowPlayback] = useState(false);
 
@@ -48,25 +50,25 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, visualization = "exp
       <div className="flex items-center gap-1.5 px-2 pt-1.5 pb-0 min-w-0">
         <span
           className={`shrink-0 w-1.5 h-1.5 rounded-full ${alg.required ? "bg-emerald-400" : "bg-sky-400"}`}
-          title={alg.required ? "Required" : "Nice to know"}
+          title={alg.required ? t("academyCard.required") : t("academyCard.niceToKnow")}
         />
         <span
           className="flex-1 min-w-0 text-[11px] font-semibold text-white truncate leading-tight cursor-pointer hover:underline"
           onClick={onPractice}
-          title={`${alg.name} — practice this now`}
+          title={t("academyCard.practiceNamed", { name: alg.name })}
         >
           {alg.name}
         </span>
         <button
           onClick={() => setShowPlayback(true)}
-          title="Show how to perform this algorithm"
+          title={t("academyCard.show")}
           className="shrink-0 p-0.5 rounded text-gray-500 hover:text-white transition-colors"
         >
           <Video size={11} />
         </button>
         <button
           onClick={onPractice}
-          title="Practice this now"
+          title={t("academyCard.practice")}
           className="shrink-0 p-0.5 rounded transition-colors opacity-0 group-hover:opacity-100"
           style={{ color: "var(--accent-bright)" }}
         >
@@ -74,7 +76,7 @@ export function AcademyAlgCard({ alg, stickeringMaskOrbits, visualization = "exp
         </button>
       </div>
 
-      <div className="px-2 py-1 flex items-center justify-center cursor-pointer" onClick={onPractice} title="Practice this now">
+      <div className="px-2 py-1 flex items-center justify-center cursor-pointer" onClick={onPractice} title={t("academyCard.practice")}>
         <div className="w-full aspect-square">
           <AlgCaseVisualisation
             alg={plainAlg}

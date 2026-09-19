@@ -11,6 +11,7 @@ import type { AlgSubgroup, DisplayConfig } from "../types/algorithm";
 import { addSubgroup, updateSubgroupMeta, deleteSubgroup } from "../services/algGroupRegistry";
 import { SubgroupCard } from "./SubgroupCard";
 import { SubgroupSettingsModal } from "./SubgroupSettingsModal";
+import { useT } from "../i18n/useT";
 
 interface SubgroupGridProps {
   groupId: string;
@@ -22,6 +23,7 @@ interface SubgroupGridProps {
 }
 
 export function SubgroupGrid({ groupId, groupDisplayConfig, subgroups, onOpen, onChange }: SubgroupGridProps) {
+  const { t } = useT();
   const [editing, setEditing] = useState<AlgSubgroup | "new" | null>(null);
 
   const handleSave = (name: string, previewAlg: string, availableInAttack: boolean, displayConfig?: Partial<DisplayConfig>) => {
@@ -43,7 +45,7 @@ export function SubgroupGrid({ groupId, groupDisplayConfig, subgroups, onOpen, o
   return (
     <div className="px-4 sm:px-6 pb-10">
       {subgroups.length === 0 && (
-        <p className="text-sm text-gray-600 mb-4">No subgroups yet — create one to start organizing this group into folders.</p>
+        <p className="text-sm text-gray-600 mb-4">{t("subgroup.empty")}</p>
       )}
       <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
         {subgroups.map((s) => (
@@ -67,7 +69,7 @@ export function SubgroupGrid({ groupId, groupDisplayConfig, subgroups, onOpen, o
           className="flex flex-col items-center justify-center gap-1.5 aspect-square rounded-xl border border-dashed border-white/10 hover:border-white/20 text-gray-600 hover:text-gray-300 transition-colors"
         >
           <FolderPlus size={20} />
-          <span className="text-xs font-medium">New subgroup</span>
+          <span className="text-xs font-medium">{t("subgroup.new")}</span>
         </button>
       </div>
 

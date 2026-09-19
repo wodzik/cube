@@ -20,6 +20,7 @@ import { CubeVisualisation } from "./CubeVisualisation";
 import { stripLeadingRotations, invertSequence } from "../logic/moveParser";
 import { parseDecoratedAlg } from "../data/academy";
 import type { StickeringMaskOrbits } from "../types/cube";
+import { useT } from "../i18n/useT";
 
 interface AlgPlaybackModalProps {
   title: string;
@@ -34,6 +35,7 @@ interface AlgPlaybackModalProps {
 }
 
 export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringMaskOrbits, onClose }: AlgPlaybackModalProps) {
+  const { t } = useT();
   // Both `plain` (what's actually ANIMATED forward) and `setup` (the
   // inverse it starts from) must derive from the SAME token set — dropping
   // the leading rotation from setup alone while still playing the FULL alg
@@ -102,7 +104,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
         <div className="px-5 py-4 border-t border-white/[0.06] shrink-0 overflow-y-auto">
           <p className="font-mono text-sm text-gray-200 break-words">{alg}</p>
           <p className="text-[11px] text-gray-600 mt-1.5">
-            Press play or step through the moves with the controls under the cube. Drag the cube to change the view.
+            {t("playback.hint")}
           </p>
         </div>
       </div>

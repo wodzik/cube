@@ -21,6 +21,7 @@ import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { groupStageTimings, stageGroupShades, stageSlotLabel } from "./stageGroups";
 import { stageDescription } from "./stageDescriptions";
 import { stageCubeColors } from "./cubeColors";
+import { useT } from "../i18n/useT";
 
 interface SolveTimingBarProps {
   timings: StageTiming[];
@@ -63,6 +64,7 @@ function StatRow({ label, value, strong = false }: { label: string; value: strin
 }
 
 export function SolveTimingBar({ timings }: SolveTimingBarProps) {
+  const { t } = useT();
   const [hoveredStage, setHoveredStage] = useState<string | null>(null);
 
   const grandTotalMs = timings.reduce((sum, t) => sum + t.totalMs, 0);
@@ -169,18 +171,18 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
               {stageHeading(hoveredGroup.label, hovered, hoveredIsMultiPart)}
             </p>
             <div className="space-y-1">
-              <StatRow label="Total Time:" value={`${formatSeconds(hovered.totalMs)}s`} strong />
-              <StatRow label="Recognition:" value={`${formatSeconds(hovered.recognitionMs)}s`} />
-              <StatRow label="Execution:" value={`${formatSeconds(hovered.executionMs)}s`} />
-              <StatRow label="TPS:" value={tps(hovered.moveCount, hovered.totalMs)} />
-              <StatRow label="Turns:" value={String(hovered.moveCount)} />
-              <StatRow label="Percentage:" value={formatPercent(hovered.totalMs, grandTotalMs)} />
+              <StatRow label={t("timing.totalTime")} value={`${formatSeconds(hovered.totalMs)}s`} strong />
+              <StatRow label={t("timing.recognition")} value={`${formatSeconds(hovered.recognitionMs)}s`} />
+              <StatRow label={t("timing.execution")} value={`${formatSeconds(hovered.executionMs)}s`} />
+              <StatRow label={t("timing.tps")} value={tps(hovered.moveCount, hovered.totalMs)} />
+              <StatRow label={t("timing.turns")} value={String(hovered.moveCount)} />
+              <StatRow label={t("timing.percentage")} value={formatPercent(hovered.totalMs, grandTotalMs)} />
             </div>
 
             {hoveredIsMultiPart && (
               <>
                 <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-3 mb-1.5">
-                  {hoveredGroup.label} Totals
+                  {t("timing.totals", { label: hoveredGroup.label })}
                 </p>
                 {(() => {
                   const groupMoves = hoveredGroup.timings.reduce((sum, t) => sum + t.moveCount, 0);
@@ -188,11 +190,11 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
                   const groupRecogMs = hoveredGroup.timings.reduce((sum, t) => sum + t.recognitionMs, 0);
                   return (
                     <div className="space-y-1">
-                      <StatRow label="Total Time:" value={`${formatSeconds(groupMs)}s`} strong />
-                      <StatRow label="Total Recognition:" value={`${formatSeconds(groupRecogMs)}s`} />
-                      <StatRow label="Total TPS:" value={tps(groupMoves, groupMs)} />
-                      <StatRow label="Total Turns:" value={String(groupMoves)} />
-                      <StatRow label="Percentage:" value={formatPercent(groupMs, grandTotalMs)} />
+                      <StatRow label={t("timing.totalTime")} value={`${formatSeconds(groupMs)}s`} strong />
+                      <StatRow label={t("timing.totalRecognition")} value={`${formatSeconds(groupRecogMs)}s`} />
+                      <StatRow label={t("timing.totalTps")} value={tps(groupMoves, groupMs)} />
+                      <StatRow label={t("timing.totalTurns")} value={String(groupMoves)} />
+                      <StatRow label={t("timing.percentage")} value={formatPercent(groupMs, grandTotalMs)} />
                     </div>
                   );
                 })()}

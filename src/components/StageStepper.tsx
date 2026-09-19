@@ -11,6 +11,8 @@
 
 import { Check } from "lucide-react";
 import type { StageBoundary } from "../logic/stageDetection/methodTracker";
+import { t } from "../i18n/i18n";
+import { useT } from "../i18n/useT";
 
 interface StageStepperProps {
   stages: readonly string[];
@@ -55,13 +57,14 @@ const STAGE_LABELS: Record<string, string> = {
  */
 function stageLabel(stage: string, detail?: string): string {
   if (stage === "oll-first" || stage === "oll-second") {
-    if (detail === "corners") return "Corners";
-    if (detail === "edges") return "Edges";
+    if (detail === "corners") return t("stage.corners");
+    if (detail === "edges") return t("stage.edges");
   }
   return STAGE_LABELS[stage] ?? stage.toUpperCase();
 }
 
 export function StageStepper({ stages, boundaries }: StageStepperProps) {
+  useT(); // re-render when the language changes (stageLabel reads it)
   const boundaryByStage = new Map(boundaries.map((b) => [b.stage, b]));
   const nextIdx = stages.findIndex((s) => !boundaryByStage.has(s));
 

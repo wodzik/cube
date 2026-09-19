@@ -23,6 +23,7 @@
 import type { ReactNode } from "react";
 import { RefreshCw, Eye, EyeOff } from "lucide-react";
 import type { SequenceProgress } from "../logic/sequenceTracker";
+import { useT } from "../i18n/useT";
 
 interface MoveSequenceDisplayProps {
   moves: string[];
@@ -81,12 +82,13 @@ export function MoveSequenceDisplay({
   loading = false,
   loadingText,
   loadingSpinner = true,
-  completeText = "Complete!",
-  errorLabel = "Undo:",
+  completeText,
+  errorLabel,
   className = "",
   decorations,
   extraControls,
 }: MoveSequenceDisplayProps) {
+  const { t } = useT();
   const hasErrors = (progress?.correctionSequence.length ?? 0) > 0;
   const isComplete = progress?.isCompleted ?? false;
   const tooManyErrors = maxErrors > 0 && (progress?.correctionSequence.length ?? 0) >= maxErrors;
@@ -120,10 +122,10 @@ export function MoveSequenceDisplay({
         <div className="scramble-display">
           {tooManyErrors && (
             <div className="scramble-error-overlay">
-              <span className="error-text">Too many errors!</span>
+              <span className="error-text">{t("sequence.tooManyErrors")}</span>
               {onReset && (
                 <button onClick={onReset} className="reset-button">
-                  Reset
+                  {t("sequence.reset")}
                 </button>
               )}
             </div>
@@ -131,7 +133,7 @@ export function MoveSequenceDisplay({
 
           {showErrorIndicator && (
             <div className="scramble-error-indicator">
-              <span className="error-label">{errorLabel}</span>
+              <span className="error-label">{errorLabel ?? t("sequence.undo")}</span>
               <span className="error-algorithm">{repairAlgorithm}</span>
             </div>
           )}
@@ -151,7 +153,7 @@ export function MoveSequenceDisplay({
             </div>
           )}
 
-          {isComplete && <span className="scramble-complete">{completeText}</span>}
+          {isComplete && <span className="scramble-complete">{completeText ?? t("sequence.complete")}</span>}
         </div>
 
         <div className="scramble-controls">
@@ -159,13 +161,13 @@ export function MoveSequenceDisplay({
             <button
               onClick={onToggleMask}
               className="control-button"
-              title={maskMoves ? "Show letters" : "Hide letters (show dots)"}
+              title={maskMoves ? t("sequence.showLetters") : t("sequence.hideLetters")}
             >
               {maskMoves ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           )}
           {showRefresh && onRefresh && (
-            <button onClick={onRefresh} className="control-button" title="Refresh">
+            <button onClick={onRefresh} className="control-button" title={t("sequence.refresh")}>
               <RefreshCw size={20} />
             </button>
           )}
@@ -175,7 +177,7 @@ export function MoveSequenceDisplay({
 
       {showErrorCount && totalErrorCount > 0 && (
         <div className="px-4 py-2 text-xs text-red-400 border-t border-gray-800/50">
-          Errors: {totalErrorCount}
+          {t("sequence.errors", { n: totalErrorCount })}
         </div>
       )}
     </div>

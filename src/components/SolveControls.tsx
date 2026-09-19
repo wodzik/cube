@@ -14,6 +14,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { X, RotateCcw } from "lucide-react";
+import { useT } from "../i18n/useT";
 
 export type ControlsMode = "solve" | "attempt";
 
@@ -42,6 +43,7 @@ export function SolveControls({
   stopByCube = false,
   className = "",
 }: SolveControlsProps) {
+  const { t } = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -77,7 +79,7 @@ export function SolveControls({
       {onResetCube && (
         <button
           onClick={onResetCube}
-          title="Re-sync cube visualisation"
+          title={t("controls.resync")}
           className="p-2 rounded-xl text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-colors"
         >
           <RotateCcw size={14} />
@@ -87,7 +89,7 @@ export function SolveControls({
       <div className="relative" ref={menuRef}>
         <button
           onClick={handleCancelClick}
-          title={mode === "attempt" ? "Cancel attempt" : "Stop solve"}
+          title={mode === "attempt" ? t("controls.cancelAttempt") : t("controls.stopSolve")}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-sm font-medium transition-all ${
             menuOpen
               ? "bg-red-500/10 text-red-400 border border-red-500/30"
@@ -95,7 +97,7 @@ export function SolveControls({
           }`}
         >
           <X size={13} />
-          <span>Cancel</span>
+          <span>{t("common.cancel")}</span>
         </button>
 
         {menuOpen && !useDirectCancel && (
@@ -107,7 +109,7 @@ export function SolveControls({
               }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
             >
-              Discard solve
+              {t("controls.discard")}
             </button>
 
             {onSaveAsDNF && (
@@ -118,7 +120,7 @@ export function SolveControls({
                 }}
                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors"
               >
-                Save as DNF
+                {t("controls.saveDnf")}
               </button>
             )}
 
@@ -128,7 +130,7 @@ export function SolveControls({
               onClick={() => setMenuOpen(false)}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"
             >
-              Keep solving
+              {t("controls.keepSolving")}
             </button>
           </div>
         )}

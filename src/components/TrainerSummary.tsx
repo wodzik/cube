@@ -12,6 +12,7 @@ import { ChevronDown, ChevronUp, Repeat2 } from "lucide-react";
 import type { TrainerAttempt } from "../types/trainer";
 import type { CrossMoveAnalysis } from "../logic/trainer/crossEngine";
 import { formatTimeMs } from "../logic/statistics";
+import { useT } from "../i18n/useT";
 
 interface TrainerSummaryProps {
   attempt: TrainerAttempt;
@@ -23,6 +24,7 @@ interface TrainerSummaryProps {
 }
 
 export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }: TrainerSummaryProps) {
+  const { t, tn } = useT();
   const [showSolutions, setShowSolutions] = useState(false);
   // F2L cases carry no computed optimum — show plain move count, no verdict.
   const hasOptimal = !attempt.type.startsWith("f2l");
@@ -48,10 +50,10 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
   return (
     <div className="panel p-5 h-full flex flex-col gap-3">
       <div>
-        <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Last attempt</p>
+        <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{t("trainerSummary.lastAttempt")}</p>
         <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">{formatTimeMs(attempt.timeMs)}</p>
         <p className="text-sm text-gray-400 mt-1">
-          {attempt.moveCount} moves{hasOptimal && ` · optimal ${attempt.optimalLength}`}
+          {tn("count.moves", attempt.moveCount)}{hasOptimal && ` · ${t("trainerSummary.optimalInline", { n: attempt.optimalLength })}`}
         </p>
       </div>
 
@@ -62,34 +64,34 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
               isOptimal ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
             }`}
           >
-            {isOptimal ? "Optimal!" : `+${attempt.overhead} ${attempt.overhead === 1 ? "move" : "moves"} over optimal`}
+            {isOptimal ? t("trainerSummary.optimal") : tn("trainerSummary.over", attempt.overhead)}
           </div>
         )}
         {attempt.hintUsed && (
-          <div className="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-sky-500/15 text-sky-300">hint used</div>
+          <div className="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide bg-sky-500/15 text-sky-300">{t("trainerSummary.hintUsed")}</div>
         )}
         {onRetry && (
           <button
             onClick={onRetry}
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
-            title="Practice this exact case again (fresh scramble, same target state)"
+            title={t("trainerSummary.retry.title")}
           >
-            <Repeat2 size={12} /> Retry case
+            <Repeat2 size={12} /> {t("trainerSummary.retry")}
           </button>
         )}
       </div>
 
       {analysis.length > 0 && (
         <div>
-          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">Your solution</p>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">{t("trainerSummary.yourSolution")}</p>
           <div className="flex flex-wrap gap-1">
             {analysis.map((a, i) => (
               <span
                 key={i}
                 title={
                   a.wasted
-                    ? `Didn't bring the cross closer (distance ${a.distBefore} → ${a.distAfter})`
-                    : `Distance ${a.distBefore} → ${a.distAfter}`
+                    ? t("trainerSummary.wasted", { from: a.distBefore, to: a.distAfter })
+                    : t("trainerSummary.distance", { from: a.distBefore, to: a.distAfter })
                 }
                 className={`px-1.5 py-0.5 rounded-md text-xs font-mono ${
                   a.wasted ? "bg-red-500/15 text-red-300 line-through decoration-red-400/60" : "bg-white/[0.05] text-gray-300"
@@ -101,8 +103,7 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
           </div>
           {(attempt.wastedMoveCount ?? 0) > 0 && (
             <p className="text-[11px] text-gray-500 mt-1.5">
-              {attempt.wastedMoveCount} {attempt.wastedMoveCount === 1 ? "move" : "moves"} didn't reduce the cross
-              distance
+              {tn("trainerSummary.wastedCount", attempt.wastedMoveCount ?? 0)}
             </p>
           )}
         </div>
@@ -111,7 +112,7 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
       {closest && (
         <div>
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
-            Closest optimal{closest.sharedMoves > 0 ? ` — diverged after ${closest.sharedMoves} ${closest.sharedMoves === 1 ? "move" : "moves"}` : ""}
+            {closest.sharedMoves > 0 ? tn("trainerSummary.diverged", closest.sharedMoves) : t("trainerSummary.closest")}
           </p>
           <div className="flex flex-wrap gap-1">
             {closest.solution.split(" ").map((move, i) => (
@@ -137,7 +138,7 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
             className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-white transition-colors"
           >
             {showSolutions ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            Optimal solutions ({optimalSolutions.length})
+            {t("trainerSummary.solutions", { n: optimalSolutions.length })}
           </button>
           {showSolutions && (
             <ul className="mt-1.5 space-y-1 max-h-40 overflow-y-auto pr-1">

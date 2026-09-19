@@ -5,6 +5,7 @@
 
 import { Bluetooth, BluetoothConnected, BatteryFull, BatteryMedium, BatteryLow, Timer } from "lucide-react";
 import type { DeviceConnection } from "../types/hardware";
+import { useT } from "../i18n/useT";
 
 interface ConnectionPanelProps {
   cube: DeviceConnection;
@@ -32,19 +33,22 @@ function BatteryIcon({ level }: { level: number | null }) {
 function DeviceButton({
   connection,
   label,
+  connectTitle,
   icon,
   onConnect,
   onDisconnect,
 }: {
   connection: DeviceConnection;
   label: string;
+  connectTitle: string;
   icon: React.ReactNode;
   onConnect: () => void;
   onDisconnect: () => void;
 }) {
+  const { t } = useT();
   if (!connection.connected) {
     return (
-      <button onClick={onConnect} className="btn-secondary" title={`Connect ${label}`}>
+      <button onClick={onConnect} className="btn-secondary" title={connectTitle}>
         {icon}
         {label}
       </button>
@@ -55,7 +59,7 @@ function DeviceButton({
     <button
       onClick={onDisconnect}
       className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-all group"
-      title="Click to disconnect"
+      title={t("device.disconnect")}
     >
       <BluetoothConnected size={13} className="group-hover:hidden" />
       <span className="hidden group-hover:inline">✕</span>
@@ -73,11 +77,13 @@ export function ConnectionPanel({
   onConnectTimer,
   onDisconnectTimer,
 }: ConnectionPanelProps) {
+  const { t } = useT();
   return (
     <div className="flex items-center gap-2">
       <DeviceButton
         connection={cube}
-        label="Cube"
+        label={t("device.cube")}
+        connectTitle={t("device.connectCube")}
         icon={<Bluetooth size={13} />}
         onConnect={onConnectCube}
         onDisconnect={onDisconnectCube}
@@ -85,7 +91,8 @@ export function ConnectionPanel({
       {timer && onConnectTimer && onDisconnectTimer && (
         <DeviceButton
           connection={timer}
-          label="Timer"
+          label={t("device.timer")}
+          connectTitle={t("device.connectTimer")}
           icon={<Timer size={13} />}
           onConnect={onConnectTimer}
           onDisconnect={onDisconnectTimer}
