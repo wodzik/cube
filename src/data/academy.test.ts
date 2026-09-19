@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { cube3x3x3 } from "cubing/puzzles";
-import { ACADEMY_LESSONS, F2L_METHOD, FOUR_LOOK_LL_CORNERS_FIRST, TWO_FIRST_LAYERS, SECOND_LAYER, ZETA_SLOTTING, parseDecoratedAlg } from "./academy";
+import { ACADEMY_LESSONS, F2L_METHOD, FIRST_LAYER, FOUR_LOOK_LL_CORNERS_FIRST, TWO_FIRST_LAYERS, SECOND_LAYER, ZETA_SLOTTING, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 
@@ -164,6 +164,33 @@ describe("4LLL corners-first lesson data", () => {
     expect(f2l.orbits.EDGES.pieces[9]!.facelets).toEqual(["regular", "regular"]);
     expect(f2l.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
     expect(f2l.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
+  });
+
+  it("Two first layers' corner cases: white right / up / front and their left-hand mirrors point white where the names say", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const step = FIRST_LAYER.steps[0];
+    // "White right" is a sexy move minus its last U', which only turns the top layer.
+    expect(step.algs.find((a) => a.id === "corner-right")!.alg).toBe("R U R'");
+    for (const [id, piece, slotName, face] of [
+      ["corner-right", 4, "URF", "R"],
+      ["corner-up", 4, "URF", "U"],
+      ["corner-front", 4, "URF", "F"],
+      ["corner-left-sexy", 5, "UFL", "L"],
+      ["corner-left-up", 5, "UFL", "U"],
+      ["corner-left-front", 5, "UFL", "F"],
+    ] as const) {
+      const { tokens } = parseDecoratedAlg(step.algs.find((a) => a.id === id)!.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(piece);
+      expect(CORNERS[slot]).toBe(slotName);
+      expect(slotName[setup.patternData.CORNERS.orientation[slot] % 3]).toBe(face);
+    }
+  });
+
+  it("Zeta Slotting's white-up corner is the same algorithm as the first-layer one (three sexy moves)", () => {
+    const zetaUp = ZETA_SLOTTING.steps[1].algs.find((a) => a.id === "up")!.alg;
+    expect(parseDecoratedAlg(zetaUp).tokens).toEqual(parseDecoratedAlg(FIRST_LAYER.steps[0].algs.find((a) => a.id === "corner-up")!.alg).tokens);
   });
 
   const zetaCornersStep = () => ZETA_SLOTTING.steps.find((s) => s.id === "zeta-corners")!;

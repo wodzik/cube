@@ -123,15 +123,18 @@ export const FIRST_LAYER: AcademyLesson = {
       id: "corners",
       title: "Corners",
       description:
-        "Corner above its slot at the front-right. White facing right: one sexy move. White facing up: three. " +
+        "Corner above its slot at the front-right. White facing right: R U R' — a sexy move without its last U', " +
+        "which only turns the top. White facing up: three sexy moves. " +
         "White facing you: the reverse sexy move (or five sexy moves). The drill shows the first layer as the " +
         "BOTTOM layer in yellow — it plays the part of white.",
       view: "first-layer",
       algs: [
-        { id: "corner-right", name: "White right · ×1", alg: "(R U R' U')", required: true, description: "The corner's white sticker points right." },
+        { id: "corner-right", name: "White right", alg: "R U R'", required: true, description: "The corner's white sticker points right. It's a sexy move without its last U' — that turn only moves the top layer, so it isn't needed." },
         { id: "corner-up", name: "White up · ×3", alg: "(R U R' U') (R U R' U') (R U R' U')", required: true, description: "The corner's white sticker points up." },
         { id: "corner-front", name: "White front · reverse", alg: "U R U' R'", required: true, description: "The corner's white sticker points at you. Five sexy moves also work." },
         { id: "corner-left-sexy", name: "Left hand · ×1", alg: "(L' U' L U)", required: false, description: "Same as \"white right\", mirrored: slot at the front-left, white facing left." },
+        { id: "corner-left-up", name: "Left hand · ×3", alg: "(L' U' L U) (L' U' L U) (L' U' L U)", required: false, description: "Same as \"white up\", mirrored: slot at the front-left, white facing up." },
+        { id: "corner-left-front", name: "Left hand · reverse", alg: "U' L' U L", required: false, description: "Same as \"white front\", mirrored: slot at the front-left, white facing you." },
       ],
     },
   ],
@@ -214,15 +217,14 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
           name: "A (OLL 33)",
           alg: "(R U R' U') (R' F R F')",
           required: true,
-          description:
-            "Building block: sexy move + sledgehammer. Combined into A + B / B + A for corner permutation.",
+          description: "Algorithm A: a sexy move followed by a sledgehammer. Remember it — you'll use it again later.",
         },
         {
           id: "block-b",
           name: "B (OLL 37)",
           alg: "F R U' R' U' R U R' F'",
           required: true,
-          description: "Building block — combined into A + B / B + A for corner permutation.",
+          description: "Algorithm B. Remember it — you'll use it again later.",
         },
       ],
     },
@@ -304,14 +306,14 @@ const ZETA_CORNERS_STEP: AcademyStep = {
   title: "Corners",
   description:
     "Corner above its slot at the front-right, edge already correctly seated below it. White facing up: the " +
-    "reverse sexy move ×3. White facing front or right: one longer algorithm each — the edge staying put is what " +
+    "the sexy move ×3, exactly as in the first layer. White facing front or right: one longer algorithm each — the edge staying put is what " +
     "makes them longer than plain first-layer inserts.",
   view: "f2l",
   algs: [
-    { id: "up", name: "White up · reverse ×3", alg: "(U R U' R') (U R U' R') (U R U' R')", required: true, description: "The corner's white sticker points up. F2L 32." },
+    { id: "up", name: "White up · ×3", alg: "(R U R' U') (R U R' U') (R U R' U')", required: true, description: "The corner's white sticker points up. The same algorithm as the first-layer corner with white up in the basic method. F2L 32." },
     { id: "front", name: "White front", alg: "U' R U' R' U2 R U' R'", required: true, description: "The corner's white sticker points at you. F2L 33." },
     { id: "right", name: "White right", alg: "U R U R' U2 R U R'", required: true, description: "The corner's white sticker points right. F2L 34." },
-    { id: "left-up", name: "Left hand · white up", alg: "(U' L' U L) (U' L' U L) (U' L' U L)", required: false, description: "Same as \"white up\", mirrored: slot at the front-left." },
+    { id: "left-up", name: "Left hand · white up", alg: "(L' U' L U) (L' U' L U) (L' U' L U)", required: false, description: "Same as \"white up\", mirrored: slot at the front-left." },
     { id: "left-front", name: "Left hand · white front", alg: "U L' U L U2 L' U L", required: false, description: "Mirror of \"white front\": slot at the front-left, the corner's white sticker points at you." },
     { id: "left-left", name: "Left hand · white left", alg: "U' L' U' L U2 L' U' L", required: false, description: "Mirror of \"white right\": slot at the front-left, the corner's white sticker points left." },
   ],

@@ -290,6 +290,18 @@ describe("Last layer — orient corners (edges ignored)", () => {
     expect(isSolved(after(c.demo))).toBe(true);
   });
 
+  it("the cases run 1, 2, 3 sexy moves first, then A and B, then Sune and Antisune", () => {
+    const orient = g.sections.find((sec) => sec.id === "orient-corners")!;
+    const ids = orient.blocks.flatMap((b) => (b.kind === "cases" ? b.cases.map((c) => c.id) : []));
+    expect(ids).toEqual(["co-headlights", "co-pi", "co-h", "co-a", "co-b", "co-sune", "co-antisune"]);
+    const sexyCount = (id: string) => algTokens(caseById(g, id).alg).join(" ").split("R U R' U'").length - 1;
+    expect([sexyCount("co-headlights"), sexyCount("co-pi"), sexyCount("co-h")]).toEqual([1, 2, 3]);
+  });
+
+  it("A and B are called out as algorithms to remember", () => {
+    for (const id of ["co-a", "co-b"]) expect(caseById(g, id).note).toContain("Remember");
+  });
+
   it("the seven cases cover all seven corner-orientation patterns exactly once", () => {
     const signatures = new Set<string>();
     for (const id of ["co-headlights", "co-a", "co-b", "co-sune", "co-antisune", "co-pi", "co-h"]) {
@@ -472,6 +484,11 @@ describe("Zeta Slotting — insert the corners", () => {
     expect(p.patternData.EDGES.pieces[edgeSlot as number]).toBe(edge as number);
     expect(p.patternData.EDGES.orientation[edgeSlot as number]).toBe(0);
     expect(isSolved(after(c.demo))).toBe(true);
+  });
+
+  it("white-up is the same three sexy moves as Layer by layer's first-layer corner", () => {
+    const same = (a: string, b: string) => algTokens(a).join(" ") === algTokens(b).join(" ");
+    expect(same(caseById(g, "up").alg, caseById(LAYER_BY_LAYER_GUIDE, "corner-up").alg)).toBe(true);
   });
 
   it("each left-hand algorithm is the mirror image of its right-hand twin", () => {

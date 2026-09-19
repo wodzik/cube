@@ -36,7 +36,7 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
     "\"Layer by layer\" solves the first two layers corner-first: all four white corners, then all four middle edges. Zeta Slotting flips that order — **every edge first, then every corner** — using the exact same cross and the exact same edge-insertion moves you already know.",
     "Why bother? Once an edge is sitting correctly in its slot, there are only three ways a corner can need inserting above it (not the four-ish of the corner-first order), and those three algorithms are exactly the \"Edge In Slot\" cases from full F2L — so this method doubles as your first real F2L practice, just applied to every slot instead of only when you happen to get lucky.",
   ],
-  hero: { alg: "U R U' R' U R U' R' U R U' R'", loop: true, repeat: 2, label: "Reverse sexy ×3 — corner around a seated edge" },
+  hero: { alg: "R U R' U' R U R' U' R U R' U'", loop: true, repeat: 2, label: "Sexy move ×3 — corner around a seated edge" },
   sections: [
     {
       id: "cross",
@@ -86,7 +86,7 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
         {
           kind: "cases",
           cases: [
-            solveCase("up", "White up", "The corner sits above its slot, white sticker on top.", "Slot at the front-right.", CORNER("up"), "f2l-pair", { note: "Reverse sexy move, three times. F2L 32." }),
+            solveCase("up", "White up", "The corner sits above its slot, white sticker on top.", "Slot at the front-right.", CORNER("up"), "f2l-pair", { note: "The sexy move, three times — the very same algorithm as the first-layer corner with white up in Layer by layer. F2L 32." }),
             solveCase("front", "White front", "The corner sits above its slot, white sticker pointing at you.", "Slot at the front-right.", CORNER("front"), "f2l-pair", { note: "F2L 33 — not a repeated trigger, worth drilling on its own." }),
             solveCase("right", "White right", "The corner sits above its slot, white sticker pointing right.", "Slot at the front-right.", CORNER("right"), "f2l-pair", { note: "F2L 34 — the mirror-shaped sibling of \"white front\"." }),
           ],
@@ -95,7 +95,7 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
         {
           kind: "cases",
           cases: [
-            solveCase("left-up", "White up · left slot", "The corner sits above the front-left slot, white sticker on top.", "Slot at the front-left.", CORNER("left-up"), "f2l-pair", { note: "Left reverse sexy move, three times." }),
+            solveCase("left-up", "White up · left slot", "The corner sits above the front-left slot, white sticker on top.", "Slot at the front-left.", CORNER("left-up"), "f2l-pair", { note: "The left sexy move, three times — the mirror of the case above, and of the left-hand first-layer corner." }),
             solveCase("left-front", "White front · left slot", "The corner sits above the front-left slot, white sticker pointing at you.", "Slot at the front-left.", CORNER("left-front"), "f2l-pair", { note: "The mirror of \"white front\"." }),
             solveCase("left-left", "White left · left slot", "The corner sits above the front-left slot, white sticker pointing left.", "Slot at the front-left.", CORNER("left-left"), "f2l-pair", { note: "The mirror of \"white right\"." }),
           ],
