@@ -3,6 +3,7 @@ import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { useAlgorithmDataVersionCheck } from "./hooks/useAlgorithmDataVersionCheck";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { useSharedSolve } from "./hooks/useSharedSolve";
 import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
 import { AppLogo } from "./components/AppLogo";
@@ -18,6 +19,8 @@ const CaseTrainerPage = lazy(() => import("./pages/CaseTrainerPage"));
 const AcademyPage = lazy(() => import("./pages/AcademyPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
+// The read-only preview a share link opens (#s=…) — loaded only when there is one.
+const SharedSolveView = lazy(() => import("./components/SharedSolveView"));
 
 type Tab = "solve" | "training" | "attack" | "trainer" | "academy" | "settings" | "debug";
 
@@ -37,6 +40,7 @@ export default function App() {
   const dataUpdateAvailable = useAlgorithmDataVersionCheck();
   const [dataNoticeDismissed, setDataNoticeDismissed] = useState(false);
   useWakeLock();
+  const { state: sharedSolve, close: closeSharedSolve } = useSharedSolve();
 
   return (
     <SmartCubeProvider>
@@ -78,6 +82,12 @@ export default function App() {
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
         </Suspense>
+
+        {sharedSolve && (
+          <Suspense fallback={null}>
+            <SharedSolveView state={sharedSolve} onClose={closeSharedSolve} />
+          </Suspense>
+        )}
 
         {updateAvailable && <UpdateNotice />}
         {!updateAvailable && dataUpdateAvailable && !dataNoticeDismissed && (
