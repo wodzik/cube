@@ -6,9 +6,11 @@ import { localizeGuide, localizedGuides } from "./guideContent";
 /** Notation spans (`R U R'`) must survive translation verbatim, and so must the number of **bold** spans. */
 const codeSpans = (text: string) => (text.match(/`[^`]+`/g) ?? []).sort();
 const boldCount = (text: string) => (text.match(/\*\*[^*]+\*\*/g) ?? []).length;
+const italicCount = (text: string) => (text.replace(/\*\*[^*]+\*\*/g, "").match(/\*[^*]+\*/g) ?? []).length;
 function sameMarkup(where: string, en: string, pl: string) {
   expect(`${where}: code ${codeSpans(pl).join(" | ")}`).toBe(`${where}: code ${codeSpans(en).join(" | ")}`);
   expect(`${where}: bold ${boldCount(pl)}`).toBe(`${where}: bold ${boldCount(en)}`);
+  expect(`${where}: italic ${italicCount(pl)}`).toBe(`${where}: italic ${italicCount(en)}`);
 }
 const filled = (where: string, text: string | undefined) => expect(`${where}: ${text?.trim() ? "ok" : "missing"}`).toBe(`${where}: ok`);
 

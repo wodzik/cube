@@ -30,9 +30,9 @@ interface GuidePageProps {
   onPractice: (lessonId: string, stepId: string) => void;
 }
 
-/** `code` → notation, **text** → bold. Nothing else — guide text is our own, not user input. */
+/** `code` → notation, **text** → bold, *text* → italic. Nothing else — guide text is our own, not user input. */
 export function renderInline(text: string): ReactNode[] {
-  return text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, i) => {
+  return text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, i) => {
     if (part.startsWith("`") && part.endsWith("`")) {
       return (
         <code key={i} className="font-mono text-[0.92em] px-1 py-0.5 rounded bg-white/[0.07] text-white whitespace-nowrap">
@@ -45,6 +45,13 @@ export function renderInline(text: string): ReactNode[] {
         <strong key={i} className="font-semibold text-gray-100">
           {part.slice(2, -2)}
         </strong>
+      );
+    }
+    if (part.length > 2 && part.startsWith("*") && part.endsWith("*")) {
+      return (
+        <em key={i} className="italic text-gray-200">
+          {part.slice(1, -1)}
+        </em>
       );
     }
     return part;
