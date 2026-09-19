@@ -68,6 +68,7 @@ import { GroupTabs } from "../components/GroupTabs";
 import { SubgroupGrid } from "../components/SubgroupGrid";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
+import { loadGroupView, saveGroupView, PRACTICE_VIEW_KEY } from "../services/lastView";
 
 const TRAINING_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -107,7 +108,9 @@ function TrainingPageInner() {
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
-  const [group, setGroup] = useState<AlgGroup>("f2l");
+  // Where you were when you last left this tab (validated against what exists now).
+  const [restoredView] = useState(() => loadGroupView(PRACTICE_VIEW_KEY));
+  const [group, setGroup] = useState<AlgGroup>(() => restoredView?.group ?? "f2l");
   const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"), "practice");
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadAlgGroup(group));
   const [caseIdx, setCaseIdx] = useState(0);
@@ -122,7 +125,7 @@ function TrainingPageInner() {
   const [showPlayback, setShowPlayback] = useState(false);
   const [showCaseAdd, setShowCaseAdd] = useState(false);
   /** When the active group hasSubgroups: null = browsing the folder grid, set = drilled into one subgroup's own case list. */
-  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(null);
+  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(() => restoredView?.subgroup ?? null);
   const groupMeta = getGroupMeta(group);
   const activeSubgroup = groupMeta?.hasSubgroups ? groupMeta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
   const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
@@ -188,10 +191,22 @@ function TrainingPageInner() {
     else setCases(loadAlgGroup(group));
   };
 
-  useEffect(() => {
+  // Switching to a DIFFERENT group leaves any open folder (a restored folder on
+  // first load is kept: the reset lives here, not in the effect below).
+  const selectGroup = (next: AlgGroup) => {
+    if (next === group) return;
+    setGroup(next);
     setActiveSubgroupId(null);
+  };
+
+  useEffect(() => {
+    saveGroupView(PRACTICE_VIEW_KEY, group, activeSubgroupId);
+  }, [group, activeSubgroupId]);
+
+  useEffect(() => {
     const meta = getGroupMeta(group);
-    setCases(meta?.hasSubgroups ? [] : loadAlgGroup(group));
+    const openFolder = meta?.hasSubgroups ? meta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
+    setCases(openFolder ? getSubgroupCases(group, openFolder.id) : meta?.hasSubgroups ? [] : loadAlgGroup(group));
     setCaseIdx(0);
     setTrackingEnabled(loadTrackingEnabled(group, meta?.category === "Roux"));
     setAccumulatedOrientation(identityOrientation());
@@ -486,7 +501,7 @@ function TrainingPageInner() {
         <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
           <GroupTabs
             activeId={group}
-            onSelect={setGroup}
+            onSelect={selectGroup}
             managementEnabled
             rightSlot={
               <div className="flex items-center gap-2">
@@ -515,7 +530,7 @@ function TrainingPageInner() {
             <div className="w-full overflow-x-auto">
               <GroupTabs
                 activeId={group}
-                onSelect={setGroup}
+                onSelect={selectGroup}
                 managementEnabled
                 rightSlot={
                   <div className="flex items-center gap-2">
@@ -557,7 +572,7 @@ function TrainingPageInner() {
             <div className="w-full overflow-x-auto">
               <GroupTabs
                 activeId={group}
-                onSelect={setGroup}
+                onSelect={selectGroup}
                 managementEnabled
                 rightSlot={
                   <div className="flex items-center gap-2">

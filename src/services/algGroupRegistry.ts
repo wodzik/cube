@@ -945,3 +945,8 @@ export function importGroup(json: string, fallbackName: string, fallbackCategory
   }
   return id;
 }
+
+/** Whether a group can appear in Time Attack: a group with subgroups needs at least one Attack-enabled folder; otherwise it's available unless opted out. */
+export function isAttackAvailable(g: AlgGroupMeta): boolean {
+  return g.hasSubgroups ? (g.subgroups ?? []).some((s) => s.availableInAttack === true) : g.availableInAttack !== false;
+}

@@ -41,6 +41,7 @@ import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
+import { loadAcademyView, saveAcademyView } from "../services/lastView";
 
 const ONBOARDING_SEEN_KEY = "nact_academy_onboarding_seen";
 
@@ -95,9 +96,14 @@ function AcademyInner() {
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
-  const [lessonId, setLessonId] = useState(ACADEMY_LESSONS[0].id);
+  // Where you were when you last left this tab (validated against the lessons that exist).
+  const [restoredView] = useState(loadAcademyView);
+  const [lessonId, setLessonId] = useState(() => restoredView?.lesson ?? ACADEMY_LESSONS[0].id);
   const lesson = ACADEMY_LESSONS.find((l) => l.id === lessonId) ?? ACADEMY_LESSONS[0];
-  const [stepId, setStepId] = useState(lesson.steps[0].id);
+  const [stepId, setStepId] = useState(() => restoredView?.step ?? lesson.steps[0].id);
+  useEffect(() => {
+    saveAcademyView(lessonId, stepId);
+  }, [lessonId, stepId]);
   const [stored, setStored] = useState<Record<string, string[]>>(loadSelected);
   const [drillIdx, setDrillIdx] = useState(0);
   const [drillRound, setDrillRound] = useState(0);
