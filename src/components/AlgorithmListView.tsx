@@ -21,6 +21,9 @@ import { getDefaultVariant } from "../logic/algGroupConfig";
 import { getGroupMeta, resolveDisplayConfig } from "../services/algGroupRegistry";
 import { CaseCard } from "./CaseCard";
 import { CaseListItem } from "./CaseListItem";
+import { useT } from "../i18n/useT";
+import { learningStatusLabel } from "../i18n/labels";
+import type { MessageKey } from "../i18n/i18n";
 
 type StatusFilter = "all" | LearningStatus;
 type ViewMode = "grid" | "list";
@@ -41,11 +44,11 @@ export interface AlgorithmListViewProps {
   displayConfigOverride?: Partial<DisplayConfig>;
 }
 
-const STATUS_LABELS: Record<StatusFilter, string> = {
-  all: "All",
-  "not-started": "Not started",
-  learning: "Learning",
-  learned: "Learned",
+const STATUS_LABELS: Record<StatusFilter, MessageKey> = {
+  all: "status.all",
+  "not-started": "status.notStarted",
+  learning: "status.learning",
+  learned: "status.learned",
 };
 
 const STATUS_PILL_ACTIVE: Record<StatusFilter, string> = {
@@ -84,6 +87,7 @@ export function AlgorithmListView({
   onAddCase,
   displayConfigOverride,
 }: AlgorithmListViewProps) {
+  const { t } = useT();
   const allCategories = useMemo(() => Array.from(new Set(cases.map((c) => c.category))), [cases]);
   const groupDisplayConfig = useMemo(
     () => resolveDisplayConfig(getGroupMeta(group), displayConfigOverride),
@@ -140,7 +144,7 @@ export function AlgorithmListView({
       {/* Filter bar */}
       <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-b border-white/[0.06] bg-gray-900/40 backdrop-blur-sm sticky top-0 z-20">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider shrink-0">Category</span>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider shrink-0">{t("list.category")}</span>
           <div className="flex flex-wrap gap-1.5">
             {allCategories.map((cat) => {
               const visible = !hiddenCategories.has(cat);
@@ -156,7 +160,7 @@ export function AlgorithmListView({
                   <span className="text-gray-600 text-[10px] ml-0.5">{categoryCounts[cat] ?? 0}</span>
                   <button
                     onClick={() => toggleCategoryVisibility(cat)}
-                    title={visible ? "Hide category" : "Show category"}
+                    title={visible ? t("list.hideCategory") : t("list.showCategory")}
                     className={`ml-0.5 p-0.5 rounded transition-colors ${visible ? "text-gray-400 hover:text-white" : "text-gray-700 hover:text-gray-400"}`}
                   >
                     {visible ? <Eye size={11} /> : <EyeOff size={11} />}
@@ -164,7 +168,7 @@ export function AlgorithmListView({
                   {visible && (
                     <button
                       onClick={() => toggleCategorySelection(cat)}
-                      title={allSel ? "Deselect category" : "Select all in category"}
+                      title={allSel ? t("list.deselectCategory") : t("list.selectCategory")}
                       className="p-0.5 rounded transition-colors"
                       style={{ color: allSel ? "var(--accent-bright)" : "var(--color-gray-700)" }}
                     >
@@ -179,7 +183,7 @@ export function AlgorithmListView({
 
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</span>
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{t("list.status")}</span>
             {(["all", "not-started", "learning", "learned"] as StatusFilter[]).map((s) => (
               <button
                 key={s}
@@ -188,7 +192,7 @@ export function AlgorithmListView({
                   statusFilter === s ? STATUS_PILL_ACTIVE[s] : "bg-white/[0.04] text-gray-500 hover:text-gray-300"
                 }`}
               >
-                {STATUS_LABELS[s]}
+                {t(STATUS_LABELS[s])}
               </button>
             ))}
           </div>
@@ -204,25 +208,25 @@ export function AlgorithmListView({
               )}
             </span>
             <button onClick={() => onSelectAll(!allSelected, filteredNames)} className="btn-secondary py-0.5 text-[11px]">
-              {allSelected ? "Deselect all" : "Select all"}
+              {allSelected ? t("list.deselectAll") : t("list.selectAll")}
             </button>
             {onAddCase && (
               <button onClick={onAddCase} className="btn-secondary py-0.5 text-[11px]">
-                <Plus size={11} /> New case
+                <Plus size={11} /> {t("case.new")}
               </button>
             )}
 
             <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode("grid")}
-                title="Grid view"
+                title={t("list.gridView")}
                 className={`p-1 rounded transition-colors ${viewMode === "grid" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
               >
                 <LayoutGrid size={12} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                title="List view"
+                title={t("list.listView")}
                 className={`p-1 rounded transition-colors ${viewMode === "list" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
               >
                 <List size={12} />
@@ -233,7 +237,7 @@ export function AlgorithmListView({
       </div>
 
       {filteredCases.length === 0 ? (
-        <div className="flex items-center justify-center h-48 text-gray-600 text-sm">No cases match the current filters.</div>
+        <div className="flex items-center justify-center h-48 text-gray-600 text-sm">{t("list.noMatch")}</div>
       ) : viewMode === "grid" ? (
         <div className="px-4 sm:px-6 pb-10">
           <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
@@ -273,7 +277,7 @@ export function AlgorithmListView({
                       e.stopPropagation();
                       if (defV) onStatusChange(c.name, defV.id, STATUS_NEXT[status]);
                     }}
-                    title={`Status: ${status} (click to advance)`}
+                    title={t("status.tooltip", { status: learningStatusLabel(status) })}
                     className={`p-1 rounded transition-colors shrink-0 ${STATUS_COLOR[status]}`}
                   >
                     {STATUS_ICON[status]}

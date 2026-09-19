@@ -22,7 +22,9 @@ import {
 } from "../services/algGroupRegistry";
 import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { GroupSettingsModal } from "./GroupSettingsModal";
+import { categoryLabel } from "../i18n/labels";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
+import { useT } from "../i18n/useT";
 
 interface GroupTabsProps {
   activeId: string;
@@ -56,6 +58,7 @@ function downloadJson(filename: string, json: string): void {
 }
 
 export function GroupTabs({ activeId, onSelect, managementEnabled = false, attackContext = false, rightSlot }: GroupTabsProps) {
+  const { t } = useT();
   const [allGroups, setAllGroups] = useState<AlgGroupMeta[]>(() => listGroups());
   const groups = attackContext ? allGroups.filter(isAttackAvailable) : allGroups;
   const categories = attackContext ? CATEGORIES.filter((c) => groups.some((g) => groupCategory(g) === c)) : CATEGORIES;
@@ -83,7 +86,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
       onSelect(id);
       setImportError(null);
     } catch {
-      setImportError(`Couldn't import "${file.name}" — not a recognised JSON file.`);
+      setImportError(t("groups.importError", { file: file.name }));
       setTimeout(() => setImportError(null), 4000);
     }
   };
@@ -150,7 +153,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
               selectedCategory === c ? "text-white bg-white/[0.08]" : "text-gray-600 hover:text-gray-300 hover:bg-white/[0.03]"
             }`}
           >
-            {c}
+            {categoryLabel(c)}
           </button>
         ))}
         {rightSlot && <div className="ml-auto shrink-0">{rightSlot}</div>}
@@ -177,7 +180,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
                   e.stopPropagation();
                   setSettingsFor(g);
                 }}
-                title="Group settings (rename, camera/stickering, export, delete)"
+                title={t("groups.settings")}
                 className={`absolute right-0.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-gray-600 hover:text-gray-200 transition-opacity ${
                   activeId === g.id ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover/tab:opacity-100"
                 }`}
@@ -189,14 +192,14 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
         ))}
 
         {visibleGroups.length === 0 && !managementEnabled && (
-          <p className="text-xs text-gray-600 py-1">No {attackContext ? "Attack-enabled " : ""}groups in {selectedCategory}.</p>
+          <p className="text-xs text-gray-600 py-1">{t(attackContext ? "groups.emptyAttack" : "groups.empty", { category: categoryLabel(selectedCategory) })}</p>
         )}
 
         {managementEnabled && (
           <div className="flex items-center gap-0.5 ml-1 pl-2 border-l border-white/[0.08] shrink-0">
             <button
               onClick={() => setSettingsFor("new")}
-              title="New group"
+              title={t("groups.new")}
               className="p-1.5 rounded-lg text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
             >
               <Plus size={14} />
@@ -214,7 +217,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              title="Import group from JSON"
+              title={t("groups.import")}
               className="p-1.5 rounded-lg text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
             >
               <Upload size={14} />

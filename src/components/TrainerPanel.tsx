@@ -23,12 +23,14 @@ import { TimerDisplay } from "./TimerDisplay";
 import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { SequenceProgress } from "../logic/sequenceTracker";
+import { useT } from "../i18n/useT";
 
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
 const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(2));
 
 /** Wraps children in a real button only when there's something to do on click — otherwise a plain container, so idle timers aren't announced as buttons. */
 function Tap({ onClick, className = "", children }: { onClick?: () => void; className?: string; children: ReactNode }) {
+  const { t } = useT();
   if (!onClick) return <div className={className}>{children}</div>;
   return (
     // No opacity/filter hover effect on purpose: either would create a
@@ -38,7 +40,7 @@ function Tap({ onClick, className = "", children }: { onClick?: () => void; clas
     <button
       type="button"
       onClick={onClick}
-      aria-label="Open solve analysis"
+      aria-label={t("trainerPanel.openAnalysis")}
       className={`text-left rounded-xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${className}`}
     >
       {children}

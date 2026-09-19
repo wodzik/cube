@@ -303,6 +303,78 @@ export const en = {
   "session.display.moves": "Move count only",
   "session.display.hint": "Hide solve times everywhere in this session — the timer, last-solve result, and history show move count instead. Times are still recorded, just not shown.",
   "common.save": "Save",
+
+  // ─── Drill: shared ───
+  "category.misc": "Other",
+  "status.all": "All",
+  "status.notStarted": "Not started",
+  "status.learning": "Learning",
+  "status.learned": "Learned",
+  "status.tooltip": "Status: {status} (click to advance)",
+  "case.practice": "Practice this now",
+  "case.showHow": "Show how to perform this algorithm",
+  "case.editVariants": "Edit variants",
+  "case.edit": "Edit case",
+  "case.editAlg": "Edit algorithm",
+  "case.new": "New case",
+  "stats.pb": "PB",
+  "stats.avg": "Avg",
+  "stats.ao5": "Ao5",
+  "trainerPanel.openAnalysis": "Open solve analysis",
+
+  // ─── Group tabs ───
+  "groups.settings": "Group settings (rename, camera/stickering, export, delete)",
+  "groups.empty": "No groups in {category}.",
+  "groups.emptyAttack": "No Attack-enabled groups in {category}.",
+  "groups.new": "New group",
+  "groups.import": "Import group from JSON",
+  "groups.importError": "Couldn't import \"{file}\" — not a recognised JSON file.",
+
+  // ─── Algorithm list ───
+  "list.category": "Category",
+  "list.hideCategory": "Hide category",
+  "list.showCategory": "Show category",
+  "list.deselectCategory": "Deselect category",
+  "list.selectCategory": "Select all in category",
+  "list.status": "Status",
+  "list.deselectAll": "Deselect all",
+  "list.selectAll": "Select all",
+  "list.gridView": "Grid view",
+  "list.listView": "List view",
+  "list.noMatch": "No cases match the current filters.",
+
+  // ─── Common (more) ───
+  "common.clickToDelete": "Click again to delete",
+  "common.clickToConfirm": "Click again to confirm",
+  "common.done": "Done",
+  "common.add": "Add",
+  "common.name": "Name",
+  "common.algorithm": "Algorithm",
+
+  // ─── Counts ───
+  "count.solves.one": "{n} solve",
+  "count.solves.other": "{n} solves",
+
+  // ─── Case editor ───
+  "caseEdit.prev": "Previous algorithm (←)",
+  "caseEdit.next": "Next algorithm (→)",
+  "caseEdit.newVariant": "New variant",
+  "caseEdit.algPlaceholder": "Algorithm (e.g. R U R' U')",
+  "caseEdit.youtubePlaceholder": "YouTube URL (optional)",
+  "caseEdit.addVariant": "Add variant",
+  "caseEdit.advanced": "Advanced",
+  "caseEdit.advancedOverriding": "Advanced (overriding group display)",
+  "caseEdit.override": "Override this case's display (e.g. mask specific slots, different camera)",
+  "caseEdit.deleteCase": "Delete case",
+  "caseEdit.confirmDeleteCase": "Click again to delete case",
+  "variant.namePlaceholder": "Variant name",
+  "variant.default": "Default variant",
+  "variant.setDefault": "Set as default (saves immediately)",
+  "variant.youtube": "Watch on YouTube",
+  "variant.test": "Test this variant with your cube (attempts won't be saved)",
+  "variant.edit": "Edit variant",
+  "variant.clearTimes": "Clear times",
+  "variant.delete": "Delete variant",
 } as const;
 
 export type MessageKey = keyof typeof en;

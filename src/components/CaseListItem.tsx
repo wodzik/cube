@@ -15,6 +15,7 @@ import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
+import { useT } from "../i18n/useT";
 
 export interface CaseListItemProps {
   case_: AlgorithmCase;
@@ -33,6 +34,7 @@ export interface CaseListItemProps {
 }
 
 export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive, left, right, onEdit, onSelect, className = "" }: CaseListItemProps) {
+  const { t } = useT();
   const defV = getDefaultVariant(case_);
   const stats = defV ? computeVariantStatsForSource(defV.times, statsSource) : null;
   const displayConfig: DisplayConfig = { ...groupDisplayConfig, ...case_.displayConfigOverride };
@@ -71,15 +73,15 @@ export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive,
           if (onSelect) onSelect();
           else onEdit?.();
         }}
-        title={onSelect ? "Practice this now" : onEdit ? "Edit algorithm" : undefined}
+        title={onSelect ? t("case.practice") : onEdit ? t("case.editAlg") : undefined}
       >
         <p className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-gray-300"}`}>{case_.name}</p>
         <p className="text-[10px] text-gray-600 font-mono truncate mt-0.5">{defV?.alg ?? ""}</p>
         {stats && stats.count > 0 && (
           <div className="flex items-center gap-2 mt-0.5">
-            {stats.bestTime !== null && <span className="text-[9px] text-emerald-500 font-mono">PB {formatTime(stats.bestTime)}</span>}
-            {stats.mean !== null && <span className="text-[9px] text-gray-400 font-mono">Avg {formatTime(stats.mean)}</span>}
-            {stats.ao5 !== null && <span className="text-[9px] font-mono" style={{ color: "var(--accent-bright)" }}>Ao5 {formatTime(stats.ao5)}</span>}
+            {stats.bestTime !== null && <span className="text-[9px] text-emerald-500 font-mono">{t("stats.pb")} {formatTime(stats.bestTime)}</span>}
+            {stats.mean !== null && <span className="text-[9px] text-gray-400 font-mono">{t("stats.avg")} {formatTime(stats.mean)}</span>}
+            {stats.ao5 !== null && <span className="text-[9px] font-mono" style={{ color: "var(--accent-bright)" }}>{t("stats.ao5")} {formatTime(stats.ao5)}</span>}
           </div>
         )}
       </div>
@@ -92,7 +94,7 @@ export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive,
           }}
           className="p-1 shrink-0 transition-colors opacity-0 group-hover:opacity-100"
           style={{ color: "var(--accent-bright)" }}
-          title="Practice this now"
+          title={t("case.practice")}
         >
           <Play size={12} fill="currentColor" />
         </button>
@@ -105,7 +107,7 @@ export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive,
             onEdit();
           }}
           className="p-1 text-gray-700 hover:text-gray-300 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
-          title="Edit case"
+          title={t("case.edit")}
         >
           <Pencil size={11} />
         </button>
