@@ -382,3 +382,15 @@ function buildStartedCorrections(accumulated: Map<Face, number>): string[] {
   });
   return corrections;
 }
+
+/** An undo sequence longer than this isn't worth reading move by move — the user is told to solve the cube and reset instead. */
+export const MAX_UNDO_MOVES_SHOWN = 25;
+
+export type UndoDisplay = { kind: "moves"; text: string } | { kind: "too-long" } | null;
+
+/** What to show for the current correction sequence: the moves, a "solve the cube and reset" notice when there are too many, or nothing. */
+export function describeUndo(correctionSequence: readonly string[], max: number = MAX_UNDO_MOVES_SHOWN): UndoDisplay {
+  if (correctionSequence.length === 0) return null;
+  if (correctionSequence.length > max) return { kind: "too-long" };
+  return { kind: "moves", text: correctionSequence.join(" ") };
+}
