@@ -211,11 +211,12 @@ export function TrainerPanel({
   cubeAlg,
   timesMs,
   moveCounts = [],
-  statsLabel = "Statistics",
+  statsLabel,
   statsHeight = layout === "side" ? 280 : "fill",
   showAo12,
   statsAside,
 }: TrainerPanelProps) {
+  const { t } = useT();
   return (
     <TrainLayout
       header={header}
@@ -347,7 +348,7 @@ export function TrainerPanel({
           {statsAside && <div className="shrink-0">{statsAside}</div>}
           <div className="flex-1 min-w-0 flex flex-col">
             <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 shrink-0">
-              {statsLabel}
+              {statsLabel ?? t("stats.label")}
             </h3>
             <div className="flex-1 min-h-0 flex flex-col">
               {moveCountOnly ? (

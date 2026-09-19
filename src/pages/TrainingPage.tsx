@@ -68,6 +68,7 @@ import { GroupTabs } from "../components/GroupTabs";
 import { SubgroupGrid } from "../components/SubgroupGrid";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
+import { useT } from "../i18n/useT";
 
 const TRAINING_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -103,6 +104,7 @@ export default function TrainingPage() {
 }
 
 function TrainingPageInner() {
+  const { t, tn } = useT();
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
@@ -450,11 +452,11 @@ function TrainingPageInner() {
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
 
   const hintText = !currentCase
-    ? "Select cases below to begin practicing"
+    ? t("drill.selectCases")
     : state.phase === "setup"
-      ? "Make a move to start"
+      ? t("drill.makeMove")
       : state.phase === "done"
-        ? `${moveCount} moves`
+        ? tn("count.moves", moveCount)
         : null;
 
   const orientationControls = (
@@ -464,17 +466,17 @@ function TrainingPageInner() {
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
           trackingEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
         }`}
-        title="Track cube orientation across algorithms with net whole-cube rotation (Roux M/E/S) and show the case setup rotated to match"
+        title={t("drill.centers.title")}
       >
-        <Compass size={12} /> Centers
+        <Compass size={12} /> {t("drill.centers")}
       </button>
       {trackingEnabled && (
         <button
           onClick={resyncOrientation}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-          title="My physical cube's orientation is canonical again — reset tracking"
+          title={t("drill.resync.title")}
         >
-          <RotateCcw size={12} /> Resync
+          <RotateCcw size={12} /> {t("drill.resync")}
         </button>
       )}
     </>
@@ -536,7 +538,7 @@ function TrainingPageInner() {
                   onClick={backToFolders}
                   className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-xl text-gray-500 hover:text-gray-300 hover:bg-white/[0.03] transition-all shrink-0"
                 >
-                  <ChevronLeft size={13} /> Back
+                  <ChevronLeft size={13} /> {t("common.back")}
                 </button>
                 <div className="w-px h-5 bg-white/[0.08] mx-1 shrink-0" />
                 {(groupMeta?.subgroups ?? []).map((sg) => (
@@ -574,8 +576,8 @@ function TrainingPageInner() {
         showMaskToggle
         maskMoves={maskMoves}
         onToggleMask={toggleMaskMoves}
-        loadingText={!currentCase ? "No case selected" : undefined}
-        completeText="Algorithm complete!"
+        loadingText={!currentCase ? t("drill.noCase") : undefined}
+        completeText={t("drill.complete")}
         centerTop={
           currentCase ? (
             <div className="flex flex-col items-center gap-1 text-center">
@@ -596,16 +598,16 @@ function TrainingPageInner() {
               <button
                 onClick={resetAttempt}
                 className="btn-secondary text-xs"
-                title="Restart this case from the beginning"
+                title={t("drill.reset.title")}
               >
-                <RotateCcw size={13} /> Reset
+                <RotateCcw size={13} /> {t("solve.reset")}
               </button>
               <button
                 onClick={() => setShowPlayback(true)}
                 className="btn-secondary text-xs"
-                title="Watch this algorithm performed move by move"
+                title={t("drill.showHow.title")}
               >
-                <Video size={13} /> Show me how
+                <Video size={13} /> {t("drill.showHow")}
               </button>
             </div>
           ) : undefined
@@ -622,7 +624,7 @@ function TrainingPageInner() {
           !currentCase ? (
             <div className="flex flex-col items-center gap-2 px-6 text-center">
               <ListChecks size={20} className="text-gray-500" />
-              <span className="text-sm font-medium text-gray-400">Select cases below to begin practicing</span>
+              <span className="text-sm font-medium text-gray-400">{t("drill.selectCases")}</span>
             </div>
           ) : undefined
         }
@@ -630,7 +632,7 @@ function TrainingPageInner() {
         cameraLongitude={displayConfig.cameraLongitude}
         cubeSetupAlg=""
         timesMs={attemptsForSource(variant?.times ?? [], "training").map((t) => t.time * 1000)}
-        statsLabel={currentCase ? `Times — ${currentCase.name}` : "Statistics"}
+        statsLabel={currentCase ? t("stats.timesFor", { name: currentCase.name }) : t("stats.label")}
         showAo12={false}
         layout="side"
         bottom={

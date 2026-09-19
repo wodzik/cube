@@ -117,6 +117,8 @@ import type { CubeVisualisationRef } from "../components/CubeVisualisation";
 import type { StickeringMaskOrbits } from "../types/cube";
 import type { SessionConfig } from "../types/session";
 import type { TrainerAttempt, TrainerType } from "../types/trainer";
+import { useT } from "../i18n/useT";
+import { t, tn, formatTime, type MessageKey } from "../i18n/i18n";
 
 const TRAINER_FACE: Face = "U"; // white cross in the standard scramble frame (white top / green front)
 const TYPE_STORAGE_KEY = "nact_trainer_type";
@@ -237,13 +239,14 @@ const SIDE_STORAGE_KEYS: Record<SidedRouxType, string> = {
   fs: "nact_trainer_roux_fs_side",
   fbdr: "nact_trainer_roux_fbdr_side",
 };
-const SIDE_LABELS: Record<SidedRouxType, string> = { ss: "Square", fs: "Square", fbdr: "Solved FS" };
+const SIDE_LABELS: Record<SidedRouxType, MessageKey> = { ss: "trainer.side.square", fs: "trainer.side.square", fbdr: "trainer.side.solvedFs" };
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";
 const F2L_SLOTS_STORAGE_KEY = "nact_trainer_f2l_slots";
 /** Ladder mode: bump the level after this many attempts at it with at least this optimal rate. */
 const LADDER_WINDOW = 10;
 const LADDER_THRESHOLD = 0.8;
 
+/** Terms (Cross, XCross, FB, CMLL…) stay as they are; only the two F2L drill kinds have translated labels — see trainerTypeLabel. */
 const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "cross", label: "Cross" },
   { id: "cross-case", label: "Cross Case" },
@@ -260,6 +263,9 @@ const TRAINER_TYPES: { id: TrainerType; label: string }[] = [
   { id: "cmll", label: "CMLL" },
   { id: "eolr", label: "EOLR" },
 ];
+
+const trainerTypeLabel = (type: TrainerType): string =>
+  type === "f2l-case" ? t("trainer.type.case") : type === "f2l" ? t("trainer.type.fromScramble") : (TRAINER_TYPES.find((x) => x.id === type)?.label ?? type);
 
 /**
  * Static piece-level mask for a type's tab icon — the exact same builders
@@ -389,6 +395,7 @@ export default function CaseTrainerPage() {
 }
 
 function CaseTrainerInner() {
+  useT(); // re-render on language change; text below uses the module-level t/tn
   const { state, submitCubeMove, setTarget, confirmManualSetup } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
   /** Auxiliary flat (unfolded-net) view — always mounted, kept in sync by fanning out every view call. */
@@ -575,10 +582,10 @@ function CaseTrainerInner() {
           hintUsedRef.current = false;
           return;
         }
-        setGenError("Cube kept moving during generation — hold it still, then press refresh.");
+        setGenError(t("trainer.genMoved"));
       } catch (err) {
         if (generationSeqRef.current === seq) {
-          setGenError(err instanceof Error ? err.message : "Failed to generate trainer scramble");
+          setGenError(err instanceof Error ? err.message : t("trainer.genFailed"));
         }
       } finally {
         if (generationSeqRef.current === seq) setIsGenerating(false);
@@ -1059,41 +1066,41 @@ function CaseTrainerInner() {
     .join("+");
   const activeHint =
     F2L_TYPES.includes(attemptType)
-      ? `Insert the ${f2lDisplaySlots} ${(current?.slots?.length ?? 1) > 1 ? "pairs" : "pair"} (cross stays)!`
+      ? tn("trainer.hint.f2l", current?.slots?.length ?? 1, { slots: f2lDisplaySlots })
       : attemptType === "cross" || attemptType === "cross-case"
-      ? "Solve the cross!"
+      ? t("trainer.hint.cross")
       : attemptType === "eocross"
-        ? "Solve the cross with all edges oriented!"
+        ? t("trainer.hint.eocross")
         : attemptType === "pair"
-          ? `Form the ${viewSlotLabel(current?.slot ?? slot)} pair (cross stays)!`
+          ? t("trainer.hint.pair", { slot: viewSlotLabel(current?.slot ?? slot) })
           : attemptType === "xxcross"
-            ? `Solve the cross + ${viewSlotLabel(current?.slot ?? pair)} pairs!`
+            ? t("trainer.hint.xxcross", { slots: viewSlotLabel(current?.slot ?? pair) })
             : attemptType === "fb"
-              ? "Build the first block (left 1×2×3)!"
+              ? t("trainer.hint.fb")
               : attemptType === "fs"
-                ? `Build the ${current?.slot ?? sides.fs} first square!`
+                ? t("trainer.hint.fs", { side: current?.slot ?? sides.fs })
                 : attemptType === "fbdr"
-                  ? "Finish the first block + DR edge!"
+                  ? t("trainer.hint.fbdr")
                   : attemptType === "ss"
-                    ? `Solve the ${current?.slot ?? sides.ss} second square (FB stays)!`
+                    ? t("trainer.hint.ss", { side: current?.slot ?? sides.ss })
                     : attemptType === "cmll"
-                      ? "Recognize and solve the CMLL case!"
+                      ? t("trainer.hint.cmll")
                       : attemptType === "eolr"
-                        ? "Solve EOLR (orient edges, prepare UL/UR)!"
-                        : `Solve the cross + ${viewSlotLabel(current?.slot ?? slot)} pair!`;
+                        ? t("trainer.hint.eolr")
+                        : t("trainer.hint.xcross", { slot: viewSlotLabel(current?.slot ?? slot) });
   const hintText =
     state.phase === "setup"
       ? summary
-        ? "Next scramble is ready — perform it when you are"
-        : "Perform the scramble shown above"
+        ? t("trainer.hint.nextReady")
+        : t("solve.hint.scramble")
       : state.phase === "ready"
-        ? "Make a move to start"
+        ? t("drill.makeMove")
         : state.phase === "active"
           ? activeHint
           : state.phase === "done"
             ? F2L_TYPES.includes(attemptType)
-              ? `${moveCount} moves`
-              : `${moveCount} moves · optimal ${current?.optimalLength ?? "—"}`
+              ? tn("count.moves", moveCount)
+              : t("trainer.movesOptimal", { moves: tn("count.moves", moveCount), n: current?.optimalLength ?? "—" })
             : null;
 
   const isRouxType = ROUX_TYPES.includes(trainerType);
@@ -1101,11 +1108,11 @@ function CaseTrainerInner() {
   const engineNotReady = isRouxType ? !isRouxEngineReady() : engineKey !== null && !isEngineReady(engineKey);
   const loadingText = isGenerating
     ? engineNotReady
-      ? `Preparing ${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} engine — first run builds tables…`
-      : "Generating scramble…"
+      ? t("trainer.preparing", { engine: trainerTypeLabel(trainerType) })
+      : t("solve.generating")
     : (genError ??
       (current?.type === "f2l-case" || current?.type === "cross-case"
-        ? "No scramble — recognise the case on the cube and solve it"
+        ? t("trainer.noScramble")
         : undefined));
 
   return (
@@ -1134,17 +1141,17 @@ function CaseTrainerInner() {
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
                   ladderEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
                 }`}
-                title={`Ladder mode: raise the optimal length automatically once ${LADDER_WINDOW} straight attempts are ≥${LADDER_THRESHOLD * 100}% optimal`}
+                title={t("trainer.ladder.title", { window: LADDER_WINDOW, percent: LADDER_THRESHOLD * 100 })}
               >
-                <TrendingUp size={12} /> Ladder
+                <TrendingUp size={12} /> {t("trainer.ladder")}
               </button>
               )}
               <button
                 onClick={resync}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-                title="My physical cube is solved — restart state tracking from it"
+                title={t("trainer.resync.title")}
               >
-                <RotateCcw size={12} /> Resync
+                <RotateCcw size={12} /> {t("drill.resync")}
               </button>
               <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
             </div>
@@ -1163,7 +1170,7 @@ function CaseTrainerInner() {
                   <span className="w-5 h-5 rounded-md overflow-hidden shrink-0 bg-gray-950/40">
                     <TrainerTypeIcon type={t.id} />
                   </span>
-                  {t.label}
+                  {trainerTypeLabel(t.id)}
                 </button>
               ))}
             </div>
@@ -1171,12 +1178,12 @@ function CaseTrainerInner() {
               // Multi-select: train exactly these slots — one, any pair, or
               // all four (= full F2L). At least one always stays selected.
               <div className="flex items-center gap-1 shrink-0">
-                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("trainer.slots")}</span>
                 {F2L_SLOT_ORDER.map((s) => (
                   <button
                     key={s}
                     onClick={() => toggleF2lSlot(s)}
-                    title="Toggle this slot — selected slots get scrambled together"
+                    title={t("trainer.slotToggle")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                       f2lSlots.includes(s) ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"
                     }`}
@@ -1189,7 +1196,7 @@ function CaseTrainerInner() {
             )}
             {(trainerType === "xcross" || trainerType === "pair") && (
               <div className="flex items-center gap-1 shrink-0">
-                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slot</span>
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("trainer.slot")}</span>
                 {XCROSS_SLOTS.map((s) => (
                   <button
                     key={s}
@@ -1206,7 +1213,7 @@ function CaseTrainerInner() {
             )}
             {trainerType === "xxcross" && (
               <div className="flex items-center gap-1 shrink-0">
-                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Slots</span>
+                <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("trainer.slots")}</span>
                 {XXCROSS_PAIRS.map((p) => (
                   <button
                     key={p}
@@ -1224,7 +1231,7 @@ function CaseTrainerInner() {
             {(SIDED_ROUX_TYPES as readonly string[]).includes(trainerType) && (
               <div className="flex items-center gap-1 shrink-0">
                 <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">
-                  {SIDE_LABELS[trainerType as SidedRouxType]}
+                  {t(SIDE_LABELS[trainerType as SidedRouxType])}
                 </span>
                 {ROUX_SS_SIDES.map((s) => (
                   <button
@@ -1248,7 +1255,7 @@ function CaseTrainerInner() {
             )}
             {trainerType !== "cmll" && !F2L_TYPES.includes(trainerType) && (
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Optimal</span>
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("trainer.optimal")}</span>
               {Array.from(
                 { length: MAX_DEPTHS[trainerType] - MIN_DEPTHS[trainerType] + 1 },
                 (_, i) => i + MIN_DEPTHS[trainerType]
@@ -1280,7 +1287,7 @@ function CaseTrainerInner() {
         info || (summary && state.phase === "setup") ? (
           <div className="mb-1.5 px-1 flex items-center gap-3">
             {summary && state.phase === "setup" && (
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Next scramble</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t("solve.nextScramble")}</p>
             )}
             {info && <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">{info}</p>}
           </div>
@@ -1312,21 +1319,21 @@ function CaseTrainerInner() {
                 onClick={() => void requestHint()}
                 disabled={isHintLoading}
                 className="btn-secondary text-xs"
-                title="Reveal the first move of an optimal solution from the current state (marks the attempt as hinted)"
+                title={t("trainer.hint.title")}
               >
-                <Lightbulb size={13} /> {isHintLoading ? "Thinking…" : "Hint"}
+                <Lightbulb size={13} /> {isHintLoading ? t("trainer.thinking") : t("trainer.hintButton")}
               </button>
               <button
                 onClick={() => void requestReveal()}
                 disabled={isRevealLoading}
                 className="btn-secondary text-xs"
-                title="Reveal full optimal solution(s) from the current state (marks the attempt as hinted)"
+                title={t("trainer.solution.title")}
               >
-                <Eye size={13} /> {isRevealLoading ? "Solving…" : "Solution"}
+                <Eye size={13} /> {isRevealLoading ? t("trainer.solving") : t("trainer.solutionButton")}
               </button>
               {hint && (
                 <span className="text-sm font-mono font-bold text-amber-300">
-                  Try: <span className="text-base">{hint}</span>
+                  {t("trainer.try")} <span className="text-base">{hint}</span>
                 </span>
               )}
             </div>
@@ -1369,8 +1376,8 @@ function CaseTrainerInner() {
         trainerType === "cmll"
           ? "CMLL"
           : F2L_TYPES.includes(trainerType)
-            ? `F2L · ${f2lSlots.map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")} · ${trainerType === "f2l" ? "from scramble" : "case"}`
-            : `${TRAINER_TYPES.find((t) => t.id === trainerType)?.label} · optimal ${targetLength}`
+            ? `F2L · ${f2lSlots.map((s) => F2L_SLOT_VIEW_LABELS[s]).join("+")} · ${trainerType === "f2l" ? t("trainer.stats.fromScramble") : t("trainer.stats.case")}`
+            : t("trainer.stats.optimalLabel", { type: trainerTypeLabel(trainerType), n: targetLength })
       }
       showAo12={false}
       layout="side"
@@ -1385,31 +1392,31 @@ function CaseTrainerInner() {
         ) : F2L_TYPES.includes(trainerType) && avgMoves !== null ? (
           <div className="panel p-5 h-full flex flex-col justify-center gap-4">
             <div>
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg moves</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{t("trainer.avgMoves")}</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{avgMoves.toFixed(1)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Fewest moves</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{t("trainer.fewestMoves")}</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{bestMoves}</p>
             </div>
             <p className="text-[11px] text-gray-600">
-              {lengthAttempts.length} {lengthAttempts.length === 1 ? "attempt" : "attempts"}
+              {tn("count.attempts", lengthAttempts.length)}
             </p>
           </div>
         ) : !F2L_TYPES.includes(trainerType) && optimalRate !== null ? (
           <div className="panel p-5 h-full flex flex-col justify-center gap-4">
             <div>
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Optimal rate</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{t("trainer.optimalRate")}</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{optimalRate}%</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg overhead</p>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{t("trainer.avgOverhead")}</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">
                 +{(avgOverhead ?? 0).toFixed(2)}
               </p>
             </div>
             <p className="text-[11px] text-gray-600">
-              {lengthAttempts.length} {lengthAttempts.length === 1 ? "attempt" : "attempts"} at optimal {targetLength}
+              {tn("trainer.attemptsAtOptimal", lengthAttempts.length, { len: targetLength })}
             </p>
           </div>
         ) : undefined
@@ -1418,7 +1425,7 @@ function CaseTrainerInner() {
         recentAttempts.length > 0 ? (
           <div className="flex flex-col">
             <div className="px-4 sm:px-6 pt-3 pb-1">
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent attempts</span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{t("trainer.recent")}</span>
             </div>
             <div className="divide-y divide-gray-800/40">
               {recentAttempts.map((a) => (
@@ -1433,7 +1440,7 @@ function CaseTrainerInner() {
                   </span>
                   <span className="text-xs font-mono tabular-nums text-white w-20 shrink-0">{formatTimeMs(a.timeMs)}</span>
                   <span className="text-xs font-mono tabular-nums text-gray-400 w-16 shrink-0">
-                    {F2L_TYPES.includes(a.type) ? `${a.moveCount} mv` : `${a.moveCount}/${a.optimalLength}`}
+                    {F2L_TYPES.includes(a.type) ? t("solve.mv", { n: a.moveCount }) : `${a.moveCount}/${a.optimalLength}`}
                   </span>
                   {!F2L_TYPES.includes(a.type) && (
                     <span
@@ -1441,21 +1448,21 @@ function CaseTrainerInner() {
                         a.overhead <= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
                       }`}
                     >
-                      {a.overhead <= 0 ? "optimal" : `+${a.overhead}`}
+                      {a.overhead <= 0 ? t("trainer.optimalTag") : `+${a.overhead}`}
                     </span>
                   )}
                   {a.hintUsed && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-sky-500/15 text-sky-300">hint</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-sky-500/15 text-sky-300">{t("trainer.hintTag")}</span>
                   )}
                   <span className="text-xs text-gray-600 flex-1 truncate font-mono">{a.scramble}</span>
                   <span className="text-[10px] text-gray-700 shrink-0">
-                    {new Date(a.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {formatTime(a.endedAt, { hour: "2-digit", minute: "2-digit" })}
                   </span>
                   {canRetry(a) && (
                     <button
                       onClick={() => retryAttempt(a)}
                       className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors"
-                      title="Practice this exact case again (fresh scramble, same target state)"
+                      title={t("trainerSummary.retry.title")}
                     >
                       <Repeat2 size={13} />
                     </button>
@@ -1468,7 +1475,7 @@ function CaseTrainerInner() {
                     className={`shrink-0 p-1.5 transition-colors ${
                       confirmDeleteId === a.id ? "text-red-400" : "text-gray-600 hover:text-red-500"
                     }`}
-                    title={confirmDeleteId === a.id ? "Click again to delete" : "Delete attempt"}
+                    title={confirmDeleteId === a.id ? t("common.clickToDelete") : t("trainer.deleteAttempt")}
                   >
                     <Trash2 size={13} />
                   </button>
