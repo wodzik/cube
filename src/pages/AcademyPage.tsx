@@ -268,6 +268,7 @@ function AcademyInner() {
       />
     )}
     <TrainerPanel
+      layout="side"
       header={
         <div className="flex items-center gap-1 w-full overflow-x-auto">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-widest shrink-0 mr-2">

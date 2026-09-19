@@ -242,7 +242,7 @@ export const FOUR_LOOK_LL_CORNERS_FIRST: AcademyLesson = {
         {
           id: "oll20",
           name: "OLL 20",
-          alg: "M U (R U R' U') M2 (U R U' r')",
+          alg: "r U R' U' M2 U R U' R' U' M'",
           required: false,
           description: "All four edges flipped — one algorithm instead of chaining OLL 28 into OLL 57.",
         },
