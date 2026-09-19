@@ -17,6 +17,7 @@ import { useInView } from "../hooks/useInView";
 import { guideMask } from "../logic/guideMasks";
 import type { GuideDemo } from "../data/guides";
 import type { DisplayConfig } from "../types/algorithm";
+import { useT } from "../i18n/useT";
 
 /** VariantTest only reads stickering/camera from this — the visualization fields are filler to satisfy the type. */
 const TRY_DISPLAY_CONFIG: DisplayConfig = {
@@ -82,10 +83,11 @@ export function GuideCubeDemo({ demo, tryTitle, className = "" }: GuideCubeDemoP
 }
 
 function TryButton({ title, alg, open, onOpen, onClose }: { title: string; alg: string; open: boolean; onOpen: () => void; onClose: () => void }) {
+  const { t } = useT();
   return (
     <>
-      <button onClick={onOpen} className="btn-secondary text-xs" title="Practise this on a connected smart cube">
-        <Hand size={13} /> Try this
+      <button onClick={onOpen} className="btn-secondary text-xs" title={t("guideDemo.try.title")}>
+        <Hand size={13} /> {t("guideDemo.try")}
       </button>
       {open && <VariantTest caseName={title} variantName={alg} alg={alg} displayConfig={TRY_DISPLAY_CONFIG} onClose={onClose} />}
     </>

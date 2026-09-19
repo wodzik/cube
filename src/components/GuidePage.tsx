@@ -16,7 +16,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, ArrowUp, BookOpen, CheckCircle2, Clock, Dumbbell, Info, Lightbulb, TriangleAlert, X } from "lucide-react";
 import { GuideCubeDemo } from "./GuideCubeDemo";
-import { GUIDES, guideById, type Guide, type GuideBlock, type GuideCase, type GuideDemo } from "../data/guides";
+import type { Guide, GuideBlock, GuideCase, GuideDemo } from "../data/guides";
+import { localizeGuide, localizedGuides, localizedGuideById } from "../i18n/guideContent";
+import { useT } from "../i18n/useT";
 
 interface GuidePageProps {
   guide: Guide;
@@ -50,20 +52,21 @@ export function renderInline(text: string): ReactNode[] {
 }
 
 const CALLOUT_STYLE = {
-  tip: { border: "border-sky-400/40", bg: "bg-sky-400/[0.06]", text: "text-sky-300", icon: Lightbulb, label: "Tip" },
-  checkpoint: { border: "border-emerald-400/40", bg: "bg-emerald-400/[0.06]", text: "text-emerald-300", icon: CheckCircle2, label: "Checkpoint" },
-  warning: { border: "border-amber-400/40", bg: "bg-amber-400/[0.06]", text: "text-amber-300", icon: TriangleAlert, label: "Watch out" },
-  note: { border: "border-white/15", bg: "bg-white/[0.03]", text: "text-gray-300", icon: Info, label: "Note" },
+  tip: { border: "border-sky-400/40", bg: "bg-sky-400/[0.06]", text: "text-sky-300", icon: Lightbulb, label: "guide.callout.tip" },
+  checkpoint: { border: "border-emerald-400/40", bg: "bg-emerald-400/[0.06]", text: "text-emerald-300", icon: CheckCircle2, label: "guide.callout.checkpoint" },
+  warning: { border: "border-amber-400/40", bg: "bg-amber-400/[0.06]", text: "text-amber-300", icon: TriangleAlert, label: "guide.callout.warning" },
+  note: { border: "border-white/15", bg: "bg-white/[0.03]", text: "text-gray-300", icon: Info, label: "guide.callout.note" },
 } as const;
 
 function Callout({ tone, title, text, demo }: { tone: keyof typeof CALLOUT_STYLE; title?: string; text: string[]; demo?: GuideDemo }) {
+  const { t } = useT();
   const s = CALLOUT_STYLE[tone];
   const Icon = s.icon;
   return (
     <div className={`rounded-xl border ${s.border} ${s.bg} p-4 flex flex-col sm:flex-row gap-4`}>
       <div className="flex-1 min-w-0">
         <p className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${s.text} mb-1.5`}>
-          <Icon size={13} /> {title ?? s.label}
+          <Icon size={13} /> {title ?? t(s.label)}
         </p>
         <div className="space-y-2">
           {text.map((t, i) => (
@@ -79,6 +82,7 @@ function Callout({ tone, title, text, demo }: { tone: keyof typeof CALLOUT_STYLE
 }
 
 function CaseCard({ c }: { c: GuideCase }) {
+  const { t } = useT();
   return (
     <div className="panel p-4 flex flex-col gap-2.5">
       <GuideCubeDemo demo={c.demo} tryTitle={c.name} />
@@ -88,7 +92,7 @@ function CaseCard({ c }: { c: GuideCase }) {
       </div>
       {c.hold && (
         <p className="text-xs text-gray-300 leading-relaxed">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mr-1.5">Hold</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mr-1.5">{t("guide.hold")}</span>
           {renderInline(c.hold)}
         </p>
       )}
@@ -99,6 +103,7 @@ function CaseCard({ c }: { c: GuideCase }) {
 }
 
 function Block({ block, onOpenGuide, onPractice }: { block: GuideBlock; onOpenGuide: GuidePageProps["onOpenGuide"]; onPractice: GuidePageProps["onPractice"] }) {
+  const { lang } = useT();
   switch (block.kind) {
     case "p":
       return <p className="text-[15px] text-gray-300 leading-relaxed max-w-3xl">{renderInline(block.text)}</p>;
@@ -154,7 +159,7 @@ function Block({ block, onOpenGuide, onPractice }: { block: GuideBlock; onOpenGu
         </button>
       );
     case "guideLink": {
-      const target = guideById(block.guideId);
+      const target = localizedGuideById(block.guideId, lang);
       if (!target) return null;
       return (
         <button
@@ -208,7 +213,10 @@ function scrollToSection(id: string) {
   document.getElementById(`guide-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: GuidePageProps) {
+export function GuidePage({ guide: englishGuide, onBack, onClose, onOpenGuide, onPractice }: GuidePageProps) {
+  const { t, lang } = useT();
+  const guide = localizeGuide(englishGuide, lang);
+  const GUIDES = localizedGuides(lang);
   const sectionIds = useMemo(() => guide.sections.map((s) => s.id), [guide]);
   const active = useActiveSection(sectionIds);
   const topRef = useRef<HTMLDivElement>(null);
@@ -237,8 +245,8 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
           the two ways out (up to the index, or out of the guides
           entirely). Stays put while the long page scrolls. */}
       <div className="sticky top-16 z-40 -mx-4 sm:-mx-8 px-4 sm:px-8 py-2 mb-4 bg-gray-950/85 backdrop-blur-xl border-b border-white/[0.06] flex items-center gap-2">
-        <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-white transition-colors shrink-0" title="All guides (Esc)">
-          <ArrowLeft size={14} /> Guides
+        <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-white transition-colors shrink-0" title={t("guide.allGuides")}>
+          <ArrowLeft size={14} /> {t("guide.guides")}
         </button>
         <span className="text-gray-700 text-xs shrink-0">/</span>
         <span className="text-xs font-semibold text-white truncate">{guide.title}</span>
@@ -252,11 +260,11 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
           </>
         )}
         <div className="ml-auto flex items-center gap-1 shrink-0">
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors" title="Back to top">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors" title={t("guide.top")}>
             <ArrowUp size={14} />
           </button>
-          <button onClick={onClose} className="btn-secondary text-xs" title="Close the guides and return to the Academy drill">
-            <X size={13} /> Close
+          <button onClick={onClose} className="btn-secondary text-xs" title={t("guide.close")}>
+            <X size={13} /> {t("common.close")}
           </button>
         </div>
       </div>
@@ -264,7 +272,7 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
       <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10">
         <aside className="hidden lg:block">
           <nav className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Contents</p>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">{t("guide.contents")}</p>
             <ol className="space-y-0.5">
               {guide.sections.map((s) => (
                 <li key={s.id}>
@@ -288,7 +296,7 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
             <div className="flex flex-col md:flex-row gap-6 md:items-start">
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-[var(--accent-bright)] uppercase tracking-widest mb-2">
-                  {guide.category === "learn" ? `Learn to solve · Part ${index + 1}` : "Reference"}
+                  {guide.category === "learn" ? t("guide.part", { n: index + 1 }) : t("guide.reference")}
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">{guide.title}</h1>
                 <p className="text-sm text-gray-400 mt-2 max-w-2xl">{guide.tagline}</p>
@@ -297,10 +305,10 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
                     <Clock size={12} /> {guide.readingTime}
                   </span>
                   {guide.prerequisites?.map((id) => {
-                    const p = guideById(id);
+                    const p = localizedGuideById(id, lang);
                     return p ? (
                       <button key={id} onClick={() => onOpenGuide(id)} className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.05] text-gray-400 hover:text-white transition-colors">
-                        Before this: {p.title}
+                        {t("guide.before", { title: p.title })}
                       </button>
                     ) : null;
                   })}

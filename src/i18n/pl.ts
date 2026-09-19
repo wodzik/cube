@@ -585,4 +585,31 @@ export const pl: Record<MessageKey, string> & Record<string, string> = {
   "academy.best": "najlepsza",
   "academy.practiceOnly": "Próby w Akademii służą tylko do ćwiczeń — nie są zapisywane w statystykach.",
   "academy.comingSoon": "Wkrótce.",
+
+  // ─── Layout ───
+  "layout.dragResize": "Przeciągnij, aby zmienić rozmiar wykresu",
+
+  // ─── Guides chrome ───
+  "guide.callout.tip": "Wskazówka",
+  "guide.callout.checkpoint": "Punkt kontrolny",
+  "guide.callout.warning": "Uwaga",
+  "guide.callout.note": "Notatka",
+  "guide.hold": "Trzymaj",
+  "guide.allGuides": "Wszystkie poradniki (Esc)",
+  "guide.guides": "Poradniki",
+  "guide.top": "Na górę",
+  "guide.close": "Zamknij poradniki i wróć do ćwiczeń w Akademii",
+  "guide.contents": "Spis treści",
+  "guide.part": "Nauka układania · Część {n}",
+  "guide.reference": "Materiały pomocnicze",
+  "guide.before": "Najpierw: {title}",
+  "guides.back": "Wróć do Akademii",
+  "guides.title": "Poradniki",
+  "guides.intro": "Czytaj je po kolei: podstawy, potem dwie pierwsze warstwy, potem ostatnia warstwa — to Twoje pierwsze ułożenie. Część 4 to inna kolejność układania dwóch pierwszych warstw (krawędzie przed rogami); część 5 zastępuje środek układania metodą F2L, gdy będziesz gotowy przyspieszyć.",
+  "guides.learn": "Nauka układania",
+  "guides.reference": "Materiały pomocnicze",
+  "guides.partN": "Część {n}",
+  "guides.open": "Otwórz",
+  "guideDemo.try": "Spróbuj",
+  "guideDemo.try.title": "Poćwicz to na podłączonej kostce Bluetooth",
 };

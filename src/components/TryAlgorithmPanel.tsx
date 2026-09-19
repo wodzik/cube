@@ -268,7 +268,7 @@ export function TryAlgorithmPanel() {
                       useMask ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"
                     }`}
                   >
-                    Mask
+                    {t("display.mask")}
                   </button>
                 </div>
               </div>

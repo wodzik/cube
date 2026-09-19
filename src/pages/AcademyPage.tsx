@@ -276,7 +276,7 @@ function AcademyInner() {
       header={
         <div className="flex items-center gap-1 w-full overflow-x-auto">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-widest shrink-0 mr-2">
-            <GraduationCap size={14} /> Academy
+            <GraduationCap size={14} /> {t("nav.academy")}
           </span>
           <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/[0.03] shrink-0">
             {lessons.map((l) => (

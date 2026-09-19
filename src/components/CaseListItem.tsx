@@ -54,7 +54,7 @@ export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive,
           e.stopPropagation();
           onEdit?.();
         }}
-        title="Edit case"
+        title={t("case.edit")}
       >
         <AlgCaseVisualisation
           alg={defV?.alg ?? ""}

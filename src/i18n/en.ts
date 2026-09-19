@@ -552,6 +552,33 @@ export const en = {
   "academy.best": "best",
   "academy.practiceOnly": "Academy attempts are practice-only — not saved to stats.",
   "academy.comingSoon": "Coming soon.",
+
+  // ─── Layout ───
+  "layout.dragResize": "Drag to resize the chart",
+
+  // ─── Guides chrome ───
+  "guide.callout.tip": "Tip",
+  "guide.callout.checkpoint": "Checkpoint",
+  "guide.callout.warning": "Watch out",
+  "guide.callout.note": "Note",
+  "guide.hold": "Hold",
+  "guide.allGuides": "All guides (Esc)",
+  "guide.guides": "Guides",
+  "guide.top": "Back to top",
+  "guide.close": "Close the guides and return to the Academy drill",
+  "guide.contents": "Contents",
+  "guide.part": "Learn to solve · Part {n}",
+  "guide.reference": "Reference",
+  "guide.before": "Before this: {title}",
+  "guides.back": "Back to the Academy",
+  "guides.title": "Guides",
+  "guides.intro": "Read them in order: the basics, then the first two layers, then the last layer — that's your first solve. Part 4 is another order for the first two layers (edges before corners); Part 5 replaces the middle of the solve with F2L once you're ready to get faster.",
+  "guides.learn": "Learn to solve",
+  "guides.reference": "Reference",
+  "guides.partN": "Part {n}",
+  "guides.open": "Open",
+  "guideDemo.try": "Try this",
+  "guideDemo.try.title": "Practise this on a connected smart cube",
 } as const;
 
 export type MessageKey = keyof typeof en;

@@ -28,6 +28,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { useT } from "../i18n/useT";
 
 /**
  * "side" (default; every page — Solve, Academy, drill / skill trainers /
@@ -99,10 +100,11 @@ function useDraggedWidth(storageKey: string, fallback: number) {
 }
 
 function DragHandle({ onPointerDown, className = "" }: { onPointerDown: (e: ReactPointerEvent) => void; className?: string }) {
+  const { t } = useT();
   return (
     <div
       onPointerDown={onPointerDown}
-      title="Drag to resize the chart"
+      title={t("layout.dragResize")}
       className={`self-stretch items-center justify-center w-6 mx-1 shrink-0 cursor-col-resize select-none touch-none group ${className}`}
     >
       <div className="h-10 w-1 rounded-full bg-white/10 group-hover:bg-white/30 group-active:bg-white/40 transition-colors" />
