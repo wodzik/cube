@@ -349,6 +349,10 @@ function SolvePageInner({
     return numbered;
   }, [solves, effectiveSortKey, sortAsc]);
 
+  // The compact "Recent solves" sidebar is always newest first, whatever the
+  // expanded table is sorted by — sorting the table must not reshuffle it.
+  const recentSolves = useMemo(() => solves.map((record, i) => ({ record, nr: i + 1 })).reverse().slice(0, 25), [solves]);
+
   // Recent solves list: collapsed by default to the compact sidebar preview
   // (CompactRecentList, in statsAside) — this flips it to the full sortable/
   // paginated table (the `bottom` block below) instead.
@@ -887,7 +891,7 @@ function SolvePageInner({
         solves.length > 0 ? (
           <CompactRecentList
             title="Recent solves"
-            items={sortedSolves.slice(0, 25)}
+            items={recentSolves}
             keyOf={(e) => e.record.id}
             expanded={solvesExpanded}
             onToggleExpand={() => setSolvesExpanded((v) => !v)}
