@@ -7,6 +7,7 @@
 import { useCallback, useState } from "react";
 import { randomScrambleForEvent } from "cubing/scramble";
 import { useSession } from "../state/sessionContext";
+import { t } from "../i18n/i18n";
 
 export interface UseScrambleGeneratorReturn {
   generate: () => Promise<void>;
@@ -26,7 +27,7 @@ export function useScrambleGenerator(): UseScrambleGeneratorReturn {
       const scramble = await randomScrambleForEvent("333");
       setTarget(scramble.toString().trim());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate scramble");
+      setError(err instanceof Error ? err.message : t("error.scramble"));
     } finally {
       setIsGenerating(false);
     }

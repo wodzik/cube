@@ -39,6 +39,7 @@ import {
 } from "smartcube-web-bluetooth";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
+import { t } from "../i18n/i18n";
 
 type MoveListener = (move: string, timestampMs: number) => void;
 
@@ -131,7 +132,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
         conn.sendCommand({ type: "REQUEST_BATTERY" }).catch(() => undefined);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect to cube");
+      setError(err instanceof Error ? err.message : t("error.cubeConnect"));
     }
   }, []);
 

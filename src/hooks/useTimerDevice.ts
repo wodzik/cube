@@ -20,6 +20,7 @@ import { connectGanTimer, GanTimerState, type GanTimerConnection } from "smartcu
 import { useSession } from "../state/sessionContext";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
+import { t } from "../i18n/i18n";
 
 export type TimerPressState = "idle" | "holding" | "armed";
 
@@ -95,7 +96,7 @@ export function useTimerDevice(): UseTimerDeviceReturn {
         }
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect to timer");
+      setError(err instanceof Error ? err.message : t("error.timerConnect"));
     }
   }, []);
 

@@ -10,6 +10,7 @@ import type { AlgSubgroup, DisplayConfig } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { useT } from "../i18n/useT";
+import { dataLabel } from "../i18n/labels";
 
 interface SubgroupCardProps {
   subgroup: AlgSubgroup;
@@ -31,7 +32,7 @@ export function SubgroupCard({ subgroup, groupDisplayConfig, onOpen, onEditSetti
       onClick={onOpen}
     >
       <div className="flex items-center justify-between gap-1 px-2.5 pt-2 pb-0">
-        <span className="text-[11px] font-semibold text-white truncate leading-tight">{subgroup.name}</span>
+        <span className="text-[11px] font-semibold text-white truncate leading-tight">{dataLabel(subgroup.name)}</span>
         {onEditSettings && (
           <button
             onClick={(e) => {

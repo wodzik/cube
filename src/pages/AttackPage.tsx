@@ -63,6 +63,7 @@ import type { AlgGroup, AlgorithmCase, DisplayConfig } from "../types/algorithm"
 import { formatTimeMs } from "../logic/statistics";
 import { useT } from "../i18n/useT";
 import { formatDate, formatTime } from "../i18n/i18n";
+import { dataLabel } from "../i18n/labels";
 
 const ATTACK_CONFIG: SessionConfig = {
   mode: "attack",
@@ -452,7 +453,7 @@ function AttackPageInner() {
                     }`}
                     style={activeSubgroupId === sg.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                   >
-                    {sg.name}
+                    {dataLabel(sg.name)}
                   </button>
                 ))}
             </div>
@@ -494,7 +495,7 @@ function AttackPageInner() {
           )}
           {currentCase && (
             <>
-              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{currentCase.name}</h2>
+              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{dataLabel(currentCase.name)}</h2>
               <p className="text-xs text-gray-500">{currentCase.category}</p>
             </>
           )}
@@ -588,7 +589,7 @@ function AttackPageInner() {
                           <div className="pl-8 pr-2 pb-2 divide-y divide-gray-800/30">
                             {s.caseTimes.map((c, i) => (
                               <div key={`${c.caseName}-${i}`} className="flex items-center gap-3 py-1.5">
-                                <span className="flex-1 text-sm text-gray-500 truncate">{c.caseName}</span>
+                                <span className="flex-1 text-sm text-gray-500 truncate">{dataLabel(c.caseName)}</span>
                                 <span className="text-sm font-mono tabular-nums text-gray-400">{formatTimeMs(c.timeMs)}</span>
                               </div>
                             ))}
@@ -652,7 +653,7 @@ function AttackPageInner() {
             <div className="divide-y divide-gray-800/40 border-t border-gray-800">
               {[...displayedCompleted].reverse().map((entry) => (
                 <div key={entry.caseName} className="flex items-center gap-3 px-4 py-2 text-gray-600">
-                  <span className="flex-1 text-xs truncate">{entry.caseName}</span>
+                  <span className="flex-1 text-xs truncate">{dataLabel(entry.caseName)}</span>
                   <span className="text-xs font-mono tabular-nums">{formatTimeMs(entry.timeMs)}</span>
                 </div>
               ))}
@@ -664,7 +665,7 @@ function AttackPageInner() {
 
     {showPlayback && currentCase && variant && (
       <AlgPlaybackModal
-        title={currentCase.name}
+        title={dataLabel(currentCase.name)}
         subtitle={variant.name}
         alg={variant.alg}
         {...resolveStickeringProps(displayConfig.stickering)}

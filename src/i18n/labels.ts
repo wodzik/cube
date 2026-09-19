@@ -4,7 +4,8 @@
  * what is displayed.
  */
 
-import { t } from "./i18n";
+import { getLang, t } from "./i18n";
+import { DATA_NAMES_PL } from "./dataNames.pl";
 import type { LearningStatus } from "../types/algorithm";
 
 /** CFOP and Roux are method names and stay as they are; "Other" is translated. */
@@ -41,4 +42,9 @@ const CENTER_KEYS: Record<string, Parameters<typeof t>[0]> = {
 export function centerGroupLabel(group: { id: string; label: string }): string {
   const key = CENTER_KEYS[group.id];
   return key ? t(key) : group.label;
+}
+
+/** Display name of built-in algorithm data (case/subgroup names) — translated when a Polish name is defined, otherwise as stored. */
+export function dataLabel(name: string): string {
+  return getLang() === "pl" ? (DATA_NAMES_PL[name] ?? name) : name;
 }

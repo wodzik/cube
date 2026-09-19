@@ -6,6 +6,9 @@ import { getLang, setLang, t, tn } from "./i18n";
 import { ACADEMY_LESSONS } from "../data/academy";
 import { ACADEMY_PL } from "./academy.pl";
 import { localizeLesson, localizedLessons } from "./academyContent";
+import { DATA_NAMES_PL } from "./dataNames.pl";
+import { dataLabel } from "./labels";
+import { loadAlgGroup } from "../services/algorithmStore";
 
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 const PLURAL_SUFFIX = /\.(one|few|many|other)$/;
@@ -95,5 +98,22 @@ describe("Academy Polish overlay", () => {
     }
     expect(localizedLessons("en")).toBe(localizedLessons("en"));
     expect(localizedLessons("en")[0]).toBe(ACADEMY_LESSONS[0]);
+  });
+});
+
+describe("Polish names for built-in algorithm data", () => {
+  it("every EO4A case has a Polish name", () => {
+    const names = loadAlgGroup("eo4a").map((c) => c.name);
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) expect(`${name}: ${DATA_NAMES_PL[name] ? "ok" : "missing"}`).toBe(`${name}: ok`);
+  });
+
+  it("dataLabel translates in Polish only, and leaves unlisted names (OLL 28, T perm…) alone", () => {
+    setLang("en");
+    expect(dataLabel("2 Top 2 Bot")).toBe("2 Top 2 Bot");
+    setLang("pl");
+    expect(dataLabel("2 Top 2 Bot")).toBe("2 górne 2 boczne");
+    expect(dataLabel("OLL 28")).toBe("OLL 28");
+    setLang("en");
   });
 });

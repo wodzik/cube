@@ -26,6 +26,7 @@ import { DisplayConfigFields } from "./DisplayConfigFields";
 import { formatTime } from "../logic/statistics";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { useT } from "../i18n/useT";
+import { dataLabel } from "../i18n/labels";
 
 interface CaseEditProps {
   case_: AlgorithmCase;
@@ -197,7 +198,7 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
       <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-white font-semibold text-base">{case_.name}</h2>
+            <h2 className="text-white font-semibold text-base">{dataLabel(case_.name)}</h2>
             <p className="text-gray-500 text-xs mt-0.5">{case_.category}</p>
           </div>
           <div className="flex items-center gap-0.5">
@@ -378,7 +379,7 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
 
       {testingVariant && (
         <VariantTest
-          caseName={case_.name}
+          caseName={dataLabel(case_.name)}
           variantName={testingVariant.name}
           alg={testingVariant.alg.replace(/[()]/g, "")}
           displayConfig={resolvedConfig}
@@ -388,7 +389,7 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
 
       {playbackVariant && (
         <AlgPlaybackModal
-          title={case_.name}
+          title={dataLabel(case_.name)}
           subtitle={playbackVariant.name}
           alg={playbackVariant.alg}
           {...resolveStickeringProps(resolvedConfig.stickering)}

@@ -69,6 +69,7 @@ import { SubgroupGrid } from "../components/SubgroupGrid";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 import { useT } from "../i18n/useT";
+import { dataLabel } from "../i18n/labels";
 
 const TRAINING_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -550,7 +551,7 @@ function TrainingPageInner() {
                     }`}
                     style={activeSubgroupId === sg.id ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
                   >
-                    {sg.name}
+                    {dataLabel(sg.name)}
                   </button>
                 ))}
               </div>
@@ -581,7 +582,7 @@ function TrainingPageInner() {
         centerTop={
           currentCase ? (
             <div className="flex flex-col items-center gap-1 text-center">
-              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{currentCase.name}</h2>
+              <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white">{dataLabel(currentCase.name)}</h2>
               <p className="text-xs text-gray-500">{currentCase.category}</p>
               <p className="text-[11px] text-gray-700 tabular-nums font-mono">
                 {caseIdx + 1} / {selectedCases.length}
@@ -632,7 +633,7 @@ function TrainingPageInner() {
         cameraLongitude={displayConfig.cameraLongitude}
         cubeSetupAlg=""
         timesMs={attemptsForSource(variant?.times ?? [], "training").map((t) => t.time * 1000)}
-        statsLabel={currentCase ? t("stats.timesFor", { name: currentCase.name }) : t("stats.label")}
+        statsLabel={currentCase ? t("stats.timesFor", { name: dataLabel(currentCase.name) }) : t("stats.label")}
         showAo12={false}
         layout="side"
         bottom={
@@ -664,7 +665,7 @@ function TrainingPageInner() {
 
       {showPlayback && currentCase && variant && (
         <AlgPlaybackModal
-          title={currentCase.name}
+          title={dataLabel(currentCase.name)}
           subtitle={variant.name}
           alg={variant.alg}
           {...resolveStickeringProps(displayConfig.stickering)}

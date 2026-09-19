@@ -612,4 +612,9 @@ export const pl: Record<MessageKey, string> & Record<string, string> = {
   "guides.open": "Otwórz",
   "guideDemo.try": "Spróbuj",
   "guideDemo.try.title": "Poćwicz to na podłączonej kostce Bluetooth",
+
+  // ─── Hardware / generator errors ───
+  "error.cubeConnect": "Nie udało się połączyć z kostką",
+  "error.timerConnect": "Nie udało się połączyć z timerem",
+  "error.scramble": "Nie udało się wygenerować scramble'a",
 };

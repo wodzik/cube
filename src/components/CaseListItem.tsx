@@ -16,6 +16,7 @@ import { getDefaultVariant } from "../logic/algGroupConfig";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
 import { useT } from "../i18n/useT";
+import { dataLabel } from "../i18n/labels";
 
 export interface CaseListItemProps {
   case_: AlgorithmCase;
@@ -75,7 +76,7 @@ export function CaseListItem({ case_, groupDisplayConfig, statsSource, isActive,
         }}
         title={onSelect ? t("case.practice") : onEdit ? t("case.editAlg") : undefined}
       >
-        <p className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-gray-300"}`}>{case_.name}</p>
+        <p className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-gray-300"}`}>{dataLabel(case_.name)}</p>
         <p className="text-[10px] text-gray-600 font-mono truncate mt-0.5">{defV?.alg ?? ""}</p>
         {stats && stats.count > 0 && (
           <div className="flex items-center gap-2 mt-0.5">

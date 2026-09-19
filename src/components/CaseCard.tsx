@@ -14,7 +14,7 @@ import { getDefaultVariant } from "../logic/algGroupConfig";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTime, computeVariantStatsForSource } from "../logic/statistics";
 import { useT } from "../i18n/useT";
-import { learningStatusLabel } from "../i18n/labels";
+import { learningStatusLabel, dataLabel } from "../i18n/labels";
 
 interface StatusMeta {
   icon: React.ReactNode;
@@ -81,7 +81,7 @@ export function CaseCard({ case_, groupDisplayConfig, statsSource, onStatusChang
           onClick={onSelect ? handleSelectClick : undefined}
           title={onSelect ? t("case.practice") : undefined}
         >
-          {case_.name}
+          {dataLabel(case_.name)}
         </span>
         <div className="flex items-center gap-0.5 shrink-0">
           {onSelect && (
@@ -155,7 +155,7 @@ export function CaseCard({ case_, groupDisplayConfig, statsSource, onStatusChang
 
       {showPlayback && defaultVariant && (
         <AlgPlaybackModal
-          title={case_.name}
+          title={dataLabel(case_.name)}
           subtitle={defaultVariant.name}
           alg={defaultVariant.alg}
           {...resolveStickeringProps(displayConfig.stickering)}

@@ -579,6 +579,11 @@ export const en = {
   "guides.open": "Open",
   "guideDemo.try": "Try this",
   "guideDemo.try.title": "Practise this on a connected smart cube",
+
+  // ─── Hardware / generator errors ───
+  "error.cubeConnect": "Failed to connect to cube",
+  "error.timerConnect": "Failed to connect to timer",
+  "error.scramble": "Failed to generate scramble",
 } as const;
 
 export type MessageKey = keyof typeof en;
