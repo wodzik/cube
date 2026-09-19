@@ -7,6 +7,9 @@ import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
 import { AppLogo } from "./components/AppLogo";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { LanguageToggle } from "./components/LanguageToggle";
+import { useT } from "./i18n/useT";
+import type { MessageKey } from "./i18n/i18n";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -21,17 +24,18 @@ const DebugPage = lazy(() => import("./pages/DebugPage"));
 
 type Tab = "solve" | "training" | "attack" | "trainer" | "academy" | "settings" | "debug";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "solve", label: "Solve" },
-  { id: "training", label: "Drill Algorithms" },
-  { id: "trainer", label: "Skill Trainers" },
-  { id: "attack", label: "Time Attack" },
-  { id: "academy", label: "Academy" },
-  { id: "debug", label: "Debug" },
-  { id: "settings", label: "Settings" },
+const TABS: { id: Tab; label: MessageKey }[] = [
+  { id: "solve", label: "nav.solve" },
+  { id: "training", label: "nav.training" },
+  { id: "trainer", label: "nav.trainer" },
+  { id: "attack", label: "nav.attack" },
+  { id: "academy", label: "nav.academy" },
+  { id: "debug", label: "nav.debug" },
+  { id: "settings", label: "nav.settings" },
 ];
 
 export default function App() {
+  const { t } = useT();
   const [tab, setTab] = useState<Tab>("solve");
   const updateAvailable = useVersionCheck();
   const dataUpdateAvailable = useAlgorithmDataVersionCheck();
@@ -53,18 +57,19 @@ export default function App() {
             </div>
             <div className="min-w-0 flex-1 sm:flex-none overflow-x-auto nav-scroll">
               <div className="nav-pill w-max mx-auto">
-                {TABS.map((t) => (
+                {TABS.map((item) => (
                   <button
-                    key={t.id}
-                    onClick={() => setTab(t.id)}
-                    className={`nav-tab ${tab === t.id ? "nav-tab-active" : "nav-tab-inactive"}`}
+                    key={item.id}
+                    onClick={() => setTab(item.id)}
+                    className={`nav-tab ${tab === item.id ? "nav-tab-active" : "nav-tab-inactive"}`}
                   >
-                    {t.label}
+                    {t(item.label)}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex items-center justify-end shrink-0">
+            <div className="flex items-center justify-end gap-1 shrink-0">
+              <LanguageToggle />
               <ThemeToggle />
             </div>
           </div>

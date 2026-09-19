@@ -10,6 +10,8 @@
 import { useRef, useState } from "react";
 import { RotateCcw, Trash2, Download, Upload, CheckCircle2 } from "lucide-react";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
+import { LANGS, setLang } from "../i18n/i18n";
+import { useT } from "../i18n/useT";
 
 const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_", "nact_alg_groups"];
 
@@ -84,6 +86,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const { lang, t } = useT();
 
   const flash = (text: string) => {
     setMessage(text);
@@ -92,8 +95,8 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 pt-12 pb-24">
-      <h1 className="text-2xl font-extrabold text-white mb-1">Settings</h1>
-      <p className="text-sm text-gray-500 mb-8">Data is stored locally in this browser only — no account, no backend.</p>
+      <h1 className="text-2xl font-extrabold text-white mb-1">{t("settings.title")}</h1>
+      <p className="text-sm text-gray-500 mb-8">{t("settings.subtitle")}</p>
 
       {message && (
         <div className="mb-5 flex items-center gap-2 px-4 py-2.5 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-xl">
@@ -102,10 +105,27 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <Section title="Algorithm progress">
+      <Section title={t("settings.section.language")}>
         <SettingsRow
-          title="Reset all algorithm progress"
-          description="Clears learning status and recorded times for every built-in group (OLL, PLL, F2L, Advanced F2L, VLS, ZBLL, CMLL, COLL, …) and reloads its cases from the bundled defaults. Custom groups are left alone."
+          title={t("settings.language.title")}
+          description={t("settings.language.description")}
+          last
+          action={
+            <div className="nav-pill">
+              {LANGS.map((l) => (
+                <button key={l.id} onClick={() => setLang(l.id)} className={`nav-tab ${lang === l.id ? "nav-tab-active" : "nav-tab-inactive"}`}>
+                  {l.name}
+                </button>
+              ))}
+            </div>
+          }
+        />
+      </Section>
+
+      <Section title={t("settings.section.algProgress")}>
+        <SettingsRow
+          title={t("settings.algProgress.title")}
+          description={t("settings.algProgress.description")}
           last
           action={
             <button
@@ -113,49 +133,49 @@ export default function SettingsPage() {
                 listGroups()
                   .filter((g) => g.isBuiltIn)
                   .forEach((g) => resetBuiltInGroup(g.id));
-                flash("Algorithm progress reset.");
+                flash(t("settings.algProgress.done"));
               }}
               className="btn-danger"
             >
-              <RotateCcw size={13} /> Reset
+              <RotateCcw size={13} /> {t("settings.algProgress.button")}
             </button>
           }
         />
       </Section>
 
-      <Section title="Solve history">
+      <Section title={t("settings.section.history")}>
         <SettingsRow
-          title="Clear all solve history"
-          description="Deletes every recorded solve and session. Algorithm times are not affected."
+          title={t("settings.history.title")}
+          description={t("settings.history.description")}
           last
           action={
             <button
               onClick={() => {
                 localStorage.removeItem("nact_solves");
                 localStorage.removeItem("nact_sessions");
-                flash("Solve history cleared.");
+                flash(t("settings.history.done"));
               }}
               className="btn-danger"
             >
-              <Trash2 size={13} /> Clear
+              <Trash2 size={13} /> {t("settings.history.button")}
             </button>
           }
         />
       </Section>
 
-      <Section title="Backup">
+      <Section title={t("settings.section.backup")}>
         <SettingsRow
-          title="Export data"
-          description="Downloads solve history, sessions, and algorithm progress as a JSON file."
+          title={t("settings.export.title")}
+          description={t("settings.export.description")}
           action={
             <button onClick={exportData} className="btn-secondary">
-              <Download size={13} /> Export
+              <Download size={13} /> {t("settings.export.button")}
             </button>
           }
         />
         <SettingsRow
-          title="Import data"
-          description="Restores from a previously exported JSON file. Overwrites existing data with matching keys."
+          title={t("settings.import.title")}
+          description={t("settings.import.description")}
           last
           action={
             <>
@@ -169,15 +189,15 @@ export default function SettingsPage() {
                   if (!file) return;
                   try {
                     await importData(file);
-                    flash("Data imported — reload the page to see it.");
+                    flash(t("settings.import.done"));
                   } catch {
-                    flash("Import failed — file was not valid JSON.");
+                    flash(t("settings.import.failed"));
                   }
                   e.target.value = "";
                 }}
               />
               <button onClick={() => fileInputRef.current?.click()} className="btn-secondary">
-                <Upload size={13} /> Import
+                <Upload size={13} /> {t("settings.import.button")}
               </button>
             </>
           }

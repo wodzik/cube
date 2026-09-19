@@ -5,15 +5,17 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
+import { useT } from "../i18n/useT";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useT();
   const isDark = theme === "dark";
 
   return (
     <button
       onClick={toggleTheme}
-      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      title={isDark ? t("theme.toLight") : t("theme.toDark")}
       className="shrink-0 p-2 rounded-xl text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-colors"
     >
       {isDark ? <Moon size={18} /> : <Sun size={18} />}
