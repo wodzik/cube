@@ -726,6 +726,7 @@ function SolvePageInner({
   return (
     <>
     <TrainerPanel
+      layout="side"
       header={
         <div className="flex items-center gap-3 w-full">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Speed Solve</span>

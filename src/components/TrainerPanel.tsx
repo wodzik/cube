@@ -52,7 +52,7 @@ export interface TrainerPanelProps {
   bottom?: ReactNode;
   /** A page's own persistent sidebar, in its own column left of everything else — e.g. a recent-times list (see TrainLayout). */
   leftAside?: ReactNode;
-  /** "stack" (default): timer above the cube, chart as a right column. "side": timer beside the cube, chart + bottom list across the full width — see TrainLayout. */
+  /** "side" (default): scramble above, timer beside the cube, chart + bottom list across the full width. "stack": timer above the cube, chart as a right column (unused) — see TrainLayout. */
   layout?: TrainLayoutMode;
 
   // ── Sequence bar ──
@@ -143,7 +143,7 @@ export interface TrainerPanelProps {
   /** Per-solve move counts, same order as `timesMs` — charted instead of times when `moveCountOnly` is set. */
   moveCounts?: number[];
   statsLabel?: string;
-  /** Defaults to "fill" (matches the timer+cube column's height) in "stack" layout (Solve), or 280px in "side" layout (drill/skill trainers/attack), where the chart is a fixed-height block above the case list. */
+  /** Defaults to "fill" (matches the timer+cube column's height) in "stack" layout, or 280px in "side" layout (every page), where the chart is a fixed-height block above the case list. */
   statsHeight?: number | "fill";
   showAo12?: boolean;
   /** Rendered ABOVE the chart, inside the same (now fixed-width, page-height) stats column — e.g. a page's own attempt-summary card. Not used by SolvePage, which shows its just-finished solve via `centerReplacement` instead (see SolvePage.tsx). */
@@ -154,7 +154,7 @@ export function TrainerPanel({
   header,
   bottom,
   leftAside,
-  layout,
+  layout = "side",
   sequenceContent,
   moves,
   progress,

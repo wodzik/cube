@@ -30,11 +30,13 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
 /**
- * "stack" (Solve): timer above the cube, chart as a full-height right column.
- * "side" (drill / skill trainers / attack): timer BESIDE the cube, then the
- * chart as a wide fixed-height block, then `bottom` (the case/algorithm
- * list) across the full width — those pages are about the list as much as
- * the timer, so nothing may hog the page height.
+ * "side" (default; every page — Solve, Academy, drill / skill trainers /
+ * attack): scramble above, timer BESIDE the cube, then the chart as a wide
+ * fixed-height block, then `bottom` (the case/algorithm list) across the
+ * full width — so nothing may hog the page height and every page reads the
+ * same.
+ * "stack": timer above the cube, chart as a full-height right column.
+ * Currently unused — kept for a page that wants a stopwatch-style layout.
  */
 export type TrainLayoutMode = "stack" | "side";
 
@@ -50,6 +52,8 @@ interface TrainLayoutProps {
 }
 
 const CHART_MIN_PX = 240;
+/** Side mode: below this much room next to block 1 the chart drops UNDER it at full width instead (its own drag minimum, CHART_MIN_PX, stays lower — that one is the user's choice). */
+const CHART_STACK_MIN_PX = 360;
 const HANDLE_PX = 32;
 /** Side mode: smallest width block 1 (scramble + timer/cube) keeps — timer (20rem) + cube (20rem). */
 const MAIN_MIN_PX = 640;
@@ -152,7 +156,8 @@ function StackColumns({ leftAside, main, stats }: { leftAside?: ReactNode; main:
  * "side" mode's top section: block 1 = scramble with the timer and cube
  * spread under it, block 2 = the chart, level with the scramble, separated
  * by a drag handle that resizes block 2 (clamped so block 1 never squeezes
- * the timer against the cube). Stacks on phones, handle hidden.
+ * the timer against the cube — the scramble wraps instead). Stacks on
+ * phones, handle hidden.
  */
 function SplitRow({
   leftAside,
@@ -193,7 +198,7 @@ function SplitRow({
     if (!row || !inner) return;
     const check = () => {
       const lg = window.matchMedia("(min-width: 1024px)").matches;
-      setStacked(lg && availableChartWidth() < CHART_MIN_PX);
+      setStacked(lg && availableChartWidth() < CHART_STACK_MIN_PX);
     };
     const ro = new ResizeObserver(check);
     ro.observe(row);
@@ -222,10 +227,13 @@ function SplitRow({
         </div>
       )}
 
-      {/* Block 1 keeps a hard minimum width (timer + cube never overlap the
-          chart); the chart is the one that yields — it shrinks below its
-          dragged width when the window gets narrower. */}
-      <div className="flex-1 min-w-0 lg:min-w-fit flex flex-col gap-6">
+      {/* Block 1's minimum width is what its timer + cube need side by side
+          (min-content) — NOT the scramble's: the scramble wraps onto more
+          lines when a wide chart squeezes this block. The chart is the one
+          that yields — it shrinks below its dragged width when the window
+          gets narrower, and drops under this block when it would get too
+          small. */}
+      <div className="flex-1 lg:min-w-min flex flex-col gap-6">
         <div className="w-full">{sequence}</div>
         <div ref={timerCubeRowRef} className="flex flex-col sm:flex-row items-center justify-evenly gap-8">
           <div className="flex flex-col items-center gap-4 sm:w-80 shrink-0">{center}</div>
@@ -255,7 +263,7 @@ function SplitRow({
   );
 }
 
-export function TrainLayout({ header, sequence, leftAside, center, cube, stats, bottom, layout = "stack" }: TrainLayoutProps) {
+export function TrainLayout({ header, sequence, leftAside, center, cube, stats, bottom, layout = "side" }: TrainLayoutProps) {
   const sequenceRow = (
     // Full-width row above the columns: a 20-move scramble at the display
     // size we want (~900px) doesn't fit a main column once sidebars have
