@@ -584,6 +584,16 @@ export const en = {
   "error.cubeConnect": "Failed to connect to cube",
   "error.timerConnect": "Failed to connect to timer",
   "error.scramble": "Failed to generate scramble",
+
+  // ─── Share links ───
+  "share.button": "Share",
+  "share.copied": "Link copied",
+  "share.title": "Copy a link that opens this solve in a preview",
+  "share.unavailable": "This solve can't be shared (it contains moves a link can't hold)",
+  "share.copyManually": "Copy this link:",
+  "share.notice": "Shared solve",
+  "share.invalid.title": "This link doesn't open",
+  "share.invalid.body": "The shared solve is damaged or was cut off — messaging apps sometimes shorten long links. Ask for the link again.",
 } as const;
 
 export type MessageKey = keyof typeof en;

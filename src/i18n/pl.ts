@@ -617,4 +617,14 @@ export const pl: Record<MessageKey, string> & Record<string, string> = {
   "error.cubeConnect": "Nie udało się połączyć z kostką",
   "error.timerConnect": "Nie udało się połączyć z timerem",
   "error.scramble": "Nie udało się wygenerować scramble'a",
+
+  // ─── Share links ───
+  "share.button": "Udostępnij",
+  "share.copied": "Link skopiowany",
+  "share.title": "Skopiuj link, który otwiera to ułożenie w podglądzie",
+  "share.unavailable": "Tego ułożenia nie można udostępnić (zawiera ruchy, których link nie pomieści)",
+  "share.copyManually": "Skopiuj ten link:",
+  "share.notice": "Udostępnione ułożenie",
+  "share.invalid.title": "Ten link się nie otwiera",
+  "share.invalid.body": "Udostępnione ułożenie jest uszkodzone albo zostało ucięte — komunikatory czasem skracają długie linki. Poproś o link jeszcze raz.",
 };

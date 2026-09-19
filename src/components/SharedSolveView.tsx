@@ -8,6 +8,7 @@
 import { AlertTriangle } from "lucide-react";
 import { SolveAnalysis } from "./SolveAnalysis";
 import type { SharedSolveState } from "../hooks/useSharedSolve";
+import { useT } from "../i18n/useT";
 
 interface SharedSolveViewProps {
   state: NonNullable<SharedSolveState>;
@@ -15,17 +16,18 @@ interface SharedSolveViewProps {
 }
 
 export default function SharedSolveView({ state, onClose }: SharedSolveViewProps) {
+  const { t } = useT();
   if (state.status === "ok") {
-    return <SolveAnalysis record={state.shared.record} moveCountOnly={state.shared.moveCountOnly} readOnly notice="Shared solve" onClose={onClose} />;
+    return <SolveAnalysis record={state.shared.record} moveCountOnly={state.shared.moveCountOnly} readOnly notice={t("share.notice")} onClose={onClose} />;
   }
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="bg-gray-900 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-6 max-w-sm w-full text-center" onClick={(e) => e.stopPropagation()}>
         <AlertTriangle size={22} className="mx-auto text-amber-400 mb-2" />
-        <h2 className="text-white font-semibold text-lg">This link doesn't open</h2>
-        <p className="text-sm text-gray-400 mt-1.5 mb-5">The shared solve is damaged or was cut off — messaging apps sometimes shorten long links. Ask for the link again.</p>
+        <h2 className="text-white font-semibold text-lg">{t("share.invalid.title")}</h2>
+        <p className="text-sm text-gray-400 mt-1.5 mb-5">{t("share.invalid.body")}</p>
         <button onClick={onClose} className="btn-primary w-full justify-center">
-          Close
+          {t("common.close")}
         </button>
       </div>
     </div>

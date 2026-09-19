@@ -278,9 +278,9 @@ export function SolveAnalysis({
                 onClick={handleShare}
                 disabled={shareUnavailable}
                 className="btn-secondary text-xs"
-                title={shareUnavailable ? "This solve can't be shared (it contains moves a link can't hold)" : "Copy a link that opens this solve in a preview"}
+                title={shareUnavailable ? t("share.unavailable") : t("share.title")}
               >
-                {copied ? <Check size={13} /> : <Link2 size={13} />} {copied ? "Link copied" : "Share"}
+                {copied ? <Check size={13} /> : <Link2 size={13} />} {copied ? t("share.copied") : t("share.button")}
               </button>
             )}
             <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white transition-colors">
@@ -290,7 +290,7 @@ export function SolveAnalysis({
         </div>
         {manualUrl && (
           <div className="px-5 py-2 border-b border-white/[0.06] flex items-center gap-2">
-            <span className="text-[11px] text-gray-500 shrink-0">Copy this link:</span>
+            <span className="text-[11px] text-gray-500 shrink-0">{t("share.copyManually")}</span>
             <input
               readOnly
               value={manualUrl}
