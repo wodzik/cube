@@ -30,7 +30,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { X, Play, RotateCcw, Trash2 } from "lucide-react";
+import { X, Play, RotateCcw, Trash2, Link2, Check } from "lucide-react";
 import type { SolveMethod, SolveRecord } from "../types/solve";
 import type { StageBoundary } from "../logic/stageDetection/types";
 import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisation";
@@ -45,6 +45,8 @@ import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liv
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
 import { patchSolve } from "../services/solveStore";
+import { buildShareUrl, shareBlocker } from "../logic/shareLink";
+import { copyText } from "../logic/clipboard";
 import { stageDescription } from "./stageDescriptions";
 
 interface SolveAnalysisProps {
@@ -61,6 +63,10 @@ interface SolveAnalysisProps {
   onDelete?: () => void;
   /** Hide time (header, TPS, per-stage recog/exec/total) and show move count instead — see StoredSession.moveCountOnly. */
   moveCountOnly?: boolean;
+  /** A solve opened from a share link: nothing is written to storage and there is no share button. */
+  readOnly?: boolean;
+  /** Small label next to the result, e.g. "Shared solve". */
+  notice?: string;
 }
 
 type DisplayMethod = Exclude<SolveMethod, "unknown">;
@@ -143,8 +149,26 @@ export function SolveAnalysis({
   onMoveToNewSession,
   onDelete,
   moveCountOnly = false,
+  readOnly = false,
+  notice,
 }: SolveAnalysisProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [copied, setCopied] = useState(false);
+  // Shown when the clipboard is unavailable, so the link can still be copied by hand.
+  const [manualUrl, setManualUrl] = useState<string | null>(null);
+  const shareUnavailable = shareBlocker(record) !== null;
+
+  async function handleShare() {
+    const url = buildShareUrl(record, { moveCountOnly });
+    if (!url) return;
+    if (await copyText(url)) {
+      setManualUrl(null);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      setManualUrl(url);
+    }
+  }
   // Display text: collapsed, compact (R2 instead of R R).
   const displayAlg = record.reducedMoves.join(" ");
   // Player alg: raw, one entry per quarter turn — keeps indices aligned with
@@ -194,12 +218,12 @@ export function SolveAnalysis({
       const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
       const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
       setHealed({ cfop, lbl, roux });
-      patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION });
+      if (!readOnly) patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION });
     });
     return () => {
       cancelled = true;
     };
-  }, [record]);
+  }, [record, readOnly]);
 
   const detector = METHOD_DETECTORS[method];
   const HEALED_KEY: Record<DisplayMethod, keyof NonNullable<typeof healed>> = { CFOP: "cfop", LBL: "lbl", Roux: "roux" };
@@ -244,10 +268,34 @@ export function SolveAnalysis({
               )}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white transition-colors">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {notice && <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300 bg-sky-500/10 rounded-md px-2 py-1">{notice}</span>}
+            {!readOnly && (
+              <button
+                onClick={handleShare}
+                disabled={shareUnavailable}
+                className="btn-secondary text-xs"
+                title={shareUnavailable ? "This solve can't be shared (it contains moves a link can't hold)" : "Copy a link that opens this solve in a preview"}
+              >
+                {copied ? <Check size={13} /> : <Link2 size={13} />} {copied ? "Link copied" : "Share"}
+              </button>
+            )}
+            <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white transition-colors">
+              <X size={18} />
+            </button>
+          </div>
         </div>
+        {manualUrl && (
+          <div className="px-5 py-2 border-b border-white/[0.06] flex items-center gap-2">
+            <span className="text-[11px] text-gray-500 shrink-0">Copy this link:</span>
+            <input
+              readOnly
+              value={manualUrl}
+              onFocus={(e) => e.currentTarget.select()}
+              className="flex-1 min-w-0 bg-gray-950/60 border border-white/10 rounded-lg px-2 py-1 text-[11px] font-mono text-gray-300"
+            />
+          </div>
+        )}
 
         <div className="flex flex-1 overflow-y-auto flex-col sm:flex-row">
           <div className="flex flex-col items-center gap-3 p-6 sm:border-r border-white/[0.06] sm:w-[26rem] shrink-0">
