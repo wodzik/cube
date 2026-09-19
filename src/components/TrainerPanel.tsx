@@ -8,8 +8,8 @@
  * what they pass into these slots (header content, bottom content, cube
  * setup, target moves), never in layout or in which components render.
  *
- *   sequence slot → MoveSequenceDisplay
- *   center  slot  → centerTop + [TimerDisplay/InspectionCountdown | controls + centerBottom] row + summary + hintText
+ *   sequence slot → MoveSequenceDisplay + the just-finished-solve `summary` under it
+ *   center  slot  → centerTop + [TimerDisplay/InspectionCountdown | controls + centerBottom] row + hintText
  *   cube    slot  → CubeVisualisation (+ flat view beside it) + cubeToolbar
  *   stats   slot  → StatsChart
  */
@@ -99,7 +99,7 @@ export interface TrainerPanelProps {
   hintText?: string | null;
   controls?: ReactNode;
   centerBottom?: ReactNode;
-  /** Rendered directly UNDER the timer row — e.g. SolvePage's just-finished solve summary (TPS · turns · stage bar). */
+  /** Rendered directly UNDER the scramble bar, above the timer and cube — e.g. SolvePage's just-finished solve summary (TPS · turns · stage bar). */
   summary?: ReactNode;
   /** Makes the timer and `summary` clickable (e.g. to open the full solve analysis while the last result is being held). */
   onCenterClick?: () => void;
@@ -246,6 +246,16 @@ export function TrainerPanel({
               extraControls={sequenceTrailing}
             />
           )}
+
+          {/* The just-finished-solve summary (stats + stage timing bar) sits
+              right under the scramble — above the timer and cube, spanning
+              the same block — instead of squeezed under the timer. Still
+              clickable: opens the solve analysis. */}
+          {summary && (
+            <Tap onClick={onCenterClick} className="w-full flex justify-center mt-4">
+              {summary}
+            </Tap>
+          )}
         </>
       }
       center={
@@ -277,12 +287,6 @@ export function TrainerPanel({
               </div>
             )}
           </div>
-
-          {summary && (
-            <Tap onClick={onCenterClick} className="w-full flex justify-center">
-              {summary}
-            </Tap>
-          )}
 
           {hintText && <p className="text-gray-500 text-sm tracking-wide animate-pulse">{hintText}</p>}
         </>
