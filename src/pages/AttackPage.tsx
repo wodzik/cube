@@ -64,6 +64,7 @@ import { formatTimeMs } from "../logic/statistics";
 import { useT } from "../i18n/useT";
 import { formatDate, formatTime } from "../i18n/i18n";
 import { dataLabel } from "../i18n/labels";
+import { loadGroupView, saveGroupView, ATTACK_VIEW_KEY } from "../services/lastView";
 
 const ATTACK_CONFIG: SessionConfig = {
   mode: "attack",
@@ -131,10 +132,12 @@ function AttackPageInner() {
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
-  const [group, setGroup] = useState<AlgGroup>("oll");
+  // Where you were when you last left this tab (validated against what is Attack-enabled now).
+  const [restoredView] = useState(() => loadGroupView(ATTACK_VIEW_KEY, { attackOnly: true }));
+  const [group, setGroup] = useState<AlgGroup>(() => restoredView?.group ?? "oll");
   const viewPrefs = useCaseViewPrefs(group.startsWith("f2l"), "attack");
   /** When the active group hasSubgroups: null = browsing the folder grid, set = drilled into one subgroup's own queue. */
-  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(null);
+  const [activeSubgroupId, setActiveSubgroupId] = useState<string | null>(() => restoredView?.subgroup ?? null);
   const groupMeta = getGroupMeta(group);
   const activeSubgroup = groupMeta?.hasSubgroups ? groupMeta.subgroups?.find((s) => s.id === activeSubgroupId) : undefined;
   const isSubgroupHome = Boolean(groupMeta?.hasSubgroups) && !activeSubgroup;
@@ -192,10 +195,23 @@ function AttackPageInner() {
     moveBuffer.clear(); // manual navigation — buffered moves belonged to the old queue
   };
 
-  useEffect(() => {
+  // Switching to a DIFFERENT group leaves any open folder (a restored folder on
+  // first load is kept: the reset lives here, not in the effect below).
+  const selectGroup = (next: AlgGroup) => {
+    if (next === group) return;
+    setGroup(next);
     setActiveSubgroupId(null);
+  };
+
+  useEffect(() => {
+    saveGroupView(ATTACK_VIEW_KEY, group, activeSubgroupId);
+  }, [group, activeSubgroupId]);
+
+  useEffect(() => {
     const meta = getGroupMeta(group);
-    armSession(group, meta?.hasSubgroups ? [] : loadAlgGroup(group));
+    const openFolder = meta?.hasSubgroups ? meta.subgroups?.find((s) => s.id === activeSubgroupId && s.availableInAttack === true) : undefined;
+    if (openFolder) armSession(`${group}:${openFolder.id}`, getSubgroupCases(group, openFolder.id));
+    else armSession(group, meta?.hasSubgroups ? [] : loadAlgGroup(group));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group]);
 
@@ -385,7 +401,7 @@ function AttackPageInner() {
         <div className="w-full overflow-x-auto px-4 sm:px-6 py-4">
           <GroupTabs
             activeId={group}
-            onSelect={setGroup}
+            onSelect={selectGroup}
             attackContext
             rightSlot={<ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />}
           />
@@ -419,7 +435,7 @@ function AttackPageInner() {
           <div className="w-full overflow-x-auto">
             <GroupTabs
               activeId={group}
-              onSelect={setGroup}
+              onSelect={selectGroup}
               attackContext
               rightSlot={
                 <div className="flex items-center gap-3">
@@ -462,7 +478,7 @@ function AttackPageInner() {
           <div className="w-full overflow-x-auto">
             <GroupTabs
               activeId={group}
-              onSelect={setGroup}
+              onSelect={selectGroup}
               attackContext
               rightSlot={
                 <div className="flex items-center gap-3">

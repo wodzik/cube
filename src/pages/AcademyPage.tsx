@@ -43,6 +43,7 @@ import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/ac
 import { localizedLessons } from "../i18n/academyContent";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
 import { useT } from "../i18n/useT";
+import { loadAcademyView, saveAcademyView } from "../services/lastView";
 
 const ONBOARDING_SEEN_KEY = "nact_academy_onboarding_seen";
 
@@ -98,10 +99,15 @@ function AcademyInner() {
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
-  const [lessonId, setLessonId] = useState(ACADEMY_LESSONS[0].id);
+  // Where you were when you last left this tab (validated against the lessons that exist).
+  const [restoredView] = useState(loadAcademyView);
+  const [lessonId, setLessonId] = useState(() => restoredView?.lesson ?? ACADEMY_LESSONS[0].id);
   const lessons = localizedLessons(lang);
   const lesson = lessons.find((l) => l.id === lessonId) ?? lessons[0];
-  const [stepId, setStepId] = useState(lesson.steps[0].id);
+  const [stepId, setStepId] = useState(() => restoredView?.step ?? lesson.steps[0].id);
+  useEffect(() => {
+    saveAcademyView(lessonId, stepId);
+  }, [lessonId, stepId]);
   const [stored, setStored] = useState<Record<string, string[]>>(loadSelected);
   const [drillIdx, setDrillIdx] = useState(0);
   const [drillRound, setDrillRound] = useState(0);

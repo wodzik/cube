@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, Upload, Settings } from "lucide-react";
 import {
   listGroups,
+  isAttackAvailable,
   createGroup,
   importGroup,
   exportGroup,
@@ -41,10 +42,6 @@ const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
 
 function groupCategory(g: AlgGroupMeta | undefined): AlgCategory {
   return g?.category ?? "Other";
-}
-
-function isAttackAvailable(g: AlgGroupMeta): boolean {
-  return g.hasSubgroups ? (g.subgroups ?? []).some((s) => s.availableInAttack === true) : g.availableInAttack !== false;
 }
 
 function downloadJson(filename: string, json: string): void {
