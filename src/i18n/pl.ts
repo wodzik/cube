@@ -554,4 +554,35 @@ export const pl: Record<MessageKey, string> & Record<string, string> = {
   "trainer.attemptsAtOptimal.other": "{n} próby przy optymalnej długości {len}",
   "trainer.attemptsAtOptimal.few": "{n} próby przy optymalnej długości {len}",
   "trainer.attemptsAtOptimal.many": "{n} prób przy optymalnej długości {len}",
+
+  // ─── Time Attack ───
+  "attack.noSubgroups": "Żadna podgrupa {group} nie jest jeszcze dostępna w Ataku na czas — włącz ją w jej ustawieniach w zakładce Algorytmy.",
+  "attack.noCases": "Nie wybrano przypadków",
+  "attack.restart": "Zacznij od nowa",
+  "attack.times": "Czasy ataku",
+  "attack.recent": "Ostatnie sesje",
+  "attack.casesShort": "{n} prz.",
+
+  // ─── Counts ───
+  "count.cases.one": "{n} przypadek",
+  "count.cases.other": "{n} przypadku",
+  "count.cases.few": "{n} przypadki",
+  "count.cases.many": "{n} przypadków",
+
+  // ─── Academy page ───
+  "academy.selectAlgs": "Wybierz algorytmy poniżej, aby ćwiczyć",
+  "academy.makeMove": "Wykonaj ruch na kostce, aby zacząć",
+  "academy.next": "Świetnie — zaraz następny…",
+  "academy.guides": "Poradniki",
+  "academy.guides.title": "Poradniki: pierwsze kroki, warstwa po warstwie, ostatnia warstwa, F2L",
+  "academy.noAlg": "Nie wybrano algorytmu",
+  "academy.required": "wymagany",
+  "academy.niceToKnow": "warto znać",
+  "academy.watch": "Zobacz algorytm wykonany ruch po ruchu",
+  "academy.session": "Ta sesja",
+  "academy.sessionNamed": "Ta sesja — {name}",
+  "academy.attempts": "Próby",
+  "academy.best": "najlepsza",
+  "academy.practiceOnly": "Próby w Akademii służą tylko do ćwiczeń — nie są zapisywane w statystykach.",
+  "academy.comingSoon": "Wkrótce.",
 };

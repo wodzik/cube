@@ -3,6 +3,9 @@ import "../testSetup";
 import { en } from "./en";
 import { pl } from "./pl";
 import { getLang, setLang, t, tn } from "./i18n";
+import { ACADEMY_LESSONS } from "../data/academy";
+import { ACADEMY_PL } from "./academy.pl";
+import { localizeLesson, localizedLessons } from "./academyContent";
 
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 const PLURAL_SUFFIX = /\.(one|few|many|other)$/;
@@ -57,5 +60,40 @@ describe("t / tn / setLang", () => {
 
   it("an unknown key falls back to the key itself", () => {
     expect(t("no.such.key" as never)).toBe("no.such.key");
+  });
+});
+
+describe("Academy Polish overlay", () => {
+  it("covers every lesson, step and algorithm — text present wherever the English has any — with no stray ids", () => {
+    expect(Object.keys(ACADEMY_PL).sort()).toEqual(ACADEMY_LESSONS.map((l) => l.id).sort());
+    for (const lesson of ACADEMY_LESSONS) {
+      const pl = ACADEMY_PL[lesson.id];
+      expect(pl.title.trim()).not.toBe("");
+      expect(pl.description.trim()).not.toBe("");
+      expect(Object.keys(pl.steps).sort()).toEqual(lesson.steps.map((s) => s.id).sort());
+      for (const step of lesson.steps) {
+        const ps = pl.steps[step.id];
+        expect(`${lesson.id}/${step.id}: ${ps.title && ps.description ? "ok" : "missing"}`).toBe(`${lesson.id}/${step.id}: ok`);
+        expect(Object.keys(ps.algs).sort()).toEqual(step.algs.map((a) => a.id).sort());
+        for (const alg of step.algs) {
+          const pa = ps.algs[alg.id];
+          expect(`${lesson.id}/${step.id}/${alg.id} name: ${pa.name ? "ok" : "missing"}`).toBe(`${lesson.id}/${step.id}/${alg.id} name: ok`);
+          if (alg.description) expect(`${lesson.id}/${step.id}/${alg.id} description: ${pa.description ? "ok" : "missing"}`).toBe(`${lesson.id}/${step.id}/${alg.id} description: ok`);
+        }
+      }
+    }
+  });
+
+  it("localizing changes text only — ids, algorithms, views and required flags are untouched", () => {
+    for (const lesson of ACADEMY_LESSONS) {
+      const local = localizeLesson(lesson, "pl");
+      expect(local.id).toBe(lesson.id);
+      expect(local.steps.map((s) => [s.id, s.view, s.algs.map((a) => [a.id, a.alg, a.required])])).toEqual(
+        lesson.steps.map((s) => [s.id, s.view, s.algs.map((a) => [a.id, a.alg, a.required])])
+      );
+      expect(local.title).not.toBe(lesson.title === "Zeta Slotting" || lesson.title === "F2L" ? "" : lesson.title);
+    }
+    expect(localizedLessons("en")).toBe(localizedLessons("en"));
+    expect(localizedLessons("en")[0]).toBe(ACADEMY_LESSONS[0]);
   });
 });

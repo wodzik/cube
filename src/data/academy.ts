@@ -305,7 +305,7 @@ const ZETA_CORNERS_STEP: AcademyStep = {
   id: "zeta-corners",
   title: "Corners",
   description:
-    "Corner above its slot at the front-right, edge already correctly seated below it. White facing up: the " +
+    "Corner above its slot at the front-right, edge already correctly seated below it. White facing up: " +
     "the sexy move ×3, exactly as in the first layer. White facing front or right: one longer algorithm each — the edge staying put is what " +
     "makes them longer than plain first-layer inserts.",
   view: "f2l",

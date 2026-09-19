@@ -61,6 +61,8 @@ import { SubgroupCard } from "../components/SubgroupCard";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase, DisplayConfig } from "../types/algorithm";
 import { formatTimeMs } from "../logic/statistics";
+import { useT } from "../i18n/useT";
+import { formatDate, formatTime } from "../i18n/i18n";
 
 const ATTACK_CONFIG: SessionConfig = {
   mode: "attack",
@@ -123,6 +125,7 @@ export default function AttackPage() {
 }
 
 function AttackPageInner() {
+  const { t, tn } = useT();
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
@@ -389,7 +392,7 @@ function AttackPageInner() {
         <div className="px-4 sm:px-6 pb-10">
           {attackSubgroups.length === 0 && (
             <p className="text-sm text-gray-600">
-              No subgroups of {groupMeta?.name} are available in Attack yet — enable one from its settings on the Practice tab.
+              {t("attack.noSubgroups", { group: groupMeta?.name ?? "" })}
             </p>
           )}
           <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))" }}>
@@ -435,7 +438,7 @@ function AttackPageInner() {
                 onClick={backToFolders}
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-xl text-gray-500 hover:text-gray-300 hover:bg-white/[0.03] transition-all shrink-0"
               >
-                <ChevronLeft size={13} /> Back
+                <ChevronLeft size={13} /> {t("common.back")}
               </button>
               <div className="w-px h-5 bg-white/[0.08] mx-1 shrink-0" />
               {(groupMeta?.subgroups ?? [])
@@ -477,8 +480,8 @@ function AttackPageInner() {
       showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}
-      loadingText={noCases ? "No cases selected" : undefined}
-      completeText="Algorithm complete!"
+      loadingText={noCases ? t("attack.noCases") : undefined}
+      completeText={t("drill.complete")}
       centerTop={
         <div className="flex flex-col items-center gap-1 text-center">
           {justFinished && (
@@ -499,20 +502,20 @@ function AttackPageInner() {
       }
       timeMs={sessionElapsedSec * 1000}
       timerState={timerState}
-      hintText={state.phase === "setup" ? "Make a move to start" : null}
+      hintText={state.phase === "setup" ? t("drill.makeMove") : null}
       controls={
         <div className="flex items-center gap-2">
           {currentCase && variant && (
             <button
               onClick={() => setShowPlayback(true)}
               className="btn-secondary text-xs"
-              title="Watch this algorithm performed move by move"
+              title={t("drill.showHow.title")}
             >
-              <Video size={13} /> Show me how
+              <Video size={13} /> {t("drill.showHow")}
             </button>
           )}
           <button onClick={handleRestart} className="btn-secondary">
-            <RotateCcw size={13} /> Restart
+            <RotateCcw size={13} /> {t("attack.restart")}
           </button>
         </div>
       }
@@ -528,13 +531,13 @@ function AttackPageInner() {
       cameraLongitude={displayConfig.cameraLongitude}
       cubeSetupAlg=""
       timesMs={sessionTotalsMs}
-      statsLabel="Attack times"
+      statsLabel={t("attack.times")}
       layout="side"
       showAo12={false}
       leftAside={
         history.length > 0 ? (
           <CompactRecentList
-            title="Recent sessions"
+            title={t("attack.recent")}
             items={sortedHistory}
             keyOf={(s) => s.id}
             expanded={historyExpanded}
@@ -543,16 +546,16 @@ function AttackPageInner() {
             renderRow={(s) => (
               <div className="flex items-center gap-3 py-1.5">
                 <span className="text-sm text-gray-500 flex-1 truncate">
-                  {new Date(s.date).toLocaleDateString()}
+                  {formatDate(s.date)}
                 </span>
-                <span className="text-sm text-gray-700 shrink-0">{s.caseTimes.length}c</span>
+                <span className="text-sm text-gray-700 shrink-0">{t("attack.casesShort", { n: s.caseTimes.length })}</span>
                 <span className="text-base font-mono tabular-nums text-white shrink-0">{formatTimeMs(s.totalMs)}</span>
               </div>
             )}
             expandedContent={
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center gap-1 pb-3 shrink-0">
-                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">Per page</span>
+                  <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{t("solve.perPage")}</span>
                   <select
                     value={historyItemsPerPage}
                     onChange={(e) => handleHistoryPageSizeChange(e.target.value === "all" ? "all" : Number(e.target.value))}
@@ -560,7 +563,7 @@ function AttackPageInner() {
                   >
                     {PAGE_SIZE_OPTIONS.map((n) => (
                       <option key={n} value={n}>
-                        {n === "all" ? "All" : n}
+                        {n === "all" ? t("solve.all") : n}
                       </option>
                     ))}
                   </select>
@@ -576,9 +579,9 @@ function AttackPageInner() {
                         >
                           <ChevronRight size={13} className={`shrink-0 text-gray-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
                           <span className="flex-1 text-sm text-gray-500">
-                            {new Date(s.date).toLocaleDateString()} {new Date(s.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            {formatDate(s.date)} {formatTime(s.date, { hour: "2-digit", minute: "2-digit" })}
                           </span>
-                          <span className="text-xs text-gray-700">{s.caseTimes.length} cases</span>
+                          <span className="text-xs text-gray-700">{tn("count.cases", s.caseTimes.length)}</span>
                           <span className="text-base font-mono tabular-nums text-gray-300">{formatTimeMs(s.totalMs)}</span>
                         </button>
                         {isExpanded && (
@@ -601,18 +604,18 @@ function AttackPageInner() {
                       onClick={() => setHistoryPage(clampedHistoryPage - 1)}
                       disabled={clampedHistoryPage <= 1}
                       className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                      title="Previous page"
+                      title={t("solve.prevPage")}
                     >
                       <ChevronLeft size={14} />
                     </button>
                     <span className="text-[10px] font-mono tabular-nums text-gray-500">
-                      Page {clampedHistoryPage} / {historyTotalPages}
+                      {t("solve.page", { n: clampedHistoryPage, total: historyTotalPages })}
                     </span>
                     <button
                       onClick={() => setHistoryPage(clampedHistoryPage + 1)}
                       disabled={clampedHistoryPage >= historyTotalPages}
                       className="p-1 rounded-md text-gray-500 hover:text-gray-200 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
-                      title="Next page"
+                      title={t("solve.nextPage")}
                     >
                       <ChevronRight size={14} />
                     </button>

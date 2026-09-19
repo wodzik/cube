@@ -523,6 +523,35 @@ export const en = {
   // ─── Skill trainers (plurals) ───
   "trainer.attemptsAtOptimal.one": "{n} attempt at optimal {len}",
   "trainer.attemptsAtOptimal.other": "{n} attempts at optimal {len}",
+
+  // ─── Time Attack ───
+  "attack.noSubgroups": "No subgroups of {group} are available in Attack yet — enable one from its settings on the Practice tab.",
+  "attack.noCases": "No cases selected",
+  "attack.restart": "Restart",
+  "attack.times": "Attack times",
+  "attack.recent": "Recent sessions",
+  "attack.casesShort": "{n}c",
+
+  // ─── Counts ───
+  "count.cases.one": "{n} case",
+  "count.cases.other": "{n} cases",
+
+  // ─── Academy page ───
+  "academy.selectAlgs": "Select algorithms below to practice",
+  "academy.makeMove": "Make a move on the cube to start",
+  "academy.next": "Nice — next one coming up…",
+  "academy.guides": "Guides",
+  "academy.guides.title": "Tutorials: getting started, layer by layer, last layer, F2L",
+  "academy.noAlg": "No algorithm selected",
+  "academy.required": "required",
+  "academy.niceToKnow": "nice to know",
+  "academy.watch": "Watch the algorithm performed move by move",
+  "academy.session": "This session",
+  "academy.sessionNamed": "This session — {name}",
+  "academy.attempts": "Attempts",
+  "academy.best": "best",
+  "academy.practiceOnly": "Academy attempts are practice-only — not saved to stats.",
+  "academy.comingSoon": "Coming soon.",
 } as const;
 
 export type MessageKey = keyof typeof en;

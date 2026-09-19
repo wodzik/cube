@@ -40,7 +40,9 @@ import { guideById } from "../data/guides";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/academy";
+import { localizedLessons } from "../i18n/academyContent";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
+import { useT } from "../i18n/useT";
 
 const ONBOARDING_SEEN_KEY = "nact_academy_onboarding_seen";
 
@@ -89,6 +91,7 @@ export default function AcademyPage() {
 }
 
 function AcademyInner() {
+  const { t, lang } = useT();
   const { state, submitCubeMove, setTarget, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const viewPrefs = useCaseViewPrefs(false, "academy");
@@ -96,7 +99,8 @@ function AcademyInner() {
   const moveBuffer = usePendingMoveBuffer(state.phase);
 
   const [lessonId, setLessonId] = useState(ACADEMY_LESSONS[0].id);
-  const lesson = ACADEMY_LESSONS.find((l) => l.id === lessonId) ?? ACADEMY_LESSONS[0];
+  const lessons = localizedLessons(lang);
+  const lesson = lessons.find((l) => l.id === lessonId) ?? lessons[0];
   const [stepId, setStepId] = useState(lesson.steps[0].id);
   const [stored, setStored] = useState<Record<string, string[]>>(loadSelected);
   const [drillIdx, setDrillIdx] = useState(0);
@@ -227,11 +231,11 @@ function AcademyInner() {
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
   const hintText = !alg
-    ? "Select algorithms below to practice"
+    ? t("academy.selectAlgs")
     : state.phase === "setup"
-      ? "Make a move on the cube to start"
+      ? t("academy.makeMove")
       : state.phase === "done"
-        ? "Nice — next one coming up…"
+        ? t("academy.next")
         : null;
 
   if (academyView === "guides") {
@@ -275,7 +279,7 @@ function AcademyInner() {
             <GraduationCap size={14} /> Academy
           </span>
           <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/[0.03] shrink-0">
-            {ACADEMY_LESSONS.map((l) => (
+            {lessons.map((l) => (
               <button
                 key={l.id}
                 onClick={() => switchLesson(l.id)}
@@ -303,8 +307,8 @@ function AcademyInner() {
             </button>
           ))}
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            <button onClick={() => setAcademyView("guides")} className="btn-secondary text-xs" title="Tutorials: getting started, layer by layer, last layer, F2L">
-              <BookOpen size={13} /> Guides
+            <button onClick={() => setAcademyView("guides")} className="btn-secondary text-xs" title={t("academy.guides.title")}>
+              <BookOpen size={13} /> {t("academy.guides")}
             </button>
             <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
           </div>
@@ -316,8 +320,8 @@ function AcademyInner() {
       showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}
-      loadingText={!alg ? "No algorithm selected" : undefined}
-      completeText="Algorithm complete!"
+      loadingText={!alg ? t("academy.noAlg") : undefined}
+      completeText={t("drill.complete")}
       centerTop={
         alg ? (
           <div className="flex flex-col items-center gap-1 text-center">
@@ -327,15 +331,15 @@ function AcademyInner() {
                 alg.required ? "bg-emerald-500/15 text-emerald-300" : "bg-sky-500/15 text-sky-300"
               }`}
             >
-              {alg.required ? "required" : "nice to know"}
+              {alg.required ? t("academy.required") : t("academy.niceToKnow")}
             </span>
             {alg.description && <p className="text-xs text-gray-500 max-w-md">{alg.description}</p>}
             <button
               onClick={() => setShowPlayback(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 mt-0.5 text-[11px] font-semibold text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
-              title="Watch the algorithm performed move by move"
+              title={t("academy.watch")}
             >
-              <Video size={12} /> Show me how
+              <Video size={12} /> {t("drill.showHow")}
             </button>
             <p className="text-[11px] text-gray-700 tabular-nums font-mono">
               {Math.min(drillIdx, Math.max(selectedAlgs.length - 1, 0)) + 1} / {selectedAlgs.length}
@@ -358,15 +362,15 @@ function AcademyInner() {
       cameraLongitude={30}
       cubeSetupAlg=""
       timesMs={algTimes}
-      statsLabel={alg ? `This session — ${alg.name}` : "This session"}
+      statsLabel={alg ? t("academy.sessionNamed", { name: alg.name }) : t("academy.session")}
       showAo12={false}
       statsAside={
         algTimes.length > 0 ? (
           <div className="panel p-5 h-full flex flex-col gap-2">
             <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
-              Attempts{bestMs !== null && (
+              {t("academy.attempts")}{bestMs !== null && (
                 <>
-                  {" "}· best <span className="text-emerald-400">{formatTimeMs(bestMs)}</span>
+                  {" "}· {t("academy.best")} <span className="text-emerald-400">{formatTimeMs(bestMs)}</span>
                 </>
               )}
             </p>
@@ -382,7 +386,7 @@ function AcademyInner() {
                 </span>
               ))}
             </div>
-            <p className="text-[11px] text-gray-600 mt-auto">Academy attempts are practice-only — not saved to stats.</p>
+            <p className="text-[11px] text-gray-600 mt-auto">{t("academy.practiceOnly")}</p>
           </div>
         ) : undefined
       }
@@ -391,7 +395,7 @@ function AcademyInner() {
           <h3 className="text-sm font-bold text-white">{step.title}</h3>
           <p className="text-xs text-gray-500 mt-1 mb-4 max-w-3xl">{step.description}</p>
           {step.algs.length === 0 ? (
-            <p className="text-xs text-gray-600 italic">Coming soon.</p>
+            <p className="text-xs text-gray-600 italic">{t("academy.comingSoon")}</p>
           ) : (
             // Fixed-width tiles, not a stretching grid: a 2D case preview is
             // legible at ~150px and only gets cartoonish on wide screens.
