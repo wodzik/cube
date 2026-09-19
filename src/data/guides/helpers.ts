@@ -1,7 +1,7 @@
 import { invertSequence } from "../../logic/moveParser";
 import { FOUR_LOOK_LL_CORNERS_FIRST, type AcademyLesson } from "../academy";
 import type { GuideMaskKind } from "../../logic/guideMasks";
-import type { GuideCase } from "./types";
+import type { GuideCase, GuideDemo } from "./types";
 
 /**
  * A solving-guide case whose demo scene is "z2 + inverse of alg" unless a
@@ -44,6 +44,16 @@ export function algTokens(alg: string): string[] {
  */
 export function guideSetup(alg: string): string {
   return ["z2", ...invertSequence(algTokens(alg))].join(" ");
+}
+
+/**
+ * The index-card animation for a guide: one of its own cases, looping — the
+ * case's scene (z2 + inverse of `alg`) and sticker mask, `alg` played once
+ * and the solved result held until the loop restarts. guides.test.ts checks
+ * that a preview really is one of the guide's case demos.
+ */
+export function previewOf(alg: string, mask: GuideMaskKind): GuideDemo {
+  return { setup: guideSetup(alg), alg: algTokens(alg).join(" "), mask, loop: true, repeat: 1 };
 }
 
 /** Solved cube, white on the bottom — for checkpoint pictures. */

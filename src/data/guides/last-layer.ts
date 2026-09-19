@@ -11,7 +11,7 @@
  */
 
 import type { Guide } from "./types";
-import { academyAlg, solveCase, SOLVED_SETUP } from "./helpers";
+import { academyAlg, previewOf, solveCase, SOLVED_SETUP } from "./helpers";
 
 const CO = (algId: string) => academyAlg("co", algId);
 const EO = (algId: string) => academyAlg("eo", algId);
@@ -25,6 +25,8 @@ export const LAST_LAYER_GUIDE: Guide = {
   category: "learn",
   readingTime: "~30 min",
   prerequisites: ["layer-by-layer"],
+  // Look 1's headlights case: F, one sexy move, F' — corners' yellow stickers only.
+  preview: previewOf(CO("sexy1"), "ll-corners-orient"),
   intro: [
     "With two layers done, the last layer is solved in two phases — first make the top yellow (**orientation**), then move the pieces into their right spots (**permutation**) — and in each phase we do the **corners first, then the edges**. That's four looks at the cube, with a short algorithm each time.",
     "There are fewer algorithms than it looks. Three of the corner cases are the same trigger repeated; the two permutation algorithms are just two building blocks, A and B, chained in either order. Each section ends with a button that opens the matching Academy drill.",

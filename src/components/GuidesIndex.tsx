@@ -6,7 +6,7 @@
 
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { GUIDES, type Guide } from "../data/guides";
-import { LoopingCubeDemo } from "./LoopingCubeDemo";
+import { GuideCubeDemo } from "./GuideCubeDemo";
 
 interface GuidesIndexProps {
   onOpen: (guideId: string) => void;
@@ -14,18 +14,11 @@ interface GuidesIndexProps {
   onBack?: () => void;
 }
 
-const PREVIEW_ALG: Record<string, string> = {
-  "getting-started": "R U R' U'",
-  "layer-by-layer": "R U R'",
-  "last-layer": "F R U R' U' F'",
-  "beginner-f2l": "U R U' R'",
-};
-
 function GuideCard({ guide, step, onOpen }: { guide: Guide; step?: number; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="panel p-5 text-left flex gap-5 hover:bg-white/[0.05] transition-colors group">
       <div className="w-24 sm:w-28 shrink-0">
-        <LoopingCubeDemo alg={PREVIEW_ALG[guide.id] ?? "R U R' U'"} repeat={6} />
+        {guide.preview && <GuideCubeDemo demo={guide.preview} />}
       </div>
       <div className="flex-1 min-w-0 flex flex-col">
         {step !== undefined && <p className="text-[10px] font-bold text-[var(--accent-bright)] uppercase tracking-widest mb-1">Part {step}</p>}

@@ -115,6 +115,16 @@ describe("guide data integrity", () => {
     }
   });
 
+  it("every guide's index-card preview is one of its own case demos (same algorithm, scene and mask)", () => {
+    for (const g of GUIDES) {
+      expect(`${g.id}: has preview ${!!g.preview}`).toBe(`${g.id}: has preview true`);
+      const pv = g.preview!;
+      expect(pv.loop).toBe(true);
+      const match = [...allDemos(g)].some(({ demo }) => demo.alg === pv.alg && demo.mask === pv.mask && demo.setup === pv.setup);
+      expect(`${g.id}: preview matches a demo ${match}`).toBe(`${g.id}: preview matches a demo true`);
+    }
+  });
+
   it("case demos play the case's own algorithm", () => {
     for (const g of GUIDES) for (const c of allCases(g)) expect(c.demo.alg).toBe(algTokens(c.alg).join(" "));
   });

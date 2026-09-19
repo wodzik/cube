@@ -19,7 +19,7 @@
  */
 
 import type { Guide } from "./types";
-import { academyAlg, solveCase, SOLVED_SETUP } from "./helpers";
+import { academyAlg, previewOf, solveCase, SOLVED_SETUP } from "./helpers";
 import { ZETA_SLOTTING } from "../academy";
 
 const EDGE = (algId: string) => academyAlg("zeta-edges", algId, ZETA_SLOTTING);
@@ -32,6 +32,8 @@ export const ZETA_SLOTTING_GUIDE: Guide = {
   category: "learn",
   readingTime: "~25 min",
   prerequisites: ["layer-by-layer"],
+  // Step 1's simple edge insert, corners hidden — this method's first move.
+  preview: previewOf(EDGE("edge-right"), "cross-edge"),
   intro: [
     "\"Layer by layer\" solves the first two layers corner-first: all four white corners, then all four middle edges. Zeta Slotting flips that order — **every edge first, then every corner** — using the exact same cross and the exact same edge-insertion moves you already know.",
     "Why bother? Once an edge is sitting correctly in its slot, there are only three ways a corner can need inserting above it (not the four-ish of the corner-first order), and those three algorithms are exactly the \"Edge In Slot\" cases from full F2L — so this method doubles as your first real F2L practice, just applied to every slot instead of only when you happen to get lucky.",

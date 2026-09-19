@@ -85,5 +85,7 @@ export interface Guide {
   prerequisites?: string[];
   /** Hero demo shown next to the intro. */
   hero?: GuideDemo;
+  /** Looping cube on this guide's index card — an algorithm from one of the guide's own cases (same scene and mask), see helpers.previewOf. */
+  preview?: GuideDemo;
   sections: GuideSection[];
 }

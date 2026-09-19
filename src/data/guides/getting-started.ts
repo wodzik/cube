@@ -29,6 +29,8 @@ export const GETTING_STARTED_GUIDE: Guide = {
     "You don't need to memorise the notation up front — come back whenever a guide uses a symbol you haven't seen.",
   ],
   hero: { alg: "R U R' U'", loop: true, repeat: 6, label: "R U R' U' — the sexy move" },
+  // The sexy move from the Triggers section, six times: it comes back to where it started.
+  preview: { alg: "R U R' U'", loop: true, repeat: 6 },
   sections: [
     {
       id: "before-you-start",

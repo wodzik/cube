@@ -12,7 +12,7 @@
  */
 
 import type { Guide } from "./types";
-import { solveCase, SOLVED_SETUP } from "./helpers";
+import { previewOf, solveCase, SOLVED_SETUP } from "./helpers";
 
 const SEXY = "R U R' U'";
 
@@ -23,6 +23,8 @@ export const LAYER_BY_LAYER_GUIDE: Guide = {
   category: "learn",
   readingTime: "~30 min",
   prerequisites: ["getting-started"],
+  // The "white facing up" corner: three sexy moves, first layer in colour.
+  preview: previewOf(`(${SEXY}) (${SEXY}) (${SEXY})`, "first-layer"),
   intro: [
     "Three steps take a scrambled cube to two solved layers. The cross is worked out piece by piece with no algorithms; the corners use one four-move trigger repeated; the second layer uses two mirrored sequences. Everything is shown with white on the bottom and yellow on top — keep holding it that way.",
     "Work through it with a cube in your hands. Every case has a 3D demo you can play, and a \"Try this\" button that tracks the moves on a connected smart cube. Checkpoints tell you what the cube should look like before you move on.",

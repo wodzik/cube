@@ -14,7 +14,7 @@
  */
 
 import type { Guide, GuideCase } from "./types";
-import { guideSetup } from "./helpers";
+import { guideSetup, previewOf } from "./helpers";
 import { F2L_METHOD } from "../academy";
 
 /**
@@ -42,6 +42,8 @@ export const BEGINNER_F2L_GUIDE: Guide = {
   category: "learn",
   readingTime: "~45 min",
   prerequisites: ["layer-by-layer"],
+  // The matched insert — the first of the four basic F2L inserts, pair in colour.
+  preview: previewOf(f2lAlg("matched-right"), "f2l-pair"),
   intro: [
     "In the beginner method you solve the first layer's corners, then the second layer's edges — eight pieces, one at a time. F2L (\"first two layers\") solves the same eight pieces as four **pairs**: a corner and the edge that belongs next to it, joined on top and inserted together. It's the same cube and the same slots, just fewer, smarter moves.",
     "Don't learn this page as a list of algorithms. Read what each move sequence is **doing** — opening a slot, moving a piece out of the way, closing it — and the 41 \"cases\" collapse into a few ideas you can work out at the cube.",
