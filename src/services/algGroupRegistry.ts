@@ -412,6 +412,22 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
     }
   }
 
+  // One-time fix-up: Second Block Last Slot used to only DIM the U/F/B/D
+  // centers; they're now hidden. Blanks just those four in a stored mask that
+  // still has them dimmed, leaving anything else the user customised alone.
+  if (sblsIdx >= 0) {
+    const stickering = next[sblsIdx].displayConfig.stickering;
+    const centers = stickering.kind === "mask" ? stickering.rawOverride?.orbits.CENTERS?.pieces : undefined;
+    const OTHER_CENTERS = [0, 2, 4, 5];
+    if (stickering.kind === "mask" && stickering.rawOverride && centers && OTHER_CENTERS.every((i) => centers[i]?.facelets.every((f) => f === "dim"))) {
+      const pieces = centers.map((piece, i) => (OTHER_CENTERS.includes(i) ? { facelets: piece!.facelets.map(() => "ignored" as const) } : piece));
+      const rawOverride = { ...stickering.rawOverride, orbits: { ...stickering.rawOverride.orbits, CENTERS: { pieces } } };
+      next = [...next];
+      next[sblsIdx] = { ...next[sblsIdx], displayConfig: { ...next[sblsIdx].displayConfig, stickering: { ...stickering, rawOverride } } };
+      changed = true;
+    }
+  }
+
   if (changed) writeRegistry(next);
   return next;
 }
@@ -491,7 +507,9 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
   { id: "summer-variation", name: "Summer Variation", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   // Second Block Last Slot: same view as CMLL, but with the top layer
   // hidden entirely (`true`) — the top corners are still scrambled at
-  // this stage, so showing them would be misleading, not helpful.
+  // this stage, so showing them would be misleading, not helpful. The
+  // U/F/B/D centers are hidden too (`true`, second arg): its algs turn r/M,
+  // which moves them, so their position isn't meaningful.
   {
     id: "second-block-last-slot",
     name: "Second Block Last Slot",
@@ -501,7 +519,7 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
       stickering: {
         kind: "mask",
         pieceGroups: ["d-corners", "f2l-fr", "f2l-fl", "f2l-br", "f2l-bl"],
-        rawOverride: rouxBlocksStickeringMask(true),
+        rawOverride: rouxBlocksStickeringMask(true, true),
       },
       cardVisualization: "3D",
       cubeVisualization: "3D",

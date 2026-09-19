@@ -161,11 +161,16 @@ export function xxcrossStickeringMask(face: Face, pair: XXCrossPair): Stickering
  * the 4 U-layer corners: CMLL keeps them (they're its actual target), but
  * Second Block Last Slot hides them too — that piece is still scrambled at
  * this stage, so showing it would be misleading, not helpful.
+ *
+ * The centers other than L/R are only DIMMED by default (context, as in
+ * CMLL); `hideOtherCenters` blanks them instead — Second Block Last Slot's
+ * algs turn r/M, which moves those centers, so their position means nothing
+ * there.
  */
-export function rouxBlocksStickeringMask(hideTopCorners: boolean): StickeringMaskOrbits {
+export function rouxBlocksStickeringMask(hideTopCorners: boolean, hideOtherCenters = false): StickeringMaskOrbits {
   const edge = (p: number): FaceletMask => ([0, 1, 2, 3, 4, 6].includes(p) ? "ignored" : "regular");
   const corner = (p: number): FaceletMask => (hideTopCorners && p <= 3 ? "ignored" : "regular");
-  const center = (p: number): FaceletMask => (p === 1 || p === 3 ? "regular" : "dim");
+  const center = (p: number): FaceletMask => (p === 1 || p === 3 ? "regular" : hideOtherCenters ? "ignored" : "dim");
   return {
     orbits: {
       EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },

@@ -259,3 +259,40 @@ describe("EO4A masks", () => {
     expect(hiddenCenters(getGroupMeta("eo4a")!.displayConfig.stickering)).toEqual([true, false, true, false, true, true]);
   });
 });
+
+describe("Second Block Last Slot mask", () => {
+  // CENTERS orbit order: U, L, F, R, B, D. Its algs turn r/M, which moves the U/F/B/D centres, so they're hidden; L/R anchor the blocks.
+  type Mask = { rawOverride: StickeringMaskOrbits };
+  const centerState = (stickering: unknown) =>
+    (stickering as Mask).rawOverride.orbits.CENTERS.pieces.map((p): string => (p!.facelets.every((f) => f === "ignored") ? "hidden" : p!.facelets[0]));
+  const HIDDEN_OTHERS = ["hidden", "regular", "hidden", "regular", "hidden", "hidden"];
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("a fresh registry hides the U/F/B/D centres", () => {
+    expect(centerState(getGroupMeta("second-block-last-slot")!.displayConfig.stickering)).toEqual(HIDDEN_OTHERS);
+  });
+
+  it("CMLL keeps its dimmed centres — only Second Block Last Slot changed", () => {
+    expect(centerState(getGroupMeta("cmll")!.displayConfig.stickering)).toEqual(["dim", "regular", "dim", "regular", "dim", "dim"]);
+  });
+
+  it("a stored registry with the old dimmed centres is upgraded once, keeping the user's other mask changes", () => {
+    const groups = listGroups();
+    const sbls = groups.find((g) => g.id === "second-block-last-slot")!;
+    const raw = (sbls.displayConfig.stickering as Mask).rawOverride;
+    // Old shipped state: the four centres dimmed; plus one edit the user made themselves (top-front edge shown).
+    raw.orbits.CENTERS.pieces = raw.orbits.CENTERS.pieces.map((p, i) => ([0, 2, 4, 5].includes(i) ? { facelets: ["dim", "dim", "dim", "dim"] } : p)) as typeof raw.orbits.CENTERS.pieces;
+    raw.orbits.EDGES.pieces[0] = { facelets: ["regular", "regular"] };
+    localStorage.setItem("nact_alg_groups", JSON.stringify(groups));
+
+    const upgraded = getGroupMeta("second-block-last-slot")!.displayConfig.stickering as Mask;
+    expect(centerState(upgraded)).toEqual(HIDDEN_OTHERS);
+    expect(upgraded.rawOverride.orbits.EDGES.pieces[0]!.facelets).toEqual(["regular", "regular"]);
+    // And it was persisted, so the fix-up doesn't repeat.
+    const stored = (rawStored("nact_alg_groups") as { id: string; displayConfig: { stickering: unknown } }[]).find((g) => g.id === "second-block-last-slot")!;
+    expect(centerState(stored.displayConfig.stickering)).toEqual(HIDDEN_OTHERS);
+  });
+});
