@@ -90,6 +90,8 @@ export interface CubeVisualisationRef {
    */
   setSetupAlgorithm: (setup: string, alg?: string, jumpTo?: "start" | "end") => void;
   setVisualization: (mode: VisualizationMode) => void;
+  /** Start (or resume) playback — a fresh/mounted player never autoplays on its own. */
+  play: () => void;
   /** Async: true if the current cube state is solved (orientation-agnostic). */
   isSolved: () => Promise<boolean>;
   /** Scrub the timeline to the moment right before the given move index plays (e.g. jump to a stage boundary). */
@@ -272,6 +274,9 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       setVisualization: (mode: VisualizationMode) => {
         if (!playerRef.current) return;
         playerRef.current.visualization = mode as TwistyPlayer["visualization"];
+      },
+      play: () => {
+        playerRef.current?.play();
       },
       isSolved: async () => {
         try {

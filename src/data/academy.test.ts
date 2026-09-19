@@ -1,7 +1,8 @@
 import { describe, it, expect } from "bun:test";
 import { cube3x3x3 } from "cubing/puzzles";
-import { ACADEMY_LESSONS, FOUR_LOOK_LL_CORNERS_FIRST, parseDecoratedAlg } from "./academy";
+import { ACADEMY_LESSONS, F2L_METHOD, FIRST_LAYER, FOUR_LOOK_LL_CORNERS_FIRST, TWO_FIRST_LAYERS, SECOND_LAYER, ZETA_SLOTTING, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
+import { buildCaseSetupAlg } from "../logic/moveParser";
 
 describe("parseDecoratedAlg", () => {
   it("strips trigger parentheses into per-token decorations", () => {
@@ -95,8 +96,171 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("lesson registry exposes the lesson", () => {
-    expect(ACADEMY_LESSONS.length).toBe(1);
+  it("lesson registry lists Two first layers, Last layer, Zeta Slotting, F2L in order — four independent lessons", () => {
+    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["two-first-layers", "4lll-corners-first", "zeta-slotting", "f2l"]);
+    expect(ACADEMY_LESSONS.map((l) => l.title)).toEqual(["Two first layers", "Last layer", "Zeta Slotting", "F2L"]);
+  });
+
+  it("Two first layers reuses FIRST_LAYER/SECOND_LAYER's step objects; Zeta Slotting has its own, distinct edges step", () => {
+    expect(TWO_FIRST_LAYERS.steps.map((s) => s.id)).toEqual(["corners", "edges"]);
+    expect(TWO_FIRST_LAYERS.steps[1]).toBe(SECOND_LAYER.steps[0]);
+    expect(ZETA_SLOTTING.steps.map((s) => s.id)).toEqual(["zeta-edges", "zeta-corners"]);
+    expect(ZETA_SLOTTING.steps[0]).not.toBe(SECOND_LAYER.steps[0]);
+    // Corner-blind edge inserts: three-move inserts for oriented edges, the hedgeslammer for unoriented ones.
+    const zetaEdges = ZETA_SLOTTING.steps[0].algs;
+    expect(zetaEdges.map((a) => [a.id, a.alg])).toEqual([
+      ["edge-right", "R U' R'"],
+      ["edge-left", "L' U L"],
+      ["edge-unoriented-right", "F R' F' R"],
+      ["edge-unoriented-left", "F' L F L'"],
+    ]);
+    expect(SECOND_LAYER.steps[0].algs.some((a) => a.id === "edge-unoriented-right")).toBe(false);
+    // No lesson shares last-layer steps anymore — it's its own top-level lesson.
+    for (const lesson of [TWO_FIRST_LAYERS, ZETA_SLOTTING, F2L_METHOD]) {
+      for (const step of lesson.steps) expect(FOUR_LOOK_LL_CORNERS_FIRST.steps).not.toContain(step);
+    }
+  });
+
+  it("Zeta Slotting's edge cases insert without disturbing the cross; oriented ones start with orientation 0, unoriented with 1", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const id of ["edge-right", "edge-left", "edge-unoriented-right", "edge-unoriented-left"]) {
+      const alg = ZETA_SLOTTING.steps[0].algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const crossOk = [4, 5, 6, 7].every((e) => p.patternData.EDGES.pieces[e] === e && p.patternData.EDGES.orientation[e] === 0);
+      expect(`${id}: cross intact ${crossOk}`).toBe(`${id}: cross intact true`);
+      // Before insertion the edge sits up in the last layer (U-index slots), same as any other not-yet-placed piece.
+      const edgeId = id.endsWith("left") ? 9 : 8;
+      const slot = p.patternData.EDGES.pieces.indexOf(edgeId);
+      expect([0, 1, 2, 3]).toContain(slot);
+      expect(p.patternData.EDGES.orientation[slot]).toBe(id.includes("unoriented") ? 1 : 0);
+    }
+  });
+
+  it("every algorithm in every lesson solves its case from the drill's setup (inverse applied to solved)", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const lesson of ACADEMY_LESSONS) {
+      for (const step of lesson.steps) {
+        for (const a of step.algs) {
+          const { tokens } = parseDecoratedAlg(a.alg);
+          const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" "))).applyAlg(tokens.join(" "));
+          expect(`${lesson.id}/${step.id}/${a.id}: ${p.experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true })}`).toBe(
+            `${lesson.id}/${step.id}/${a.id}: true`
+          );
+        }
+      }
+    }
+    // The inserts act on the D slots (U is the last layer, as for OLL), so the
+    // case must leave U untouched apart from the displaced piece itself.
+    const corner = parseDecoratedAlg(TWO_FIRST_LAYERS.steps[0].algs[0].alg).tokens.join(" ");
+    const cornerCase = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(corner));
+    expect([4, 5, 6, 7].filter((c) => cornerCase.patternData.CORNERS.pieces[c] !== c).length).toBe(1);
+    // Views: first layer = D-index pieces; f2l greys out the U (last) layer.
+    const fl = academyStepMask("first-layer");
+    expect(fl.orbits.CORNERS.pieces[5]!.facelets).toEqual(["regular", "regular", "regular"]);
+    expect(fl.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
+    expect(fl.orbits.EDGES.pieces[9]!.facelets).toEqual(["ignored", "ignored"]);
+    const f2l = academyStepMask("f2l");
+    expect(f2l.orbits.EDGES.pieces[9]!.facelets).toEqual(["regular", "regular"]);
+    expect(f2l.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
+    expect(f2l.orbits.CORNERS.pieces[0]!.facelets).toEqual(["ignored", "ignored", "ignored"]);
+  });
+
+  it("Two first layers' corner cases: white right / up / front and their left-hand mirrors point white where the names say", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const step = FIRST_LAYER.steps[0];
+    // "White right" is a sexy move minus its last U', which only turns the top layer.
+    expect(step.algs.find((a) => a.id === "corner-right")!.alg).toBe("R U R'");
+    for (const [id, piece, slotName, face] of [
+      ["corner-right", 4, "URF", "R"],
+      ["corner-up", 4, "URF", "U"],
+      ["corner-front", 4, "URF", "F"],
+      ["corner-left-sexy", 5, "UFL", "L"],
+      ["corner-left-up", 5, "UFL", "U"],
+      ["corner-left-front", 5, "UFL", "F"],
+    ] as const) {
+      const { tokens } = parseDecoratedAlg(step.algs.find((a) => a.id === id)!.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(piece);
+      expect(CORNERS[slot]).toBe(slotName);
+      expect(slotName[setup.patternData.CORNERS.orientation[slot] % 3]).toBe(face);
+    }
+  });
+
+  it("Zeta Slotting's white-up corner is the same algorithm as the first-layer one (three sexy moves)", () => {
+    const zetaUp = ZETA_SLOTTING.steps[1].algs.find((a) => a.id === "up")!.alg;
+    expect(parseDecoratedAlg(zetaUp).tokens).toEqual(parseDecoratedAlg(FIRST_LAYER.steps[0].algs.find((a) => a.id === "corner-up")!.alg).tokens);
+  });
+
+  const zetaCornersStep = () => ZETA_SLOTTING.steps.find((s) => s.id === "zeta-corners")!;
+
+  it("Zeta Slotting's corner algs never disturb the already-seated FR edge or the cross", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    for (const a of zetaCornersStep().algs) {
+      const { tokens } = parseDecoratedAlg(a.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const d = setup.patternData;
+      const isLeft = a.id.startsWith("left-");
+      const frEdgeHome = isLeft ? d.EDGES.pieces[9] === 9 && d.EDGES.orientation[9] === 0 : d.EDGES.pieces[8] === 8 && d.EDGES.orientation[8] === 0;
+      expect(`${a.id}: FR/FL edge home`).toBe(`${a.id}: FR/FL edge home`);
+      expect(frEdgeHome).toBe(true);
+      for (let c = 4; c < 8; c++) {
+        // the target corner (4 for right-hand cases, 5 for the mirror) is allowed to move; the other 3 D-corners must not.
+        if ((isLeft && c === 5) || (!isLeft && c === 4)) continue;
+        expect(`${a.id}: corner ${c} untouched`).toBe(`${a.id}: corner ${c} untouched`);
+        expect(d.CORNERS.pieces[c] === c && d.CORNERS.orientation[c] === 0).toBe(true);
+      }
+    }
+  });
+
+  it("Zeta Slotting's 3 right-hand corner cases cover white pointing up / front / right", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const CORNER_FACES = CORNERS.map((n) => n.split(""));
+    const faces = new Set<string>();
+    for (const id of ["up", "front", "right"]) {
+      const alg = zetaCornersStep().algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(4);
+      const ori = setup.patternData.CORNERS.orientation[slot];
+      faces.add(CORNER_FACES[slot][ori % 3]);
+    }
+    expect(faces).toEqual(new Set(["U", "F", "R"]));
+  });
+
+  it("Zeta Slotting's 3 left-hand corner cases cover white pointing up / front / left", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
+    const CORNER_FACES = CORNERS.map((n) => n.split(""));
+    const faces = new Set<string>();
+    for (const id of ["left-up", "left-front", "left-left"]) {
+      const alg = zetaCornersStep().algs.find((a) => a.id === id)!;
+      const { tokens } = parseDecoratedAlg(alg.alg);
+      const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const slot = setup.patternData.CORNERS.pieces.indexOf(5);
+      faces.add(CORNER_FACES[slot][setup.patternData.CORNERS.orientation[slot] % 3]);
+    }
+    expect(faces).toEqual(new Set(["U", "F", "L"]));
+  });
+
+  it("F2L lesson's set-up cases each reduce to a basic insert without moving the cross", async () => {
+    const kpuzzle = await cube3x3x3.kpuzzle();
+    const setup = F2L_METHOD.steps[1];
+    // The two inserts' distinguishing tail — matched ends "R U' R'", split ends "R U R'"
+    // (see F2L_METHOD.steps[0]) — set-up cases prepend alignment/extraction moves but
+    // always end in one of these two.
+    const tails = ["R U' R'", "R U R'"];
+    for (const a of setup.algs) {
+      const { tokens } = parseDecoratedAlg(a.alg);
+      const p = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
+      const crossOk = [4, 5, 6, 7].every((e) => p.patternData.EDGES.pieces[e] === e && p.patternData.EDGES.orientation[e] === 0);
+      expect(`${a.id}: cross intact`).toBe(`${a.id}: cross intact`);
+      expect(crossOk).toBe(true);
+      const tail = tokens.slice(-3).join(" ");
+      expect(`${a.id} tail: ${tail}`).toBe(`${a.id} tail: ${tails.find((t) => t === tail) ?? `expected one of ${tails.join(" / ")}`}`);
+    }
   });
 
   it("step views follow the curriculum: OLL-style for orientation, corner-only for CP", () => {
@@ -106,16 +270,17 @@ describe("4LLL corners-first lesson data", () => {
       "corners",
       "full",
     ]);
-    // "oll-corners": LL corners primary-sticker-only (OLL look), LL edges blacked out.
+    // "oll-corners": LL corners primary-sticker-only (OLL look), LL edges blacked out, F2L in full color.
     const co = academyStepMask("oll-corners");
     expect(co.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "ignored", "ignored"]);
     expect(co.orbits.EDGES.pieces[0]!.facelets).toEqual(["ignored", "ignored"]);
-    expect(co.orbits.EDGES.pieces[5]!.facelets[0]).toBe("dim");
-    // "oll": classic OLL — LL edges also show their primary sticker.
+    expect(co.orbits.EDGES.pieces[5]!.facelets).toEqual(["regular", "regular"]);
+    // "oll": classic OLL — LL edges also show their primary sticker; F2L stays in full color.
     const oll = academyStepMask("oll");
     expect(oll.orbits.EDGES.pieces[0]!.facelets).toEqual(["regular", "ignored"]);
     expect(oll.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "ignored", "ignored"]);
-    expect(oll.orbits.CORNERS.pieces[5]!.facelets[0]).toBe("dim");
+    expect(oll.orbits.CORNERS.pieces[5]!.facelets).toEqual(["regular", "regular", "regular"]);
+    expect(oll.orbits.CENTERS.pieces[2]!.facelets[0]).toBe("regular");
     // "corners": full-color LL corners (permutation visible), edges blacked out.
     const cp = academyStepMask("corners");
     expect(cp.orbits.CORNERS.pieces[0]!.facelets).toEqual(["regular", "regular", "regular"]);

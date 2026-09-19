@@ -1,10 +1,8 @@
 /**
- * AcademyPage — guided lessons with a FIXED curriculum (currently: 4-Look
- * Last Layer, corners first — see data/academy.ts).
+ * AcademyPage — guided lessons with a FIXED curriculum (first layer,
+ * second layer, last layer in four looks — see data/academy.ts).
  *
- * Two levels of navigation: a LESSON picker (so future lessons — 4LLL
- * edge-first, cross, F2L — slot in beside this one) and the lesson's STEPS
- * as tabs (the way OLL/PLL groups are tabs in Practice). Each step shows
+ * Two levels of navigation: a LESSON picker and the lesson's STEPS as tabs (the way OLL/PLL groups are tabs in Practice). Each step shows
  * its algorithms as selectable preview cards, and the drill cycles through
  * the SELECTED algorithms of the active step. Same drill machinery as
  * Practice (pending-move buffer, drill-round restart, batched-render-safe
@@ -20,7 +18,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GraduationCap, Video } from "lucide-react";
+import { GraduationCap, Video, BookOpen } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress } from "../state/sessionSelectors";
 import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
@@ -36,10 +34,18 @@ import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { AcademyAlgCard } from "../components/AcademyAlgCard";
 import { AlgPlaybackModal } from "../components/AlgPlaybackModal";
+import { GuidesIndex } from "../components/GuidesIndex";
+import { GuidePage } from "../components/GuidePage";
+import { guideById } from "../data/guides";
 import { CaseViewToggles } from "../components/CaseViewToggles";
 import type { SessionConfig } from "../types/session";
 import { ACADEMY_LESSONS, parseDecoratedAlg, type AcademyStep } from "../data/academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
+
+const ONBOARDING_SEEN_KEY = "nact_academy_onboarding_seen";
+
+/** "drill" is the lesson/step trainer; "guides" the guides index; { guide } one open guide (see components/GuidePage). */
+type AcademyView = "drill" | "guides" | { guide: string };
 
 const ACADEMY_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -98,9 +104,24 @@ function AcademyInner() {
   /** Session-scratch attempt times per alg id — never persisted (see sessionAttemptsCache). */
   const [attemptsMs, setAttemptsMs] = useState<Record<string, number[]>>(() => sessionAttemptsCache);
   const [showPlayback, setShowPlayback] = useState(false);
+  const [academyView, setAcademyView] = useState<AcademyView>("drill");
+
+  // Open the guides index exactly once, on the very first visit —
+  // afterward it only opens via the header button. Marked seen immediately
+  // (not on close) so a visit that navigates away mid-guide doesn't loop.
+  useEffect(() => {
+    if (localStorage.getItem(ONBOARDING_SEEN_KEY)) return;
+    localStorage.setItem(ONBOARDING_SEEN_KEY, "true");
+    setAcademyView("guides");
+  }, []);
 
   const step: AcademyStep = lesson.steps.find((s) => s.id === stepId) ?? lesson.steps[0];
   const stepMask = useMemo(() => academyStepMask(step.view), [step.view]);
+  // First-layer/second-layer cases turn on where a sticker points relative
+  // to the SIDE of the cube (white right vs. up vs. front) — invisible from
+  // the flat top-down 2D-LL angle every other step uses. Those two steps
+  // get a 3D card instead.
+  const cardVisualization = step.view === "first-layer" || step.view === "f2l" || step.view === "f2l-edges" ? "3D" : "experimental-2D-LL";
   const selectedIds = useMemo(() => selectedInStep(step, stored), [step, stored]);
   const selectedAlgs = useMemo(() => step.algs.filter((a) => selectedIds.includes(a.id)), [step, selectedIds]);
   const alg = selectedAlgs[Math.min(drillIdx, Math.max(selectedAlgs.length - 1, 0))];
@@ -161,6 +182,13 @@ function AcademyInner() {
 
   const cube = useSmartCube({
     onMove: (move, timestamp) => {
+      // A guide's "Try this" popup (VariantTest) has its own useSmartCube
+      // listener — every move goes to every listener (see useSmartCube's
+      // doc comment), so this drill must stay quiet while a guide is
+      // showing or its hidden-underneath session would also advance/
+      // complete from moves meant for the popup (same reason TrainingPage
+      // suppresses its onMove while CaseEdit is open).
+      if (academyView !== "drill") return;
       if (moveBuffer.capture(move, timestamp)) return;
       submitCubeMove(move, timestamp);
       view.addMove(move);
@@ -206,6 +234,28 @@ function AcademyInner() {
         ? "Nice — next one coming up…"
         : null;
 
+  if (academyView === "guides") {
+    return <GuidesIndex onOpen={(id) => setAcademyView({ guide: id })} onBack={() => setAcademyView("drill")} />;
+  }
+  if (academyView !== "drill") {
+    const guide = guideById(academyView.guide);
+    if (guide) {
+      return (
+        <GuidePage
+          guide={guide}
+          onBack={() => setAcademyView("guides")}
+          onClose={() => setAcademyView("drill")}
+          onOpenGuide={(id) => setAcademyView({ guide: id })}
+          onPractice={(targetLessonId, targetStepId) => {
+            switchLesson(targetLessonId);
+            switchStep(targetStepId);
+            setAcademyView("drill");
+          }}
+        />
+      );
+    }
+  }
+
   return (
     <>
     {showPlayback && alg && (
@@ -218,6 +268,7 @@ function AcademyInner() {
       />
     )}
     <TrainerPanel
+      layout="side"
       header={
         <div className="flex items-center gap-1 w-full overflow-x-auto">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-widest shrink-0 mr-2">
@@ -251,7 +302,10 @@ function AcademyInner() {
               {s.title}
             </button>
           ))}
-          <div className="ml-auto shrink-0">
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            <button onClick={() => setAcademyView("guides")} className="btn-secondary text-xs" title="Tutorials: getting started, layer by layer, last layer, F2L">
+              <BookOpen size={13} /> Guides
+            </button>
             <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
           </div>
         </div>
@@ -339,12 +393,15 @@ function AcademyInner() {
           {step.algs.length === 0 ? (
             <p className="text-xs text-gray-600 italic">Coming soon.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2">
+            // Fixed-width tiles, not a stretching grid: a 2D case preview is
+            // legible at ~150px and only gets cartoonish on wide screens.
+            <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(140px, 160px))" }}>
               {step.algs.map((a) => (
                 <AcademyAlgCard
                   key={a.id}
                   alg={a}
                   stickeringMaskOrbits={stepMask}
+                  visualization={cardVisualization}
                   selected={selectedIds.includes(a.id)}
                   onSelectedChange={(sel) => setSelection(a.id, sel)}
                   onPractice={() => practiceNow(a.id)}
