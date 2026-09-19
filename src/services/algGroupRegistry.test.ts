@@ -21,6 +21,7 @@ import {
 } from "./algGroupRegistry";
 import { loadAlgGroup, recordAttempt } from "./algorithmStore";
 import type { AlgorithmCase } from "../types/algorithm";
+import type { StickeringMaskOrbits } from "../types/cube";
 
 /** Raw on-disk value for a localStorage key — asserting on this (not the hydrated API output) confirms WHAT'S actually persisted, not just what's readable back. */
 function rawStored(key: string): unknown {
@@ -240,5 +241,21 @@ describe("algGroupRegistry — subgroup case storage (ZBLL/F2L/Advanced F2L/VLS 
     saveSubgroupCases("zbll", "zbll-t", [{ ...makeCase("Direct"), selected: true }]);
     const raw = rawStored("alg_subgroup_zbll_zbll-t") as { cases?: Record<string, { selected: boolean }> };
     expect(raw.cases?.Direct?.selected).toBe(true);
+  });
+});
+
+describe("EO4A masks", () => {
+  // CENTERS orbit order: U, L, F, R, B, D. The M turns in the EO algs move the U/F/B/D centres, so they're irrelevant and hidden; L/R belong to the blocks.
+  const hiddenCenters = (stickering: unknown) =>
+    (stickering as { rawOverride: StickeringMaskOrbits }).rawOverride.orbits.CENTERS.pieces.map((p) => p!.facelets.every((f) => f === "ignored"));
+
+  it("every bundled case hides the U/F/B/D centres and keeps L/R", () => {
+    const cases = loadAlgGroup("eo4a");
+    expect(cases.length).toBeGreaterThan(0);
+    for (const c of cases) expect(`${c.name}: ${hiddenCenters(c.displayConfigOverride?.stickering)}`).toBe(`${c.name}: true,false,true,false,true,true`);
+  });
+
+  it("the group-level fallback mask (hand-added cases) does the same", () => {
+    expect(hiddenCenters(getGroupMeta("eo4a")!.displayConfig.stickering)).toEqual([true, false, true, false, true, true]);
   });
 });

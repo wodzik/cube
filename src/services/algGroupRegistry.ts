@@ -432,7 +432,8 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
   // case carries its OWN precomputed displayConfigOverride (see
   // src/algs/eo4a.json) showing that exact case's actual good/bad edges —
   // this group-level mask is just the fallback for a hand-added case
-  // without one: all 6 LSE edges shown oriented (no info), blocks/corners dimmed.
+  // without one: all 6 LSE edges shown oriented (no info), blocks/corners
+  // dimmed, U/F/B/D centres hidden (the M turns move them).
   {
     id: "eo4a",
     name: "EO4A",
@@ -450,7 +451,8 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
               })),
             },
             CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["dim", "dim", "dim"] })) },
-            CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["dim", "dim", "dim", "dim"] })) },
+            // U/F/B/D centres (0/2/4/5) are irrelevant here — the M turns in EO algs move them — so they're hidden; L/R (1/3) belong to the blocks and stay dimmed.
+            CENTERS: { pieces: Array.from({ length: 6 }, (_, i) => ({ facelets: [1, 3].includes(i) ? ["dim", "dim", "dim", "dim"] : ["ignored", "ignored", "ignored", "ignored"] })) },
           },
         },
       },
