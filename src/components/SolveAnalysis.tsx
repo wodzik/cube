@@ -247,7 +247,7 @@ export function SolveAnalysis({
   // popup, so it must stack on top of it.
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-5xl max-h-full flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
             <h2 className="text-white font-semibold text-base font-mono tabular-nums">

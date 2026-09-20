@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { buildSequenceTarget, computeSequenceProgress } from "./sequenceTracker";
+import { MAX_UNDO_MOVES_SHOWN, buildSequenceTarget, computeSequenceProgress, describeUndo } from "./sequenceTracker";
 
 describe("computeSequenceProgress — basic matching", () => {
   it("tracks a clean, exact match through to completion", () => {
@@ -206,5 +206,33 @@ describe("computeSequenceProgress — edge cases", () => {
     expect(progress.isCompleted).toBe(false);
     expect(progress.hadErrors).toBe(false);
     expect(progress.completedIndices).toEqual([]);
+  });
+});
+
+describe("describeUndo — long undo sequences", () => {
+  const moves = (n: number) => Array.from({ length: n }, (_, i) => (i % 2 ? "R'" : "U"));
+
+  it("nothing to undo → nothing to show", () => {
+    expect(describeUndo([])).toBeNull();
+  });
+
+  it("up to the limit the undo moves are shown as they are", () => {
+    expect(MAX_UNDO_MOVES_SHOWN).toBe(25);
+    expect(describeUndo(["R", "U'"])).toEqual({ kind: "moves", text: "R U'" });
+    expect(describeUndo(moves(25))).toEqual({ kind: "moves", text: moves(25).join(" ") });
+  });
+
+  it("more than 25 moves → a 'solve the cube and reset' notice instead of the list", () => {
+    expect(describeUndo(moves(26))).toEqual({ kind: "too-long" });
+    expect(describeUndo(moves(100))).toEqual({ kind: "too-long" });
+  });
+
+  it("a real run of wrong moves crosses the threshold end to end", () => {
+    const target = buildSequenceTarget("R U R' U'");
+    const few = computeSequenceProgress(target, ["F", "L", "D"]);
+    expect(describeUndo(few.correctionSequence)?.kind).toBe("moves");
+    const many = computeSequenceProgress(target, Array.from({ length: 40 }, (_, i) => ["F", "L", "D", "B"][i % 4]));
+    expect(many.correctionSequence.length).toBeGreaterThan(MAX_UNDO_MOVES_SHOWN);
+    expect(describeUndo(many.correctionSequence)).toEqual({ kind: "too-long" });
   });
 });

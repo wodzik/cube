@@ -627,4 +627,7 @@ export const pl: Record<MessageKey, string> & Record<string, string> = {
   "share.notice": "Udostępnione ułożenie",
   "share.invalid.title": "Ten link się nie otwiera",
   "share.invalid.body": "Udostępnione ułożenie jest uszkodzone albo zostało ucięte — komunikatory czasem skracają długie linki. Poproś o link jeszcze raz.",
+
+  // ─── Move sequence (more) ───
+  "sequence.undoTooLong": "Za dużo ruchów do cofnięcia — ułóż kostkę i naciśnij reset.",
 };

@@ -22,7 +22,7 @@
 
 import type { ReactNode } from "react";
 import { RefreshCw, Eye, EyeOff } from "lucide-react";
-import type { SequenceProgress } from "../logic/sequenceTracker";
+import { describeUndo, type SequenceProgress } from "../logic/sequenceTracker";
 import { useT } from "../i18n/useT";
 
 interface MoveSequenceDisplayProps {
@@ -97,8 +97,7 @@ export function MoveSequenceDisplay({
   // underneath to dim (vs. the very first load, nothing to overlay onto).
   const dimStaleMoves = showLoadingOverlay && moves.length > 0;
 
-  const repairAlgorithm =
-    progress && progress.correctionSequence.length > 0 ? progress.correctionSequence.join(" ") : null;
+  const undo = progress ? describeUndo(progress.correctionSequence) : null;
 
   const getMoveClass = (index: number): string => {
     if (!progress) return "pending";
@@ -108,7 +107,7 @@ export function MoveSequenceDisplay({
     return "pending";
   };
 
-  const showErrorIndicator = hasErrors && !tooManyErrors && repairAlgorithm;
+  const showErrorIndicator = hasErrors && !tooManyErrors && undo !== null;
 
   return (
     <div className={`scramble-card ${className} ${showLoadingOverlay && moves.length === 0 ? "min-h-16" : ""}`}>
@@ -133,8 +132,15 @@ export function MoveSequenceDisplay({
 
           {showErrorIndicator && (
             <div className="scramble-error-indicator">
-              <span className="error-label">{errorLabel ?? t("sequence.undo")}</span>
-              <span className="error-algorithm">{repairAlgorithm}</span>
+              {undo.kind === "moves" ? (
+                <>
+                  <span className="error-label">{errorLabel ?? t("sequence.undo")}</span>
+                  <span className="error-algorithm">{undo.text}</span>
+                </>
+              ) : (
+                // Too many wrong moves to read off as an undo — solving the cube by hand and resetting is quicker.
+                <span className="text-orange-300">{t("sequence.undoTooLong")}</span>
+              )}
             </div>
           )}
 

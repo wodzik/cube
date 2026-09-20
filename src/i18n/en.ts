@@ -594,6 +594,9 @@ export const en = {
   "share.notice": "Shared solve",
   "share.invalid.title": "This link doesn't open",
   "share.invalid.body": "The shared solve is damaged or was cut off — messaging apps sometimes shorten long links. Ask for the link again.",
+
+  // ─── Move sequence (more) ───
+  "sequence.undoTooLong": "Too many moves to undo — solve the cube and press reset.",
 } as const;
 
 export type MessageKey = keyof typeof en;
