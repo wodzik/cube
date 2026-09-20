@@ -267,7 +267,7 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
       {fullscreen && (
         <OverlayModal
           onClose={() => setFullscreen(false)}
-          className="w-[94vw] h-[90vh]"
+          className="w-[94vw] h-full"
           header={(["single", "ao5", "ao12", "ao100"] as const).map((m) => (
             <MetricChip key={m} metric={m} active={visible[m]} onClick={() => toggle(m)} />
           ))}

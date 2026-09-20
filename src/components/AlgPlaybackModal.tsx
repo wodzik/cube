@@ -66,7 +66,7 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
       onClick={onClose}
     >
       <div
-        className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+        className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-lg max-h-full flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] shrink-0">
@@ -80,9 +80,9 @@ export function AlgPlaybackModal({ title, subtitle, alg, stickering, stickeringM
         </div>
 
         {/* max-h caps the square on short viewports — header + footer +
-            cube must fit in the card's 90vh, or the canvas spills out of
+            cube must fit in the card (max-h-full = the visible area), or the canvas spills out of
             the modal. The player letterboxes inside a non-square box. */}
-        <div className="w-full aspect-square max-h-[55vh] min-h-48 bg-gray-950/50">
+        <div className="w-full aspect-square max-h-[55svh] min-h-48 bg-gray-950/50">
           <CubeVisualisation
             alg={plain}
             setupAlg={setup}

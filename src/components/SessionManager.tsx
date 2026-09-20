@@ -259,7 +259,7 @@ export function SessionEditModal({ session, onClose, onSave }: SessionEditModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-md max-h-full flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <h2 className="text-white font-semibold text-base">{session ? "Edit session" : "New session"}</h2>
           <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-gray-200 transition-colors">

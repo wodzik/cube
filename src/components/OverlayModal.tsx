@@ -14,7 +14,7 @@ interface OverlayModalProps {
   onClose: () => void;
   /** Left side of the header row (title, chips, controls). */
   header?: ReactNode;
-  /** Size classes for the card, e.g. "w-[97vw] h-[95vh]" or "w-[min(97vw,40rem)] max-h-[90vh]". */
+  /** Size classes for the card, e.g. "w-[97vw] h-full" or "w-[min(97vw,40rem)] max-h-full" — NOT vh heights: on a phone `vh` ignores the browser toolbars, so a centered card taller than the visible area loses its header (and close button) off the top. */
   className?: string;
   /** Extra classes on the scrollable body (defaults to padded + vertical scroll). */
   bodyClassName?: string;
@@ -33,7 +33,7 @@ export function OverlayModal({ onClose, header, className = "", bodyClassName = 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3" onClick={onClose}>
       <div
-        className={`bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden ${className}`}
+        className={`bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-full ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3 px-5 py-4 shrink-0">
