@@ -222,7 +222,11 @@ function SplitRow({
       className={`flex flex-col px-4 sm:px-6 py-4 gap-6 ${stacked ? "lg:gap-8" : "lg:flex-row lg:items-start lg:gap-0"}`}
     >
       {leftAside != null && (
-        <div data-left-aside className="lg:flex-none lg:mr-8 flex flex-col self-start">
+        // Below the timer, cube and chart when the row is stacked (phones, or a
+        // narrow desktop) — first in the DOM, so `order-last` — and back in the
+        // left column beside them on a wide screen. A long times list must
+        // not push the timer and cube off the screen.
+        <div data-left-aside className={`order-last ${stacked ? "" : "lg:order-none"} lg:flex-none lg:mr-8 flex flex-col self-start w-full lg:w-auto`}>
           {leftAside}
         </div>
       )}
