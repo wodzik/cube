@@ -164,8 +164,8 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       // shadow DOM.
       player.style.width = "100%";
       player.style.height = "100%";
-      // White back stickers vanish on the light theme (cubing.js #394).
-      if (visualization === "3D" && hintFacelets === "floating") adaptHintStickerColors(player);
+      // White back stickers vs. masked ones (cubing.js #394) — hooked on every 3D player, so toggling back stickers later works too.
+      if (visualization === "3D") adaptHintStickerColors(player);
       return player;
     }
 
@@ -224,7 +224,6 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (!playerRef.current) return;
       playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
-      if (visualization === "3D" && hintFacelets === "floating") adaptHintStickerColors(playerRef.current);
     }, [hintFacelets]);
 
     useEffect(() => {
