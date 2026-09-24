@@ -18,6 +18,7 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { TwistyPlayer } from "cubing/twisty";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
+import { adaptHintStickerColors } from "../logic/hintStickerColor";
 
 export type { VisualizationMode };
 
@@ -163,6 +164,8 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       // shadow DOM.
       player.style.width = "100%";
       player.style.height = "100%";
+      // White back stickers vanish on the light theme (cubing.js #394).
+      if (visualization === "3D" && hintFacelets === "floating") adaptHintStickerColors(player);
       return player;
     }
 
@@ -221,6 +224,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (!playerRef.current) return;
       playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
+      if (visualization === "3D" && hintFacelets === "floating") adaptHintStickerColors(playerRef.current);
     }, [hintFacelets]);
 
     useEffect(() => {
