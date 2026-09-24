@@ -7,11 +7,12 @@
  *
  * We recolour two of Cube3D's hint materials per theme:
  *   - white   → high contrast, nearly opaque (blue-grey on light, white on dark)
- *   - ignored → low contrast, fading into the page
+ *   - ignored → low contrast: visible, but clearly behind the white ones
  * Cube3D shares its materials across players and swaps them on every
  * stickering-mask change, so each player's scene is rescanned on every
  * scheduled render (a cheap walk over ~130 meshes); newly seen materials are
  * classified by their ORIGINAL colour and restyled. Follows <html data-theme>.
+ * Cost: ~0.003 ms per rescan (measured, 161 nodes) — nothing next to a 16.7 ms frame.
  *
  * Relies on cubing.js internals (experimentalCurrentThreeJSPuzzleObject and
  * the library's hint colours): if they change, nothing matches and the
@@ -25,7 +26,9 @@ type Theme = "light" | "dark";
 
 const STYLE: Record<Kind, Record<Theme, { color: number; opacity: number }>> = {
   white: { light: { color: 0x6f7b8a, opacity: 0.9 }, dark: { color: 0xffffff, opacity: 0.9 } },
-  ignored: { light: { color: 0xe6e6e6, opacity: 0.5 }, dark: { color: 0x333333, opacity: 0.6 } },
+  // Still readable as "there's a sticker here", just clearly behind the white ones.
+  // three.js reads these hex values as sRGB and renders them darker than they look here.
+  ignored: { light: { color: 0xd6d6d6, opacity: 0.55 }, dark: { color: 0xaaaaaa, opacity: 0.45 } },
 };
 
 interface ThreeMaterial {
