@@ -57,6 +57,22 @@ function loadElevation(): number {
     : DEFAULT_HINT_ELEVATION;
 }
 
+/**
+ * Back view — a second camera showing the three hidden faces (cubing.js
+ * `backView`): two cubes side by side, or a small inset in the corner.
+ * Remembered per page like the toggles above; default off. Back stickers and
+ * the back view are alternatives — turning one on turns the other off.
+ */
+export type BackView = "none" | "top-right" | "side-by-side";
+const BACK_VIEWS: readonly BackView[] = ["none", "top-right", "side-by-side"];
+const BACK_MODES = ["none", "stickers", "side-by-side", "top-right"] as const;
+const backViewKey = (scope: CaseViewScope, bucket: Bucket) => `nact_view_back_view_${scope}_${bucket}`;
+
+function loadBackView(scope: CaseViewScope, bucket: Bucket): BackView {
+  const stored = localStorage.getItem(backViewKey(scope, bucket));
+  return BACK_VIEWS.includes(stored as BackView) ? (stored as BackView) : "none";
+}
+
 function load(pref: Pref, scope: CaseViewScope, bucket: Bucket): boolean {
   const stored = localStorage.getItem(key(pref, scope, bucket));
   if (stored !== null) return stored === "true";
@@ -75,7 +91,9 @@ export interface CaseViewPrefs {
   flatView: boolean;
   /** Distance of the floating hint stickers from the cube (Cube3D elevation units). */
   hintElevation: number;
-  toggleBackStickers: () => void;
+  backView: BackView;
+  /** One button: off → back stickers → back view → back view (corner) → off. */
+  cycleBackMode: () => void;
   toggleFlatView: () => void;
   setHintElevation: (value: number) => void;
 }
@@ -85,20 +103,37 @@ export function useCaseViewPrefs(isF2l: boolean, scope: CaseViewScope): CaseView
   const [backStickers, setBackStickers] = useState(() => load("backStickers", scope, bucket));
   const [flatView, setFlatView] = useState(() => load("flatView", scope, bucket));
   const [hintElevation, setHintElevationState] = useState(loadElevation);
+  const [backView, setBackView] = useState(() => loadBackView(scope, bucket));
 
   // Re-read when the page switches context (e.g. Practice going OLL -> F2L).
   useEffect(() => {
     setBackStickers(load("backStickers", scope, bucket));
     setFlatView(load("flatView", scope, bucket));
+    setBackView(loadBackView(scope, bucket));
   }, [scope, bucket]);
 
-  const toggleBackStickers = useCallback(() => {
-    setBackStickers((v) => {
-      const next = !v;
+  const saveBackView = useCallback(
+    (next: BackView) => {
+      localStorage.setItem(backViewKey(scope, bucket), next);
+      setBackView(next);
+    },
+    [scope, bucket],
+  );
+  const saveBackStickers = useCallback(
+    (next: boolean) => {
       localStorage.setItem(key("backStickers", scope, bucket), String(next));
-      return next;
-    });
-  }, [scope, bucket]);
+      setBackStickers(next);
+    },
+    [scope, bucket],
+  );
+
+  // Back stickers and the back view are alternatives, cycled by one button.
+  const cycleBackMode = useCallback(() => {
+    const current = backView !== "none" ? backView : backStickers ? "stickers" : "none";
+    const next = BACK_MODES[(BACK_MODES.indexOf(current) + 1) % BACK_MODES.length];
+    saveBackStickers(next === "stickers");
+    saveBackView(next === "stickers" ? "none" : next);
+  }, [backStickers, backView, saveBackStickers, saveBackView]);
 
   const toggleFlatView = useCallback(() => {
     setFlatView((v) => {
@@ -113,5 +148,7 @@ export function useCaseViewPrefs(isF2l: boolean, scope: CaseViewScope): CaseView
     setHintElevationState(value);
   }, []);
 
-  return { backStickers, flatView, hintElevation, toggleBackStickers, toggleFlatView, setHintElevation };
+  // Stored values from before these became exclusive: the back view wins.
+  const shownBackStickers = backStickers && backView === "none";
+  return { backStickers: shownBackStickers, flatView, hintElevation, backView, cycleBackMode, toggleFlatView, setHintElevation };
 }

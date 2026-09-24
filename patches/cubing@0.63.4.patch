@@ -1,0 +1,14 @@
+diff --git a/dist/lib/cubing/twisty/index.js b/dist/lib/cubing/twisty/index.js
+index 4b452815cd409e298f5493d2ea4411a9f01afee2..7f20f8be7e06e5ac777c7dc1562f868af758319f 100644
+--- a/dist/lib/cubing/twisty/index.js
++++ b/dist/lib/cubing/twisty/index.js
+@@ -1822,7 +1822,8 @@ var Twisty3DSceneWrapper = class extends ManagedCustomElement {
+     this.#vantages.delete(vantage);
+     vantage.remove();
+     vantage.disconnect();
+-    this.#currentTwisty3DPuzzleWrapper?.disconnect();
++    // act patch: the puzzle wrapper is shared by every vantage — disconnecting it here (when the
++    // back view is turned off) left the main view deaf to moves, hint and mask changes.
+   }
+   experimentalVantages() {
+     return this.#vantages.values();

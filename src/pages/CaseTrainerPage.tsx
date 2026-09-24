@@ -1347,6 +1347,7 @@ function CaseTrainerInner() {
       stickeringMaskOrbits={stickeringMask}
       hintFacelets={backStickers ? "floating" : "none"}
       hintFaceletsElevation={viewPrefs.hintElevation}
+      backView={viewPrefs.backView}
       flatCubeRef={flatCubeRef}
       showFlatView={flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}

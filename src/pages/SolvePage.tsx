@@ -880,6 +880,7 @@ function SolvePageInner({
       cubeRef={cubeRef}
       hintFacelets={viewPrefs.backStickers ? "floating" : "none"}
       hintFaceletsElevation={viewPrefs.hintElevation}
+      backView={viewPrefs.backView}
       flatCubeRef={flatCubeRef}
       showFlatView={viewPrefs.flatView}
       cubeToolbar={<CaseViewToggles {...viewPrefs} />}

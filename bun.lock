@@ -28,6 +28,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "cubing@0.63.4": "patches/cubing@0.63.4.patch",
+  },
   "packages": {
     "@cubing/lazy-promise": ["@cubing/lazy-promise@0.1.1", "", {}, "sha512-yeNQuAfwcZTTPkJhrkIIQFjg0Lr76awN+lWYh4bm6UK6AKUIbjuBBGjcoXWLw2zE78Y4na1rAx3OjMYEr2tYBA=="],
 

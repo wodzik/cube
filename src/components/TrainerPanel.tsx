@@ -114,6 +114,8 @@ export interface TrainerPanelProps {
   hintFacelets?: "none" | "floating";
   /** Distance of the floating hint stickers from the cube — see CubeVisualisation. */
   hintFaceletsElevation?: number;
+  /** Second view of the hidden faces — "side-by-side" widens the cube cell to fit two cubes. */
+  backView?: "none" | "top-right" | "side-by-side";
   /**
    * Ref for an auxiliary FLAT (unfolded-net "2D") view under the main cube.
    * When provided the flat player is ALWAYS mounted — so it stays in sync
@@ -198,6 +200,7 @@ export function TrainerPanel({
   dragInput = "auto",
   hintFacelets,
   hintFaceletsElevation,
+  backView = "none",
   flatCubeRef,
   showFlatView = false,
   cubeToolbar,
@@ -295,7 +298,11 @@ export function TrainerPanel({
               side by side as equal cells, symmetric about the column's
               center (stacked on phones). */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-            <div className="relative w-72 sm:w-80 xl:w-96 aspect-square">
+            <div
+              className={`relative ${
+                backView === "side-by-side" ? "w-[min(calc(100vw-2rem),36rem)] xl:w-[44rem] aspect-[2/1]" : "w-72 sm:w-80 xl:w-96 aspect-square"
+              }`}
+            >
               <CubeVisualisation
                 ref={cubeRef}
                 visualization={visualization}
@@ -306,6 +313,7 @@ export function TrainerPanel({
                 dragInput={dragInput}
                 hintFacelets={hintFacelets}
                 hintFaceletsElevation={hintFaceletsElevation}
+                backView={backView}
                 cameraLatitude={cameraLatitude}
                 cameraLongitude={cameraLongitude}
                 setupAlg={cubeSetupAlg}
@@ -337,7 +345,7 @@ export function TrainerPanel({
               </div>
             )}
           </div>
-          {cubeToolbar && <div className="flex items-center justify-center gap-2">{cubeToolbar}</div>}
+          {cubeToolbar && <div className="flex flex-wrap items-center justify-center gap-2">{cubeToolbar}</div>}
         </div>
       }
       stats={

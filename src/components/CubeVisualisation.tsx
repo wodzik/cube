@@ -55,6 +55,8 @@ export interface CubeVisualisationProps {
    * visualization honours it — PG3D silently ignores it (cubing.js #415).
    */
   hintFaceletsElevation?: number;
+  /** Second view of the hidden faces from behind: a corner inset or two cubes side by side. */
+  backView?: "none" | "top-right" | "side-by-side";
   /** Stickering scheme: "full" | "OLL" | "PLL" | "F2L" | etc. */
   stickering?: string;
   /**
@@ -108,6 +110,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       visualization = "3D",
       hintFacelets = "none",
       hintFaceletsElevation,
+      backView = "none",
       stickering = "full",
       stickeringMaskOrbits,
       background = "none",
@@ -143,6 +146,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       player.controlPanel = controlPanel as TwistyPlayer["controlPanel"];
       player.viewerLink = viewerLink as TwistyPlayer["viewerLink"];
       player.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
+      player.backView = backView;
       if (hintFaceletsElevation !== undefined) {
         player.experimentalHintFaceletsElevation = hintFaceletsElevation;
         player.cameraDistance = cameraDistanceFor(hintFacelets, hintFaceletsElevation);
@@ -225,6 +229,11 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       if (!playerRef.current) return;
       playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
     }, [hintFacelets]);
+
+    useEffect(() => {
+      if (!playerRef.current) return;
+      playerRef.current.backView = backView;
+    }, [backView]);
 
     useEffect(() => {
       if (!playerRef.current || hintFaceletsElevation === undefined) return;
