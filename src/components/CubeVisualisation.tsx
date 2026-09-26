@@ -20,7 +20,8 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import "@cubecore/element"; // registers <cube-player>
 import type { CubePlayer } from "@cubecore/element";
-import { SKINS, type Skin } from "@cubecore/render";
+import type { Skin } from "@cubecore/render";
+import { useCubeLook } from "../hooks/useCubeLook";
 import { isSolved } from "@cubecore/core";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
@@ -112,12 +113,15 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const playerRef = useRef<CubePlayer | null>(null);
+    const { skin: lookSkin } = useCubeLook();
 
-    // The skin: the default look, with floating back stickers when asked.
+    // The skin: the app's chosen look (settings / the connected cube), with floating back stickers when asked.
     const skinFor = (): Skin => ({
-      ...SKINS.default,
-      hints: { ...SKINS.default.hints, enabled: hintFacelets === "floating", distance: hintFaceletsElevation ?? SKINS.default.hints.distance },
+      ...lookSkin,
+      hints: { ...lookSkin.hints, enabled: hintFacelets === "floating", distance: hintFaceletsElevation ?? lookSkin.hints.distance },
     });
+    // The page's light / dark theme (data-theme on <html>) → the skin's page adjustments.
+    const pageTheme = () => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
     const applyMask = (p: CubePlayer) => {
       p.mask = stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
     };
@@ -131,6 +135,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       p.setAttribute("anchor", setupAnchor);
       p.setAttribute("tempo", String(Math.max(1, tempoScale * 2)));
       p.setAttribute("back-view", backView);
+      p.setAttribute("theme", pageTheme());
       p.style.width = "100%";
       p.style.height = "100%";
       // Fit whatever box the page gives it (the element's own 200px minimum is for standalone use).
@@ -143,7 +148,10 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       playerRef.current = p;
       applyMask(p);
       applyCamera(p);
+      const themeWatch = new MutationObserver(() => p.setAttribute("theme", pageTheme()));
+      themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
       return () => {
+        themeWatch.disconnect();
         p.remove();
         playerRef.current = null;
       };
@@ -161,7 +169,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (playerRef.current) playerRef.current.skin = skinFor();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [hintFacelets, hintFaceletsElevation]);
+    }, [hintFacelets, hintFaceletsElevation, lookSkin]);
     useEffect(() => {
       playerRef.current?.setAttribute("back-view", backView);
     }, [backView]);

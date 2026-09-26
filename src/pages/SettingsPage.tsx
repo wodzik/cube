@@ -10,8 +10,85 @@
 import { useRef, useState } from "react";
 import { RotateCcw, Trash2, Download, Upload, CheckCircle2 } from "lucide-react";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
+import { useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
+import { CubeVisualisation } from "../components/CubeVisualisation";
 
-const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_", "nact_alg_groups"];
+/** Names for the skins (cubecore presets). */
+const SKIN_LABELS: Record<SkinName, string> = {
+  default: "Default — stickerless",
+  gan: "GAN — stickerless",
+  qiyiSC: "QiYi Smart Cube",
+  moyu: "MoYu (WCU) — stickerless",
+  defaultStickers: "Default — stickers",
+  ganStickers: "GAN — stickers",
+  moyuStickers: "MoYu — stickers",
+  qiyiStickersRounded: "QiYi — black, rounded",
+  qiyiStickersSquare: "QiYi — black, square",
+};
+const STICKERS: [CubeLook["stickers"], string][] = [["", "As the skin is"], ["raised", "Stickered: raised"], ["thin", "Stickered: thin"], ["flat", "Stickered: flat print"]];
+const FINISHES: [CubeLook["finish"], string][] = [["", "The skin's own"], ["matte", "Matte"], ["uv", "UV-coated (glossy)"]];
+
+const selectClass = "bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-white";
+
+function CubeLookSection() {
+  const { look, setLook, autoSkin } = useCubeLook();
+  return (
+    <Section title="Cube look">
+      <div className="flex gap-5 py-4 border-b border-white/[0.06] items-center">
+        <div className="size-40 shrink-0">
+          <CubeVisualisation cameraLatitude={28} cameraLongitude={32} />
+        </div>
+        <p className="text-xs text-gray-500">
+          How the cube is drawn everywhere in the app. <strong className="text-gray-300">Auto</strong> picks the skin that suits the
+          connected smart cube (GAN, QiYi, MoYu…) by its name — now: {SKIN_LABELS[autoSkin]}.
+        </p>
+      </div>
+      <SettingsRow
+        title="Skin"
+        description="The cube's shapes and colours."
+        action={
+          <select className={selectClass} value={look.skin} onChange={(e) => setLook({ skin: e.target.value as CubeLook["skin"] })}>
+            <option value="auto">Auto — the connected cube</option>
+            {(Object.keys(SKIN_LABELS) as SkinName[]).map((k) => (
+              <option key={k} value={k}>
+                {SKIN_LABELS[k]}
+              </option>
+            ))}
+          </select>
+        }
+      />
+      <SettingsRow
+        title="Stickers"
+        description="Show the same cube with stickers on black plastic."
+        action={
+          <select className={selectClass} value={look.stickers} onChange={(e) => setLook({ stickers: e.target.value as CubeLook["stickers"] })}>
+            {STICKERS.map(([v, label]) => (
+              <option key={v} value={v}>
+                {label}
+              </option>
+            ))}
+          </select>
+        }
+      />
+      <SettingsRow
+        title="Finish"
+        description="Matte or glossy plastic."
+        last
+        action={
+          <select className={selectClass} value={look.finish} onChange={(e) => setLook({ finish: e.target.value as CubeLook["finish"] })}>
+            {FINISHES.map(([v, label]) => (
+              <option key={v} value={v}>
+                {label}
+              </option>
+            ))}
+          </select>
+        }
+      />
+    </Section>
+  );
+}
+
+const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_", "nact_alg_groups", "nact_cube_look"];
 
 function allNactKeys(): string[] {
   const keys: string[] = [];
@@ -101,6 +178,8 @@ export default function SettingsPage() {
           {message}
         </div>
       )}
+
+      <CubeLookSection />
 
       <Section title="Algorithm progress">
         <SettingsRow

@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
+import { CubeLookProvider } from "./hooks/useCubeLook";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { useAlgorithmDataVersionCheck } from "./hooks/useAlgorithmDataVersionCheck";
 import { useWakeLock } from "./hooks/useWakeLock";
@@ -44,6 +45,7 @@ export default function App() {
 
   return (
     <SmartCubeProvider>
+      <CubeLookProvider>
       <div className="app-bg min-h-screen flex flex-col">
         <header className="sticky top-0 z-50 h-16 flex items-center px-2 sm:px-6 bg-gray-950/85 backdrop-blur-xl">
           {/* Phones: brand hidden, the tab pill scrolls horizontally (it is
@@ -94,6 +96,7 @@ export default function App() {
           <AlgorithmDataUpdateNotice onClose={() => setDataNoticeDismissed(true)} />
         )}
       </div>
+      </CubeLookProvider>
     </SmartCubeProvider>
   );
 }

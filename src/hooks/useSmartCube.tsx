@@ -18,8 +18,9 @@
  * concern — see sessionReducer / sequenceTracker.
  *
  * Every move from real hardware is a single physical face quarter-turn.
- * smartcube-web-bluetooth already normalizes this across brands into one
- * `MOVE` event shape with a ready-to-use notation string (event.move).
+ * The connection is a cubecore SmartCubeSession (over smartcube-web-bluetooth):
+ * moves come with the cube's own clock mapped onto the page's, the tracked
+ * state, the gyro, and a skin that suits the connected cube (by its name).
  */
 
 import {
@@ -32,11 +33,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  connectSmartCube,
-  getCachedMacForDevice,
-  type SmartCubeConnection,
-} from "smartcube-web-bluetooth";
+import { getCachedMacForDevice } from "smartcube-web-bluetooth";
+import { SmartCubeSession } from "@cubecore/bluetooth";
+import { formatMove } from "@cubecore/core";
+import { SKINS } from "@cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
 
@@ -46,6 +46,10 @@ interface SmartCubeContextValue extends DeviceConnection {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   error: string | null;
+  /** The live session (state, gyro, mark solved…), or null when not connected. */
+  session: SmartCubeSession | null;
+  /** Name of the skin that suits the connected cube (its brand / model), or null. */
+  suggestedSkin: string | null;
   /** Register a move listener; returns an unsubscribe function. */
   addMoveListener: (fn: MoveListener) => () => void;
 }
@@ -57,8 +61,10 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DeviceConnection>(INITIAL_DEVICE_CONNECTION);
   const [error, setError] = useState<string | null>(null);
 
-  const connectionRef = useRef<SmartCubeConnection | null>(null);
+  const connectionRef = useRef<SmartCubeSession | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const [session, setSession] = useState<SmartCubeSession | null>(null);
+  const [suggestedSkin, setSuggestedSkin] = useState<string | null>(null);
   const listenersRef = useRef(new Set<MoveListener>());
 
   const addMoveListener = useCallback((fn: MoveListener) => {
@@ -73,6 +79,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     subscriptionRef.current = null;
     await connectionRef.current?.disconnect().catch(() => undefined);
     connectionRef.current = null;
+    setSession(null);
+    setSuggestedSkin(null);
     setState(INITIAL_DEVICE_CONNECTION);
   }, []);
 
@@ -85,7 +93,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       // exposes no advertisement data (desktop Chrome without the
       // web-platform-features flag). The provider is the last-resort fallback:
       // ask the user to type the MAC in manually.
-      const conn = await connectSmartCube({
+      const conn = await SmartCubeSession.connect({
         enableAddressSearch: true,
         macAddressProvider: async (device, isFallbackCall) => {
           if (!isFallbackCall) return null;
@@ -100,36 +108,35 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
         },
       });
       connectionRef.current = conn;
+      setSession(conn);
 
       setState({
         connected: true,
-        deviceName: conn.deviceName,
-        protocolId: conn.protocol.id,
-        battery: null,
+        deviceName: conn.info.name,
+        protocolId: conn.info.protocol.id,
+        battery: conn.battery,
       });
+      // The skin for this cube, by its brand / name (refined when the hardware name arrives).
+      const nameOfSkin = () => (Object.keys(SKINS) as (keyof typeof SKINS)[]).find((k) => SKINS[k] === conn.suggestedSkin) ?? null;
+      setSuggestedSkin(nameOfSkin());
 
-      subscriptionRef.current = conn.events$.subscribe((event) => {
-        switch (event.type) {
-          case "MOVE":
-            for (const listener of listenersRef.current) {
-              listener(event.move, event.localTimestamp ?? event.timestamp);
-            }
-            break;
-          case "BATTERY":
-            setState((s) => ({ ...s, battery: event.batteryLevel }));
-            break;
-          case "DISCONNECT":
-            subscriptionRef.current?.unsubscribe();
-            subscriptionRef.current = null;
-            connectionRef.current = null;
-            setState(INITIAL_DEVICE_CONNECTION);
-            break;
-        }
-      });
-
-      if (conn.capabilities.battery) {
-        conn.sendCommand({ type: "REQUEST_BATTERY" }).catch(() => undefined);
-      }
+      const offs = [
+        conn.on("move", (e) => {
+          const move = formatMove(e.move);
+          for (const listener of listenersRef.current) listener(move, e.time);
+        }),
+        conn.on("battery", (level) => setState((s) => ({ ...s, battery: level }))),
+        conn.on("hardware", () => setSuggestedSkin(nameOfSkin())),
+        conn.on("disconnect", () => {
+          subscriptionRef.current?.unsubscribe();
+          subscriptionRef.current = null;
+          connectionRef.current = null;
+          setSession(null);
+          setSuggestedSkin(null);
+          setState(INITIAL_DEVICE_CONNECTION);
+        }),
+      ];
+      subscriptionRef.current = { unsubscribe: () => offs.forEach((off) => off()) };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect to cube");
     }
@@ -175,8 +182,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<SmartCubeContextValue>(
-    () => ({ ...state, error, connect, disconnect, addMoveListener }),
-    [state, error, connect, disconnect, addMoveListener]
+    () => ({ ...state, error, connect, disconnect, addMoveListener, session, suggestedSkin }),
+    [state, error, connect, disconnect, addMoveListener, session, suggestedSkin]
   );
 
   return <SmartCubeContext.Provider value={value}>{children}</SmartCubeContext.Provider>;
@@ -191,6 +198,13 @@ export interface UseSmartCubeReturn extends DeviceConnection {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   error: string | null;
+  session: SmartCubeSession | null;
+  suggestedSkin: string | null;
+}
+
+/** The shared connection without subscribing to moves (for views that only need the session / skin); null outside the provider. */
+export function useSmartCubeConnection(): Omit<SmartCubeContextValue, "addMoveListener"> | null {
+  return useContext(SmartCubeContext);
 }
 
 /** Same API as before — pages don't need to change. Now backed by the shared connection. */
