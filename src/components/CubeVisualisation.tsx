@@ -138,6 +138,8 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       p.setAttribute("tempo", String(Math.max(1, tempoScale * 2)));
       p.setAttribute("back-view", backView);
       p.setAttribute("theme", pageTheme());
+      // Controls are drawn in currentColor — give them the page's text colour.
+      p.style.color = pageTheme() === "light" ? "#1f2937" : "#e5e7eb";
       p.style.width = "100%";
       p.style.height = "100%";
       // Fit whatever box the page gives it (the element's own 200px minimum is for standalone use).
@@ -150,7 +152,10 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       playerRef.current = p;
       applyMask(p);
       applyCamera(p);
-      const themeWatch = new MutationObserver(() => p.setAttribute("theme", pageTheme()));
+      const themeWatch = new MutationObserver(() => {
+        p.setAttribute("theme", pageTheme());
+        p.style.color = pageTheme() === "light" ? "#1f2937" : "#e5e7eb";
+      });
       themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
       return () => {
         themeWatch.disconnect();
