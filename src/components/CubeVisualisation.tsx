@@ -1,10 +1,12 @@
 /**
- * Wrapper around TwistyPlayer (cubing/twisty web component).
+ * Wrapper around cubecore's <cube-player> (the cube view with skins, masks,
+ * back view, 2D pictures) — same props and ref API as the old TwistyPlayer
+ * wrapper, so callers don't change.
  *
  * RESPONSIBILITY:
- * - Mount and manage a TwistyPlayer DOM element
+ * - Mount and manage a <cube-player> element
  * - Expose an imperative ref API for parent components to drive the visualisation
- * - Check isSolved() via the cubing KPattern model
+ * - Check isSolved() on the shown state (any orientation)
  *
  * NOT responsible for: generating scrambles, tracking moves/state, solve logic.
  *
@@ -16,30 +18,14 @@
  */
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
-import { TwistyPlayer } from "cubing/twisty";
+import "@cubecore/element"; // registers <cube-player>
+import type { CubePlayer } from "@cubecore/element";
+import { SKINS, type Skin } from "@cubecore/render";
+import { isSolved } from "@cubecore/core";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
-import { adaptHintStickerColors } from "../logic/hintStickerColor";
+import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 
 export type { VisualizationMode };
-
-/**
- * Camera distance that keeps floating hint stickers in frame.
- *
- * cubing.js fixes the 3x3 Cube3D camera at distance 6, tuned for the
- * DEFAULT hint elevation (1.45) — raise the elevation and the stickers
- * leave the canvas. Scale the distance with the scene's outermost extent:
- * the cube spans ~1.5 half-units and hint stickers sit ~(elevation − 0.5)
- * beyond the face, so extent grows as (1 + elevation) and 6 corresponds
- * to the default's (1 + 1.45). Never zoom in closer than the default.
- */
-const DEFAULT_CAMERA_DISTANCE = 6;
-const DEFAULT_HINT_ELEVATION = 1.45;
-function cameraDistanceFor(hintFacelets: "none" | "floating", elevation: number | undefined): number {
-  if (hintFacelets !== "floating" || elevation === undefined || elevation <= DEFAULT_HINT_ELEVATION) {
-    return DEFAULT_CAMERA_DISTANCE;
-  }
-  return (DEFAULT_CAMERA_DISTANCE * (1 + elevation)) / (1 + DEFAULT_HINT_ELEVATION);
-}
 
 export interface CubeVisualisationProps {
   /** Algorithm moves to display (applied after setup). */
@@ -101,6 +87,9 @@ export interface CubeVisualisationRef {
   setMoveIndex: (moveIndex: number) => void;
 }
 
+/** cubing.js visualization names → <cube-player> views. */
+const VIEW: Record<VisualizationMode, string> = { "3D": "3d", PG3D: "3d", "2D": "net", "experimental-2D-LL": "top" };
+
 export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisationProps>(
   (
     {
@@ -113,10 +102,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       backView = "none",
       stickering = "full",
       stickeringMaskOrbits,
-      background = "none",
       controlPanel = "none",
-      dragInput = "auto",
-      viewerLink = "none",
       cameraLatitude = 20,
       cameraLongitude = 20,
       tempoScale = 5,
@@ -125,201 +111,102 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     ref
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const playerRef = useRef<TwistyPlayer | null>(null);
-    // Which of the two mutually-exclusive stickering channels the CURRENTLY
-    // mounted player is on — see the stickeringMaskOrbits doc comment above.
-    // Needed because switching channels requires tearing the player down and
-    // recreating it; a plain property assignment silently does nothing.
-    const stickeringChannelRef = useRef<"mask" | "named" | null>(null);
+    const playerRef = useRef<CubePlayer | null>(null);
 
-    // Builds a fresh TwistyPlayer with every "set once, driven imperatively
-    // after that" prop applied — used both for the initial mount and for
-    // remounting when the stickering channel flips (see below). Reads props
-    // via closure, so it always reflects whatever's current when called.
-    function createPlayer(): TwistyPlayer {
-      const player = new TwistyPlayer();
-
-      player.puzzle = "3x3x3";
-      player.visualization = visualization as TwistyPlayer["visualization"];
-      player.experimentalSetupAnchor = setupAnchor as TwistyPlayer["experimentalSetupAnchor"];
-      player.background = background as TwistyPlayer["background"];
-      player.controlPanel = controlPanel as TwistyPlayer["controlPanel"];
-      player.viewerLink = viewerLink as TwistyPlayer["viewerLink"];
-      player.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
-      player.backView = backView;
-      if (hintFaceletsElevation !== undefined) {
-        player.experimentalHintFaceletsElevation = hintFaceletsElevation;
-        player.cameraDistance = cameraDistanceFor(hintFacelets, hintFaceletsElevation);
-      }
-      player.experimentalDragInput = dragInput as TwistyPlayer["experimentalDragInput"];
-      player.cameraLatitude = cameraLatitude;
-      player.cameraLongitude = cameraLongitude;
-      player.tempoScale = tempoScale;
-      if (stickeringMaskOrbits) {
-        player.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
-        stickeringChannelRef.current = "mask";
-      } else {
-        player.experimentalStickering = stickering;
-        stickeringChannelRef.current = "named";
-      }
-
-      // Size must be set as inline style directly on the web component
-      // element — CSS classes on the wrapper div don't cascade into its
-      // shadow DOM.
-      player.style.width = "100%";
-      player.style.height = "100%";
-      // White back stickers vs. masked ones (cubing.js #394) — hooked on every 3D player, so toggling back stickers later works too.
-      if (visualization === "3D") adaptHintStickerColors(player);
-      return player;
-    }
+    // The skin: the default look, with floating back stickers when asked.
+    const skinFor = (): Skin => ({
+      ...SKINS.default,
+      hints: { ...SKINS.default.hints, enabled: hintFacelets === "floating", distance: hintFaceletsElevation ?? SKINS.default.hints.distance },
+    });
+    const applyMask = (p: CubePlayer) => {
+      p.mask = stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
+    };
+    const applyCamera = (p: CubePlayer) => p.renderer?.setCamera({ latitude: cameraLatitude, longitude: cameraLongitude });
 
     useEffect(() => {
       if (!containerRef.current) return;
-
-      const player = createPlayer();
-      player.alg = alg;
-      if (setupAlg) player.experimentalSetupAlg = setupAlg;
-
-      playerRef.current = player;
-      containerRef.current.appendChild(player);
-
+      const p = document.createElement("cube-player") as CubePlayer;
+      if (controlPanel === "none") p.setAttribute("controls", "none");
+      p.setAttribute("visualization", VIEW[visualization] ?? "3d");
+      p.setAttribute("anchor", setupAnchor);
+      p.setAttribute("tempo", String(Math.max(1, tempoScale * 2)));
+      p.setAttribute("back-view", backView);
+      p.style.width = "100%";
+      p.style.height = "100%";
+      // Fit whatever box the page gives it (the element's own 200px minimum is for standalone use).
+      p.style.minWidth = "0";
+      p.style.minHeight = "0";
+      p.skin = skinFor();
+      if (setupAlg) p.setup = setupAlg;
+      p.alg = alg;
+      containerRef.current.appendChild(p);
+      playerRef.current = p;
+      applyMask(p);
+      applyCamera(p);
       return () => {
-        player.remove();
+        p.remove();
         playerRef.current = null;
       };
-      // Intentionally empty deps: TwistyPlayer is mounted once and driven imperatively.
+      // Mounted once and driven imperatively.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-      const oldPlayer = playerRef.current;
-      if (!oldPlayer || !containerRef.current) return;
-
-      const wantsChannel = stickeringMaskOrbits ? "mask" : "named";
-      if (stickeringChannelRef.current === wantsChannel) {
-        // Same channel — a plain property update takes effect fine.
-        if (stickeringMaskOrbits) oldPlayer.experimentalStickeringMaskOrbits = stickeringMaskOrbits;
-        else oldPlayer.experimentalStickering = stickering;
-        return;
-      }
-
-      // Channel flip (mask <-> named): the old player is permanently stuck
-      // showing whichever channel it was first given, so swap in a fresh
-      // one instead. Can't carry over its current alg/setup — TwistyPlayer's
-      // `alg`/`experimentalSetupAlg` are write-only, reading them throws —
-      // but in practice this only fires when the caller is switching to a
-      // whole new group/case, which drives a fresh setSetupAlgorithm/reset
-      // through the imperative ref right after anyway (see TrainingPage's
-      // case-loading effect), so the momentary reset-to-blank here doesn't
-      // linger.
-      const newPlayer = createPlayer();
-      newPlayer.alg = alg;
-      if (setupAlg) newPlayer.experimentalSetupAlg = setupAlg;
-      containerRef.current.replaceChild(newPlayer, oldPlayer);
-      oldPlayer.remove();
-      playerRef.current = newPlayer;
+      if (playerRef.current) applyMask(playerRef.current);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stickering, stickeringMaskOrbits]);
-
     useEffect(() => {
-      if (!playerRef.current) return;
-      playerRef.current.visualization = visualization as TwistyPlayer["visualization"];
+      playerRef.current?.setAttribute("visualization", VIEW[visualization] ?? "3d");
     }, [visualization]);
-
     useEffect(() => {
-      if (!playerRef.current) return;
-      playerRef.current.hintFacelets = hintFacelets as TwistyPlayer["hintFacelets"];
-    }, [hintFacelets]);
-
-    useEffect(() => {
-      if (!playerRef.current) return;
-      playerRef.current.backView = backView;
-    }, [backView]);
-
-    useEffect(() => {
-      if (!playerRef.current || hintFaceletsElevation === undefined) return;
-      playerRef.current.experimentalHintFaceletsElevation = hintFaceletsElevation;
-      playerRef.current.cameraDistance = cameraDistanceFor(hintFacelets, hintFaceletsElevation);
+      if (playerRef.current) playerRef.current.skin = skinFor();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hintFacelets, hintFaceletsElevation]);
-
     useEffect(() => {
-      if (!playerRef.current) return;
-      playerRef.current.cameraLatitude = cameraLatitude;
-      playerRef.current.cameraLongitude = cameraLongitude;
+      playerRef.current?.setAttribute("back-view", backView);
+    }, [backView]);
+    useEffect(() => {
+      if (playerRef.current) applyCamera(playerRef.current);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cameraLatitude, cameraLongitude]);
 
     useImperativeHandle(ref, () => ({
       addMove: (move: string) => {
         const trimmed = move.trim();
-        if (!trimmed || !playerRef.current) return;
-        playerRef.current.experimentalAddMove(trimmed);
+        if (trimmed) playerRef.current?.pushMove(trimmed);
       },
       reset: () => {
-        if (!playerRef.current) return;
-        playerRef.current.alg = "";
-        playerRef.current.experimentalSetupAlg = "";
+        const p = playerRef.current;
+        if (!p) return;
+        p.setup = "";
+        p.alg = "";
       },
       setAlgorithm: (newAlg: string) => {
-        if (!playerRef.current) return;
-        playerRef.current.alg = newAlg;
-        // Assigning `.alg` on an ALREADY-MOUNTED player preserves the
-        // current timeline position rather than resetting to the start —
-        // verified live: pasting a fresh algorithm landed the scrubber at
-        // the END, cube already fully turned, instead of ready to play
-        // from solved. Force it back to the start explicitly.
-        playerRef.current.jumpToStart({ flash: false });
+        const p = playerRef.current;
+        if (!p) return;
+        p.alg = newAlg;
+        p.toStart();
       },
       setSetupAlgorithm: (setup: string, newAlg = "", jumpTo: "start" | "end" = "end") => {
-        if (!playerRef.current) return;
-        playerRef.current.experimentalSetupAlg = setup;
-        playerRef.current.alg = newAlg;
-        if (jumpTo === "start") {
-          playerRef.current.jumpToStart({ flash: false });
-        } else {
-          // Replacing the setup mid-animation (e.g. the trainer swapping in
-          // the next attempt's view right as the final solve move is still
-          // animating) can leave the timeline frozen before the end — the
-          // cube then LOOKS unsolved until the next move nudges it. Land on
-          // the final state explicitly.
-          playerRef.current.jumpToEnd({ flash: false });
-        }
+        const p = playerRef.current;
+        if (!p) return;
+        p.setup = setup;
+        p.alg = newAlg;
+        if (jumpTo === "start") p.toStart();
+        else p.toEnd();
       },
       setVisualization: (mode: VisualizationMode) => {
-        if (!playerRef.current) return;
-        playerRef.current.visualization = mode as TwistyPlayer["visualization"];
+        playerRef.current?.setAttribute("visualization", VIEW[mode] ?? "3d");
       },
       play: () => {
         playerRef.current?.play();
       },
       isSolved: async () => {
-        try {
-          const player = playerRef.current;
-          if (!player?.experimentalModel) return false;
-          const pattern = await player.experimentalModel.currentPattern.get();
-          return pattern.experimentalIsSolved({
-            ignorePuzzleOrientation: true,
-            ignoreCenterOrientation: true,
-          });
-        } catch (err) {
-          console.warn("CubeVisualisation: isSolved check failed", err);
-          return false;
-        }
+        const state = playerRef.current?.renderer?.currentState;
+        return state ? isSolved(state) : false;
       },
       setMoveIndex: (moveIndex: number) => {
-        const player = playerRef.current;
-        if (!player?.experimentalModel) return;
-        void (async () => {
-          try {
-            const model = player.experimentalModel as unknown as {
-              indexer: { get: () => Promise<{ indexToMoveStartTimestamp: (i: number) => number }> };
-              timestampRequest: { set: (ts: number) => void };
-            };
-            const indexer = await model.indexer.get();
-            const timestamp = indexer.indexToMoveStartTimestamp(moveIndex);
-            model.timestampRequest.set(timestamp);
-          } catch (err) {
-            console.warn("CubeVisualisation: setMoveIndex failed", err);
-          }
-        })();
+        playerRef.current?.seekToMove(moveIndex);
       },
     }));
 

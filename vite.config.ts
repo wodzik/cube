@@ -14,6 +14,11 @@ const smartcubeSrc = fileURLToPath(
   new URL("./node_modules/smartcube-web-bluetooth/src/index.ts", import.meta.url)
 );
 
+// cubecore (local, not published yet): the packages are read straight from
+// ../cubecore/packages/*/src — Vite transpiles them like our own sources.
+// Matched by a "paths" entry in tsconfig.json.
+const cubecoreDir = fileURLToPath(new URL("../cubecore", import.meta.url));
+
 const workerImportMetaUrlRE =
   /\bnew\s+(?:Worker|SharedWorker)\s*\(\s*(new\s+URL\s*\(\s*('[^']+'|"[^"]+"|`[^`]+`)\s*,\s*import\.meta\.url\s*\))/g;
 
@@ -43,9 +48,13 @@ export default defineConfig({
     },
   ],
   resolve: {
-    alias: {
-      "smartcube-web-bluetooth": smartcubeSrc,
-    },
+    alias: [
+      { find: "smartcube-web-bluetooth", replacement: smartcubeSrc },
+      { find: /^@cubecore\/([a-z]+)$/, replacement: `${cubecoreDir}/packages/$1/src/index.ts` },
+    ],
+  },
+  server: {
+    fs: { allow: [".", cubecoreDir] },
   },
   build: {
     chunkSizeWarningLimit: 2048,

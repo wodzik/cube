@@ -5,7 +5,7 @@
     "allowJs": true,
     "checkJs": false,
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -19,7 +19,8 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "paths": {
-      "smartcube-web-bluetooth": ["./node_modules/smartcube-web-bluetooth/src/index.ts"]
+      "smartcube-web-bluetooth": ["./node_modules/smartcube-web-bluetooth/src/index.ts"],
+      "@cubecore/*": ["../cubecore/packages/*/src/index.ts"]
     },
     // TS 7 no longer auto-includes every node_modules/@types package —
     // global types must be listed. web-bluetooth: relied on by
