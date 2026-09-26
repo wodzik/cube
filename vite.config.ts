@@ -65,6 +65,16 @@ export default defineConfig({
     // production ("document is not defined" -> no scrambles). Costs only
     // the preload hint, not correctness: imports still resolve normally.
     modulePreload: false,
+    rolldownOptions: {
+      output: {
+        // Run modules in source order whatever chunk they land in. Automatic
+        // splitting puts shared code (React, the icons, cubecore…) in chunks
+        // that import each other in cycles; without this a module could run
+        // before one it depends on — e.g. an icon before React ("reading
+        // 'forwardRef'" of undefined): a blank page, in production only.
+        strictExecutionOrder: true,
+      },
+    },
   },
   optimizeDeps: {
     // cubing ships its own workers/wasm — pre-bundling breaks it.
