@@ -22,7 +22,8 @@ import "@cubecore/element"; // registers <cube-player>
 import type { CubePlayer } from "@cubecore/element";
 import type { Skin } from "@cubecore/render";
 import { useCubeLook } from "../hooks/useCubeLook";
-import { type State, isSolved } from "@cubecore/core";
+import { type Frame, type Mask, type State, isSolved } from "@cubecore/core";
+import { frameQuaternion } from "../logic/frameView";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 
@@ -54,6 +55,10 @@ export interface CubeVisualisationProps {
    * for its whole life, or be remounted.
    */
   stickeringMaskOrbits?: StickeringMaskOrbits;
+  /** A cubecore mask (overrides `stickering` / `stickeringMaskOrbits`). */
+  mask?: Mask | null;
+  /** Show the cube as held in this frame (e.g. white down for a cross on white). */
+  orientation?: Frame | null;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -105,6 +110,8 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       backView = "none",
       stickering = "full",
       stickeringMaskOrbits,
+      mask,
+      orientation,
       controlPanel = "none",
       cameraLatitude = 20,
       cameraLongitude = 20,
@@ -125,9 +132,12 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     // The page's light / dark theme (data-theme on <html>) → the skin's page adjustments.
     const pageTheme = () => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
     const applyMask = (p: CubePlayer) => {
-      p.mask = stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
+      p.mask = mask !== undefined ? mask : stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
     };
-    const applyCamera = (p: CubePlayer) => p.renderer?.setCamera({ latitude: cameraLatitude, longitude: cameraLongitude });
+    const applyCamera = (p: CubePlayer) => {
+      p.renderer?.setCamera({ latitude: cameraLatitude, longitude: cameraLongitude });
+      p.renderer?.setOrientation(orientation ? frameQuaternion(orientation) : null);
+    };
 
     useEffect(() => {
       if (!containerRef.current) return;
@@ -169,7 +179,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (playerRef.current) applyMask(playerRef.current);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stickering, stickeringMaskOrbits]);
+    }, [stickering, stickeringMaskOrbits, mask]);
     useEffect(() => {
       playerRef.current?.setAttribute("visualization", VIEW[visualization] ?? "3d");
     }, [visualization]);
@@ -183,7 +193,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (playerRef.current) applyCamera(playerRef.current);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [cameraLatitude, cameraLongitude]);
+    }, [cameraLatitude, cameraLongitude, orientation]);
 
     useImperativeHandle(ref, () => ({
       addMove: (move: string) => {

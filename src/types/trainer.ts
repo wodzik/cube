@@ -28,7 +28,10 @@ export type TrainerType =
   | "fbdr"
   | "ss"
   | "cmll"
-  | "eolr";
+  | "eolr"
+  | "lse"
+  | "eoline"
+  | "zz-block";
 
 export interface TrainerAttempt {
   id: string;
@@ -39,8 +42,8 @@ export interface TrainerAttempt {
   type: TrainerType;
   /** The face whose cross the scramble was generated for (and detection watched). */
   face: Face;
-  /** Which F2L slot (xcross/pair), slot pair (xxcross), or SS side (roux ss) was targeted. */
-  slot?: XCrossSlot | XXCrossPair | RouxSsSide;
+  /** Which F2L slot (xcross/pair), slot pair (xxcross), side (roux), block (zz) or CMLL group was targeted. */
+  slot?: XCrossSlot | XXCrossPair | RouxSsSide | string;
   /** F2L multi-pair drills: all trained slots (detection scope on retry, list display). */
   slots?: XCrossSlot[];
   /** The requested difficulty — scrambles are generated with optimal == this. */
@@ -62,7 +65,7 @@ export interface TrainerAttempt {
   /** True if the on-demand hint was revealed during this attempt. */
   hintUsed?: boolean;
 
-  // ── Retry pinning (see trainerScrambleService.regenerateForTarget) ──
+  // ── Retry pinning of the earlier (pre-cubecore) trainers — kept for old records ──
   /** Engine-encoded cross state right after the scramble — cross attempts. */
   startCrossState?: number;
   /** Native-frame optimal solution of the target state — WASM-backed attempts. */
@@ -71,6 +74,14 @@ export interface TrainerAttempt {
   nativeTargetAppl?: string;
   /** Roux types: face-turn generator of the whole target state — the retry pin. */
   targetGenerator?: string;
+
+  // ── cubecore trainers ──
+  /** The case (physical cube state right after the scramble), stateCodec-encoded — retry goes back to it from wherever the cube is. */
+  caseState?: string;
+  /** cubecore FRAMES id the case was built for (which colour down). */
+  frameId?: number;
+  /** Practised on the screen only (no scramble on the cube). */
+  virtual?: boolean;
 
   isDNF: boolean;
 }

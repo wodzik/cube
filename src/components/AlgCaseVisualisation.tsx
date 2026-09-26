@@ -28,6 +28,7 @@ import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } 
 import { buildCanonicalDisplaySetupAlg } from "../logic/moveParser";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 import { useCubeLook } from "../hooks/useCubeLook";
+import { frameQuaternion } from "../logic/frameView";
 
 /** A short stable id per skin object (for the picture cache key). */
 const skinIds = new WeakMap<Skin, number>();
@@ -44,6 +45,10 @@ interface AlgCaseVisualisationProps {
   stickering?: string;
   /** Piece-level mask (overrides `stickering`) — see CubeVisualisation. */
   stickeringMaskOrbits?: import("../types/cube").StickeringMaskOrbits;
+  /** A cubecore mask (overrides the stickering props). */
+  cubeMask?: import("@cubecore/core").Mask;
+  /** Picture the cube as held in this frame. */
+  orientation?: import("@cubecore/core").Frame;
   visualization?: VisualizationMode;
   cameraLatitude?: number;
   cameraLongitude?: number;
@@ -54,6 +59,8 @@ export function AlgCaseVisualisation({
   alg,
   stickering = "full",
   stickeringMaskOrbits,
+  cubeMask,
+  orientation,
   visualization = "experimental-2D-LL",
   cameraLatitude = 30,
   cameraLongitude = -30,
@@ -101,14 +108,14 @@ export function AlgCaseVisualisation({
   const picture = useMemo(() => {
     if (!visible || !is3d) return null;
     try {
-      const mask = stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
+      const mask = cubeMask ?? (stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering));
       const theme = pageTheme();
-      const key = [inverseAlg, stickeringMaskOrbits ? JSON.stringify(stickeringMaskOrbits) : stickering, cameraLatitude, cameraLongitude, skinId(skin), theme].join("|");
-      return sharedPictures().draw({ state: applyMoves(solvedState(), inverseAlg), mask, skin, theme, camera: { latitude: cameraLatitude, longitude: cameraLongitude } }, key);
+      const key = [inverseAlg, cubeMask ? cubeMask.join("") : stickeringMaskOrbits ? JSON.stringify(stickeringMaskOrbits) : stickering, orientation?.id ?? 0, cameraLatitude, cameraLongitude, skinId(skin), theme].join("|");
+      return sharedPictures().draw({ state: applyMoves(solvedState(), inverseAlg), mask, skin, theme, camera: { latitude: cameraLatitude, longitude: cameraLongitude }, orientation: orientation ? frameQuaternion(orientation) : null }, key);
     } catch {
       return null;
     }
-  }, [visible, is3d, inverseAlg, stickering, stickeringMaskOrbits, cameraLatitude, cameraLongitude, skin]);
+  }, [visible, is3d, inverseAlg, stickering, stickeringMaskOrbits, cubeMask, orientation, cameraLatitude, cameraLongitude, skin]);
 
   return (
     <div ref={wrapperRef} className={`size-full ${className}`}>

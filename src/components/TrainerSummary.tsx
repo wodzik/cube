@@ -4,14 +4,22 @@
  * your move count vs the scramble's known optimal, a per-move wasted-move
  * strip from the exact-distance analysis, and the optimal solutions on
  * demand. Dismissed by the first move of the next scramble (see
- * CaseTrainerPage's effect).
+ * TrainersPage's effect).
  */
 
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Repeat2 } from "lucide-react";
 import type { TrainerAttempt } from "../types/trainer";
-import type { CrossMoveAnalysis } from "../logic/trainer/crossEngine";
 import { formatTimeMs } from "../logic/statistics";
+
+/** One of the solver's moves in the verdict: the step's distance before and after it. */
+export interface CrossMoveAnalysis {
+  move: string;
+  distBefore: number;
+  distAfter: number;
+  /** True when this move did not bring the step closer to done. */
+  wasted: boolean;
+}
 
 interface TrainerSummaryProps {
   attempt: TrainerAttempt;
@@ -24,8 +32,8 @@ interface TrainerSummaryProps {
 
 export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }: TrainerSummaryProps) {
   const [showSolutions, setShowSolutions] = useState(false);
-  // F2L cases carry no computed optimum — show plain move count, no verdict.
-  const hasOptimal = !attempt.type.startsWith("f2l");
+  // Random cases without a computed optimum (F2L of 3+ slots, CMLL): plain move count, no verdict.
+  const hasOptimal = attempt.optimalLength > 0;
   const isOptimal = attempt.overhead <= 0;
 
   // Non-optimal solve with a full solution list (cross — signalled by a
@@ -88,7 +96,7 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
                 key={i}
                 title={
                   a.wasted
-                    ? `Didn't bring the cross closer (distance ${a.distBefore} → ${a.distAfter})`
+                    ? `Didn't bring the step closer (distance ${a.distBefore} → ${a.distAfter})`
                     : `Distance ${a.distBefore} → ${a.distAfter}`
                 }
                 className={`px-1.5 py-0.5 rounded-md text-xs font-mono ${
@@ -101,8 +109,8 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
           </div>
           {(attempt.wastedMoveCount ?? 0) > 0 && (
             <p className="text-[11px] text-gray-500 mt-1.5">
-              {attempt.wastedMoveCount} {attempt.wastedMoveCount === 1 ? "move" : "moves"} didn't reduce the cross
-              distance
+              {attempt.wastedMoveCount} {attempt.wastedMoveCount === 1 ? "move" : "moves"} didn't bring the step
+              closer
             </p>
           )}
         </div>

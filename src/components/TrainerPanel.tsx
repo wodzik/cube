@@ -23,6 +23,7 @@ import { TimerDisplay } from "./TimerDisplay";
 import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { TrackedProgress } from "../logic/cubecoreSequence";
+import type { Frame, Mask } from "@cubecore/core";
 import type { SequenceTracking } from "./MoveSequenceDisplay";
 
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
@@ -112,6 +113,10 @@ export interface TrainerPanelProps {
   visualization?: VisualizationMode;
   stickering?: string;
   stickeringMaskOrbits?: StickeringMaskOrbits;
+  /** A cubecore mask for the cube (overrides the stickering props). */
+  cubeMask?: Mask | null;
+  /** Show the 3D cube as held in this frame. */
+  cubeOrientation?: Frame | null;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -202,6 +207,8 @@ export function TrainerPanel({
   visualization = "3D",
   stickering,
   stickeringMaskOrbits,
+  cubeMask,
+  cubeOrientation,
   background = "none",
   controlPanel = "none",
   dragInput = "auto",
@@ -317,6 +324,8 @@ export function TrainerPanel({
                 visualization={visualization}
                 stickering={stickering}
                 stickeringMaskOrbits={stickeringMaskOrbits}
+                mask={cubeMask}
+                orientation={cubeOrientation}
                 background={background}
                 controlPanel={controlPanel}
                 dragInput={dragInput}
@@ -343,6 +352,7 @@ export function TrainerPanel({
                   visualization="2D"
                   stickering={stickering}
                   stickeringMaskOrbits={stickeringMaskOrbits}
+                  mask={cubeMask}
                   background="none"
                   controlPanel="none"
                   dragInput="none"

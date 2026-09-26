@@ -194,7 +194,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       return listenersRef.current.size;
     };
     // A simulated smart cube: a real SmartCubeSession (state, events) without Bluetooth.
-    const ws = window as unknown as { __nactSimulateConnect?: () => void };
+    const ws = window as unknown as { __nactSimulateConnect?: () => void; __nactCubeState?: () => State | null };
+    ws.__nactCubeState = () => connectionRef.current?.state ?? null;
     ws.__nactSimulateConnect = () => {
       simulatedRef.current = new SimulatedCube();
       use(new SmartCubeSession(simulatedRef.current));
@@ -202,6 +203,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     return () => {
       delete w.__nactSimulateMove;
       delete ws.__nactSimulateConnect;
+      delete ws.__nactCubeState;
     };
   }, [use]);
 

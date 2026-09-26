@@ -31,7 +31,7 @@ export type StartMethod = "cube-move" | "spacebar" | "timer-device";
 /**
  * "stage-solved" is the trainer-mode stop: the attempt ends when a target
  * SUB-state (e.g. cross solved) is reached, not the whole cube — dispatched
- * by useStageSolvedDetection through the same STOP_SIGNAL path as the
+ * by the trainers page (TrainersPage) through the same STOP_SIGNAL path as the
  * manual methods.
  */
 export type StopMethod = "cube-solved" | "spacebar" | "timer-device" | "stage-solved";

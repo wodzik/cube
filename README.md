@@ -74,9 +74,9 @@ bun run preview    # serve the production build
 
 First use: open the app in Chrome/Edge, press **Cube** (top right), pick
 your cube from the Bluetooth chooser, and make sure the physical cube is
-**solved** before starting a session. Note: the heavier trainer engines
-(XCross/XXCross/Pair/EOCross) build large in-memory tables on first use —
-a few seconds and a few hundred MB of RAM in their workers.
+**solved** before starting a session. Note: each trainer builds its solver
+tables on first use (in a worker, kept in IndexedDB afterwards) — the first
+case of a kind can take a few seconds.
 
 ## Credits & prior art
 
@@ -90,12 +90,14 @@ This app stands on the shoulders of the cubing open-source community:
   stream across all supported cube brands.
 - **[RubiksSolverDemo](https://github.com/or18/RubiksSolverDemo)** by or18
   (GPL-3.0) — the CFOP case-trainer concept (exact-depth scramble
-  generation) and the vendored WASM engines in `public/trainers/`
-  (xcross, xxcross, free pair, eocross).
+  generation). Earlier versions vendored its WASM engines; the trainers
+  now run on cubecore's own solver.
 - **[roux-trainers](https://github.com/onionhoney/roux-trainers)** by
-  onionhoney (GPL-3.0) — the Roux trainer concepts and the vendored
-  pure-TypeScript solver library in `src/vendor/roux/` (FB/FS/FBDR/SS/EOLR
-  solvers, min2phase, CMLL reference algorithms).
+  onionhoney (GPL-3.0) — the Roux trainer concepts. Earlier versions
+  vendored its solver library; the trainers now run on cubecore's own
+  solver.
+- **cubecore** — the cube library the app is built on (smart cubes, state
+  tracking, 3D / 2D views, the stage solver behind the trainers).
 - **[csTimer](https://cstimer.net/)** — long-time inspiration for timer UX
   and statistics conventions.
 
@@ -103,19 +105,10 @@ This app stands on the shoulders of the cubing open-source community:
 
 **GPL-3.0** — see [LICENSE](./LICENSE).
 
-The app bundles GPL-3.0 components (the or18 WASM engines and the
-roux-trainers solver library, see above), which makes the combined work
-GPL-3.0 as a whole. All other dependencies (MIT/ISC/Apache-2.0/MPL-2.0)
-are GPL-compatible. Vendored code keeps its upstream license files
-(`public/trainers/LICENSE`, `src/vendor/roux/LICENSE`) and in-file change
-notices.
-
-Commercial use is permitted by the GPL — but any distribution (including
-serving the app to browsers) must make the complete corresponding source
-available under the same license. A proprietary build would require
-replacing the two GPL surfaces first; both are isolated behind single
-service modules (`src/services/or18TrainerWorkers.ts`,
-`src/services/rouxTrainerService.ts`) for exactly that reason.
+The GPL-3.0 components earlier versions bundled (the or18 WASM engines
+and the roux-trainers solver library) are no longer part of the app. All
+other dependencies are MIT/ISC/Apache-2.0/MPL-2.0 (cubing.js is used under
+MPL-2.0).
 
 "Rubik's Cube" is a trademark of its respective owner; this project is not
 affiliated with or endorsed by it.
