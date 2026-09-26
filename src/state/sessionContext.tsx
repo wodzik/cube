@@ -8,7 +8,8 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { sessionReducer } from "./sessionReducer";
 import { actions } from "./sessionActions";
-import { useSmartCube } from "../hooks/useSmartCube";
+import { useSmartCube, useSmartCubeConnection } from "../hooks/useSmartCube";
+import { type SequenceTarget, type TrackedProgress, sequenceProgress, sequenceTarget } from "../logic/cubecoreSequence";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionConfig, SessionState, StartMethod, StopMethod } from "../types/session";
 import type { Orientation } from "../types/cube";
@@ -35,6 +36,12 @@ export interface SessionContextValue {
   startInspection: () => void;
   /** initialOrientation: see sessionActions.targetReady — carries a hardware-frame shift into this target, so a solver who doesn't regrip between back-to-back algorithms is still recognized correctly. */
   setTarget: (targetNotation: string, initialOrientation?: Orientation) => void;
+  /**
+   * Progress of the target just set after `moves` — for replaying buffered
+   * moves right after setTarget (the reducer's state isn't updated yet):
+   * stop once one completes it. Same start as the session uses.
+   */
+  targetProgress: (moves: readonly string[]) => TrackedProgress | null;
   /** Solve mode, "setup" phase only: declare scrambling done regardless of exact-match — see ActionType.MANUAL_SETUP_DONE. */
   confirmManualSetup: () => void;
   configure: (config: SessionConfig) => void;
@@ -62,6 +69,15 @@ export function SessionProvider({
   // consumer gets this for free). Only the CUBE matters here, not an
   // optional separately-connected BT timer.
   const { connected } = useSmartCube();
+  const cube = useSmartCubeConnection();
+  const cubeRef = useRef(cube);
+  cubeRef.current = cube;
+
+  // The target as the reducer will have it, kept here synchronously: set
+  // from the cube's state NOW (it lives in the app-wide SmartCubeSession, so
+  // it's right whatever happened on other pages), and moved back once if the
+  // first move fed to it is a replayed one made before it was set.
+  const targetRef = useRef<{ notation: string; target: SequenceTarget; setAt: number; fed: boolean } | null>(null);
   const wasConnectedRef = useRef(connected);
   useEffect(() => {
     if (wasConnectedRef.current && !connected) {
@@ -73,12 +89,31 @@ export function SessionProvider({
   const value = useMemo<SessionContextValue>(
     () => ({
       state,
-      submitCubeMove: (move, timestamp) => dispatch(actions.cubeMove(move, timestamp)),
+      submitCubeMove: (move, timestamp) => {
+        const t = targetRef.current;
+        if (t && !t.fed) {
+          t.fed = true;
+          const before = timestamp < t.setAt ? cubeRef.current?.stateBefore(timestamp) : null;
+          if (before) {
+            t.target = { ...t.target, start: before };
+            dispatch(actions.targetStart(before));
+          }
+        }
+        dispatch(actions.cubeMove(move, timestamp));
+      },
       signalStart: (source) => dispatch(actions.startSignal(source, performance.now())),
       signalStop: (source, timestamp) => dispatch(actions.stopSignal(source, timestamp ?? performance.now())),
       signalSolved: () => dispatch(actions.cubeSolved(performance.now())),
       startInspection: () => dispatch(actions.inspectionStart(performance.now())),
-      setTarget: (targetNotation, initialOrientation) => dispatch(actions.targetReady(targetNotation, initialOrientation)),
+      setTarget: (targetNotation, initialOrientation) => {
+        const start = cubeRef.current?.session?.state ?? null;
+        targetRef.current = { notation: targetNotation, target: sequenceTarget(start, initialOrientation), setAt: performance.now(), fed: false };
+        dispatch(actions.targetReady(targetNotation, initialOrientation, start ?? undefined));
+      },
+      targetProgress: (moves) => {
+        const t = targetRef.current;
+        return t ? sequenceProgress(t.notation, t.target, moves) : null;
+      },
       confirmManualSetup: () => dispatch(actions.manualSetupDone()),
       configure: (nextConfig) => dispatch(actions.configure(nextConfig)),
       reset: () => dispatch(actions.reset()),

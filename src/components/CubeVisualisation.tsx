@@ -22,7 +22,7 @@ import "@cubecore/element"; // registers <cube-player>
 import type { CubePlayer } from "@cubecore/element";
 import type { Skin } from "@cubecore/render";
 import { useCubeLook } from "../hooks/useCubeLook";
-import { isSolved } from "@cubecore/core";
+import { type State, isSolved } from "@cubecore/core";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 
@@ -86,6 +86,8 @@ export interface CubeVisualisationRef {
   isSolved: () => Promise<boolean>;
   /** Scrub the timeline to the moment right before the given move index plays (e.g. jump to a stage boundary). */
   setMoveIndex: (moveIndex: number) => void;
+  /** Show this cube state (e.g. the smart cube's, as it is now), with no algorithm. */
+  setState: (state: State) => void;
 }
 
 /** cubing.js visualization names → <cube-player> views. */
@@ -187,6 +189,12 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
         const p = playerRef.current;
         if (!p) return;
         p.setup = "";
+        p.alg = "";
+      },
+      setState: (state: State) => {
+        const p = playerRef.current;
+        if (!p) return;
+        p.setup = state;
         p.alg = "";
       },
       setAlgorithm: (newAlg: string) => {

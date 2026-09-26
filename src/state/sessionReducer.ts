@@ -4,10 +4,11 @@
  * PRINCIPLES:
  * 1. Pure function — zero side-effects, no external reads.
  * 2. All decision data is in state + action.
- * 3. Move-sequence tracking delegated to logic/sequenceTracker.ts — this
- *    reducer never re-implements match/error/repair logic itself, whether
- *    the phase is "solve scrambling" or "algorithm execution". Same engine,
- *    different target notation (see §6.2 of plan.md).
+ * 3. Move-sequence tracking delegated to cubecore's SequenceTracker (via
+ *    logic/cubecoreSequence.ts) — this reducer never re-implements
+ *    match/error/repair logic itself, whether the phase is "solve
+ *    scrambling" or "algorithm execution". Same engine, different target
+ *    notation, followed from the cube's state when the target was set.
  *
  * Replaces THREE previously-separate hand-rolled phase machines
  * (SolvePage's sessionReducer, TrainingPage's local DrillPhase state,
@@ -17,7 +18,7 @@
 import type { MoveRecord, Phase, SessionState } from "../types/session";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import { ActionType, type SessionAction } from "./sessionActions";
-import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
+import { sequenceProgress, sequenceTarget } from "../logic/cubecoreSequence";
 
 export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
@@ -29,7 +30,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
     // algorithm (algorithm/attack mode). Same action either way: from the
     // reducer's point of view a scramble IS just a target sequence.
     case ActionType.TARGET_READY: {
-      const target = buildSequenceTarget(action.targetNotation, action.initialOrientation);
+      const target = sequenceTarget(action.start, action.initialOrientation);
       return {
         ...state,
         phase: "setup",
@@ -43,6 +44,11 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         endedBy: null,
         error: null,
       };
+    }
+
+    case ActionType.TARGET_START: {
+      if (!state.target || state.moveLog.length > 0) return state;
+      return { ...state, target: { ...state.target, start: action.start } };
     }
 
     case ActionType.CUBE_MOVE: {
@@ -92,7 +98,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         ...state,
         phase: "ready",
         targetNotation: performedNotation,
-        target: buildSequenceTarget(performedNotation),
+        target: state.target && { ...state.target, frame: sequenceTarget().frame },
       };
     }
 
@@ -122,12 +128,9 @@ function handleCubeMove(state: SessionState, move: string, timestamp: number): S
   switch (state.phase) {
     case "setup":
       // Solve, empty/manual target (e.g. hand-scrambling with no notation to
-      // follow, or a non-"scratch" starting stage): computeSequenceProgress
-      // treats an empty target as trivially "completed", which would
-      // auto-advance to "ready" after just the first move. Bypass matching
-      // entirely here — just log moves and wait for the explicit
-      // MANUAL_SETUP_DONE action instead.
-      if (state.config.mode === "solve" && state.target && state.target.physicalMoves.length === 0) {
+      // follow, or a non-"scratch" starting stage): nothing to match —
+      // just log moves and wait for the explicit MANUAL_SETUP_DONE action.
+      if (state.config.mode === "solve" && !state.targetNotation.trim()) {
         return { ...state, moveLog: [...state.moveLog, record] };
       }
       // Solve: scrambling, tracked against the scramble target, advances to "ready" once matched.
@@ -162,14 +165,14 @@ function handleCubeMove(state: SessionState, move: string, timestamp: number): S
 /**
  * A move during a tracked phase (solve's setup=scrambling, or
  * algorithm/attack's active=executing) — delegates matching entirely to
- * sequenceTracker, advances phase once the target sequence is completed.
+ * cubecore's tracker, advances phase once the target sequence is completed.
  */
 function handleTrackedMove(state: SessionState, record: MoveRecord, phaseOnComplete: Phase): SessionState {
   const moveLog = [...state.moveLog, record];
   if (!state.target) return { ...state, moveLog };
 
-  const progress = computeSequenceProgress(state.target, moveLog.map((m) => m.move));
-  if (!progress.isCompleted) return { ...state, moveLog };
+  const progress = sequenceProgress(state.targetNotation, state.target, moveLog.map((m) => m.move));
+  if (!progress?.complete) return { ...state, moveLog };
 
   return {
     ...state,
@@ -190,8 +193,8 @@ function handleFirstTrackedMove(state: SessionState, record: MoveRecord): Sessio
   };
   if (!started.target) return started;
 
-  const progress = computeSequenceProgress(started.target, [startedRecord.move]);
-  return progress.isCompleted
+  const progress = sequenceProgress(started.targetNotation, started.target, [startedRecord.move]);
+  return progress?.complete
     ? { ...started, phase: "done", endTime: record.timestamp }
     : started;
 }

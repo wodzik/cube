@@ -15,7 +15,7 @@
  *
  * ADAPTER PATTERN — no business logic here. What a caller does with a move
  * (dispatch to a reducer, feed a tracker, etc.) is not this module's
- * concern — see sessionReducer / sequenceTracker.
+ * concern — see sessionReducer.
  *
  * Every move from real hardware is a single physical face quarter-turn.
  * The connection is a cubecore SmartCubeSession (over smartcube-web-bluetooth):
@@ -34,8 +34,8 @@ import {
   type ReactNode,
 } from "react";
 import { getCachedMacForDevice } from "smartcube-web-bluetooth";
-import { SmartCubeSession } from "@cubecore/bluetooth";
-import { formatMove } from "@cubecore/core";
+import { SimulatedCube, SmartCubeSession } from "@cubecore/bluetooth";
+import { type State, formatMove } from "@cubecore/core";
 import { SKINS } from "@cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
@@ -52,7 +52,16 @@ interface SmartCubeContextValue extends DeviceConnection {
   suggestedSkin: string | null;
   /** Register a move listener; returns an unsubscribe function. */
   addMoveListener: (fn: MoveListener) => () => void;
+  /**
+   * The cube's state just before the move reported at `timestampMs` (one of
+   * the recent ones), or null — lets a page that replays buffered moves find
+   * where they started from.
+   */
+  stateBefore: (timestampMs: number) => State | null;
 }
+
+/** Recent moves remembered for stateBefore. */
+const HISTORY = 200;
 
 const SmartCubeContext = createContext<SmartCubeContextValue | null>(null);
 
@@ -66,6 +75,10 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<SmartCubeSession | null>(null);
   const [suggestedSkin, setSuggestedSkin] = useState<string | null>(null);
   const listenersRef = useRef(new Set<MoveListener>());
+  const historyRef = useRef<{ time: number; before: State }[]>([]);
+  const simulatedRef = useRef<SimulatedCube | null>(null);
+
+  const stateBefore = useCallback((timestampMs: number) => historyRef.current.find((h) => h.time === timestampMs)?.before ?? null, []);
 
   const addMoveListener = useCallback((fn: MoveListener) => {
     listenersRef.current.add(fn);
@@ -79,9 +92,54 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     subscriptionRef.current = null;
     await connectionRef.current?.disconnect().catch(() => undefined);
     connectionRef.current = null;
+    simulatedRef.current = null;
     setSession(null);
     setSuggestedSkin(null);
     setState(INITIAL_DEVICE_CONNECTION);
+  }, []);
+
+  /** Wire a connected session into the app (a real cube, or the dev simulator). */
+  const use = useCallback((conn: SmartCubeSession) => {
+    connectionRef.current = conn;
+    setSession(conn);
+
+    setState({
+      connected: true,
+      deviceName: conn.info.name,
+      protocolId: conn.info.protocol.id,
+      battery: conn.battery,
+    });
+    // The skin for this cube, by its brand / name (refined when the hardware name arrives).
+    const nameOfSkin = () => (Object.keys(SKINS) as (keyof typeof SKINS)[]).find((k) => SKINS[k] === conn.suggestedSkin) ?? null;
+    setSuggestedSkin(nameOfSkin());
+
+    historyRef.current = [];
+    let before = conn.state;
+    const offs = [
+      conn.on("move", (e) => {
+        historyRef.current.push({ time: e.time, before });
+        if (historyRef.current.length > HISTORY) historyRef.current.shift();
+        before = e.state;
+        const move = formatMove(e.move);
+        for (const listener of listenersRef.current) listener(move, e.time);
+      }),
+      // "Mark solved" / a resync from the cube: the next move starts from here.
+      conn.on("state", (e) => {
+        if (e.reason !== "move") before = e.state;
+      }),
+      conn.on("battery", (level) => setState((s) => ({ ...s, battery: level }))),
+      conn.on("hardware", () => setSuggestedSkin(nameOfSkin())),
+      conn.on("disconnect", () => {
+        subscriptionRef.current?.unsubscribe();
+        subscriptionRef.current = null;
+        connectionRef.current = null;
+        simulatedRef.current = null;
+        setSession(null);
+        setSuggestedSkin(null);
+        setState(INITIAL_DEVICE_CONNECTION);
+      }),
+    ];
+    subscriptionRef.current = { unsubscribe: () => offs.forEach((off) => off()) };
   }, []);
 
   const connect = useCallback(async () => {
@@ -107,40 +165,11 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
           );
         },
       });
-      connectionRef.current = conn;
-      setSession(conn);
-
-      setState({
-        connected: true,
-        deviceName: conn.info.name,
-        protocolId: conn.info.protocol.id,
-        battery: conn.battery,
-      });
-      // The skin for this cube, by its brand / name (refined when the hardware name arrives).
-      const nameOfSkin = () => (Object.keys(SKINS) as (keyof typeof SKINS)[]).find((k) => SKINS[k] === conn.suggestedSkin) ?? null;
-      setSuggestedSkin(nameOfSkin());
-
-      const offs = [
-        conn.on("move", (e) => {
-          const move = formatMove(e.move);
-          for (const listener of listenersRef.current) listener(move, e.time);
-        }),
-        conn.on("battery", (level) => setState((s) => ({ ...s, battery: level }))),
-        conn.on("hardware", () => setSuggestedSkin(nameOfSkin())),
-        conn.on("disconnect", () => {
-          subscriptionRef.current?.unsubscribe();
-          subscriptionRef.current = null;
-          connectionRef.current = null;
-          setSession(null);
-          setSuggestedSkin(null);
-          setState(INITIAL_DEVICE_CONNECTION);
-        }),
-      ];
-      subscriptionRef.current = { unsubscribe: () => offs.forEach((off) => off()) };
+      use(conn);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect to cube");
     }
-  }, []);
+  }, [use]);
 
   // Disconnect only when the PROVIDER unmounts — i.e. the app closing, not a
   // tab switch (the provider lives above tab switching in App.tsx).
@@ -159,13 +188,22 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     if (!import.meta.env.DEV) return;
     const w = window as unknown as { __nactSimulateMove?: (move: string) => number };
     w.__nactSimulateMove = (move: string) => {
-      for (const listener of listenersRef.current) listener(move, performance.now());
+      // With a simulated cube connected, turn it (the session tracks the state like a real one).
+      if (simulatedRef.current) simulatedRef.current.turn(move);
+      else for (const listener of listenersRef.current) listener(move, performance.now());
       return listenersRef.current.size;
+    };
+    // A simulated smart cube: a real SmartCubeSession (state, events) without Bluetooth.
+    const ws = window as unknown as { __nactSimulateConnect?: () => void };
+    ws.__nactSimulateConnect = () => {
+      simulatedRef.current = new SimulatedCube();
+      use(new SmartCubeSession(simulatedRef.current));
     };
     return () => {
       delete w.__nactSimulateMove;
+      delete ws.__nactSimulateConnect;
     };
-  }, []);
+  }, [use]);
 
   // Dev-only escape hatch: flip `connected` without a real BT device — lets
   // console/test driving of disconnect-triggered behavior (e.g.
@@ -182,8 +220,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<SmartCubeContextValue>(
-    () => ({ ...state, error, connect, disconnect, addMoveListener, session, suggestedSkin }),
-    [state, error, connect, disconnect, addMoveListener, session, suggestedSkin]
+    () => ({ ...state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin }),
+    [state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin]
   );
 
   return <SmartCubeContext.Provider value={value}>{children}</SmartCubeContext.Provider>;
@@ -212,7 +250,7 @@ export function useSmartCube(options: UseSmartCubeOptions = {}): UseSmartCubeRet
   const ctx = useContext(SmartCubeContext);
   if (!ctx) throw new Error("useSmartCube must be used within a SmartCubeProvider (mount it in App.tsx)");
 
-  const { addMoveListener, ...connection } = ctx;
+  const { addMoveListener, stateBefore: _stateBefore, ...connection } = ctx;
 
   const onMoveRef = useRef(options.onMove);
   onMoveRef.current = options.onMove;

@@ -3,7 +3,7 @@
  * One reducer drives all three modes — Solve, Algorithm training, Attack.
  */
 
-import type { SequenceTarget } from "../logic/sequenceTracker";
+import type { SequenceTarget } from "../logic/cubecoreSequence";
 
 // ─── Mode ───
 
@@ -94,8 +94,8 @@ export interface MoveRecord {
  * Deliberately does NOT store per-move tracking internals (accumulated
  * power, pending composite parts, wrong-move stack, orientation) — those are
  * all derived on demand from `target` + `moveLog` via
- * logic/sequenceTracker.ts's computeSequenceProgress, which is a pure,
- * stateless, cheap-to-recompute function (see sessionSelectors.ts).
+ * logic/cubecoreSequence.ts's sequenceProgress (cubecore's SequenceTracker,
+ * recomputed — cheap; see sessionSelectors.ts).
  */
 export interface SessionState {
   phase: Phase;
@@ -103,7 +103,7 @@ export interface SessionState {
 
   /** Scramble or algorithm notation currently being tracked/displayed. "" if none set. */
   targetNotation: string;
-  /** Precomputed physical-move form of targetNotation. null until a target is set. */
+  /** Where targetNotation is followed from: the cube's state (and grip) when it was set. null until a target is set. */
   target: SequenceTarget | null;
 
   /** Full log of every move performed since the current phase group (setup or active) began. */

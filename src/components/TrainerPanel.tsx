@@ -22,7 +22,8 @@ import type { StickeringMaskOrbits } from "../types/cube";
 import { TimerDisplay } from "./TimerDisplay";
 import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
-import type { SequenceProgress } from "../logic/sequenceTracker";
+import type { TrackedProgress } from "../logic/cubecoreSequence";
+import type { SequenceTracking } from "./MoveSequenceDisplay";
 
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
 const formatMoveCount = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(2));
@@ -58,7 +59,11 @@ export interface TrainerPanelProps {
   // ── Sequence bar ──
   sequenceContent?: ReactNode;
   moves: string[];
-  progress: SequenceProgress | null;
+  progress: TrackedProgress | null;
+  /** What the bar follows — see MoveSequenceDisplay / selectTracking. */
+  tracking?: SequenceTracking | null;
+  /** "scramble" (default) or "alg" — which cubecore element shows the sequence. */
+  sequenceKind?: "scramble" | "alg";
   onRefresh?: () => void;
   showRefresh?: boolean;
   maxErrors?: number;
@@ -160,6 +165,8 @@ export function TrainerPanel({
   sequenceContent,
   moves,
   progress,
+  tracking,
+  sequenceKind,
   onRefresh,
   showRefresh,
   maxErrors,
@@ -229,6 +236,8 @@ export function TrainerPanel({
             <MoveSequenceDisplay
               moves={moves}
               progress={progress}
+              tracking={tracking}
+              kind={sequenceKind}
               decorations={sequenceDecorations}
               onRefresh={onRefresh}
               showRefresh={showRefresh}

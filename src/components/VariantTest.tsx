@@ -19,8 +19,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress } from "../state/sessionSelectors";
-import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
+import { selectCurrentProgress, selectTracking } from "../state/sessionSelectors";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 import { resolveStickeringProps } from "../services/algGroupRegistry";
 import { formatTimeMs } from "../logic/statistics";
@@ -59,7 +58,7 @@ export function VariantTest(props: VariantTestProps) {
 }
 
 function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }: VariantTestProps) {
-  const { state, submitCubeMove, setTarget, reset } = useSession();
+  const { state, submitCubeMove, setTarget, targetProgress, reset } = useSession();
   const cubeRef = useRef<CubeVisualisationRef>(null);
   const [attemptsMs, setAttemptsMs] = useState<number[]>([]);
   const moveBuffer = usePendingMoveBuffer(state.phase);
@@ -74,13 +73,12 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
     // the variant be executed several times back-to-back without waiting
     // for the reset delay. Stop at completion; any tail waits for the next
     // reload.
-    const flushTarget = buildSequenceTarget(alg);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
       cubeRef.current?.addMove(move);
       delivered.push(move);
-      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+      return !targetProgress(delivered)?.complete;
     });
   };
 
@@ -160,7 +158,7 @@ function VariantTestInner({ caseName, variantName, alg, displayConfig, onClose }
         </div>
 
         <div className="p-5 border-b border-white/[0.06]">
-          <MoveSequenceDisplay moves={tokens} progress={progress} completeText="Variant complete!" />
+          <MoveSequenceDisplay moves={tokens} progress={progress} tracking={selectTracking(state)} kind="alg" completeText="Variant complete!" />
         </div>
 
         <div className="flex flex-col sm:flex-row flex-1 overflow-y-auto">

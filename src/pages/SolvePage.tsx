@@ -4,7 +4,7 @@
  * Thin controller over the shared session reducer + TrainerPanel: wires
  * hardware/spacebar/solved-detection hooks to the session, and maps session
  * state to TrainerPanel props. No business logic lives here — matching,
- * timing, and error tracking all come from sessionReducer/sequenceTracker.
+ * timing, and error tracking all come from sessionReducer (cubecore's SequenceTracker).
  *
  * The 3D cube is a live mirror of physical moves: every move from hardware
  * is applied to it via addMove(), unconditionally, regardless of phase. This
@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Info, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS } from "../state/sessionSelectors";
+import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
 import { parseMove } from "../logic/moveParser";
 import { sessionMethodsForInput } from "../logic/inputMethod";
@@ -23,7 +23,8 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { useSpacebar } from "../hooks/useSpacebar";
 import { useTimerDevice } from "../hooks/useTimerDevice";
 import { useSolvedDetection } from "../hooks/useSolvedDetection";
-import { useScrambleGenerator } from "../hooks/useScrambleGenerator";
+import { useSolveScramble } from "../hooks/useSolveScramble";
+import { solvedState } from "@cubecore/core";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMethodProgress } from "../hooks/useMethodProgress";
 import { useMaskMoves } from "../hooks/useMaskMoves";
@@ -276,7 +277,7 @@ function SolvePageInner({
   const { state, submitCubeMove, startInspection, setTarget, confirmManualSetup } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const viewPrefs = useCaseViewPrefs(false, "solve");
-  const { generate, isGenerating, error: scrambleError } = useScrambleGenerator();
+  const { generate, use: armScramble, rearm, settle, manual, official, isGenerating, error: scrambleError } = useSolveScramble();
 
   // Custom scramble entry — paste/type your own instead of a random one.
   const [isPasteOpen, setIsPasteOpen] = useState(false);
@@ -413,9 +414,9 @@ function SolvePageInner({
     if (session.startingStage === "scratch") {
       void generate();
     } else {
-      setTarget("");
+      manual();
     }
-  }, [session.startingStage, generate, setTarget]);
+  }, [session.startingStage, generate, manual]);
 
   /**
    * Abandon whatever's been done on the CURRENT attempt (scrambling or
@@ -427,15 +428,15 @@ function SolvePageInner({
    * same reasoning as the case-loading effect in TrainingPage.
    */
   const resetAttempt = useCallback(() => {
-    view.reset();
-    setTarget(state.targetNotation);
+    // The same scramble again — from wherever the cube is now (see useSolveScramble).
+    void rearm();
     // The dismiss effect below only clears these on the FIRST move of a
     // fresh "setup" (moveLog.length > 0) — re-arming here lands on an EMPTY
     // moveLog, so it wouldn't fire; clear explicitly instead of leaving a
     // stale summary/analysis modal next to the just-reset scramble.
     setSummaryRecord(null);
     setAnalysisRecord(null);
-  }, [view, setTarget, state.targetNotation]);
+  }, [rearm]);
 
   // Every physical move mirrors 1:1 into the 3D view, unconditionally —
   // it's a live shadow of the real cube, not phase-aware.
@@ -482,11 +483,23 @@ function SolvePageInner({
     wasCubeConnectedRef.current = cube.connected;
   }, [cube.connected, state.phase, startNextAttempt]);
 
-  // Reset the 3D view whenever a new scramble is set.
-  const targetNotation = state.targetNotation;
+  // A cube connected while a scramble waits untouched: it was set up for a
+  // solved cube — take the same scramble from wherever this cube really is.
+  const lastSessionRef = useRef(cube.session);
   useEffect(() => {
-    view.reset();
-  }, [targetNotation, view]);
+    const connectedNow = cube.session && cube.session !== lastSessionRef.current;
+    lastSessionRef.current = cube.session;
+    if (connectedNow && state.phase === "setup" && state.moveLog.length === 0 && state.targetNotation) void rearm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cube.session]);
+
+  // Whenever a new scramble is set, the 3D view starts from where the cube
+  // is (the target's start: the smart cube's state then) and mirrors every
+  // move from there.
+  const targetStart = state.target?.start;
+  useEffect(() => {
+    view.setState(targetStart ?? solvedState());
+  }, [targetStart, view]);
 
   useEffect(() => {
     if (isPasteOpen) {
@@ -516,11 +529,19 @@ function SolvePageInner({
       return;
     }
     isCustomScrambleRef.current = true;
-    setTarget(tokens.join(" "));
+    void armScramble(tokens.join(" "));
     setIsPasteOpen(false);
     setPasteInput("");
     setPasteError(null);
   }
+
+  // Scrambling done: the official scramble for the state the cube is in
+  // (unchanged when the shown one was followed; found by the solver when
+  // it was scrambled by hand).
+  useEffect(() => {
+    if (state.phase === "ready") void settle(state.targetNotation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase]);
 
   // Auto-enter inspection the moment the scramble is completed, if configured.
   useEffect(() => {
@@ -580,8 +601,9 @@ function SolvePageInner({
   // on every move.
   const trackMethod = state.phase === "active" || state.phase === "done";
   const activeDetector = detectorForMethod(session.solveMethod);
+  const scramble = official || state.targetNotation;
   const { boundaries: liveBoundaries, startState } = useMethodProgress(
-    state.targetNotation,
+    scramble,
     trackMethod ? state.moveLog : [],
     activeDetector
   );
@@ -644,8 +666,8 @@ function SolvePageInner({
       timeToFirstMoveMs: state.moveLog[0] ? state.moveLog[0].timestamp - state.startTime : null,
       endedAt: state.endTime,
       timeMs: solveTimeMs,
-      scramble: state.targetNotation,
-      scrambleMoves: targetTokens,
+      scramble,
+      scrambleMoves: scramble.trim().split(/\s+/).filter(Boolean),
       moves: state.moveLog,
       reducedMoves: collapseIdenticalMoves(state.moveLog.map((m) => m.move)),
       moveCount,
@@ -673,7 +695,7 @@ function SolvePageInner({
     // until the user actually starts performing that scramble (see the
     // dismissing effect below).
     startNextAttempt();
-  }, [state.phase, solveTimeMs, state.startTime, state.endTime, state.moveLog, state.targetNotation, state.startedBy, state.endedBy, state.config.startMethod, state.config.stopMethod, moveCount, tps, startState, session.id, session.solveMethod, customScramblesSessionId, targetTokens, onSolved, startNextAttempt]);
+  }, [state.phase, solveTimeMs, state.startTime, state.endTime, state.moveLog, scramble, state.startedBy, state.endedBy, state.config.startMethod, state.config.stopMethod, moveCount, tps, startState, session.id, session.solveMethod, customScramblesSessionId, onSolved, startNextAttempt]);
 
   // Dismiss the inline summary (and any open analysis modal, and the held
   // timer display above) the moment the user moves on to the next attempt —
@@ -756,6 +778,7 @@ function SolvePageInner({
       }
       moves={targetTokens}
       progress={progress}
+      tracking={selectTracking(state)}
       showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}
@@ -850,8 +873,12 @@ function SolvePageInner({
             onDiscard={startNextAttempt}
             onSaveAsDNF={startNextAttempt}
             onResetCube={() => {
-              view.reset();
-              state.moveLog.forEach((m) => view.addMove(m.move));
+              // Back to the real cube as it is now (or: the start + the moves so far).
+              if (cube.session) view.setState(cube.session.state);
+              else {
+                view.setState(state.target?.start ?? solvedState());
+                state.moveLog.forEach((m) => view.addMove(m.move));
+              }
             }}
             // No manual stop trigger (spacebar/timer) enabled -> Cancel can
             // only mean "give up", so skip the Discard/Save-as-DNF menu and
@@ -1086,7 +1113,7 @@ function SolvePageInner({
         onUseScramble={(scramble) => {
           setAnalysisRecord(null);
           isCustomScrambleRef.current = true;
-          setTarget(scramble);
+          void armScramble(scramble);
         }}
         moveTargets={sessions.filter((x) => x.id !== analysisRecord.sessionId).map((x) => ({ id: x.id, name: x.name }))}
         onMoveToSession={(sessionId) => handleMoveSolve(analysisRecord, sessionId)}

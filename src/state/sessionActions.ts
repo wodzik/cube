@@ -1,9 +1,11 @@
 import type { SessionConfig, StartMethod, StopMethod } from "../types/session";
 import type { Orientation } from "../types/cube";
+import type { State } from "@cubecore/core";
 
 export enum ActionType {
   CONFIGURE = "CONFIGURE",
   TARGET_READY = "TARGET_READY",
+  TARGET_START = "TARGET_START",
   CUBE_MOVE = "CUBE_MOVE",
   START_SIGNAL = "START_SIGNAL",
   STOP_SIGNAL = "STOP_SIGNAL",
@@ -20,7 +22,10 @@ export type SessionAction =
   // target boundary (e.g. from one algorithm's own net M/wide/rotation
   // content into the NEXT one) — see moveParser's finalOrientationAfterAlg.
   // Undefined defaults to identity, matching all prior behavior.
-  | { type: ActionType.TARGET_READY; targetNotation: string; initialOrientation?: Orientation }
+  // start: the cube's state the target is followed from (default solved).
+  | { type: ActionType.TARGET_READY; targetNotation: string; initialOrientation?: Orientation; start?: State }
+  // The target's start moved back to before moves that are about to be replayed (see SessionProvider).
+  | { type: ActionType.TARGET_START; start: State }
   | { type: ActionType.CUBE_MOVE; move: string; timestamp: number }
   | { type: ActionType.START_SIGNAL; source: StartMethod; timestamp: number }
   | { type: ActionType.STOP_SIGNAL; source: StopMethod; timestamp: number }
@@ -32,11 +37,13 @@ export type SessionAction =
 
 export const actions = {
   configure: (config: SessionConfig): SessionAction => ({ type: ActionType.CONFIGURE, config }),
-  targetReady: (targetNotation: string, initialOrientation?: Orientation): SessionAction => ({
+  targetReady: (targetNotation: string, initialOrientation?: Orientation, start?: State): SessionAction => ({
     type: ActionType.TARGET_READY,
     targetNotation,
     initialOrientation,
+    start,
   }),
+  targetStart: (start: State): SessionAction => ({ type: ActionType.TARGET_START, start }),
   cubeMove: (move: string, timestamp: number): SessionAction => ({ type: ActionType.CUBE_MOVE, move, timestamp }),
   startSignal: (source: StartMethod, timestamp: number): SessionAction => ({ type: ActionType.START_SIGNAL, source, timestamp }),
   stopSignal: (source: StopMethod, timestamp: number): SessionAction => ({ type: ActionType.STOP_SIGNAL, source, timestamp }),

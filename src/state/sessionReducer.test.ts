@@ -3,6 +3,8 @@ import { sessionReducer } from "./sessionReducer";
 import { actions } from "./sessionActions";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionConfig, SessionState } from "../types/session";
+import { applyMoves, solvedState } from "@cubecore/core";
+import { finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 
 function configured(config: Partial<SessionConfig>): SessionState {
   const fullConfig: SessionConfig = {
@@ -141,7 +143,7 @@ describe("sessionReducer — solve mode, manual (hand) scrambling", () => {
 
   it("empty target notation (manual starting stage) never auto-completes via ordinary move matching, however many moves come in", () => {
     // computeSequenceProgress treats an empty target as trivially
-    // "completed" (see logic/sequenceTracker.ts's EMPTY_PROGRESS) — without
+    // "completed" (an empty target has nothing to match) — without
     // the reducer's own bypass, handleTrackedMove would jump straight to
     // "ready" after the FIRST move instead of waiting for the explicit
     // MANUAL_SETUP_DONE action. This is the bug non-"scratch" starting
@@ -301,3 +303,40 @@ describe("sessionReducer — reset", () => {
     expect(state.target).toBeNull();
   });
 });
+
+describe("sessionReducer — following targets from the cube's real state", () => {
+  it("a scramble set on an unsolved cube is tracked from that state", () => {
+    const start = applyMoves(solvedState(), "L2 B D'");
+    let state = configured({ mode: "solve" });
+    state = sessionReducer(state, actions.targetReady("R U'", undefined, start));
+    state = sessionReducer(state, actions.cubeMove("R", 1));
+    state = sessionReducer(state, actions.cubeMove("U'", 2));
+    expect(state.phase).toBe("ready");
+  });
+
+  it("TARGET_START moves the start back before replayed moves — only before any move is logged", () => {
+    const before = solvedState();
+    let state = configured({ mode: "algorithm" });
+    // Target set after the first move (R) was already made on the cube…
+    state = sessionReducer(state, actions.targetReady("R U", undefined, applyMoves(before, "R")));
+    state = sessionReducer(state, actions.targetStart(before));
+    expect(state.target?.start).toEqual(before);
+    // …then R is replayed and U completes it.
+    state = sessionReducer(state, actions.cubeMove("R", 1));
+    state = sessionReducer(state, actions.targetStart(applyMoves(before, "F")));
+    expect(state.target?.start).toEqual(before); // ignored once moves are logged
+    state = sessionReducer(state, actions.cubeMove("U", 2));
+    expect(state.phase).toBe("done");
+  });
+
+  it("an algorithm right after one with a net rotation is read in the new grip", () => {
+    // After M' (net x) the holder's U is the cube's F.
+    const grip = finalOrientationAfterAlg("M'", identityOrientation());
+    let state = configured({ mode: "algorithm" });
+    state = sessionReducer(state, actions.targetReady("U R", grip));
+    state = sessionReducer(state, actions.cubeMove("F", 1));
+    state = sessionReducer(state, actions.cubeMove("R", 2));
+    expect(state.phase).toBe("done");
+  });
+});
+

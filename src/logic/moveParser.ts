@@ -551,46 +551,6 @@ export function physicalMovesToString(moves: PhysicalMove[]): string {
     .join(" ");
 }
 
-/**
- * Reduce physical moves by combining consecutive same-face moves.
- *
- * DELIBERATELY adjacent-only: merging across intervening opposite-face
- * moves would be sound for the raw cube state, but this reduction feeds
- * sequenceTracker's block matcher, which consumes the list left-to-right
- * against target blocks — a cross-merge can pull a new (wrong) move into
- * an already-MATCHED part of the history and retroactively un-complete
- * earlier blocks. Axis-commuting collapse is applied only to the wrong-move
- * tail, where the match boundary protects the prefix — see
- * sequenceTracker's reduceWrongTailAcrossOpposites.
- *
- * @param moves - Array of physical moves
- * @returns Reduced array
- */
-export function reducePhysicalMoves(moves: PhysicalMove[]): PhysicalMove[] {
-  const result: PhysicalMove[] = [];
-
-  for (const move of moves) {
-    if (result.length === 0) {
-      result.push({ ...move });
-      continue;
-    }
-
-    const last = result[result.length - 1];
-    if (last.face === move.face) {
-      const newPower = (last.power + move.power) % 4;
-      if (newPower === 0) {
-        result.pop();
-      } else {
-        last.power = newPower;
-      }
-    } else {
-      result.push({ ...move });
-    }
-  }
-
-  return result;
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // STAGE-AWARE SPLIT COMPUTATION
 // ═══════════════════════════════════════════════════════════════════════════
@@ -630,7 +590,7 @@ export interface StageSplit {
  * is kept separate.
  *
  * Uses collapseIdenticalMoves (moveReduction.ts) for the reduced move count —
- * NOT simplifyMoveStack/reduceMoves, which cancel R,R' pairs to nothing. In a
+ * NOT an algebraic simplification, which cancels R,R' pairs to nothing. In a
  * solve, R then R' are two distinct real turns and must both be counted.
  *
  * Algorithm:

@@ -1,33 +1,47 @@
 /**
- * MoveSequenceDisplay — shows a target move sequence (scramble OR algorithm)
- * with progress coloring, driven entirely by a SequenceProgress snapshot
- * from logic/sequenceTracker.ts. Same component, same API, for scrambling,
- * algorithm training, and attack mode — no per-mode branching.
+ * MoveSequenceDisplay — the scramble / algorithm bar: cubecore's
+ * <cube-scramble> (scrambles) or <cube-alg-practice> (algorithms) inside
+ * act's card (loading overlay, eye / refresh / extra controls, complete
+ * text, too-far-off reset).
  *
- * Coloring:
- *   green  = completedIndices (correctly executed)
- *   blue   = nextIndex (next expected move, only when no active error)
- *   yellow = startedIndices (correct face, partial power)
- *   gray   = pending (not yet reached)
- *   red    = error indicator with undo sequence, shown separately above
+ * The element runs cubecore's SequenceTracker — the same engine the session
+ * reducer uses (logic/cubecoreSequence.ts) — fed from the session: the
+ * target, the cube's state when it was set, and the moves so far
+ * (`tracking`, see selectTracking). While nothing is tracked it keeps
+ * showing where it got to.
  *
- * The eye icon toggles maskMoves: each move's LETTERS become a "•" dot
- * (same per-token coloring/progress still visible) — for memo-style
- * practice on any page where you want to hide which scramble/algorithm it
- * is without losing the error-repair hint, which always shows real letters
- * regardless (you still need to read it to actually fix a mistake). This is
- * a controlled toggle — the parent owns maskMoves/onToggleMask (via
- * hooks/useMaskMoves, shared/persisted across pages), not local state here.
+ * Colouring (act's palette via --cc-seq-* variables): done = green,
+ * current = accent, half-done half turn = amber, to do = grey; after a slip
+ * the undo line in orange.
+ *
+ * The eye icon toggles maskMoves: every move becomes a dot (progress colours
+ * stay) — for practising from memory; after a slip an algorithm shows the
+ * move that was due. A controlled toggle — the parent owns maskMoves /
+ * onToggleMask (hooks/useMaskMoves, shared and persisted across pages).
  */
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { RefreshCw, Eye, EyeOff } from "lucide-react";
-import { describeUndo, type SequenceProgress } from "../logic/sequenceTracker";
+import "@cubecore/element";
+import type { CubeAlgPractice, CubeScramble } from "@cubecore/element";
+import { parseAlg, solvedState } from "@cubecore/core";
+import type { SequenceTarget, TrackedProgress } from "../logic/cubecoreSequence";
+import type { MoveRecord } from "../types/session";
+
+export interface SequenceTracking {
+  notation: string;
+  target: SequenceTarget;
+  moves: readonly MoveRecord[];
+}
 
 interface MoveSequenceDisplayProps {
   moves: string[];
-  /** null = nothing being tracked yet (e.g. no target set). */
-  progress: SequenceProgress | null;
+  /** The session's verdict (null = nothing being tracked, e.g. no target set). */
+  progress: TrackedProgress | null;
+  /** What the bar follows (null = keep showing where it got to). */
+  tracking?: SequenceTracking | null;
+  /** "scramble" (default): <cube-scramble>; "alg": <cube-alg-practice>. */
+  kind?: "scramble" | "alg";
 
   onRefresh?: () => void;
   showRefresh?: boolean;
@@ -69,6 +83,8 @@ interface MoveSequenceDisplayProps {
 export function MoveSequenceDisplay({
   moves,
   progress,
+  tracking = null,
+  kind = "scramble",
   onRefresh,
   showRefresh = false,
   showMaskToggle = false,
@@ -87,25 +103,12 @@ export function MoveSequenceDisplay({
   decorations,
   extraControls,
 }: MoveSequenceDisplayProps) {
-  const hasErrors = (progress?.correctionSequence.length ?? 0) > 0;
-  const isComplete = progress?.isCompleted ?? false;
-  const tooManyErrors = maxErrors > 0 && (progress?.correctionSequence.length ?? 0) >= maxErrors;
+  const isComplete = progress?.complete ?? false;
+  const tooManyErrors = !!progress && (progress.needsReset || (maxErrors > 0 && progress.undo.length >= maxErrors));
   const showLoadingOverlay = loadingText !== undefined && (loading || moves.length === 0);
   // Distinct from showLoadingOverlay: only true when there ARE stale moves
   // underneath to dim (vs. the very first load, nothing to overlay onto).
   const dimStaleMoves = showLoadingOverlay && moves.length > 0;
-
-  const undo = progress ? describeUndo(progress.correctionSequence) : null;
-
-  const getMoveClass = (index: number): string => {
-    if (!progress) return "pending";
-    if (progress.completedIndices.includes(index)) return "correct";
-    if (progress.startedIndices.includes(index)) return "started";
-    if (!hasErrors && index === progress.nextIndex) return "current";
-    return "pending";
-  };
-
-  const showErrorIndicator = hasErrors && !tooManyErrors && undo !== null;
 
   return (
     <div className={`scramble-card ${className} ${showLoadingOverlay && moves.length === 0 ? "min-h-16" : ""}`}>
@@ -119,7 +122,7 @@ export function MoveSequenceDisplay({
         <div className="scramble-display">
           {tooManyErrors && (
             <div className="scramble-error-overlay">
-              <span className="error-text">Too many errors!</span>
+              <span className="error-text">Too many moves to undo — solve the cube and reset.</span>
               {onReset && (
                 <button onClick={onReset} className="reset-button">
                   Reset
@@ -128,33 +131,15 @@ export function MoveSequenceDisplay({
             </div>
           )}
 
-          {showErrorIndicator && (
-            <div className="scramble-error-indicator">
-              {undo.kind === "moves" ? (
-                <>
-                  <span className="error-label">{errorLabel}</span>
-                  <span className="error-algorithm">{undo.text}</span>
-                </>
-              ) : (
-                // Too many wrong moves to read off as an undo — solving the cube by hand and resetting is quicker.
-                <span className="text-orange-300">Too many moves to undo — solve the cube and press reset.</span>
-              )}
-            </div>
-          )}
-
           {moves.length > 0 && (
-            <div className="scramble-moves">
-              {moves.map((move, index) => {
-                const deco = decorations?.[index];
-                return (
-                  <span key={`${move}-${index}`} className="inline-flex items-center">
-                    {deco?.prefix && <span className="font-mono text-3xl font-black text-gray-300 select-none mr-0.5">{deco.prefix}</span>}
-                    <span className={`scramble-move ${getMoveClass(index)}`}>{maskMoves ? "•" : move}</span>
-                    {deco?.suffix && <span className="font-mono text-3xl font-black text-gray-300 select-none ml-0.5">{deco.suffix}</span>}
-                  </span>
-                );
-              })}
-            </div>
+            <SequenceElement
+              kind={kind}
+              notation={moves.join(" ")}
+              tracking={tracking}
+              masked={maskMoves}
+              decorations={decorations}
+              undoLabel={errorLabel.replace(/:$/, "")}
+            />
           )}
 
           {isComplete && <span className="scramble-complete">{completeText}</span>}
@@ -186,4 +171,93 @@ export function MoveSequenceDisplay({
       )}
     </div>
   );
+}
+
+type SequenceEl = CubeScramble | CubeAlgPractice;
+
+/**
+ * The library element, fed from the session: a new target (or start) sets it
+ * up from scratch; more moves of the same attempt are pushed on; anything
+ * else (an undone replay, another attempt) replays the log from the start.
+ */
+function SequenceElement({
+  kind,
+  notation,
+  tracking,
+  masked,
+  decorations,
+  undoLabel,
+}: {
+  kind: "scramble" | "alg";
+  notation: string;
+  tracking: SequenceTracking | null;
+  masked: boolean;
+  decorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
+  undoLabel: string;
+}) {
+  const host = useRef<HTMLDivElement>(null);
+  const el = useRef<SequenceEl | null>(null);
+  const fed = useRef<{ notation: string; target: SequenceTarget | null; moves: readonly MoveRecord[] }>({ notation: "", target: null, moves: [] });
+
+  useEffect(() => {
+    const e = document.createElement(kind === "alg" ? "cube-alg-practice" : "cube-scramble") as SequenceEl;
+    e.setAttribute("controls", "none");
+    e.className = "act-sequence";
+    if (kind === "alg") {
+      e.setAttribute("reveal", "all");
+      (e as CubeAlgPractice).formatStats = () => "";
+    }
+    e.messages = { reset: "", complete: "" };
+    host.current?.append(e);
+    el.current = e;
+    fed.current = { notation: "", target: null, moves: [] };
+    return () => {
+      e.remove();
+      el.current = null;
+    };
+  }, [kind]);
+
+  useEffect(() => {
+    el.current?.setAttribute("masked", "");
+    if (!masked) el.current?.removeAttribute("masked");
+    if (kind === "alg") el.current?.setAttribute("reveal", masked ? "none" : "all");
+  }, [masked, kind]);
+
+  useEffect(() => {
+    if (el.current) el.current.messages = { undo: undoLabel };
+  }, [undoLabel]);
+
+  useEffect(() => {
+    if (el.current) el.current.decorations = decorations ?? null;
+  }, [decorations]);
+
+  useEffect(() => {
+    const e = el.current;
+    if (!e) return;
+    const f = fed.current;
+    const setUp = (target: SequenceTarget | null) => {
+      e.frame = target?.frame ?? null;
+      if ("alg" in e) e.alg = notation;
+      else e.scramble = notation;
+      e.reset(target?.start ?? solvedState());
+      fed.current = { notation, target, moves: [] };
+    };
+    const push = (records: readonly MoveRecord[]) => {
+      for (const r of records) for (const m of parseAlg(r.move)) e.push(m, r.timestamp);
+    };
+    if (!tracking || tracking.notation !== notation) {
+      // Nothing tracked: a new sequence starts afresh; the same one stays where it got to.
+      if (f.notation !== notation) setUp(null);
+      return;
+    }
+    const sameAttempt = f.notation === notation && f.target === tracking.target;
+    const extends_ = sameAttempt && f.moves.length <= tracking.moves.length && f.moves.every((m, i) => m === tracking.moves[i]);
+    if (!extends_) {
+      setUp(tracking.target);
+      push(tracking.moves);
+    } else push(tracking.moves.slice(f.moves.length));
+    fed.current = { notation, target: tracking.target, moves: tracking.moves };
+  }, [notation, tracking]);
+
+  return <div ref={host} className="w-full" />;
 }

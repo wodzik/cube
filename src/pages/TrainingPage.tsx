@@ -22,8 +22,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress, selectMoveCount } from "../state/sessionSelectors";
-import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
+import { selectCurrentProgress, selectMoveCount, selectTracking } from "../state/sessionSelectors";
+import { doneTokens, sequenceProgress } from "../logic/cubecoreSequence";
 import { buildCaseSetupAlg, stripLeadingRotations, finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 import type { Orientation } from "../types/cube";
 import { getDefaultVariant } from "../logic/algGroupConfig";
@@ -104,7 +104,7 @@ export default function TrainingPage() {
 }
 
 function TrainingPageInner() {
-  const { state, submitCubeMove, setTarget, reset } = useSession();
+  const { state, submitCubeMove, setTarget, targetProgress, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
@@ -311,12 +311,11 @@ function TrainingPageInner() {
     // (any tail beyond completion waits for the round after). Must use the
     // SAME initialOrientation as the real target above, or this check would
     // silently disagree with what the session actually armed.
-    const flushTarget = buildSequenceTarget(variant.alg, initialOrientation);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
       delivered.push(move);
-      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+      return !targetProgress(delivered)?.complete;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant?.id, drillRound]);
@@ -365,7 +364,7 @@ function TrainingPageInner() {
     if (lastRecordedEndRef.current === state.endTime) return;
     lastRecordedEndRef.current = state.endTime;
 
-    const finalProgress = state.target ? computeSequenceProgress(state.target, state.moveLog.map((m) => m.move)) : null;
+    const finalProgress = state.target ? sequenceProgress(state.targetNotation, state.target, state.moveLog.map((m) => m.move)) : null;
     const attempt = {
       time: (state.endTime - state.startTime) / 1000,
       hadErrors: finalProgress?.hadErrors ?? false,
@@ -443,13 +442,13 @@ function TrainingPageInner() {
   // time — recompute progress directly from moveLog here, unaffected by
   // that phase gate (state.target/state.moveLog stay valid through "done").
   const liveProgress = useMemo(
-    () => (state.target ? computeSequenceProgress(state.target, state.moveLog.map((m) => m.move)) : null),
-    [state.target, state.moveLog]
+    () => (state.target ? sequenceProgress(state.targetNotation, state.target, state.moveLog.map((m) => m.move)) : null),
+    [state.targetNotation, state.target, state.moveLog]
   );
   useEffect(() => {
     if (!liveProgress) return;
     let maxIdx = animatedTokenIndexRef.current;
-    for (const idx of liveProgress.completedIndices) {
+    for (const idx of doneTokens(liveProgress)) {
       if (idx <= animatedTokenIndexRef.current) continue;
       if (idx >= leadingRotationCount) {
         const token = algTokens[idx];
@@ -459,7 +458,7 @@ function TrainingPageInner() {
     }
     animatedTokenIndexRef.current = maxIdx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveProgress?.completedCount]);
+  }, [liveProgress?.done]);
 
   const timerState: "idle" | "solving" | "solved" =
     state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : "idle";
@@ -586,6 +585,8 @@ function TrainingPageInner() {
         }
         moves={targetTokens}
         progress={progress}
+      tracking={selectTracking(state)}
+      sequenceKind="alg"
         showMaskToggle
         maskMoves={maskMoves}
         onToggleMask={toggleMaskMoves}

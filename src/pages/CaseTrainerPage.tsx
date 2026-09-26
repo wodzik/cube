@@ -7,11 +7,10 @@
  * 1. Scrambles come from trainerScrambleService with a KNOWN exact optimal
  *    length, generated FROM THE CUBE'S CURRENT STATE — an attempt ends with
  *    the cube unsolved (target done, rest scrambled), so the next scramble
- *    is a path from wherever the cube actually is. The page tracks that
- *    physical state as a KTransformation fed by every hardware move
- *    (independent of the reducer, which drops moves outside tracked
- *    phases). The session must START from a solved cube; the "Resync"
- *    button re-declares solved if tracking ever drifts (missed BT events).
+ *    is a path from wherever the cube actually is. That state is the
+ *    app-wide SmartCubeSession's (cubecore), so it stays right across page
+ *    switches; "Resync" marks the cube solved if tracking ever drifts
+ *    (missed BT events).
  *
  * 2. The attempt stops via useStageSolvedDetection ("stage-solved" stop
  *    method) the instant the trained target is solved — cross, or
@@ -30,7 +29,8 @@ import { Eye, Lightbulb, RefreshCw, Repeat2, RotateCcw, Trash2, TrendingUp } fro
 import { cube3x3x3 } from "cubing/puzzles";
 import type { KPuzzle, KTransformation } from "cubing/kpuzzle";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs } from "../state/sessionSelectors";
+import { stateToKTransformation } from "../logic/cubecoreKpuzzle";
+import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
 import { isCrossSolvedOnFace, type Face } from "../logic/stageDetection/lastLayerShared";
 import { isSlotSolved, applyMoveToState, type LiveCubeState } from "../logic/stageDetection/liveCubeState";
@@ -103,7 +103,7 @@ import {
 } from "../services/trainerScrambleService";
 import { getTrainerAttempts, saveTrainerAttempt, deleteTrainerAttempt } from "../services/trainerStore";
 import { formatTimeMs } from "../logic/statistics";
-import { useSmartCube } from "../hooks/useSmartCube";
+import { useSmartCube, useSmartCubeConnection } from "../hooks/useSmartCube";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useStageSolvedDetection } from "../hooks/useStageSolvedDetection";
 import { useCaseViewPrefs } from "../hooks/useCaseViewPrefs";
@@ -467,10 +467,15 @@ function CaseTrainerInner() {
 
   const targetLength = lengths[trainerType];
 
-  // Physical cube state since session start (assumed solved) — EVERY
-  // hardware move lands here, including ones the reducer ignores (phase
-  // "done" fiddling), because the next scramble is generated from it.
-  const physicalRef = useRef<KTransformation | null>(null);
+  // The physical cube's state (the smart cube session's; solved without a
+  // cube) — the next scramble is generated from it.
+  const cubeConnection = useSmartCubeConnection();
+  const cubeSessionRef = useRef(cubeConnection?.session ?? null);
+  cubeSessionRef.current = cubeConnection?.session ?? null;
+  const physicalNow = (kp: KPuzzle): KTransformation => {
+    const s = cubeSessionRef.current;
+    return s ? stateToKTransformation(kp, s.state) : kp.identityTransformation();
+  };
   // Total hardware moves seen — used to detect "cube moved mid-generation".
   const moveCounterRef = useRef(0);
   // Only the latest generation request may apply its result.
@@ -492,7 +497,6 @@ function CaseTrainerInner() {
     let cancelled = false;
     cube3x3x3.kpuzzle().then((kp) => {
       if (cancelled) return;
-      physicalRef.current = kp.identityTransformation();
       kpuzzleRef.current = kp;
       setKpuzzle(kp);
     });
@@ -519,7 +523,7 @@ function CaseTrainerInner() {
             targetLength: len,
             f2lSlots: f2lSlotsNow,
           } = configRef.current;
-          const snapshot = physicalRef.current ?? kp.identityTransformation();
+          const snapshot = physicalNow(kp);
           const movesAtSnapshot = moveCounterRef.current;
           const generated = retryOf
             ? ROUX_TYPES.includes(retryOf.type)
@@ -643,7 +647,7 @@ function CaseTrainerInner() {
   /** Declare the physical cube solved again — recovery for tracking drift (missed BT events). */
   const resync = () => {
     if (!kpuzzle) return;
-    physicalRef.current = kpuzzle.identityTransformation();
+    cubeSessionRef.current?.markSolved();
     view.reset();
     setSummary(null);
     void startNextAttempt(kpuzzle);
@@ -651,7 +655,6 @@ function CaseTrainerInner() {
 
   const handleMove = useCallback(
     (move: string, timestamp: number) => {
-      if (physicalRef.current) physicalRef.current = physicalRef.current.applyMove(move);
       moveCounterRef.current++;
       submitCubeMove(move, timestamp);
       // Virtual case mode: the view shows the CASE, not the physical cube —
@@ -1271,6 +1274,7 @@ function CaseTrainerInner() {
       }
       moves={targetTokens}
       progress={progress}
+      tracking={selectTracking(state)}
       showRefresh
       onRefresh={regenerate}
       loading={isGenerating}

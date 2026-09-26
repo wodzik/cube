@@ -7,6 +7,7 @@
  */
 
 import { useMemo, useRef } from "react";
+import type { State } from "@cubecore/core";
 import type { CubeVisualisationRef } from "../components/CubeVisualisation";
 
 export function useCubeViewRefs() {
@@ -22,6 +23,10 @@ export function useCubeViewRefs() {
       reset: () => {
         cubeRef.current?.reset();
         flatCubeRef.current?.reset();
+      },
+      setState: (state: State) => {
+        cubeRef.current?.setState(state);
+        flatCubeRef.current?.setState(state);
       },
       setSetupAlgorithm: (setup: string, alg = "") => {
         cubeRef.current?.setSetupAlgorithm(setup, alg);

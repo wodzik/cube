@@ -29,8 +29,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, RotateCcw, ChevronRight, ChevronLeft, Video } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress } from "../state/sessionSelectors";
-import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
+import { selectCurrentProgress, selectTracking } from "../state/sessionSelectors";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 import { getDefaultVariant } from "../logic/algGroupConfig";
 import {
@@ -124,7 +123,7 @@ export default function AttackPage() {
 }
 
 function AttackPageInner() {
-  const { state, submitCubeMove, setTarget, reset } = useSession();
+  const { state, submitCubeMove, setTarget, targetProgress, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
 
@@ -235,13 +234,12 @@ function AttackPageInner() {
     // advances over a render — a fast solver's first moves of the NEXT case
     // can land in that gap) belong to this case: replay them, stopping if
     // they complete it (any tail waits for the case after).
-    const flushTarget = buildSequenceTarget(variant.alg);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
       view.addMove(move);
       delivered.push(move);
-      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+      return !targetProgress(delivered)?.complete;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant?.id, restartToken]);
@@ -490,6 +488,8 @@ function AttackPageInner() {
       }
       moves={targetTokens}
       progress={progress}
+      tracking={selectTracking(state)}
+      sequenceKind="alg"
       showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}

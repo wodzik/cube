@@ -265,6 +265,32 @@
   @apply text-gray-400;
 }
 
+/* The cubecore sequence element (<cube-scramble> / <cube-alg-practice>) in act's palette. */
+.act-sequence {
+  --cc-seq-size: var(--scramble-size, 1.875rem);
+  --cc-seq-font: ui-monospace, "SF Mono", Menlo, monospace;
+  --cc-seq-gap: 0.45em;
+  --cc-seq-done: #34d399; /* emerald-400 */
+  --cc-seq-current: var(--move-current);
+  --cc-seq-current-bg: transparent;
+  --cc-seq-partial: #fcd34d; /* amber-300 */
+  --cc-seq-todo: #9ca3af; /* gray-400 */
+  --cc-seq-hidden: #6b7280;
+  --cc-seq-undo: #fdba74; /* orange-300 */
+  --cc-seq-decoration: #d1d5db;
+  display: block;
+}
+.act-sequence::part(moves) {
+  justify-content: center;
+  line-height: 1.2;
+}
+.act-sequence::part(move-current) {
+  text-shadow: 0 0 24px var(--move-current-glow);
+}
+.act-sequence::part(undo) {
+  justify-content: center;
+}
+
 .scramble-complete {
   @apply text-emerald-400 text-sm font-semibold;
 }

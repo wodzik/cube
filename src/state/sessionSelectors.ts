@@ -3,7 +3,7 @@
  * Pure functions — no React, no side effects.
  */
 
-import { computeSequenceProgress, type SequenceProgress } from "../logic/sequenceTracker";
+import { sequenceProgress, type TrackedProgress } from "../logic/cubecoreSequence";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
 import type { SessionState } from "../types/session";
 
@@ -12,19 +12,33 @@ import type { SessionState } from "../types/session";
  * or algorithm (algorithm/attack's "active"). null when there's nothing to
  * track (no target set, or solve mode's free-form "active" phase).
  */
-export function selectCurrentProgress(state: SessionState): SequenceProgress | null {
+export function selectCurrentProgress(state: SessionState): TrackedProgress | null {
   if (!state.target) return null;
   // Empty target (manual/hand-setup starting stage, see ActionType.
-  // MANUAL_SETUP_DONE) has nothing to track — computeSequenceProgress
-  // treats an empty target as trivially "completed", which would otherwise
-  // surface as a misleading "Complete!" banner the instant setup begins.
-  if (state.target.physicalMoves.length === 0) return null;
+  // MANUAL_SETUP_DONE) has nothing to track (sequenceProgress gives null).
   const isTrackedPhase =
     state.phase === "setup" ||
     (state.phase === "active" && state.config.mode !== "solve");
   if (!isTrackedPhase) return null;
 
-  return computeSequenceProgress(state.target, state.moveLog.map((m) => m.move));
+  return sequenceProgress(state.targetNotation, state.target, state.moveLog.map((m) => m.move));
+}
+
+/**
+ * What the sequence bar follows: the target, where it started and the moves
+ * made on it — while it's tracked AND right after it's done (so the move
+ * that completes it shows too): solve's scramble through "ready" /
+ * "inspecting" (the log still holds the scramble moves), an algorithm
+ * through "done". null otherwise — the bar keeps showing where it got to
+ * (a solve's log holds the solve by then).
+ */
+export function selectTracking(state: SessionState): { notation: string; target: NonNullable<SessionState["target"]>; moves: SessionState["moveLog"] } | null {
+  if (!state.target || !state.targetNotation.trim()) return null;
+  const solve = state.config.mode === "solve";
+  const follows =
+    state.phase === "setup" ||
+    (solve ? state.phase === "ready" || state.phase === "inspecting" : state.phase === "active" || state.phase === "done");
+  return follows ? { notation: state.targetNotation, target: state.target, moves: state.moveLog } : null;
 }
 
 /** Elapsed time since the timer started, clamped to endTime once stopped. null if not started. */

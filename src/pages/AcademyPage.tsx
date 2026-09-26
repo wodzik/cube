@@ -20,8 +20,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GraduationCap, Video, BookOpen } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
-import { selectCurrentProgress } from "../state/sessionSelectors";
-import { buildSequenceTarget, computeSequenceProgress } from "../logic/sequenceTracker";
+import { selectCurrentProgress, selectTracking } from "../state/sessionSelectors";
 import { buildCaseSetupAlg } from "../logic/moveParser";
 import { formatTimeMs } from "../logic/statistics";
 import { useSmartCube } from "../hooks/useSmartCube";
@@ -90,7 +89,7 @@ export default function AcademyPage() {
 }
 
 function AcademyInner() {
-  const { state, submitCubeMove, setTarget, reset } = useSession();
+  const { state, submitCubeMove, setTarget, targetProgress, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const viewPrefs = useCaseViewPrefs(false, "academy");
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
@@ -175,13 +174,12 @@ function AcademyInner() {
     view.setSetupAlgorithm(buildCaseSetupAlg(decorated.tokens.join(" ")), "");
     // Replay moves chained straight out of the previous round — stop at
     // completion, tail waits a round (see usePendingMoveBuffer).
-    const flushTarget = buildSequenceTarget(plain);
     const delivered: string[] = [];
     moveBuffer.flush((move, timestamp) => {
       submitCubeMove(move, timestamp);
       view.addMove(move);
       delivered.push(move);
-      return !computeSequenceProgress(flushTarget, delivered).isCompleted;
+      return !targetProgress(delivered)?.complete;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [algIdKey, drillRound]);
@@ -318,6 +316,8 @@ function AcademyInner() {
       }
       moves={decorated?.tokens ?? []}
       progress={progress}
+      tracking={selectTracking(state)}
+      sequenceKind="alg"
       sequenceDecorations={decorated?.decorations}
       showMaskToggle
       maskMoves={maskMoves}
