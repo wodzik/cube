@@ -8,12 +8,11 @@
  * Content: move count / TPS / time, ONE method's stage progress (dots, reused
  * from the live view) plus a per-stage breakdown (move count, moves,
  * recognition vs execution vs total time — see logic/stageDetection/
- * stageTiming.ts), and a scrubbable 3D playback of the solve (scramble ->
- * solved) via TwistyPlayer's built-in control panel. Clicking a stage row
- * jumps the player's timeline to that stage's first move (ported from the
- * old app's CubeVisualisation.setMoveIndex).
+ * stageTiming.ts), and a real-time replay of the solve (scramble -> solved)
+ * on cubecore's <cube-player> with the stages as a bar over its controls
+ * (SolveReplay). Clicking a stage row jumps the replay to that stage.
  *
- * IMPORTANT: the player's `alg` is built from the RAW move list
+ * IMPORTANT: the replay is built from the RAW move list
  * (record.moves), not record.reducedMoves. StageBoundary.moveIndex (and
  * therefore StageTiming.startMoveIndex/endMoveIndex) is an index into the
  * raw, one-quarter-turn-per-entry stream that stage detection actually
@@ -33,7 +32,7 @@ import { useEffect, useRef, useState } from "react";
 import { X, Play, RotateCcw, Trash2, Link2, Check } from "lucide-react";
 import type { SolveMethod, SolveRecord } from "../types/solve";
 import type { StageBoundary } from "../logic/stageDetection/types";
-import { CubeVisualisation, type CubeVisualisationRef } from "./CubeVisualisation";
+import { SolveReplay, type SolveReplayRef } from "./SolveReplay";
 import { StageProgress } from "./StageProgress";
 import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
@@ -91,7 +90,7 @@ function StageTimingRow({
   moveCountOnly = false,
 }: {
   timing: StageTiming;
-  onJump: (moveIndex: number) => void;
+  onJump: (stage: string, moveIndex: number) => void;
   moveCountOnly?: boolean;
 }) {
   const reached = timing.startMoveIndex !== null;
@@ -106,7 +105,7 @@ function StageTimingRow({
       className={`group flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors ${
         reached ? "hover:bg-white/[0.05] cursor-pointer" : "opacity-60"
       }`}
-      onClick={reached ? () => onJump(timing.startMoveIndex!) : undefined}
+      onClick={reached ? () => onJump(timing.stage, timing.startMoveIndex!) : undefined}
       title={reached ? "Jump the player to this stage" : undefined}
     >
       {reached && (
@@ -171,11 +170,8 @@ export function SolveAnalysis({
   }
   // Display text: collapsed, compact (R2 instead of R R).
   const displayAlg = record.reducedMoves.join(" ");
-  // Player alg: raw, one entry per quarter turn — keeps indices aligned with
-  // stage boundaries (see file header comment).
-  const playerAlg = record.moves.map((m) => m.move).join(" ");
   const [method, setMethod] = useState<DisplayMethod>(record.method !== "unknown" ? record.method : "CFOP");
-  const cubeRef = useRef<CubeVisualisationRef>(null);
+  const cubeRef = useRef<SolveReplayRef>(null);
 
   // Self-heal solves recorded by older builds: no `lbl` field at all (which
   // used to white-screen this modal — undefined.map in computeStageTimings),
@@ -300,14 +296,7 @@ export function SolveAnalysis({
         <div className="flex flex-1 overflow-y-auto flex-col sm:flex-row">
           <div className="flex flex-col items-center gap-3 p-6 sm:border-r border-white/[0.06] sm:w-[26rem] shrink-0">
             <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-950/50">
-              <CubeVisualisation
-                ref={cubeRef}
-                setupAlg={record.scramble}
-                alg={playerAlg}
-                visualization="3D"
-                controlPanel="bottom-row"
-                className="size-full"
-              />
+              <SolveReplay ref={cubeRef} record={record} timings={moveCountOnly ? [] : timings} className="size-full" />
             </div>
             <p className="text-[11px] text-gray-400 text-center leading-relaxed font-mono break-all">{record.scramble}</p>
             {onUseScramble && (
@@ -347,7 +336,7 @@ export function SolveAnalysis({
                   <StageTimingRow
                     key={t.stage}
                     timing={t}
-                    onJump={(idx) => cubeRef.current?.setMoveIndex(idx)}
+                    onJump={(stage, idx) => cubeRef.current?.seekToStage(stage, idx)}
                     moveCountOnly={moveCountOnly}
                   />
                 ))}

@@ -13,15 +13,30 @@
  * (moves) x'") as a whole instead of leaving one half stripped — see that
  * function's doc comment for why the two must stay separate.
  *
- * Performance: TwistyPlayer is expensive to mount (WebGL/SVG init). A grid
- * of 40+ cases would otherwise mount 40+ contexts at once, so mounting is
- * deferred via IntersectionObserver until the card is near the viewport;
- * once mounted it stays mounted.
+ * Performance: a grid of 40+ cases. 3D cases are still PICTURES drawn by
+ * cubecore's one shared renderer (sharedPictures — browsers allow only ~16
+ * live WebGL contexts, a player per card blanked most of them); 2D ones are
+ * SVG players (no WebGL). Either way nothing is drawn until the card is
+ * near the viewport (IntersectionObserver).
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { applyMoves, solvedState } from "@cubecore/core";
+import { sharedPictures } from "@cubecore/render";
+import type { Skin } from "@cubecore/render";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
 import { buildCanonicalDisplaySetupAlg } from "../logic/moveParser";
+import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
+import { useCubeLook } from "../hooks/useCubeLook";
+
+/** A short stable id per skin object (for the picture cache key). */
+const skinIds = new WeakMap<Skin, number>();
+let nextSkinId = 1;
+const skinId = (s: Skin) => {
+  if (!skinIds.has(s)) skinIds.set(s, nextSkinId++);
+  return skinIds.get(s)!;
+};
+const pageTheme = () => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
 
 interface AlgCaseVisualisationProps {
   /** The solution algorithm — the visualisation shows the state BEFORE this is applied. */
@@ -80,9 +95,25 @@ export function AlgCaseVisualisation({
     cubeRef.current?.setSetupAlgorithm(inverseAlg, "");
   }, [inverseAlg, visible]);
 
+
+  const is3d = visualization === "3D" || visualization === "PG3D";
+  const { skin } = useCubeLook();
+  const picture = useMemo(() => {
+    if (!visible || !is3d) return null;
+    try {
+      const mask = stickeringMaskOrbits ? orbitMaskToCubecore(stickeringMaskOrbits) : namedMaskToCubecore(stickering);
+      const theme = pageTheme();
+      const key = [inverseAlg, stickeringMaskOrbits ? JSON.stringify(stickeringMaskOrbits) : stickering, cameraLatitude, cameraLongitude, skinId(skin), theme].join("|");
+      return sharedPictures().draw({ state: applyMoves(solvedState(), inverseAlg), mask, skin, theme, camera: { latitude: cameraLatitude, longitude: cameraLongitude } }, key);
+    } catch {
+      return null;
+    }
+  }, [visible, is3d, inverseAlg, stickering, stickeringMaskOrbits, cameraLatitude, cameraLongitude, skin]);
+
   return (
     <div ref={wrapperRef} className={`size-full ${className}`}>
-      {visible && (
+      {picture && <img src={picture} alt="" draggable={false} className="size-full object-contain select-none" />}
+      {visible && !is3d && (
         <CubeVisualisation
           ref={cubeRef}
           setupAlg={inverseAlg}
