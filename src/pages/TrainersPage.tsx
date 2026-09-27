@@ -295,7 +295,7 @@ function TrainersInner() {
           caseState = unreframe(applyMoves(solvedState(), invert(turns)), frame);
           scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
         } else if (d.id === "f2l") {
-          const r = await solver.randomScramble({ preset: "f2l", keep: f2lKeep(slots), frame, from });
+          const r = await solver.randomScramble({ preset: "f2l", keep: f2lKeep(slots, v === "free"), frame, from });
           caseState = r.state;
           scramble = r.moves;
         } else {
@@ -361,7 +361,7 @@ function TrainersInner() {
     if (!a || state.phase !== "active" || !state.moveLog.length) return;
     const now = nowState(a);
     const last = state.moveLog[state.moveLog.length - 1].timestamp;
-    const local = doneLocally(a.def, now, a.frame);
+    const local = doneLocally(a.def, now, a.frame, a.variant, a.slots);
     if (local !== null) {
       if (local) signalStop("stage-solved", last);
       return;
@@ -492,7 +492,7 @@ function TrainersInner() {
         endedAt: Date.now(),
         type: a.def.id,
         face: a.bottom as TrainerAttempt["face"],
-        slot: a.def.id === "f2l" ? undefined : a.variant || undefined,
+        slot: a.variant || undefined,
         slots: a.def.id === "f2l" ? a.slots : undefined,
         targetLength: a.level ?? 0,
         scramble: a.virtual ? "" : formatAlg(a.scramble),
@@ -589,9 +589,11 @@ function TrainersInner() {
         a.type === def.id &&
         // Scramble and Recognize apart: their times don't compare.
         !!a.virtual === settings.virtual &&
-        (!def.levels ? def.id !== "f2l" || [...(a.slots ?? [])].sort().join(",") === set : a.targetLength === level)
+        (!def.levels
+          ? def.id !== "f2l" || ([...(a.slots ?? [])].sort().join(",") === set && (a.slot ?? "solved") === variant)
+          : a.targetLength === level)
     );
-  }, [attempts, def.id, def.levels, level, settings.slots, settings.virtual]);
+  }, [attempts, def.id, def.levels, level, settings.slots, settings.virtual, variant]);
   const recognitions = scopeAttempts.flatMap((a) => (a.recognitionMs !== undefined ? [a.recognitionMs] : []));
   const avgRecognition = recognitions.length ? recognitions.reduce((x, y) => x + y, 0) / recognitions.length : null;
   const recognitionStat =
@@ -849,7 +851,7 @@ function TrainersInner() {
         def.id === "cmll"
           ? `CMLL · ${variant}`
           : def.id === "f2l"
-            ? `F2L · ${slotLabel(settings.slots)}`
+            ? `F2L · ${slotLabel(settings.slots)}${variant === "free" ? " · other slots free" : ""}`
             : def.levels
               ? `${def.label}${variant ? ` ${variant}` : ""} · optimal ${level}`
               : `${def.label} · ${variant}`

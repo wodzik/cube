@@ -95,21 +95,24 @@ export function sbLastSlot(last: "front" | "back"): StageDef {
   };
 }
 
-/** F2L of chosen slots: the cross and the other slots stay (they're solved in the case), these get paired and inserted. */
-export function f2lStage(slots: readonly F2LSlot[]): StageDef {
+/**
+ * F2L of chosen slots: the cross stays; the other slots either stay solved
+ * too ("solved" — they're occupied) or are free (their pieces anywhere, the
+ * slots usable while pairing), then only the cross and these slots count.
+ */
+export function f2lStage(slots: readonly F2LSlot[], free = false): StageDef {
   const order = SLOTS.filter((s) => slots.includes(s));
-  const rest = SLOTS.filter((s) => !slots.includes(s));
+  const rest = free ? [] : SLOTS.filter((s) => !slots.includes(s));
   const pieces = [...CROSS, ...order.flatMap((s) => SLOT_PIECES[s]), ...rest.flatMap((s) => SLOT_PIECES[s])];
   const trained = order.length * 2;
   return {
-    name: `f2l-${order.join("")}`,
+    name: `f2l${free ? "-free" : ""}-${order.join("")}`,
     pieces,
     groups: Array.from({ length: trained }, (_, i) => [0, 1, 2, 3, 4 + i]),
     keep: [0, 1, 2, 3, ...Array.from({ length: rest.length * 2 }, (_, i) => 4 + trained + i)],
   };
 }
-/** Pieces the F2L drill keeps solved: the slots not being practised (the cross comes with the scramble preset). */
-export const f2lKeep = (slots: readonly F2LSlot[]): Piece[] => SLOTS.filter((s) => !slots.includes(s)).flatMap((s) => SLOT_PIECES[s]);
+export const f2lKeep = (slots: readonly F2LSlot[], free = false): Piece[] => (free ? [] : SLOTS.filter((s) => !slots.includes(s)).flatMap((s) => SLOT_PIECES[s]));
 
 const inSlot = (slots: readonly F2LSlot[]) => {
   const at = { FR: [1, 1], FL: [-1, 1], BR: [1, -1], BL: [-1, -1] } as const;
@@ -153,12 +156,15 @@ export const TRAINERS: readonly TrainerDef[] = [
     family: "f2l",
     label: "Slots",
     goal: "Insert the {v} (cross stays)!",
+    variants: { label: "Other slots", options: [["solved", "solved"], ["free", "free"]], default: "solved" },
     levels: null,
     // Exact solutions only while it's small enough to search (1–2 slots).
-    stage: (_v, slots) => (slots.length <= 2 ? f2lStage(slots) : null),
-    mask: (_v, slots) => {
+    stage: (v, slots) => (slots.length <= 2 ? f2lStage(slots, v === "free") : null),
+    mask: (v, slots) => {
       const trained = inSlot(slots);
-      return (_f, c) => (c.kind === "center" || (c.kind === "edge" && c.pos[1] === -1) || (c.pos[1] <= 0 && trained(c.pos)) ? "regular" : c.pos[1] <= 0 ? "dim" : "ignored");
+      // The other slots: solved → faded; free → not part of it (grey, like the last layer).
+      return (_f, c) =>
+        c.kind === "center" || (c.kind === "edge" && c.pos[1] === -1) || (c.pos[1] <= 0 && trained(c.pos)) ? "regular" : c.pos[1] <= 0 && v !== "free" ? "dim" : "ignored";
     },
   },
   {
@@ -265,8 +271,12 @@ export function frameForBottom(bottom: Face): Frame {
  * CMLL checked right here; the solver stages say it with distance 0 (see
  * the page — asked of the worker).
  */
-export function doneLocally(def: TrainerDef, state: State, frame: Frame): boolean | null {
-  if (def.id === "f2l") return checks.f2lSolved(view(state, frame));
+export function doneLocally(def: TrainerDef, state: State, frame: Frame, variant = "", slots: readonly F2LSlot[] = SLOTS): boolean | null {
+  if (def.id === "f2l") {
+    const s = view(state, frame);
+    // Free other slots: the cross and the chosen pairs; else the whole F2L.
+    return variant === "free" ? checks.crossSolved(s) && slots.every((slot) => checks.pairSolved(s, slot)) : checks.f2lSolved(s);
+  }
   if (def.id === "cmll") return cmll(view(state, frame));
   if (def.id === "oll") {
     const s = view(state, frame);
