@@ -4,14 +4,18 @@
  * (stickerless as the skin is, or stickered: raised / thin / flat) and the
  * finish (matte / UV). Persisted; read by every CubeVisualisation.
  *
- * A connected cube can have its own look (Settings → My cubes): the parts it
- * sets replace the app's while it's connected.
+ * A connected cube gets the skin that suits it (by its brand / name) unless
+ * it has its own (Settings → My cubes); the other parts it sets (stickers,
+ * finish, logo) replace the app's while it's connected. The app's skin is
+ * for when no cube is connected. A logo (the app's, or an image you added)
+ * can sit on the white centre.
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { SKINS, type Skin, type StickerStyle, withFinish, withStickers } from "@cubecore/skin";
 import { useSmartCubeConnection } from "./useSmartCube";
 import { type KnownCube, listCubes, onCubesChange } from "../services/cubeRegistry";
+import { logoImage, onLogosChange } from "../services/logoStore";
 
 const STORAGE_KEY = "nact_cube_look";
 
@@ -23,9 +27,11 @@ export interface CubeLook {
   stickers: StickerStyle | "";
   /** Matte / UV-coated, or "" for the skin's own finish. */
   finish: "matte" | "uv" | "";
+  /** Logo on the white centre: "" none, "app", or an added image's id (services/logoStore). */
+  logo: string;
 }
 
-const DEFAULT_LOOK: CubeLook = { skin: "auto", stickers: "", finish: "" };
+const DEFAULT_LOOK: CubeLook = { skin: "auto", stickers: "", finish: "", logo: "" };
 
 function readStored(): CubeLook {
   try {
@@ -53,8 +59,22 @@ const CubeLookContext = createContext<CubeLookValue | null>(null);
 
 export function resolveSkin(look: CubeLook, autoSkin: SkinName): Skin {
   const base: Skin = SKINS[look.skin === "auto" ? autoSkin : look.skin];
-  const stickered = look.stickers ? withStickers(base, look.stickers) : base;
+  const image = logoImage(look.logo);
+  // The logo on the white (U) centre, upright as the cube is usually held.
+  const withLogo: Skin = image ? { ...base, decals: [...(base.decals ?? []), { select: { stickers: [4] }, image, size: 0.56, rotate: 2 }] } : base;
+  const stickered = look.stickers ? withStickers(withLogo, look.stickers) : withLogo;
   return look.finish ? withFinish(stickered, look.finish) : stickered;
+}
+
+/**
+ * The look for a connected cube: the app's, with the cube's own parts over
+ * it — and its skin its own, or the one that suits it ("auto"), never the
+ * app's (that's for when no cube is connected).
+ */
+export function lookForCube(app: CubeLook, own: Partial<CubeLook> | undefined): CubeLook {
+  const set = Object.fromEntries(Object.entries(own ?? {}).filter(([, v]) => v !== undefined)) as Partial<CubeLook>;
+  if (set.skin && set.skin !== "auto" && !(set.skin in SKINS)) delete set.skin;
+  return { ...app, ...set, skin: set.skin ?? "auto" };
 }
 
 /** Mount inside SmartCubeProvider (it follows the connected cube for "auto"). */
@@ -84,9 +104,14 @@ export function CubeLookProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Added / removed logo images: draw again.
+  const [logosVersion, setLogosVersion] = useState(0);
+  useEffect(() => onLogosChange(() => setLogosVersion((n) => n + 1)), []);
+  const connected = !!cube?.session;
   const value = useMemo(
-    () => ({ look, setLook, skin: resolveSkin(cubeLook ? { ...look, ...cubeLook } : look, autoSkin), autoSkin, cubeLook }),
-    [look, setLook, autoSkin, cubeLook]
+    () => ({ look, setLook, skin: resolveSkin(connected ? lookForCube(look, cubeLook ?? undefined) : look, autoSkin), autoSkin, cubeLook }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [look, setLook, autoSkin, cubeLook, connected, logosVersion]
   );
   return <CubeLookContext.Provider value={value}>{children}</CubeLookContext.Provider>;
 }

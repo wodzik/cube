@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw, Trash2, Download, Upload, CheckCircle2, Bluetooth } from "lucide-react";
 import { type KnownCube, cubeName, forgetCube, listCubes, onCubesChange, updateCube } from "../services/cubeRegistry";
 import { getSolves } from "../services/solveStore";
+import { APP_LOGO, type StoredLogo, addLogo, listLogos, onLogosChange, removeLogo } from "../services/logoStore";
 import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
@@ -45,7 +46,7 @@ function CubeLookSection() {
         </div>
         <p className="text-xs text-gray-500">
           How the cube is drawn everywhere in the app. <strong className="text-gray-300">Auto</strong> picks the skin that suits the
-          connected smart cube (GAN, QiYi, MoYu…) by its name — now: {SKIN_LABELS[autoSkin]}.
+          connected smart cube (GAN, QiYi, MoYu…) by its name — now: {SKIN_LABELS[autoSkin]}. With a cube connected it always gets the skin that suits it, unless you gave it its own (My cubes).
           {cubeLook && (
             <span className="block mt-1.5 text-sky-300/80">The connected cube has its own look (My cubes, below) — that's what's drawn now.</span>
           )}
@@ -53,7 +54,7 @@ function CubeLookSection() {
       </div>
       <SettingsRow
         title="Skin"
-        description="The cube's shapes and colours."
+        description="The cube's shapes and colours when no smart cube is connected — a connected cube gets the skin that suits it (or its own, in My cubes)."
         action={
           <select className={selectClass} value={look.skin} onChange={(e) => setLook({ skin: e.target.value as CubeLook["skin"] })}>
             <option value="auto">Auto — the connected cube</option>
@@ -81,7 +82,6 @@ function CubeLookSection() {
       <SettingsRow
         title="Finish"
         description="Matte or glossy plastic."
-        last
         action={
           <select className={selectClass} value={look.finish} onChange={(e) => setLook({ finish: e.target.value as CubeLook["finish"] })}>
             {FINISHES.map(([v, label]) => (
@@ -92,6 +92,7 @@ function CubeLookSection() {
           </select>
         }
       />
+      <LogoRow value={look.logo} onChange={(logo) => setLook({ logo })} />
     </Section>
   );
 }
@@ -121,6 +122,87 @@ function TurnArrowsSection() {
 
 const ARROW_MODES: [ArrowMode, string][] = [["off", "Off"], ["circle", "Round"], ["box", "Along the edges"]];
 
+/** The logos to choose from: the app's, and images added in this browser. */
+function useLogos(): StoredLogo[] {
+  const [logos, setLogos] = useState(listLogos);
+  useEffect(() => onLogosChange(() => setLogos(listLogos())), []);
+  return logos;
+}
+
+function LogoOptions({ logos }: { logos: StoredLogo[] }) {
+  return (
+    <>
+      <option value="">No logo</option>
+      <option value={APP_LOGO}>App logo</option>
+      {logos.map((l) => (
+        <option key={l.id} value={l.id}>
+          {l.name}
+        </option>
+      ))}
+    </>
+  );
+}
+
+/** Logo on the white centre: choose, add an image of your own, remove added ones. */
+function LogoRow({ value, onChange }: { value: string; onChange: (logo: string) => void }) {
+  const logos = useLogos();
+  const input = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <SettingsRow
+      title="Logo"
+      description={
+        <>
+          On the white centre. Add an image of your own (e.g. your cube's brand logo) — it stays in this browser only.
+          {logos.length > 0 && (
+            <span className="flex flex-wrap gap-1.5 mt-2">
+              {logos.map((l) => (
+                <span key={l.id} className="flex items-center gap-1.5 pl-1 pr-1.5 py-0.5 rounded-lg bg-white/[0.04] text-[11px] text-gray-300">
+                  <img src={l.image} alt="" className="size-5 object-contain" />
+                  {l.name}
+                  <button onClick={() => removeLogo(l.id)} className="text-gray-500 hover:text-red-400" title="Remove this logo">
+                    <Trash2 size={11} />
+                  </button>
+                </span>
+              ))}
+            </span>
+          )}
+          {error && <span className="block text-red-400 mt-1">{error}</span>}
+        </>
+      }
+      last
+      action={
+        <div className="flex items-center gap-2">
+          <select className={selectClass} value={value} onChange={(e) => onChange(e.target.value)}>
+            <LogoOptions logos={logos} />
+          </select>
+          <button onClick={() => input.current?.click()} className="btn-secondary text-xs" title="Add an image as a logo">
+            <Upload size={13} /> Add
+          </button>
+          <input
+            ref={input}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (!f) return;
+              setError(null);
+              try {
+                const logo = await addLogo(f);
+                onChange(logo.id);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "Could not read the image");
+              }
+            }}
+          />
+        </div>
+      }
+    />
+  );
+}
+
 /** A select value for "follow the app's setting" (no per-cube value). */
 const APP = "__app";
 
@@ -130,6 +212,7 @@ const APP = "__app";
  * its own or the app's (Cube look, above).
  */
 function MyCubesSection() {
+  const logos = useLogos();
   const [cubes, setCubes] = useState<KnownCube[]>(listCubes);
   useEffect(() => onCubesChange(() => setCubes(listCubes())), []);
   const connectedId = useSmartCubeConnection()?.cubeId ?? null;
@@ -181,9 +264,8 @@ function MyCubesSection() {
               {c.deviceName} · {c.protocol} · last used {new Date(c.lastSeen).toLocaleDateString()} · {counts.get(c.id) ?? 0} records
             </p>
             <div className="flex flex-wrap gap-2">
-              <select className={selectClass} value={c.look?.skin ?? APP} onChange={(e) => setLookPart(c, "skin", e.target.value)} title="Skin for this cube">
-                <option value={APP}>Skin: app setting</option>
-                <option value="auto">Auto — by its name</option>
+              <select className={selectClass} value={c.look?.skin && c.look.skin !== "auto" ? c.look.skin : APP} onChange={(e) => setLookPart(c, "skin", e.target.value)} title="Skin for this cube">
+                <option value={APP}>Skin: the one that suits it</option>
                 {(Object.keys(SKIN_LABELS) as SkinName[]).map((k) => (
                   <option key={k} value={k}>
                     {SKIN_LABELS[k]}
@@ -219,6 +301,10 @@ function MyCubesSection() {
                   </option>
                 ))}
               </select>
+              <select className={selectClass} value={c.look?.logo ?? APP} onChange={(e) => setLookPart(c, "logo", e.target.value)} title="Logo for this cube">
+                <option value={APP}>Logo: app setting</option>
+                <LogoOptions logos={logos} />
+              </select>
             </div>
           </div>
         ))
@@ -238,6 +324,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_trainer_attempts",
   "nact_bld_times",
   "nact_turn_arrows",
+  "nact_logos",
 ];
 
 function allNactKeys(): string[] {
@@ -284,7 +371,7 @@ function SettingsRow({
   last = false,
 }: {
   title: string;
-  description: string;
+  description: React.ReactNode;
   action: React.ReactNode;
   last?: boolean;
 }) {
@@ -292,7 +379,7 @@ function SettingsRow({
     <div className={`flex items-center justify-between gap-4 py-4 ${last ? "" : "border-b border-white/[0.06]"}`}>
       <div>
         <p className="text-sm font-medium text-white">{title}</p>
-        <p className="text-xs text-gray-500 mt-0.5 max-w-md">{description}</p>
+        <div className="text-xs text-gray-500 mt-0.5 max-w-md">{description}</div>
       </div>
       {action}
     </div>

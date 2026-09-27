@@ -26,7 +26,7 @@ import { type Move, type State, formatAlg, isSolved, solvedState, statesEqual } 
 import { SimulatedCube, SmartCubeSession as SmartCubeSessionClass, type SmartCubeSession } from "@cubecore/bluetooth";
 import { SKINS } from "@cubecore/skin";
 import { openCubeSession, trackKnownCube, useSmartCube } from "../hooks/useSmartCube";
-import { type SkinName, resolveSkin, useCubeLook } from "../hooks/useCubeLook";
+import { type SkinName, lookForCube, resolveSkin, useCubeLook } from "../hooks/useCubeLook";
 import { useTurnArrows } from "../hooks/useTurnArrows";
 import { listCubes, onCubesChange } from "../services/cubeRegistry";
 import { cubecoreSolver } from "../services/cubecoreSolver";
@@ -352,7 +352,7 @@ function PlayerSide({
     if (!session) return resolveSkin(look, "default");
     const known = cubes.find((c) => c.key === (session.info.mac ? session.info.mac.toUpperCase() : session.info.name));
     const auto = ((Object.keys(SKINS) as SkinName[]).find((k) => SKINS[k] === session.suggestedSkin) ?? "default") as SkinName;
-    return resolveSkin({ ...look, ...Object.fromEntries(Object.entries(known?.look ?? {}).filter(([, v]) => v !== undefined)) }, auto);
+    return resolveSkin(lookForCube(look, known?.look), auto);
   }, [session, look, cubes]);
 
   useEffect(() => {
@@ -470,16 +470,14 @@ function PlayerSide({
         )}
       </div>
 
-      <div className="relative w-72 sm:w-80 aspect-square">
+      <div className="w-72 sm:w-80 aspect-square">
         <div ref={playerHost} className="size-full" />
-        {!session && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button onClick={onConnect} className="btn-secondary" title="Connect this player's cube">
-              <Bluetooth size={13} /> Connect
-            </button>
-          </div>
-        )}
       </div>
+      {!session && (
+        <button onClick={onConnect} className="btn-secondary" style={{ color: colour, borderColor: `${colour}55` }} title="Connect this player's cube">
+          <Bluetooth size={13} /> Connect cube
+        </button>
+      )}
 
       {session && (
         <div className="flex items-center gap-2">
