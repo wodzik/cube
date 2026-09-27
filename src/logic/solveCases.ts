@@ -193,3 +193,19 @@ export function solveCases(record: SolveRecord, method: string, boundaries?: rea
   }
   return hit;
 }
+
+/**
+ * A CFOP solve's cross as a case: the scrambled cube and the face the cross
+ * was built on — for its optimal length, and to practise it in the cross
+ * trainer. Null when there's no cross stage (or it was done before the
+ * first move).
+ */
+export function crossCaseOf(record: SolveRecord, boundaries: readonly StageBoundary[] = record.cfop ?? []): { start: State; face: Face } | null {
+  const cross = boundaries.find((b) => b.stage === "cross");
+  if (!cross || cross.moveIndex < 0) return null;
+  const states = statesAt(record, [0, doneAt(cross)]);
+  const start = states.get(0);
+  const done = states.get(doneAt(cross));
+  const frame = done && crossFrame(done, cross.detail);
+  return start && frame ? { start, face: frame.face.D } : null;
+}

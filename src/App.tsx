@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { type AnalyzeRequest, onOpenAnalyze } from "./services/analyzeNav";
 import { type DrillRequest, onOpenDrill } from "./services/drillNav";
 import { onOpenTab } from "./services/tabNav";
+import { type TrainerRequest, onOpenTrainer } from "./services/trainerNav";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { CubeLookProvider } from "./hooks/useCubeLook";
 import { useVersionCheck } from "./hooks/useVersionCheck";
@@ -93,6 +94,16 @@ export default function App() {
     []
   );
   useEffect(() => onOpenTab((t) => setTab(t as Tab)), []);
+  // A trainer on one case (a solve's cross…).
+  const [trainerRequest, setTrainerRequest] = useState<TrainerRequest | null>(null);
+  useEffect(
+    () =>
+      onOpenTrainer((r) => {
+        setTrainerRequest(r);
+        setTab("trainer");
+      }),
+    []
+  );
   const updateAvailable = useVersionCheck();
   const dataUpdateAvailable = useAlgorithmDataVersionCheck();
   const [dataNoticeDismissed, setDataNoticeDismissed] = useState(false);
@@ -125,7 +136,7 @@ export default function App() {
           {tab === "solve" && <SolvePage />}
           {tab === "training" && <TrainingPage request={drillRequest} />}
           {tab === "attack" && <AttackPage />}
-          {tab === "trainer" && <TrainersPage />}
+          {tab === "trainer" && <TrainersPage request={trainerRequest} />}
           {tab === "bld" && <BldTrainerPage />}
           {tab === "versus" && <VersusPage />}
           {tab === "analyze" && <AnalyzePage request={analyzeRequest} />}

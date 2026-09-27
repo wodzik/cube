@@ -49,7 +49,11 @@ import { patchSolve } from "../services/solveStore";
 import { buildShareUrl, shareBlocker } from "../logic/shareLink";
 import { copyText } from "../logic/clipboard";
 import { stageDescription } from "./stageDescriptions";
-import { type StageCase, caseTitle, isRealCase, solveCases } from "../logic/solveCases";
+import { type StageCase, caseTitle, crossCaseOf, isRealCase, solveCases } from "../logic/solveCases";
+import { cubecoreSolver } from "../services/cubecoreSolver";
+import { openTrainer } from "../services/trainerNav";
+import { frameForBottom } from "../logic/trainerCatalog";
+import { CFOP_TRAINERS } from "@wodzik/cubecore/cfop";
 import { CaseAlgorithmsModal } from "./CaseAlgorithmsModal";
 
 interface SolveAnalysisProps {
@@ -94,6 +98,7 @@ function StageTimingRow({
   moveCountOnly = false,
   stageCase,
   onOpenCase,
+  cross,
 }: {
   timing: StageTiming;
   onJump: (stage: string, moveIndex: number) => void;
@@ -101,6 +106,8 @@ function StageTimingRow({
   /** The algorithm case this stage started from (F2L / OLL / PLL / CMLL). */
   stageCase?: StageCase;
   onOpenCase?: (c: StageCase) => void;
+  /** The cross (CFOP): its optimal length (null: still computing), and practising this exact cross. */
+  cross?: { optimal: number | null; onTrain: () => void };
 }) {
   const reached = timing.startMoveIndex !== null;
   // A stage with 0 moves either completed as a side effect of the previous
@@ -121,12 +128,12 @@ function StageTimingRow({
         <Play size={11} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--accent-bright)" }} fill="currentColor" />
       )}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage, timing.detail)}</span>
           {skipped ? (
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
           ) : (
-            <span className="text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
+            <span className="whitespace-nowrap text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
           )}
           {!skipped && isRealCase(stageCase) && (
             <button
@@ -139,6 +146,36 @@ function StageTimingRow({
             >
               {caseTitle(stageCase)}
             </button>
+          )}
+          {!skipped && cross && (
+            <>
+              {cross.optimal === null ? (
+                <span className="text-[10px] text-gray-500">optimal …</span>
+              ) : timing.moveCount <= cross.optimal ? (
+                <span className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-emerald-500/10 text-emerald-300" title={`The shortest cross here is ${cross.optimal} moves — yours too`}>
+                  optimal ✓
+                </span>
+              ) : (
+                <span
+                  className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-amber-500/10 text-amber-300"
+                  title={`The shortest cross here is ${cross.optimal} moves — yours took ${timing.moveCount}`}
+                >
+                  optimal {cross.optimal} (+{timing.moveCount - cross.optimal})
+                </span>
+              )}
+              {cross.optimal !== null && cross.optimal > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cross.onTrain();
+                  }}
+                  className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                  title="Practise this exact cross in the cross trainer (Recognize, at its optimal length)"
+                >
+                  Train this cross →
+                </button>
+              )}
+            </>
           )}
           {!skipped && stageCase?.name === "other" && (
             <span className="text-[10px] text-gray-500" title="Not one of the set's cases (e.g. a piece was in another slot)">
@@ -257,6 +294,34 @@ export function SolveAnalysis({
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
   // Which algorithm case each stage started from (CFOP: F2L / OLL / PLL; Roux: CMLL).
   const cases = solveCases(record, method, boundaries);
+  // CFOP: the cross's optimal length (the cross trainer's solver, the face it was built on).
+  const crossCase = method === "CFOP" ? crossCaseOf(record, boundaries) : null;
+  const crossKey = crossCase ? `${record.id}|${crossCase.face}` : "";
+  const [crossOptimal, setCrossOptimal] = useState<{ key: string; optimal: number } | null>(null);
+  useEffect(() => {
+    if (!crossCase) return;
+    let cancelled = false;
+    cubecoreSolver()
+      .stageDistance(CFOP_TRAINERS.cross(), crossCase.start, { frame: frameForBottom(crossCase.face) })
+      .then((d) => !cancelled && typeof d === "number" && setCrossOptimal({ key: crossKey, optimal: d }))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crossKey]);
+  const cross =
+    crossCase && !readOnly
+      ? {
+          optimal: crossOptimal?.key === crossKey ? crossOptimal.optimal : null,
+          onTrain: () => {
+            const optimal = crossOptimal?.key === crossKey ? crossOptimal.optimal : null;
+            if (!optimal) return;
+            onClose();
+            openTrainer({ type: "cross", level: optimal, bottom: crossCase.face, virtual: true, caseState: crossCase.start });
+          },
+        }
+      : undefined;
   const [openCase, setOpenCase] = useState<StageCase | null>(null);
   // For the method currently shown (its stage split defines the pauses).
   const fluency = fluencyPercent(timings, record.timeMs);
@@ -387,6 +452,7 @@ export function SolveAnalysis({
                     moveCountOnly={moveCountOnly}
                     stageCase={cases[t.stage]}
                     onOpenCase={setOpenCase}
+                    cross={t.stage === "cross" ? cross : undefined}
                   />
                 ))}
               </div>

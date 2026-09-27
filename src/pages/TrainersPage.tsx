@@ -50,6 +50,7 @@ import type { F2LSlot } from "@wodzik/cubecore/cfop";
 import { CMLL_CASES, cmllCaseState, recognizeCmll } from "@wodzik/cubecore/roux";
 import { OLL_CASES, PLL_CASES, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
 import { SessionProvider, useSession } from "../state/sessionContext";
+import type { TrainerRequest } from "../services/trainerNav";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves, collapseToStm } from "../logic/moveReduction";
 import {
@@ -174,15 +175,15 @@ interface Summary {
   optimalSolutions: string[];
 }
 
-export default function TrainersPage() {
+export default function TrainersPage({ request }: { request?: TrainerRequest | null }) {
   return (
     <SessionProvider config={TRAINER_CONFIG}>
-      <TrainersInner />
+      <TrainersInner request={request ?? null} />
     </SessionProvider>
   );
 }
 
-function TrainersInner() {
+function TrainersInner({ request }: { request: TrainerRequest | null }) {
   const { state, submitCubeMove, setTarget, confirmManualSetup, signalStop } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
 
@@ -336,12 +337,42 @@ function TrainersInner() {
     void startNextAttempt();
   }, [startNextAttempt]);
 
-  // First case, and a new one whenever what's practised changes.
+  // Opened on one case (a solve's cross… — services/trainerNav): its trainer, level,
+  // colour and mode, then that exact case as the first one.
+  const pendingCase = useRef<{ caseState: State; attempt: TrainerAttempt } | null>(null);
+  const [requestSeq, setRequestSeq] = useState(0);
+  useEffect(() => {
+    if (!request) return;
+    const d = trainerById(request.type);
+    if (!d) return;
+    const s = settingsRef.current;
+    setSettings({
+      type: d.id,
+      lastByFamily: { ...s.lastByFamily, [d.family]: d.id },
+      levels: { ...s.levels, [d.id]: request.level },
+      bottom: { ...s.bottom, [d.family]: request.bottom },
+      virtual: request.virtual,
+    });
+    pendingCase.current = {
+      caseState: request.caseState,
+      attempt: { type: d.id, targetLength: request.level, frameId: frameForBottom(request.bottom).id } as TrainerAttempt,
+    };
+    setRequestSeq((n) => n + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request]);
+
+  // First case, and a new one whenever what's practised changes (or a requested case).
   const choiceKey = `${def.id}|${variant}|${level}|${settings.slots.join()}|${bottom}|${settings.virtual}`;
   useEffect(() => {
-    void startNextAttempt();
+    const pending = pendingCase.current;
+    pendingCase.current = null;
+    if (pending) {
+      setSummary(null);
+      setInfo(`This case from your solve — optimal ${pending.attempt.targetLength}`);
+      void startNextAttempt(pending);
+    } else void startNextAttempt();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [choiceKey]);
+  }, [choiceKey, requestSeq]);
 
   // The view follows the real cube from where the scramble starts (case mode: set with the case).
   const targetStart = state.target?.start;

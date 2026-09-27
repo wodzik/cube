@@ -26,6 +26,7 @@
  * dragged chart width in "side" mode (persisted per browser).
  */
 
+import { useChartShown } from "../hooks/useChartShown";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
@@ -169,6 +170,8 @@ function SplitRow({
   const rowRef = useRef<HTMLDivElement>(null);
   const timerCubeRowRef = useRef<HTMLDivElement>(null);
   const { width: chartWidth, startDrag } = useDraggedWidth("nact_side_chart_width", 480);
+  // Chart hidden: the column shrinks to its numbers (no handle, never stacks under).
+  const [chartShown] = useChartShown();
   // True when the row can't fit block 1 + handle + a minimum-width chart:
   // the chart then drops UNDER block 1 at full width instead of the two
   // overlapping or the row overflowing the viewport.
@@ -219,14 +222,14 @@ function SplitRow({
   return (
     <div
       ref={rowRef}
-      className={`flex flex-col px-4 sm:px-6 py-4 gap-6 ${stacked ? "lg:gap-8" : "lg:flex-row lg:items-start lg:gap-0"}`}
+      className={`flex flex-col px-4 sm:px-6 py-4 gap-6 ${stacked && chartShown ? "lg:gap-8" : "lg:flex-row lg:items-start lg:gap-0"}`}
     >
       {leftAside != null && (
         // Below the timer, cube and chart when the row is stacked (phones, or a
         // narrow desktop) — first in the DOM, so `order-last` — and back in the
         // left column beside them on a wide screen. A long times list must
         // not push the timer and cube off the screen.
-        <div data-left-aside className={`order-last ${stacked ? "" : "lg:order-none"} lg:flex-none lg:mr-8 flex flex-col self-start w-full lg:w-auto`}>
+        <div data-left-aside className={`order-last ${stacked && chartShown ? "" : "lg:order-none"} lg:flex-none lg:mr-8 flex flex-col self-start w-full lg:w-auto`}>
           {leftAside}
         </div>
       )}
@@ -247,15 +250,17 @@ function SplitRow({
 
       {stats != null && (
         <>
-          <DragHandle onPointerDown={onHandleDown} className={stacked ? "hidden" : "hidden lg:flex"} />
+          <DragHandle onPointerDown={onHandleDown} className={stacked || !chartShown ? "hidden" : "hidden lg:flex"} />
           <div
             // Remount on mode switch: recharts' ResponsiveContainer keeps the
             // width it measured in the previous mode otherwise.
-            key={stacked ? "stacked" : "side"}
+            key={!chartShown ? "numbers" : stacked ? "stacked" : "side"}
             className={
-              stacked
-                ? "w-full min-w-0"
-                : "w-full lg:w-auto lg:basis-[var(--chart-w)] lg:grow-0 lg:shrink lg:min-w-[240px] min-w-0"
+              !chartShown
+                ? "w-full lg:w-auto lg:flex-none lg:ml-6 min-w-0"
+                : stacked
+                  ? "w-full min-w-0"
+                  : "w-full lg:w-auto lg:basis-[var(--chart-w)] lg:grow-0 lg:shrink lg:min-w-[240px] min-w-0"
             }
             style={{ "--chart-w": `${chartWidth}px` } as CSSProperties}
           >

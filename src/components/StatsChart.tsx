@@ -13,6 +13,7 @@ import { LineChart, Maximize2 } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ao5, ao12, ao100, best, mean, formatTimeMs } from "../logic/statistics";
 import { OverlayModal } from "./OverlayModal";
+import { useChartShown } from "../hooks/useChartShown";
 
 interface StatsChartProps {
   /** Values in chronological order (oldest first) — solve times in ms by default; anything where lower is better works (e.g. move counts) given a matching `formatValue`. */
@@ -189,7 +190,7 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
       </div>
       )}
 
-      <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3 shrink-0">
+      <div className={showGraph ? "flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3 shrink-0" : "flex flex-col gap-3 shrink-0"}>
         <StatCard label="Ao5" value={currentAo5 ? formatValue(currentAo5) : null} accent={METRIC_COLOR.ao5} />
         <StatCard label="Ao12" value={currentAo12 ? formatValue(currentAo12) : null} accent={METRIC_COLOR.ao12} />
         <StatCard label="Ao100" value={currentAo100 ? formatValue(currentAo100) : null} accent={METRIC_COLOR.ao100} />
@@ -200,8 +201,6 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
   );
 }
 
-const GRAPH_KEY = "nact_chart_shown";
-
 export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true, showAo12 = true, showAo100 = false, height = 200 }: StatsChartProps) {
   const [visible, setVisible] = useState<Record<Metric, boolean>>({
     single: true,
@@ -210,23 +209,8 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
     ao100: showAo100,
   });
   const [fullscreen, setFullscreen] = useState(false);
-  // Show / hide the graph (the numbers stay) — one choice for every chart, kept in this browser.
-  const [graphShown, setGraphShown] = useState(() => {
-    try {
-      return localStorage.getItem(GRAPH_KEY) !== "false";
-    } catch {
-      return true;
-    }
-  });
-  const toggleGraph = () => {
-    const next = !graphShown;
-    setGraphShown(next);
-    try {
-      localStorage.setItem(GRAPH_KEY, String(next));
-    } catch {
-      // not kept
-    }
-  };
+  // Show / hide the graph (the numbers stay, in one column) — shared with the layout around it.
+  const [graphShown, toggleGraph] = useChartShown();
   // The fullscreen chart fills nearly the whole viewport — ResponsiveContainer
   // needs a concrete pixel height (percentage heights need a height-bounded
   // flex ancestor, which fights with the modal's own padding/header math more
