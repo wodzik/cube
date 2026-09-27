@@ -30,6 +30,12 @@ export interface KnownCube {
   look?: Partial<CubeLook>;
   /** This cube's turn arrows (off / round / along the edges); unset: the app's. */
   arrows?: "off" | "circle" | "box";
+  /**
+   * A cube that can't reset its own state (QiYi…): what it reports when it's
+   * solved since "Mark as solved" (stateCodec) — passed to the session on
+   * every connection.
+   */
+  base?: string;
 }
 
 export function listCubes(): KnownCube[] {
@@ -68,13 +74,19 @@ export function rememberCube(device: { name: string; mac?: string | null; protoc
   return cube;
 }
 
-export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look" | "arrows">>): void {
+export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look" | "arrows" | "base">>): void {
   save(listCubes().map((c) => (c.id === id ? { ...c, ...patch } : c)));
 }
 
 /** Forget a cube (its records keep the id; they just show it as an unknown cube). */
 export function forgetCube(id: string): void {
   save(listCubes().filter((c) => c.id !== id));
+}
+
+/** The record of a device (by MAC, else name), before it's remembered — e.g. to look up its base. */
+export function findCube(device: { name: string; mac?: string | null }): KnownCube | undefined {
+  const key = device.mac ? device.mac.toUpperCase() : device.name;
+  return listCubes().find((c) => c.key === key);
 }
 
 export const cubeName = (c: KnownCube): string => c.label?.trim() || c.deviceName;

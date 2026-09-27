@@ -35,10 +35,10 @@ import {
 } from "react";
 import { getCachedMacForDevice } from "smartcube-web-bluetooth";
 import { SimulatedCube, SmartCubeSession } from "@cubecore/bluetooth";
-import { type State, formatMove } from "@cubecore/core";
+import { type State, decodeState, encodeState, formatMove } from "@cubecore/core";
 import { SKINS } from "@cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";
-import { rememberCube, setActiveCube } from "../services/cubeRegistry";
+import { findCube, rememberCube, setActiveCube, updateCube } from "../services/cubeRegistry";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
 
 type MoveListener = (move: string, timestampMs: number) => void;
@@ -122,6 +122,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     const known = rememberCube({ name: conn.info.name, mac: conn.info.mac, protocol: conn.info.protocol.id });
     setActiveCube(known.id);
     setCubeId(known.id);
+    // Keep the cube's "solved" reference for the next connection (cubes that can't reset — QiYi…).
+    const keepBase = conn.on("base", (b) => updateCube(known.id, { base: b ? (encodeState(b) ?? undefined) : undefined }));
 
     setState({
       connected: true,
@@ -161,6 +163,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
         setState(INITIAL_DEVICE_CONNECTION);
       }),
     ];
+    offs.push(keepBase);
     subscriptionRef.current = { unsubscribe: () => offs.forEach((off) => off()) };
   }, []);
 
@@ -173,20 +176,29 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       // exposes no advertisement data (desktop Chrome without the
       // web-platform-features flag). The provider is the last-resort fallback:
       // ask the user to type the MAC in manually.
-      const conn = await SmartCubeSession.connect({
-        enableAddressSearch: true,
-        macAddressProvider: async (device, isFallbackCall) => {
-          if (!isFallbackCall) return null;
-          const flagHint =
-            typeof device.watchAdvertisements !== "function"
-              ? "\n\nOn Chrome, automatic discovery may work if you enable\nchrome://flags/#enable-experimental-web-platform-features"
-              : "";
-          return window.prompt(
-            `Unable to determine cube MAC address.\nPlease enter it manually:${flagHint}`,
-            getCachedMacForDevice(device) ?? ""
-          );
+      const conn = await SmartCubeSession.connect(
+        {
+          enableAddressSearch: true,
+          macAddressProvider: async (device, isFallbackCall) => {
+            if (!isFallbackCall) return null;
+            const flagHint =
+              typeof device.watchAdvertisements !== "function"
+                ? "\n\nOn Chrome, automatic discovery may work if you enable\nchrome://flags/#enable-experimental-web-platform-features"
+                : "";
+            return window.prompt(
+              `Unable to determine cube MAC address.\nPlease enter it manually:${flagHint}`,
+              getCachedMacForDevice(device) ?? ""
+            );
+          },
         },
-      });
+        {
+          // A cube that can't reset its own state: what it reports when solved, kept from "Mark as solved".
+          base: (device) => {
+            const kept = findCube(device)?.base;
+            return kept ? decodeState(kept) : null;
+          },
+        }
+      );
       use(conn);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect to cube");
