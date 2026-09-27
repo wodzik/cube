@@ -30,7 +30,8 @@
 
 import { cubeLabel } from "../services/cubeRegistry";
 import { useEffect, useRef, useState } from "react";
-import { X, Play, RotateCcw, Trash2, Link2, Check } from "lucide-react";
+import { X, Play, RotateCcw, Trash2, Link2, Check, Sparkles } from "lucide-react";
+import { openAnalyze } from "../services/analyzeNav";
 import type { SolveMethod, SolveRecord } from "../types/solve";
 import type { StageBoundary } from "../logic/stageDetection/types";
 import { SolveReplay, type SolveReplayRef } from "./SolveReplay";
@@ -301,6 +302,19 @@ export function SolveAnalysis({
               <SolveReplay ref={cubeRef} record={record} timings={moveCountOnly ? [] : timings} className="size-full" />
             </div>
             <p className="text-[11px] text-gray-400 text-center leading-relaxed font-mono break-all">{record.scramble}</p>
+            <button
+              onClick={() => {
+                onClose();
+                openAnalyze({
+                  scramble: record.scramble,
+                  solve: { moves: record.reducedMoves, timeMs: record.timeMs, moveCount: record.moveCount, method: record.method !== "unknown" ? record.method : undefined },
+                });
+              }}
+              className="btn-secondary py-1.5 text-[11px] w-full"
+              title="The scramble through CFOP, Roux and ZZ, step by step — with your solve next to it"
+            >
+              <Sparkles size={12} /> Analyze
+            </button>
             {onUseScramble && (
               <button
                 onClick={() => onUseScramble(record.scramble)}

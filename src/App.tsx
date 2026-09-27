@@ -1,4 +1,5 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { type AnalyzeRequest, onOpenAnalyze } from "./services/analyzeNav";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { CubeLookProvider } from "./hooks/useCubeLook";
 import { useVersionCheck } from "./hooks/useVersionCheck";
@@ -19,13 +20,14 @@ const AttackPage = lazy(() => import("./pages/AttackPage"));
 const TrainersPage = lazy(() => import("./pages/TrainersPage"));
 const BldTrainerPage = lazy(() => import("./pages/BldTrainerPage"));
 const VersusPage = lazy(() => import("./pages/VersusPage"));
+const AnalyzePage = lazy(() => import("./pages/AnalyzePage"));
 const AcademyPage = lazy(() => import("./pages/AcademyPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 // The read-only preview a share link opens (#s=…) — loaded only when there is one.
 const SharedSolveView = lazy(() => import("./components/SharedSolveView"));
 
-type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "versus" | "academy" | "settings" | "debug";
+type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "versus" | "analyze" | "academy" | "settings" | "debug";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
@@ -33,6 +35,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "trainer", label: "Trainers" },
   { id: "bld", label: "Blindfolded" },
   { id: "versus", label: "Versus" },
+  { id: "analyze", label: "Analyze" },
   { id: "attack", label: "Time Attack" },
   { id: "academy", label: "Academy" },
   { id: "debug", label: "Debug" },
@@ -41,6 +44,16 @@ const TABS: { id: Tab; label: string }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("solve");
+  // Analyze a scramble from anywhere (a solve's analysis…): switch to the tab with it filled in.
+  const [analyzeRequest, setAnalyzeRequest] = useState<AnalyzeRequest | null>(null);
+  useEffect(
+    () =>
+      onOpenAnalyze((r) => {
+        setAnalyzeRequest(r);
+        setTab("analyze");
+      }),
+    []
+  );
   const updateAvailable = useVersionCheck();
   const dataUpdateAvailable = useAlgorithmDataVersionCheck();
   const [dataNoticeDismissed, setDataNoticeDismissed] = useState(false);
@@ -86,6 +99,7 @@ export default function App() {
           {tab === "trainer" && <TrainersPage />}
           {tab === "bld" && <BldTrainerPage />}
           {tab === "versus" && <VersusPage />}
+          {tab === "analyze" && <AnalyzePage request={analyzeRequest} />}
           {tab === "academy" && <AcademyPage />}
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
