@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { type AnalyzeRequest, onOpenAnalyze } from "./services/analyzeNav";
+import { type DrillRequest, onOpenDrill } from "./services/drillNav";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { CubeLookProvider } from "./hooks/useCubeLook";
 import { useVersionCheck } from "./hooks/useVersionCheck";
@@ -21,13 +22,14 @@ const TrainersPage = lazy(() => import("./pages/TrainersPage"));
 const BldTrainerPage = lazy(() => import("./pages/BldTrainerPage"));
 const VersusPage = lazy(() => import("./pages/VersusPage"));
 const AnalyzePage = lazy(() => import("./pages/AnalyzePage"));
+const CaseStatsPage = lazy(() => import("./pages/CaseStatsPage"));
 const AcademyPage = lazy(() => import("./pages/AcademyPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 // The read-only preview a share link opens (#s=…) — loaded only when there is one.
 const SharedSolveView = lazy(() => import("./components/SharedSolveView"));
 
-type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "versus" | "analyze" | "academy" | "settings" | "debug";
+type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "versus" | "analyze" | "stats" | "academy" | "settings" | "debug";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
@@ -36,6 +38,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "bld", label: "Blindfolded" },
   { id: "versus", label: "Versus" },
   { id: "analyze", label: "Analyze" },
+  { id: "stats", label: "Stats" },
   { id: "attack", label: "Time Attack" },
   { id: "academy", label: "Academy" },
   { id: "debug", label: "Debug" },
@@ -51,6 +54,16 @@ export default function App() {
       onOpenAnalyze((r) => {
         setAnalyzeRequest(r);
         setTab("analyze");
+      }),
+    []
+  );
+  // Drill one case's algorithm from anywhere (a solve's case, the case stats): switch to Drill Algorithms on it.
+  const [drillRequest, setDrillRequest] = useState<DrillRequest | null>(null);
+  useEffect(
+    () =>
+      onOpenDrill((r) => {
+        setDrillRequest(r);
+        setTab("training");
       }),
     []
   );
@@ -94,12 +107,13 @@ export default function App() {
         </header>
         <Suspense fallback={null}>
           {tab === "solve" && <SolvePage />}
-          {tab === "training" && <TrainingPage />}
+          {tab === "training" && <TrainingPage request={drillRequest} />}
           {tab === "attack" && <AttackPage />}
           {tab === "trainer" && <TrainersPage />}
           {tab === "bld" && <BldTrainerPage />}
           {tab === "versus" && <VersusPage />}
           {tab === "analyze" && <AnalyzePage request={analyzeRequest} />}
+          {tab === "stats" && <CaseStatsPage />}
           {tab === "academy" && <AcademyPage />}
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}

@@ -70,6 +70,7 @@ import { SubgroupGrid } from "../components/SubgroupGrid";
 import type { SessionConfig } from "../types/session";
 import type { AlgGroup, AlgorithmCase } from "../types/algorithm";
 import { loadGroupView, saveGroupView, PRACTICE_VIEW_KEY } from "../services/lastView";
+import type { DrillRequest } from "../services/drillNav";
 
 const TRAINING_CONFIG: SessionConfig = {
   mode: "algorithm",
@@ -96,15 +97,15 @@ function loadTrackingEnabled(group: AlgGroup, defaultOn: boolean): boolean {
   return defaultOn;
 }
 
-export default function TrainingPage() {
+export default function TrainingPage({ request }: { request?: DrillRequest | null }) {
   return (
     <SessionProvider config={TRAINING_CONFIG}>
-      <TrainingPageInner />
+      <TrainingPageInner request={request ?? null} />
     </SessionProvider>
   );
 }
 
-function TrainingPageInner() {
+function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   const { state, submitCubeMove, setTarget, targetProgress, reset } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const { maskMoves, toggleMaskMoves } = useMaskMoves();
@@ -198,6 +199,7 @@ function TrainingPageInner() {
     if (next === group) return;
     setGroup(next);
     setActiveSubgroupId(null);
+    setVariantOverride(null);
   };
 
   useEffect(() => {
@@ -263,8 +265,31 @@ function TrainingPageInner() {
     }
   }, [jumpToCaseName, selectedCases]);
 
+  // Opened on one case from elsewhere (a solve's case, the case stats — services/drillNav):
+  // switch to its group / folder, make sure it's selected, jump the drill to it,
+  // and drill the requested algorithm of it instead of the default one.
+  const [variantOverride, setVariantOverride] = useState<{ caseName: string; variantId: string } | null>(null);
+  useEffect(() => {
+    if (!request) return;
+    const meta = getGroupMeta(request.group);
+    if (!meta) return;
+    const folder = meta.hasSubgroups ? (request.subgroup ?? null) : null;
+    if (meta.hasSubgroups && !meta.subgroups?.some((sg) => sg.id === folder)) return;
+    if (folder) setSubgroupCaseSelected(request.group, folder, request.caseName, true);
+    else setCaseSelected(request.group, request.caseName, true);
+    setGroup(request.group);
+    setActiveSubgroupId(folder);
+    setCases(folder ? getSubgroupCases(request.group, folder) : loadAlgGroup(request.group));
+    setVariantOverride(request.variantId ? { caseName: request.caseName, variantId: request.variantId } : null);
+    moveBuffer.clear();
+    setJumpToCaseName(request.caseName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request]);
+
   const currentCase = selectedCases[caseIdx] ?? null;
-  const variant = currentCase ? getDefaultVariant(currentCase) : undefined;
+  const overridden =
+    currentCase && variantOverride?.caseName === currentCase.name ? currentCase.algList.find((v) => v.id === variantOverride.variantId) : undefined;
+  const variant = currentCase ? (overridden ?? getDefaultVariant(currentCase)) : undefined;
   const displayConfig = resolveDisplayConfig(groupMeta, activeSubgroup?.displayConfig, currentCase?.displayConfigOverride);
 
   /** The algorithm's own tokens, exactly as written — fed to the view one at a time as each completes (see the animation effect below), never the raw decomposed hardware sub-moves. */

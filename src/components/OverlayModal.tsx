@@ -18,10 +18,12 @@ interface OverlayModalProps {
   className?: string;
   /** Extra classes on the scrollable body (defaults to padded + vertical scroll). */
   bodyClassName?: string;
+  /** Stacking layer — raise it for a modal opened from another modal (e.g. "z-[90]" over SolveAnalysis's z-[80]). */
+  layerClassName?: string;
   children: ReactNode;
 }
 
-export function OverlayModal({ onClose, header, className = "", bodyClassName = "p-5 overflow-y-auto", children }: OverlayModalProps) {
+export function OverlayModal({ onClose, header, className = "", bodyClassName = "p-5 overflow-y-auto", layerClassName = "z-[70]", children }: OverlayModalProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -31,7 +33,7 @@ export function OverlayModal({ onClose, header, className = "", bodyClassName = 
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3" onClick={onClose}>
+    <div className={`fixed inset-0 ${layerClassName} flex items-center justify-center bg-black/70 backdrop-blur-sm p-3`} onClick={onClose}>
       <div
         className={`bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-full ${className}`}
         onClick={(e) => e.stopPropagation()}

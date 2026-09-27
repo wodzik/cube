@@ -49,6 +49,8 @@ import { patchSolve } from "../services/solveStore";
 import { buildShareUrl, shareBlocker } from "../logic/shareLink";
 import { copyText } from "../logic/clipboard";
 import { stageDescription } from "./stageDescriptions";
+import { type StageCase, caseTitle, isRealCase, solveCases } from "../logic/solveCases";
+import { CaseAlgorithmsModal } from "./CaseAlgorithmsModal";
 
 interface SolveAnalysisProps {
   record: SolveRecord;
@@ -90,10 +92,15 @@ function StageTimingRow({
   timing,
   onJump,
   moveCountOnly = false,
+  stageCase,
+  onOpenCase,
 }: {
   timing: StageTiming;
   onJump: (stage: string, moveIndex: number) => void;
   moveCountOnly?: boolean;
+  /** The algorithm case this stage started from (F2L / OLL / PLL / CMLL). */
+  stageCase?: StageCase;
+  onOpenCase?: (c: StageCase) => void;
 }) {
   const reached = timing.startMoveIndex !== null;
   // A stage with 0 moves either completed as a side effect of the previous
@@ -120,6 +127,23 @@ function StageTimingRow({
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
           ) : (
             <span className="text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
+          )}
+          {!skipped && isRealCase(stageCase) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenCase?.(stageCase);
+              }}
+              className="text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 transition-colors"
+              title="This case's algorithms and your stats for it"
+            >
+              {caseTitle(stageCase)}
+            </button>
+          )}
+          {!skipped && stageCase?.name === "other" && (
+            <span className="text-[10px] text-gray-500" title="Not one of the set's cases (e.g. a piece was in another slot)">
+              not a standard case
+            </span>
           )}
         </div>
         {timing.moves.length > 0 && <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{timing.moves.join(" ")}</p>}
@@ -227,16 +251,19 @@ export function SolveAnalysis({
   const HEALED_KEY: Record<DisplayMethod, keyof NonNullable<typeof healed>> = { CFOP: "cfop", LBL: "lbl", Roux: "roux" };
   const boundaries = healed?.[HEALED_KEY[method]] ?? BOUNDARIES_BY_METHOD[method](record) ?? [];
   const timings = computeStageTimings(detector.stages, boundaries, record.moves);
+  // Which algorithm case each stage started from (CFOP: F2L / OLL / PLL; Roux: CMLL).
+  const cases = solveCases(record, method, boundaries);
+  const [openCase, setOpenCase] = useState<StageCase | null>(null);
   // For the method currently shown (its stage split defines the pauses).
   const fluency = fluencyPercent(timings, record.timeMs);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !openCase) onClose(); // Escape closes the case popup first
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, openCase]);
 
   // z-[80]: above OverlayModal (z-[70]) — this opens FROM the recent-solves
   // popup, so it must stack on top of it.
@@ -354,6 +381,8 @@ export function SolveAnalysis({
                     timing={t}
                     onJump={(stage, idx) => cubeRef.current?.seekToStage(stage, idx)}
                     moveCountOnly={moveCountOnly}
+                    stageCase={cases[t.stage]}
+                    onOpenCase={setOpenCase}
                   />
                 ))}
               </div>
@@ -365,6 +394,10 @@ export function SolveAnalysis({
             </div>
           </div>
         </div>
+
+        {openCase && (
+          <CaseAlgorithmsModal kind={openCase.kind} name={openCase.name} onClose={() => setOpenCase(null)} onNavigate={onClose} layerClassName="z-[90]" />
+        )}
 
         {(onDelete || (onMoveToSession && ((moveTargets?.length ?? 0) > 0 || onMoveToNewSession))) && (
           <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-white/[0.06]">
