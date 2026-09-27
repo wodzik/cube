@@ -13,6 +13,7 @@ import { type KnownCube, cubeName, forgetCube, listCubes, onCubesChange, updateC
 import { getSolves } from "../services/solveStore";
 import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
+import { type ArrowShape, useTurnArrows } from "../hooks/useTurnArrows";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
@@ -88,6 +89,35 @@ function CubeLookSection() {
                 {label}
               </option>
             ))}
+          </select>
+        }
+      />
+    </Section>
+  );
+}
+
+/** Turn arrows: on / off (also by the cube) and their shape. */
+function TurnArrowsSection() {
+  const { arrows, toggleArrows, shape, setShape } = useTurnArrows();
+  return (
+    <Section title="Turn arrows">
+      <SettingsRow
+        title="Show turn arrows"
+        description="While a smart cube is connected: the next move of the scramble or algorithm drawn on the 3D cube — and the way back after a slip (red), or the right face turned the wrong way (orange). Also switched by the cube."
+        action={
+          <button onClick={toggleArrows} className={selectClass}>
+            {arrows ? "On" : "Off"}
+          </button>
+        }
+      />
+      <SettingsRow
+        title="Arrow shape"
+        description="Ribbons along the faces, round the cube's edges — or round arcs clear of the corners."
+        last
+        action={
+          <select className={selectClass} value={shape} onChange={(e) => setShape(e.target.value as ArrowShape)}>
+            <option value="box">Along the edges</option>
+            <option value="circle">Round</option>
           </select>
         }
       />
@@ -198,6 +228,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_cubes",
   "nact_trainer_attempts",
   "nact_bld_times",
+  "nact_turn_arrows",
 ];
 
 function allNactKeys(): string[] {
@@ -291,6 +322,7 @@ export default function SettingsPage() {
 
       <CubeLookSection />
       <MyCubesSection />
+      <TurnArrowsSection />
 
       <Section title="Algorithm progress">
         <SettingsRow

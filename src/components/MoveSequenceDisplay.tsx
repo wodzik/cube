@@ -113,7 +113,7 @@ export function MoveSequenceDisplay({
   extraControls,
 }: MoveSequenceDisplayProps) {
   const isComplete = progress?.complete ?? false;
-  const { arrows } = useTurnArrows();
+  const { arrows, shape: arrowShape } = useTurnArrows();
   const following = !!useSmartCubeConnection()?.session && !!tracking;
   const canArrow = !!arrowTarget && !!useSmartCubeConnection()?.session;
   const tooManyErrors = !!progress && (progress.needsReset || (maxErrors > 0 && progress.undo.length >= maxErrors));
@@ -152,6 +152,7 @@ export function MoveSequenceDisplay({
               decorations={decorations}
               undoLabel={errorLabel.replace(/:$/, "")}
               arrowTarget={canArrow && arrows && following ? arrowTarget : undefined}
+              arrowShape={arrowShape}
             />
           )}
 
@@ -201,6 +202,7 @@ function SequenceElement({
   decorations,
   undoLabel,
   arrowTarget,
+  arrowShape,
 }: {
   kind: "scramble" | "alg";
   notation: string;
@@ -209,6 +211,7 @@ function SequenceElement({
   decorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
   undoLabel: string;
   arrowTarget?: () => ArrowTarget | null | undefined;
+  arrowShape: "box" | "circle";
 }) {
   const host = useRef<HTMLDivElement>(null);
   const el = useRef<SequenceEl | null>(null);
@@ -251,6 +254,7 @@ function SequenceElement({
     const e = el.current;
     if (!e) return;
     const target = arrowTarget?.() ?? null;
+    if (e.getAttribute("arrow-shape") !== arrowShape) e.setAttribute("arrow-shape", arrowShape);
     if (target) {
       if (e.player !== target) e.player = target;
       if (!e.hasAttribute("arrows")) e.setAttribute("arrows", "");
