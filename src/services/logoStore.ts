@@ -5,7 +5,7 @@
  * or per cube in My cubes.
  */
 
-import appLogoSvg from "../../public/favicon.svg?raw";
+import appLogoSvg from "../assets/app-logo.svg?raw";
 
 const KEY = "nact_logos";
 const EVENT = "nact-logos";

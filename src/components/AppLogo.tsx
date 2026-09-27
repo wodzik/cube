@@ -1,5 +1,5 @@
 /**
- * AppLogo — the circular solved-cube badge, mirrored from public/favicon.svg
+ * AppLogo — the circular solved-cube badge, mirrored from src/assets/app-logo.svg (also the favicon)
  * (that file drives the browser tab icon; this component renders the same
  * mark inline for the header, since a static <img> would lose crispness at
  * small sizes and can't inherit currentColor-free flat design tweaks later).
