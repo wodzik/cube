@@ -5,7 +5,7 @@
 
 import { formatTimeMs } from "../logic/statistics";
 
-type TimerState = "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
+type TimerState = "idle" | "ready" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
 
 interface TimerDisplayProps {
   timeMs: number;
@@ -18,6 +18,8 @@ interface TimerDisplayProps {
 
 const STATE_CLASSES: Record<TimerState, string> = {
   idle: "text-gray-300",
+  // Scrambled and waiting for the first move — go.
+  ready: "text-emerald-400",
   // Hold-to-start feedback (spacebar/BT timer) — red while held but not yet
   // past the minimum hold duration, green once armed (release now to go).
   holding: "text-red-400 timer-glow-holding",

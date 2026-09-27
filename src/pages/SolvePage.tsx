@@ -64,6 +64,8 @@ import {
 } from "../services/solveStore";
 
 function buildStartHint(methods: readonly StartMethod[]): string {
+  // Only the cube starts it: say so plainly (the timer shows ready, in green).
+  if (methods.length === 1 && methods[0] === "cube-move") return "Start turning — the first move starts the timer";
   const labels: string[] = [];
   if (methods.includes("cube-move")) labels.push("make a move");
   if (methods.includes("spacebar")) labels.push("press space");
@@ -705,12 +707,14 @@ function SolvePageInner({
     }
   }, [summaryRecord, analysisRecord, state.phase, state.moveLog.length]);
 
-  const timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" =
+  const timerState: "idle" | "ready" | "holding" | "armed" | "inspecting" | "solving" | "solved" =
     holdingLastResult
       ? "solved"
       : state.phase === "ready" && pressState !== "idle"
         ? pressState
-        : state.phase === "inspecting"
+        : state.phase === "ready"
+          ? "ready" // scrambled: the next move (or press) starts the timer
+          : state.phase === "inspecting"
           ? "inspecting"
           : state.phase === "active"
             ? "solving"

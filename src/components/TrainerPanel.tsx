@@ -100,7 +100,7 @@ export interface TrainerPanelProps {
   inspectionSecondsLeft?: number;
   inspectionMode?: "wca" | "custom" | "unlimited";
   timeMs: number;
-  timerState: "idle" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
+  timerState: "idle" | "ready" | "holding" | "armed" | "inspecting" | "solving" | "solved" | "dnf";
   timerClassName?: string;
   /** Show move count instead of time on the big timer, and chart `moveCounts` instead of `timesMs` — see StoredSession.moveCountOnly. */
   moveCountOnly?: boolean;
