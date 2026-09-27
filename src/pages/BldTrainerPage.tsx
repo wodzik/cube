@@ -22,6 +22,7 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { cubecoreSolver } from "../services/cubecoreSolver";
 import { ConnectionPanel } from "../components/ConnectionPanel";
+import { CubeTools } from "../components/CubeTools";
 
 const STORAGE_KEY = "nact_bld";
 const TIMES_KEY = "nact_bld_times";
@@ -335,7 +336,12 @@ export default function BldTrainerPage() {
       {!session && scramble && <p className="mx-auto max-w-3xl text-center font-mono text-lg text-gray-100">{formatAlg(scramble.moves)}</p>}
 
       <div className="grid gap-4 md:grid-cols-[1fr_minmax(0,24rem)] items-start">
-        <div ref={playerHost} className="h-[min(60vh,520px)] min-h-72 rounded-2xl bg-gray-900/60 overflow-hidden" />
+        <div className="flex flex-col items-center gap-2">
+          <div ref={playerHost} className="w-full h-[min(60vh,520px)] min-h-72 rounded-2xl bg-gray-900/60 overflow-hidden" />
+          <div className="flex items-center gap-2">
+            <CubeTools arrows={false} />
+          </div>
+        </div>
         <div className="flex flex-col gap-3">
           <div className="rounded-2xl bg-gray-900 p-4 grid grid-cols-2 gap-2 text-center">
             <div>

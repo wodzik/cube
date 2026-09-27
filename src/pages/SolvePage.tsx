@@ -773,7 +773,6 @@ function SolvePageInner({
       moves={targetTokens}
       progress={progress}
       tracking={selectTracking(state)}
-      showMaskToggle
       maskMoves={maskMoves}
       onToggleMask={toggleMaskMoves}
       showRefresh

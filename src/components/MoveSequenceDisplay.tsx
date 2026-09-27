@@ -14,14 +14,18 @@
  * current = accent, half-done half turn = amber, to do = grey; after a slip
  * the undo line in orange.
  *
- * The eye icon toggles maskMoves: every move becomes a dot (progress colours
- * stay) — for practising from memory; after a slip an algorithm shows the
- * move that was due. A controlled toggle — the parent owns maskMoves /
+ * Algorithms only: the eye icon toggles maskMoves — every move becomes a dot
+ * (progress colours stay), for practising from memory; after a slip the
+ * move that was due shows. A controlled toggle — the parent owns maskMoves /
  * onToggleMask (hooks/useMaskMoves, shared and persisted across pages).
+ *
+ * After a slip the moves give way to the way back (red undo moves); the
+ * move due turned the wrong way just turns orange. Turn arrows on the 3D
+ * cube follow the "Arrows" switch by the cube (CubeTools).
  */
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { RefreshCw, Eye, EyeOff, Navigation } from "lucide-react";
+import { RefreshCw, Eye, EyeOff } from "lucide-react";
 import { useTurnArrows } from "../hooks/useTurnArrows";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import "@cubecore/element";
@@ -109,7 +113,7 @@ export function MoveSequenceDisplay({
   extraControls,
 }: MoveSequenceDisplayProps) {
   const isComplete = progress?.complete ?? false;
-  const { arrows, toggleArrows } = useTurnArrows();
+  const { arrows } = useTurnArrows();
   const following = !!useSmartCubeConnection()?.session && !!tracking;
   const canArrow = !!arrowTarget && !!useSmartCubeConnection()?.session;
   const tooManyErrors = !!progress && (progress.needsReset || (maxErrors > 0 && progress.undo.length >= maxErrors));
@@ -162,15 +166,6 @@ export function MoveSequenceDisplay({
               title={maskMoves ? "Show letters" : "Hide letters (show dots)"}
             >
               {maskMoves ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          )}
-          {canArrow && (
-            <button
-              onClick={toggleArrows}
-              className={`control-button ${arrows ? "!text-sky-300" : ""}`}
-              title={arrows ? "Hide turn arrows on the cube" : "Show the next turn as arrows on the cube"}
-            >
-              <Navigation size={20} />
             </button>
           )}
           {showRefresh && onRefresh && (
@@ -237,9 +232,8 @@ function SequenceElement({
     };
   }, [kind]);
 
+  // Hiding the moves (dots) is an algorithm drill's thing — <cube-alg-practice> reveal="none".
   useEffect(() => {
-    el.current?.setAttribute("masked", "");
-    if (!masked) el.current?.removeAttribute("masked");
     if (kind === "alg") el.current?.setAttribute("reveal", masked ? "none" : "all");
   }, [masked, kind]);
 
@@ -248,7 +242,8 @@ function SequenceElement({
   }, [undoLabel]);
 
   useEffect(() => {
-    if (el.current) el.current.decorations = decorations ?? null;
+    const e = el.current;
+    if (e && "decorations" in e) e.decorations = decorations ?? null;
   }, [decorations]);
 
   // Turn arrows on the 3D cube (off: cleared there).

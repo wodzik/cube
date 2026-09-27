@@ -276,7 +276,8 @@
   --cc-seq-partial: #fcd34d; /* amber-300 */
   --cc-seq-todo: #9ca3af; /* gray-400 */
   --cc-seq-hidden: #6b7280;
-  --cc-seq-undo: #fdba74; /* orange-300 */
+  --cc-seq-undo: #f87171; /* red-400 */
+  --cc-seq-wrong-way: #fb923c; /* orange-400 */
   --cc-seq-decoration: #d1d5db;
   display: block;
 }

@@ -17,6 +17,7 @@
 import type { ReactNode, RefObject } from "react";
 import { TrainLayout, type TrainLayoutMode } from "./TrainLayout";
 import { MoveSequenceDisplay } from "./MoveSequenceDisplay";
+import { CubeTools } from "./CubeTools";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
 import type { StickeringMaskOrbits } from "../types/cube";
 import { TimerDisplay } from "./TimerDisplay";
@@ -365,7 +366,10 @@ export function TrainerPanel({
               </div>
             )}
           </div>
-          {cubeToolbar && <div className="flex flex-wrap items-center justify-center gap-2">{cubeToolbar}</div>}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {cubeToolbar}
+            <CubeTools />
+          </div>
         </div>
       }
       stats={

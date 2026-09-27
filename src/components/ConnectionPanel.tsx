@@ -1,36 +1,11 @@
 /**
  * Bluetooth connection panel — cube (required) + timer (optional, solve mode only).
- * Receives connection state + callbacks; with a cube connected it also
- * offers "Mark as solved" (the app keeps the cube's state across pages, so
- * this — not a page reset — is how to tell it the cube is solved).
+ * Purely presentational: receives connection state + callbacks. (Mark as
+ * solved / turn arrows live by the cube — CubeTools.)
  */
 
-/** "Mark as solved" beside the connected cube. */
-function MarkSolvedButton() {
-  const conn = useSmartCubeConnection();
-  const [done, setDone] = useState(false);
-  if (!conn?.session) return null;
-  return (
-    <button
-      onClick={() => {
-        conn.markSolved();
-        setDone(true);
-        setTimeout(() => setDone(false), 1500);
-      }}
-      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-        done ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-      }`}
-      title="My cube is solved — start tracking it from solved (scrambles and targets are planned again)"
-    >
-      <CheckCheck size={13} /> {done ? "Marked solved" : "Mark as solved"}
-    </button>
-  );
-}
-
-import { useState } from "react";
-import { Bluetooth, BluetoothConnected, BatteryFull, BatteryMedium, BatteryLow, Timer, CheckCheck } from "lucide-react";
+import { Bluetooth, BluetoothConnected, BatteryFull, BatteryMedium, BatteryLow, Timer } from "lucide-react";
 import type { DeviceConnection } from "../types/hardware";
-import { useSmartCubeConnection } from "../hooks/useSmartCube";
 
 interface ConnectionPanelProps {
   cube: DeviceConnection;
@@ -101,7 +76,6 @@ export function ConnectionPanel({
 }: ConnectionPanelProps) {
   return (
     <div className="flex items-center gap-2">
-      {cube.connected && <MarkSolvedButton />}
       <DeviceButton
         connection={cube}
         label="Cube"
