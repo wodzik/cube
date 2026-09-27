@@ -112,12 +112,12 @@ function TurnArrowsSection() {
       />
       <SettingsRow
         title="Arrow shape"
-        description="Ribbons along the faces, round the cube's edges — or round arcs clear of the corners."
+        description="Round arcs clear of the corners — or ribbons along the faces, round the cube's edges."
         last
         action={
           <select className={selectClass} value={shape} onChange={(e) => setShape(e.target.value as ArrowShape)}>
-            <option value="box">Along the edges</option>
             <option value="circle">Round</option>
+            <option value="box">Along the edges</option>
           </select>
         }
       />

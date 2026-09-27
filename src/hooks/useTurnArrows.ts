@@ -28,7 +28,8 @@ const write = (key: string, value: string) => {
   }
   window.dispatchEvent(new Event(EVENT));
 };
-const readShape = (): ArrowShape => (read(SHAPE_KEY) === "circle" ? "circle" : "box");
+/** Round arcs unless "along the edges" was chosen. */
+const readShape = (): ArrowShape => (read(SHAPE_KEY) === "box" ? "box" : "circle");
 
 export function useTurnArrows(): { arrows: boolean; toggleArrows: () => void; shape: ArrowShape; setShape: (s: ArrowShape) => void } {
   const [arrows, setArrows] = useState(() => read(KEY) === "true");
