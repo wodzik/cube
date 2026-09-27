@@ -76,6 +76,46 @@ const HISTORY = 200;
 
 const SmartCubeContext = createContext<SmartCubeContextValue | null>(null);
 
+/**
+ * Ask the browser for a smart cube and open a session on it — the options
+ * every connection uses (QiYi MAC probing / prompt; the "solved" reference
+ * of a cube that can't reset, from the list of known cubes). Needs a user
+ * gesture. The app's own cube goes through SmartCubeProvider; pages with
+ * more cubes (Versus) open more with this.
+ */
+export async function openCubeSession(): Promise<SmartCubeSession> {
+  return SmartCubeSession.connect(
+    {
+      enableAddressSearch: true,
+      macAddressProvider: async (device, isFallbackCall) => {
+        if (!isFallbackCall) return null;
+        const flagHint =
+          typeof device.watchAdvertisements !== "function"
+            ? "\n\nOn Chrome, automatic discovery may work if you enable\nchrome://flags/#enable-experimental-web-platform-features"
+            : "";
+        return window.prompt(
+          `Unable to determine cube MAC address.\nPlease enter it manually:${flagHint}`,
+          getCachedMacForDevice(device) ?? ""
+        );
+      },
+    },
+    {
+      // A cube that can't reset its own state: what it reports when solved, kept from "Mark as solved".
+      base: (device) => {
+        const kept = findCube(device)?.base;
+        return kept ? decodeState(kept) : null;
+      },
+    }
+  );
+}
+
+/** Remember a connected cube (Settings → My cubes) and keep its "solved" reference; returns its id and an unsubscribe. */
+export function trackKnownCube(conn: SmartCubeSession): { cubeId: string; off: () => void } {
+  const known = rememberCube({ name: conn.info.name, mac: conn.info.mac, protocol: conn.info.protocol.id });
+  const off = conn.on("base", (b) => updateCube(known.id, { base: b ? (encodeState(b) ?? undefined) : undefined }));
+  return { cubeId: known.id, off };
+}
+
 /** Mount once at the app root, above any tab/route switching. */
 export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DeviceConnection>(INITIAL_DEVICE_CONNECTION);
@@ -119,11 +159,9 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     connectionRef.current = conn;
     setSession(conn);
     // Remember this cube (the list in Settings; records are stamped with its id).
-    const known = rememberCube({ name: conn.info.name, mac: conn.info.mac, protocol: conn.info.protocol.id });
-    setActiveCube(known.id);
-    setCubeId(known.id);
-    // Keep the cube's "solved" reference for the next connection (cubes that can't reset — QiYi…).
-    const keepBase = conn.on("base", (b) => updateCube(known.id, { base: b ? (encodeState(b) ?? undefined) : undefined }));
+    const { cubeId: knownId, off: keepBase } = trackKnownCube(conn);
+    setActiveCube(knownId);
+    setCubeId(knownId);
 
     setState({
       connected: true,
@@ -176,29 +214,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       // exposes no advertisement data (desktop Chrome without the
       // web-platform-features flag). The provider is the last-resort fallback:
       // ask the user to type the MAC in manually.
-      const conn = await SmartCubeSession.connect(
-        {
-          enableAddressSearch: true,
-          macAddressProvider: async (device, isFallbackCall) => {
-            if (!isFallbackCall) return null;
-            const flagHint =
-              typeof device.watchAdvertisements !== "function"
-                ? "\n\nOn Chrome, automatic discovery may work if you enable\nchrome://flags/#enable-experimental-web-platform-features"
-                : "";
-            return window.prompt(
-              `Unable to determine cube MAC address.\nPlease enter it manually:${flagHint}`,
-              getCachedMacForDevice(device) ?? ""
-            );
-          },
-        },
-        {
-          // A cube that can't reset its own state: what it reports when solved, kept from "Mark as solved".
-          base: (device) => {
-            const kept = findCube(device)?.base;
-            return kept ? decodeState(kept) : null;
-          },
-        }
-      );
+      const conn = await openCubeSession();
       use(conn);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect to cube");

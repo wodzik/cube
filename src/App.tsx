@@ -18,19 +18,21 @@ const TrainingPage = lazy(() => import("./pages/TrainingPage"));
 const AttackPage = lazy(() => import("./pages/AttackPage"));
 const TrainersPage = lazy(() => import("./pages/TrainersPage"));
 const BldTrainerPage = lazy(() => import("./pages/BldTrainerPage"));
+const VersusPage = lazy(() => import("./pages/VersusPage"));
 const AcademyPage = lazy(() => import("./pages/AcademyPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 // The read-only preview a share link opens (#s=…) — loaded only when there is one.
 const SharedSolveView = lazy(() => import("./components/SharedSolveView"));
 
-type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "academy" | "settings" | "debug";
+type Tab = "solve" | "training" | "attack" | "trainer" | "bld" | "versus" | "academy" | "settings" | "debug";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "solve", label: "Solve" },
   { id: "training", label: "Drill Algorithms" },
   { id: "trainer", label: "Trainers" },
   { id: "bld", label: "Blindfolded" },
+  { id: "versus", label: "Versus" },
   { id: "attack", label: "Time Attack" },
   { id: "academy", label: "Academy" },
   { id: "debug", label: "Debug" },
@@ -83,6 +85,7 @@ export default function App() {
           {tab === "attack" && <AttackPage />}
           {tab === "trainer" && <TrainersPage />}
           {tab === "bld" && <BldTrainerPage />}
+          {tab === "versus" && <VersusPage />}
           {tab === "academy" && <AcademyPage />}
           {tab === "settings" && <SettingsPage />}
           {tab === "debug" && <DebugPage />}
