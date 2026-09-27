@@ -245,6 +245,7 @@ export function TrainerPanel({
               progress={progress}
               tracking={tracking}
               kind={sequenceKind}
+              arrowTarget={() => cubeRef.current?.arrowTarget()}
               decorations={sequenceDecorations}
               onRefresh={onRefresh}
               showRefresh={showRefresh}

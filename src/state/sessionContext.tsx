@@ -32,7 +32,8 @@ export interface SessionContextValue {
    * honest end time, not performance.now() at dispatch).
    */
   signalStop: (source: StopMethod, timestamp?: number) => void;
-  signalSolved: () => void;
+  /** The cube is solved — `timestamp`: the solving move's (default now). */
+  signalSolved: (timestamp?: number) => void;
   startInspection: () => void;
   /** initialOrientation: see sessionActions.targetReady — carries a hardware-frame shift into this target, so a solver who doesn't regrip between back-to-back algorithms is still recognized correctly. */
   setTarget: (targetNotation: string, initialOrientation?: Orientation) => void;
@@ -117,7 +118,7 @@ export function SessionProvider({
       },
       signalStart: (source) => dispatch(actions.startSignal(source, performance.now())),
       signalStop: (source, timestamp) => dispatch(actions.stopSignal(source, timestamp ?? performance.now())),
-      signalSolved: () => dispatch(actions.cubeSolved(performance.now())),
+      signalSolved: (timestamp) => dispatch(actions.cubeSolved(timestamp ?? performance.now())),
       startInspection: () => dispatch(actions.inspectionStart(performance.now())),
       setTarget: (targetNotation, initialOrientation) => {
         const start = cubeRef.current?.session?.state ?? null;

@@ -19,7 +19,7 @@
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import "@cubecore/element"; // registers <cube-player>
-import type { CubePlayer } from "@cubecore/element";
+import type { ArrowTarget, CubePlayer } from "@cubecore/element";
 import type { Skin } from "@cubecore/render";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { type Frame, type Mask, type State, isSolved } from "@cubecore/core";
@@ -93,6 +93,8 @@ export interface CubeVisualisationRef {
   setMoveIndex: (moveIndex: number) => void;
   /** Show this cube state (e.g. the smart cube's, as it is now), with no algorithm. */
   setState: (state: State) => void;
+  /** The player element — where a sequence bar draws its turn arrows. */
+  arrowTarget: () => ArrowTarget | null;
 }
 
 /** cubing.js visualization names → <cube-player> views. */
@@ -206,6 +208,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
         p.setup = "";
         p.alg = "";
       },
+      arrowTarget: () => playerRef.current,
       setState: (state: State) => {
         const p = playerRef.current;
         if (!p) return;

@@ -21,9 +21,11 @@
  */
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { RefreshCw, Eye, EyeOff } from "lucide-react";
+import { RefreshCw, Eye, EyeOff, Navigation } from "lucide-react";
+import { useTurnArrows } from "../hooks/useTurnArrows";
+import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import "@cubecore/element";
-import type { CubeAlgPractice, CubeScramble } from "@cubecore/element";
+import type { ArrowTarget, CubeAlgPractice, CubeScramble } from "@cubecore/element";
 import { parseAlg, solvedState } from "@cubecore/core";
 import type { SequenceTarget, TrackedProgress } from "../logic/cubecoreSequence";
 import type { MoveRecord } from "../types/session";
@@ -42,6 +44,8 @@ interface MoveSequenceDisplayProps {
   tracking?: SequenceTracking | null;
   /** "scramble" (default): <cube-scramble>; "alg": <cube-alg-practice>. */
   kind?: "scramble" | "alg";
+  /** The 3D cube the turn arrows go on (the arrows switch shows when given and a cube is connected). */
+  arrowTarget?: () => ArrowTarget | null | undefined;
 
   onRefresh?: () => void;
   showRefresh?: boolean;
@@ -85,6 +89,7 @@ export function MoveSequenceDisplay({
   progress,
   tracking = null,
   kind = "scramble",
+  arrowTarget,
   onRefresh,
   showRefresh = false,
   showMaskToggle = false,
@@ -104,6 +109,9 @@ export function MoveSequenceDisplay({
   extraControls,
 }: MoveSequenceDisplayProps) {
   const isComplete = progress?.complete ?? false;
+  const { arrows, toggleArrows } = useTurnArrows();
+  const following = !!useSmartCubeConnection()?.session && !!tracking;
+  const canArrow = !!arrowTarget && !!useSmartCubeConnection()?.session;
   const tooManyErrors = !!progress && (progress.needsReset || (maxErrors > 0 && progress.undo.length >= maxErrors));
   const showLoadingOverlay = loadingText !== undefined && (loading || moves.length === 0);
   // Distinct from showLoadingOverlay: only true when there ARE stale moves
@@ -139,6 +147,7 @@ export function MoveSequenceDisplay({
               masked={maskMoves}
               decorations={decorations}
               undoLabel={errorLabel.replace(/:$/, "")}
+              arrowTarget={canArrow && arrows && following ? arrowTarget : undefined}
             />
           )}
 
@@ -153,6 +162,15 @@ export function MoveSequenceDisplay({
               title={maskMoves ? "Show letters" : "Hide letters (show dots)"}
             >
               {maskMoves ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          )}
+          {canArrow && (
+            <button
+              onClick={toggleArrows}
+              className={`control-button ${arrows ? "!text-sky-300" : ""}`}
+              title={arrows ? "Hide turn arrows on the cube" : "Show the next turn as arrows on the cube"}
+            >
+              <Navigation size={20} />
             </button>
           )}
           {showRefresh && onRefresh && (
@@ -187,6 +205,7 @@ function SequenceElement({
   masked,
   decorations,
   undoLabel,
+  arrowTarget,
 }: {
   kind: "scramble" | "alg";
   notation: string;
@@ -194,6 +213,7 @@ function SequenceElement({
   masked: boolean;
   decorations?: Partial<Record<number, { prefix?: string; suffix?: string }>>;
   undoLabel: string;
+  arrowTarget?: () => ArrowTarget | null | undefined;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const el = useRef<SequenceEl | null>(null);
@@ -230,6 +250,20 @@ function SequenceElement({
   useEffect(() => {
     if (el.current) el.current.decorations = decorations ?? null;
   }, [decorations]);
+
+  // Turn arrows on the 3D cube (off: cleared there).
+  useEffect(() => {
+    const e = el.current;
+    if (!e) return;
+    const target = arrowTarget?.() ?? null;
+    if (target) {
+      if (e.player !== target) e.player = target;
+      if (!e.hasAttribute("arrows")) e.setAttribute("arrows", "");
+    } else if (e.hasAttribute("arrows")) {
+      e.removeAttribute("arrows");
+      e.player?.showTurnArrows(null, {}, e);
+    }
+  });
 
   useEffect(() => {
     const e = el.current;

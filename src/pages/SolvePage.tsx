@@ -437,7 +437,7 @@ function SolvePageInner({
   // and nothing happens; release at/after it and the attempt starts. See
   // useSpacebar's doc comment for why there's no maximum hold time.
   const { pressState: spacebarPressState } = useSpacebar({ holdToStart: true });
-  useSolvedDetection(cubeRef);
+  useSolvedDetection();
 
   // One unified "hold to start" indicator regardless of which input method
   // is actually armed — spacebar and the BT timer are mutually exclusive in
