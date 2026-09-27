@@ -63,6 +63,11 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
           {attempt.moveCount} moves{hasOptimal && ` · optimal ${attempt.optimalLength}`}
           {cubeLabel(attempt.cube) && ` · ${cubeLabel(attempt.cube)}`}
         </p>
+        <p className="text-sm text-gray-400">
+          {attempt.caseName && <span className="text-gray-200 font-semibold">{attempt.caseName}</span>}
+          {attempt.caseName && attempt.recognitionMs !== undefined && " · "}
+          {attempt.recognitionMs !== undefined && <>recognised in {(attempt.recognitionMs / 1000).toFixed(2)} s</>}
+        </p>
       </div>
 
       <div className="flex items-center gap-2">

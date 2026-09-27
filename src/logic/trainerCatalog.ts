@@ -25,19 +25,21 @@ import {
   type Vec3,
   checks,
   frameFor,
+  isSolved,
   isLseStage,
   view,
 } from "@cubecore/core";
-import { CFOP_MASKS, CFOP_TRAINERS, type F2LSlot } from "@cubecore/cfop";
+import { CFOP_MASKS, CFOP_TRAINERS, type F2LSlot, OLL_CASES, PLL_CASES } from "@cubecore/cfop";
 import { CMLL_CASES, ROUX_MASKS, ROUX_TRAINERS, cmll } from "@cubecore/roux";
 import { ZZ_TRAINERS } from "@cubecore/zz";
 import type { TrainerType } from "../types/trainer";
 
-export type Family = "cross" | "f2l" | "roux" | "zz";
+export type Family = "cross" | "f2l" | "ll" | "roux" | "zz";
 
 export const FAMILIES: { id: Family; label: string }[] = [
   { id: "cross", label: "Cross+" },
   { id: "f2l", label: "F2L" },
+  { id: "ll", label: "LL" },
   { id: "roux", label: "Roux" },
   { id: "zz", label: "ZZ" },
 ];
@@ -69,6 +71,7 @@ export const SLOTS: readonly F2LSlot[] = ["FR", "FL", "BR", "BL"];
 const SLOT_VARIANTS: Variants = { label: "Slot", options: SLOTS.map((s) => [s, s] as const), default: "FR" };
 const PAIRS = [["FR+FL", "FR+FL"], ["FR+BR", "FR+BR"], ["FL+BL", "FL+BL"], ["BR+BL", "BR+BL"], ["FR+BL", "FR+BL"], ["FL+BR", "FL+BR"]] as const;
 const SIDES: Variants = { label: "Square", options: [["front", "front"], ["back", "back"]], default: "front" };
+const groupsOf = (cases: readonly { group: string }[]) => ["all", ...new Set(cases.map((c) => c.group))];
 const CMLL_GROUPS = ["all", ...new Set(CMLL_CASES.map((c) => c.group).filter((g) => g !== "Solved"))];
 
 const CROSS: readonly Piece[] = [PIECE.DR, PIECE.DF, PIECE.DL, PIECE.DB];
@@ -78,6 +81,19 @@ const SLOT_PIECES: Record<F2LSlot, readonly [Piece, Piece]> = {
   BL: [PIECE.BL, PIECE.DBL],
   BR: [PIECE.BR, PIECE.DRB],
 };
+
+/** Roux second block, its last pair: the first block, DR and the other square stay. */
+export function sbLastSlot(last: "front" | "back"): StageDef {
+  const fb = [PIECE.DL, PIECE.FL, PIECE.BL, PIECE.DLF, PIECE.DBL];
+  const square = { front: [PIECE.FR, PIECE.DFR], back: [PIECE.BR, PIECE.DRB] };
+  const other = last === "front" ? "back" : "front";
+  return {
+    name: `roux-sb-ls-${last}`,
+    pieces: [...fb, PIECE.DR, ...square[other], ...square[last]],
+    groups: [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]],
+    keep: [0, 1, 2, 3, 4, 5, 6, 7],
+  };
+}
 
 /** F2L of chosen slots: the cross and the other slots stay (they're solved in the case), these get paired and inserted. */
 export function f2lStage(slots: readonly F2LSlot[]): StageDef {
@@ -145,6 +161,26 @@ export const TRAINERS: readonly TrainerDef[] = [
       return (_f, c) => (c.kind === "center" || (c.kind === "edge" && c.pos[1] === -1) || (c.pos[1] <= 0 && trained(c.pos)) ? "regular" : c.pos[1] <= 0 ? "dim" : "ignored");
     },
   },
+  {
+    id: "oll",
+    family: "ll",
+    label: "OLL",
+    goal: "Orient the last layer!",
+    variants: { label: "Cases", options: groupsOf(OLL_CASES).map((g) => [g, g] as const), default: "all" },
+    levels: null,
+    stage: () => null,
+    mask: () => CFOP_MASKS.oll,
+  },
+  {
+    id: "pll",
+    family: "ll",
+    label: "PLL",
+    goal: "Permute the last layer (and AUF)!",
+    variants: { label: "Cases", options: groupsOf(PLL_CASES).map((g) => [g, g] as const), default: "all" },
+    levels: null,
+    stage: () => null,
+    mask: () => CFOP_MASKS.pll,
+  },
   { id: "fs", family: "roux", label: "FS", goal: "Build the {v} first square!", variants: SIDES, levels: { min: 2, max: 6, default: 4 }, stage: (v) => ROUX_TRAINERS.fs(v as "front"), mask: (v) => stageMaskRule(ROUX_TRAINERS.fs(v as "front")), stm: true },
   { id: "fb", family: "roux", label: "FB", goal: "Build the first block (left 1×2×3)!", levels: { min: 3, max: 8, default: 6 }, stage: () => ROUX_TRAINERS.fb(), mask: () => ROUX_MASKS.fb, stm: true },
   {
@@ -156,6 +192,17 @@ export const TRAINERS: readonly TrainerDef[] = [
     levels: { min: 2, max: 7, default: 5 },
     stage: (v) => ROUX_TRAINERS.fbdr(v as "front"),
     mask: (v) => stageMaskRule(ROUX_TRAINERS.fbdr(v as "front")),
+    stm: true,
+  },
+  {
+    id: "sb-ls",
+    family: "roux",
+    label: "SB last slot",
+    goal: "Finish the second block — the {v} pair!",
+    variants: { label: "Last pair", options: [["front", "front"], ["back", "back"]], default: "front" },
+    levels: { min: 2, max: 9, default: 6 },
+    stage: (v) => sbLastSlot(v as "front"),
+    mask: (v) => stageMaskRule(sbLastSlot(v as "front")),
     stm: true,
   },
   { id: "ss", family: "roux", label: "SS", goal: "Solve the {v} second square (FB stays)!", variants: SIDES, levels: { min: 3, max: 10, default: 7 }, stage: (v) => ROUX_TRAINERS.ss(v as "front"), mask: (v) => stageMaskRule(ROUX_TRAINERS.ss(v as "front")), stm: true },
@@ -206,7 +253,7 @@ export const BOTTOM_COLOURS: readonly (readonly [Face, string, string])[] = [
   ["R", "Red", "#ef4444"],
   ["L", "Orange", "#f97316"],
 ];
-export const DEFAULT_BOTTOM: Record<Family, Face> = { cross: "U", f2l: "U", zz: "U", roux: "D" };
+export const DEFAULT_BOTTOM: Record<Family, Face> = { cross: "U", f2l: "U", ll: "U", zz: "U", roux: "D" };
 
 /** How the cube is held for `bottom` down: green in front when it can be, else white (U). */
 export function frameForBottom(bottom: Face): Frame {
@@ -221,6 +268,11 @@ export function frameForBottom(bottom: Face): Frame {
 export function doneLocally(def: TrainerDef, state: State, frame: Frame): boolean | null {
   if (def.id === "f2l") return checks.f2lSolved(view(state, frame));
   if (def.id === "cmll") return cmll(view(state, frame));
+  if (def.id === "oll") {
+    const s = view(state, frame);
+    return checks.f2lSolved(s) && checks.topOriented(s);
+  }
+  if (def.id === "pll") return isSolved(state);
   return null;
 }
 

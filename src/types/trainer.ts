@@ -31,7 +31,10 @@ export type TrainerType =
   | "eolr"
   | "lse"
   | "eoline"
-  | "zz-block";
+  | "zz-block"
+  | "oll"
+  | "pll"
+  | "sb-ls";
 
 export interface TrainerAttempt {
   id: string;
@@ -83,8 +86,12 @@ export interface TrainerAttempt {
   caseState?: string;
   /** cubecore FRAMES id the case was built for (which colour down). */
   frameId?: number;
-  /** Practised on the screen only (no scramble on the cube). */
+  /** Practised on the screen only (no scramble on the cube) — "Recognize". */
   virtual?: boolean;
+  /** Time from the case being there (shown, or scrambled) to the first turn — how fast it was recognised. */
+  recognitionMs?: number;
+  /** The last-layer / CMLL case it was (e.g. "OLL 27", "T"), when known. */
+  caseName?: string;
 
   isDNF: boolean;
 }

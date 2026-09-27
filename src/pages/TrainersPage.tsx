@@ -40,11 +40,15 @@ import {
   parseAlg,
   solvedState,
   statesEqual,
+  isSolved,
   unreframe,
+  invert,
+  toFaceTurns,
   view as viewOf,
 } from "@cubecore/core";
 import type { F2LSlot } from "@cubecore/cfop";
 import { CMLL_CASES, cmllCaseState, recognizeCmll } from "@cubecore/roux";
+import { OLL_CASES, PLL_CASES, recognizeOll, recognizePll } from "@cubecore/cfop";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves, collapseToStm } from "../logic/moveReduction";
@@ -109,7 +113,7 @@ interface Settings {
 
 const DEFAULT_SETTINGS: Settings = {
   type: "cross",
-  lastByFamily: { cross: "cross", f2l: "f2l", roux: "fb", zz: "eoline" },
+  lastByFamily: { cross: "cross", f2l: "f2l", ll: "oll", roux: "fb", zz: "eoline" },
   variants: {},
   levels: {},
   slots: ["FR"],
@@ -278,6 +282,18 @@ function TrainersInner() {
           cmllCase = kase.id;
           caseState = unreframe(cmllCaseState(kase.id), frame);
           scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
+        } else if (d.id === "oll" || d.id === "pll") {
+          // A random case of the group, with random AUFs — for OLL a random permutation too (as it comes in a solve).
+          const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
+          const auf = () => pick(["", "U", "U2", "U'"]);
+          const pool = (d.id === "oll" ? OLL_CASES : PLL_CASES).filter((c) => v === "all" || c.group === v);
+          const kase = pick(pool);
+          cmllCase = kase.id;
+          const solution = d.id === "oll" ? `${auf()} ${kase.alg} ${auf()} ${pick(PLL_CASES).alg} ${auf()}` : `${auf()} ${kase.alg} ${auf()}`;
+          // As face turns (rotations in the algorithms become the grip): the centres stay home.
+          const turns = toFaceTurns(solution).moves;
+          caseState = unreframe(applyMoves(solvedState(), invert(turns)), frame);
+          scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
         } else if (d.id === "f2l") {
           const r = await solver.randomScramble({ preset: "f2l", keep: f2lKeep(slots), frame, from });
           caseState = r.state;
@@ -366,9 +382,25 @@ function TrainersInner() {
   // ─── hint / solution ───
 
   const solutionsFrom = useCallback(async (a: Attempt, from: State, limit: number): Promise<string[]> => {
-    if (a.def.id === "cmll") {
-      const m = recognizeCmll(viewOf(from, a.frame));
-      return m ? [`${m.preAuf} ${m.alg}`.trim()] : [];
+    if (a.def.id === "cmll" || a.def.id === "oll" || a.def.id === "pll") {
+      // The case's algorithm (after the AUF it needs), as held.
+      try {
+        const held = viewOf(from, a.frame);
+        const m = a.def.id === "cmll" ? recognizeCmll(held) : a.def.id === "oll" ? recognizeOll(held) : recognizePll(held);
+        if (m) {
+          const alg = `${m.preAuf} ${m.alg}`.trim();
+          if (a.def.id !== "pll") return [alg];
+          // PLL ends with the cube solved: the last AUF too.
+          const after = applyMoves(held, toFaceTurns(alg).moves);
+          const auf = ["", "U", "U2", "U'"].find((u) => isSolved(u ? applyMoves(after, u) : after)) ?? "";
+          return [`${alg} ${auf}`.trim()];
+        }
+        // Solved but for the AUF.
+        for (const auf of ["U", "U2", "U'"]) if (a.def.id === "pll" && isSolved(applyMoves(held, auf))) return [auf];
+        return [];
+      } catch {
+        return []; // not that step any more (e.g. F2L broken)
+      }
     }
     const stage = a.def.stage(a.variant, a.slots);
     if (!stage) return [];
@@ -411,6 +443,15 @@ function TrainersInner() {
   // ─── the verdict ───
 
   const solveTimeMs = selectSolveTimeMs(state);
+
+  // When the case was there to recognise: shown (Recognize) or scrambled (the last scramble move).
+  const readyAtRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (state.phase !== "ready") return;
+    readyAtRef.current = currentRef.current?.virtual ? performance.now() : (state.moveLog.at(-1)?.timestamp ?? performance.now());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase]);
+  const recognitionMs = state.phase === "active" || state.phase === "done" ? (state.moveLog[0] && readyAtRef.current !== null ? Math.max(0, state.moveLog[0].timestamp - readyAtRef.current) : null) : null;
   const ladderRef = useRef(ladderEnabled);
   ladderRef.current = ladderEnabled;
   const notifiedRef = useRef(false);
@@ -431,7 +472,8 @@ function TrainersInner() {
 
     void (async () => {
       const optimal = await solutionsFrom(a, a.caseState, OPTIMAL_SOLUTIONS_SHOWN).catch(() => []);
-      const optimalLength = a.level ?? (a.def.id === "cmll" ? 0 : (optimal[0]?.split(" ").filter(Boolean).length ?? 0));
+      // Cases solved by algorithm (CMLL, OLL, PLL): no optimum to measure against.
+      const optimalLength = a.level ?? (["cmll", "oll", "pll"].includes(a.def.id) ? 0 : (optimal[0]?.split(" ").filter(Boolean).length ?? 0));
       // Which moves didn't bring the step closer: the solver's distance after each.
       const analysis: CrossMoveAnalysis[] = [];
       const stage = a.def.stage(a.variant, a.slots);
@@ -464,6 +506,8 @@ function TrainersInner() {
         caseState: encodeState(a.caseState) ?? undefined,
         frameId: a.frame.id,
         virtual: a.virtual || undefined,
+        recognitionMs: moveLog[0] && readyAtRef.current !== null ? Math.max(0, moveLog[0].timestamp - readyAtRef.current) : undefined,
+        caseName: a.cmllCase,
         isDNF: false,
         cube: activeCubeId(),
       };
@@ -543,9 +587,20 @@ function TrainersInner() {
     return attempts.filter(
       (a) =>
         a.type === def.id &&
-        (def.id === "cmll" ? true : def.id === "f2l" ? [...(a.slots ?? [])].sort().join(",") === set : a.targetLength === level)
+        // Scramble and Recognize apart: their times don't compare.
+        !!a.virtual === settings.virtual &&
+        (!def.levels ? def.id !== "f2l" || [...(a.slots ?? [])].sort().join(",") === set : a.targetLength === level)
     );
-  }, [attempts, def.id, level, settings.slots]);
+  }, [attempts, def.id, def.levels, level, settings.slots, settings.virtual]);
+  const recognitions = scopeAttempts.flatMap((a) => (a.recognitionMs !== undefined ? [a.recognitionMs] : []));
+  const avgRecognition = recognitions.length ? recognitions.reduce((x, y) => x + y, 0) / recognitions.length : null;
+  const recognitionStat =
+    avgRecognition !== null ? (
+      <div>
+        <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg recognition</p>
+        <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{(avgRecognition / 1000).toFixed(2)} s</p>
+      </div>
+    ) : null;
   const optimalRate = scopeAttempts.length ? Math.round((scopeAttempts.filter((a) => a.overhead <= 0).length / scopeAttempts.length) * 100) : null;
   const avgOverhead = scopeAttempts.length ? scopeAttempts.reduce((sum, a) => sum + a.overhead, 0) / scopeAttempts.length : null;
   const avgMoves = scopeAttempts.length ? scopeAttempts.reduce((sum, a) => sum + a.moveCount, 0) / scopeAttempts.length : null;
@@ -579,7 +634,7 @@ function TrainersInner() {
           : "Make a move to start"
         : state.phase === "active"
           ? shown
-            ? goalText(shown.def, shown.variant, shown.slots)
+            ? `${goalText(shown.def, shown.variant, shown.slots)}${recognitionMs !== null ? ` · recognised in ${(recognitionMs / 1000).toFixed(2)} s` : ""}`
             : null
           : state.phase === "done"
             ? shown?.level
@@ -588,8 +643,8 @@ function TrainersInner() {
             : null;
   const loadingText = isGenerating
     ? "Generating a case… (the first one of a kind builds its tables)"
-    : (genError ?? (shown?.virtual ? "Case mode — no scramble: the case is on the screen, solve it from there" : undefined));
-  const canHint = shown && (shown.def.id === "cmll" || shown.def.stage(shown.variant, shown.slots) !== null);
+    : (genError ?? (shown?.virtual ? "Recognize — no scramble: the case is on the screen; recognise it and solve it from there" : undefined));
+  const canHint = shown && (["cmll", "oll", "pll"].includes(shown.def.id) || shown.def.stage(shown.variant, shown.slots) !== null);
 
   const chip = (active: boolean) =>
     `px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${active ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"}`;
@@ -625,15 +680,21 @@ function TrainersInner() {
               ))}
             </div>
             <div className="ml-auto flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => setSettings({ virtual: !settings.virtual })}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                  settings.virtual ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
-                }`}
-                title="Case mode: no scramble — the case is shown on the screen and your moves are played onto it"
-              >
-                <Eye size={12} /> Case
-              </button>
+              <div className="flex items-center gap-0.5 rounded-xl bg-white/[0.03] p-0.5" title="Scramble: the case scrambled on your cube. Recognize: the case on the screen — recognise it and solve it from there (the time to your first turn is measured).">
+                {([
+                  [false, "Scramble"],
+                  [true, "Recognize"],
+                ] as const).map(([virtual, label]) => (
+                  <button
+                    key={label}
+                    onClick={() => setSettings({ virtual })}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-[10px] transition-all ${settings.virtual === virtual ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"}`}
+                    style={settings.virtual === virtual ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
               {def.levels && (
                 <button
                   onClick={toggleLadder}
@@ -789,7 +850,9 @@ function TrainersInner() {
           ? `CMLL · ${variant}`
           : def.id === "f2l"
             ? `F2L · ${slotLabel(settings.slots)}`
-            : `${def.label}${variant ? ` ${variant}` : ""} · optimal ${level}`
+            : def.levels
+              ? `${def.label}${variant ? ` ${variant}` : ""} · optimal ${level}`
+              : `${def.label} · ${variant}`
       }
       showAo12={false}
       layout="side"
@@ -811,6 +874,7 @@ function TrainersInner() {
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Fewest moves</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{bestMoves}</p>
             </div>
+            {recognitionStat}
             <p className="text-[11px] text-gray-600">
               {scopeAttempts.length} {scopeAttempts.length === 1 ? "attempt" : "attempts"}
             </p>
@@ -825,6 +889,7 @@ function TrainersInner() {
               <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Avg overhead</p>
               <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">+{(avgOverhead ?? 0).toFixed(2)}</p>
             </div>
+            {recognitionStat}
             <p className="text-[11px] text-gray-600">
               {scopeAttempts.length} {scopeAttempts.length === 1 ? "attempt" : "attempts"} at optimal {level}
             </p>
@@ -852,6 +917,12 @@ function TrainersInner() {
                     </span>
                   )}
                   {a.hintUsed && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-sky-500/15 text-sky-300">hint</span>}
+                  {a.caseName && <span className="text-[10px] font-semibold text-gray-300 shrink-0">{a.caseName}</span>}
+                  {a.recognitionMs !== undefined && (
+                    <span className="text-[10px] font-mono tabular-nums text-gray-500 shrink-0" title="Time to the first turn — recognition">
+                      rec {(a.recognitionMs / 1000).toFixed(2)}
+                    </span>
+                  )}
                   {a.virtual && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-white/[0.05] text-gray-400">case</span>}
                   <span className="text-xs text-gray-600 flex-1 truncate font-mono">{a.scramble}</span>
                   {cubeLabel(a.cube) && <span className="text-[10px] text-gray-500 shrink-0 max-w-32 truncate" title="Cube">{cubeLabel(a.cube)}</span>}
