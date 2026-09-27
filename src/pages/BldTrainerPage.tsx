@@ -289,7 +289,7 @@ function BldInner() {
     <TrainerPanel
       header={
         <div className="w-full overflow-x-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {group("Letters", [["speffz", "Speffz"], ["ruwix", "ruwix"]], settings.scheme, (v) => setSettings({ scheme: v as Scheme }))}
             {group("Hold", HOLDS, settings.hold, (v) => setSettings({ hold: v }))}
             {group("First", [["edges", "Edges"], ["corners", "Corners"]], settings.order, (v) => setSettings({ order: v as Order }))}
@@ -306,7 +306,7 @@ function BldInner() {
               <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-1">
             {group("Cube", [["colours", "Colours"], ["letters", "Letters"], ["lettersOnly", "Letters only"], ["hidden", "Hidden"]], settings.view, (v) => setSettings({ view: v as View }))}
             {group("Memo letters", [["all", "Shown"], ["done", "Once done"], ["none", "Hidden"]], settings.reveal, (v) => setSettings({ reveal: v as Reveal }))}
           </div>

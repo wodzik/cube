@@ -8,11 +8,13 @@
  */
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { ChevronDown, Settings } from "lucide-react";
+import { ChevronDown, GraduationCap, Settings } from "lucide-react";
 
 export interface NavItem<T extends string> {
   id: T;
   label: string;
+  /** Shown instead of the label on phones (the label from `sm` up). */
+  icon?: ReactNode;
 }
 
 export interface NavEntry<T extends string> {
@@ -37,11 +39,10 @@ function Menu<T extends string>({ entry, tab, onSelect }: { entry: NonNullable<N
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
     const onResize = () => setOpen(null);
-    // The tab strip itself scrolling (phones: e.g. to bring this button into view) moves the menu with it; the page scrolling closes it.
-    const onScroll = (e: Event) => {
+    // Scrolling (the tab strip on phones, or the page — the header stays put) keeps the menu under its button.
+    const onScroll = () => {
       const button = buttonRef.current;
-      if (button && e.target instanceof Element && e.target.contains(button)) setOpen(button.getBoundingClientRect());
-      else setOpen(null);
+      if (button) setOpen(button.getBoundingClientRect());
     };
     window.addEventListener("pointerdown", close);
     window.addEventListener("keydown", onKey);
@@ -101,8 +102,20 @@ export function NavBar<T extends string>({ entries, tab, onSelect }: { entries: 
     <div className="nav-pill gap-0.5 sm:gap-1 w-max mx-auto">
       {entries.map((e, i) =>
         e.item ? (
-          <button key={e.item.id} onClick={() => onSelect(e.item!.id)} className={`nav-tab ${tab === e.item.id ? "nav-tab-active" : "nav-tab-inactive"}`}>
-            {e.item.label}
+          <button
+            key={e.item.id}
+            onClick={() => onSelect(e.item!.id)}
+            title={e.item.icon ? e.item.label : undefined}
+            className={`nav-tab flex items-center ${tab === e.item.id ? "nav-tab-active" : "nav-tab-inactive"}`}
+          >
+            {e.item.icon ? (
+              <>
+                <span className="sm:hidden">{e.item.icon}</span>
+                <span className="hidden sm:inline">{e.item.label}</span>
+              </>
+            ) : (
+              e.item.label
+            )}
           </button>
         ) : e.menu ? (
           <Menu key={i} entry={e.menu} tab={tab} onSelect={onSelect} />
@@ -113,3 +126,4 @@ export function NavBar<T extends string>({ entries, tab, onSelect }: { entries: 
 }
 
 export const SettingsIcon = () => <Settings size={16} />;
+export const AcademyIcon = () => <GraduationCap size={17} />;

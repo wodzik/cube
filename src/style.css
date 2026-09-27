@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  /* native controls (selects, scrollbars) and system colours follow the theme */
+  color-scheme: dark;
   font-family: "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -57,6 +59,7 @@
    near-black. `--color-black` is left as-is so modal scrims stay dark in
    both themes. */
 [data-theme="light"] {
+  color-scheme: light;
   --color-gray-950: oklch(98.5% 0 0);
   --color-gray-900: oklch(97% 0 0);
   --color-gray-800: oklch(92.2% 0 0);

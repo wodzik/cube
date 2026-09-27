@@ -41,6 +41,8 @@ interface Column {
   /** Sorting by it puts the largest first (counts, slowest…). */
   desc?: boolean;
   strong?: boolean;
+  /** Hidden on phones (the table fits a narrow screen with the main columns). */
+  wide?: boolean;
 }
 
 interface Row {
@@ -60,25 +62,25 @@ const COLUMNS: Record<Source, Column[]> = {
     { id: "mean", label: "Average", title: "Recognition + execution, average", show: s2, strong: true },
     { id: "best", label: "Best", show: s2 },
     { id: "recog", label: "Recog.", title: "Average pause before the first move", show: s2, desc: true },
-    { id: "exec", label: "Exec.", title: "Average time turning", show: s2 },
-    { id: "moves", label: "Moves", show: (v) => v.toFixed(1) },
-    { id: "drill", label: "Drill best", title: "Your best single in Drill Algorithms (any of the case's algorithms)", show: (v) => fmtSec(v) },
+    { id: "exec", label: "Exec.", wide: true, title: "Average time turning", show: s2 },
+    { id: "moves", label: "Moves", wide: true, show: (v) => v.toFixed(1) },
+    { id: "drill", label: "Drill best", wide: true, title: "Your best single in Drill Algorithms (any of the case's algorithms)", show: (v) => fmtSec(v) },
   ],
   drill: [
     { id: "count", label: "Tries", show: String, desc: true },
     { id: "best", label: "Best", show: (v) => fmtSec(v), strong: true },
     { id: "mean", label: "Mean", show: (v) => fmtSec(v) },
     { id: "ao5", label: "Best ao5", title: "The best ao5 of any of its algorithms", show: (v) => fmtSec(v) },
-    { id: "ao12", label: "Best ao12", show: (v) => fmtSec(v) },
-    { id: "algs", label: "Algorithms", title: "Algorithms you've drilled for it", show: String, desc: true },
+    { id: "ao12", label: "Best ao12", wide: true, show: (v) => fmtSec(v) },
+    { id: "algs", label: "Algorithms", wide: true, title: "Algorithms you've drilled for it", show: String, desc: true },
   ],
   recognize: [
     { id: "count", label: "Tries", show: String, desc: true },
     { id: "recog", label: "Recognition", title: "Average time from the case on the screen to your first turn", show: s2, strong: true, desc: true },
-    { id: "bestRecog", label: "Best recog.", show: s2 },
+    { id: "bestRecog", label: "Best recog.", wide: true, show: s2 },
     { id: "mean", label: "Average", title: "Recognition + solving, average", show: s2 },
     { id: "best", label: "Best", show: s2 },
-    { id: "moves", label: "Moves", show: (v) => v.toFixed(1) },
+    { id: "moves", label: "Moves", wide: true, show: (v) => v.toFixed(1) },
   ],
 };
 
@@ -260,12 +262,12 @@ export default function CaseStatsPage() {
                   Case
                 </th>
                 {columns.map((c) => (
-                  <th key={c.id} className="font-semibold px-2 py-2 cursor-pointer hover:text-gray-300" title={c.title} onClick={() => setSortBy(c.id)}>
+                  <th key={c.id} className={`font-semibold px-2 py-2 cursor-pointer hover:text-gray-300 ${c.wide ? "hidden md:table-cell" : ""}`} title={c.title} onClick={() => setSortBy(c.id)}>
                     {c.label}
                     {c.id === sortColumn.id && " ·"}
                   </th>
                 ))}
-                {source !== "drill" && <th className="font-semibold px-3 py-2">Last</th>}
+                {source !== "drill" && <th className="hidden md:table-cell font-semibold px-3 py-2">Last</th>}
               </tr>
             </thead>
             <tbody>
@@ -286,12 +288,12 @@ export default function CaseStatsPage() {
                   {columns.map((c) => {
                     const v = r.values[c.id];
                     return (
-                      <td key={c.id} className={`px-2 ${c.strong ? "text-gray-100 font-semibold" : ""}`}>
+                      <td key={c.id} className={`px-2 ${c.strong ? "text-gray-100 font-semibold" : ""} ${c.wide ? "hidden md:table-cell" : ""}`}>
                         {v === null || v === undefined || (c.id === "count" && v === 0) ? "—" : c.show(v)}
                       </td>
                     );
                   })}
-                  {source !== "drill" && <td className="px-3 font-sans text-gray-500">{r.lastAt ? formatRelativeTime(r.lastAt) : "—"}</td>}
+                  {source !== "drill" && <td className="hidden md:table-cell px-3 font-sans text-gray-500">{r.lastAt ? formatRelativeTime(r.lastAt) : "—"}</td>}
                 </tr>
               ))}
             </tbody>

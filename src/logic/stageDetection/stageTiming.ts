@@ -76,6 +76,11 @@ export function computeStageTimings(
       const firstMoveTimestampMs = firstMove ? firstMove.relativeMs : boundary.timestampMs;
       recognitionMs = Math.max(0, firstMoveTimestampMs - prevTimestampMs);
       executionMs = Math.max(0, boundary.timestampMs - firstMoveTimestampMs);
+      // AUF: one U turn (two for U2) — nothing to recognise; the pause is just the turn itself.
+      if (stage === "auf") {
+        executionMs += recognitionMs;
+        recognitionMs = 0;
+      }
     }
 
     timings.push({

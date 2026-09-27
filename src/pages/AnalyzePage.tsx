@@ -196,7 +196,7 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
       {/* Scramble + options */}
       <div className="flex flex-col gap-3">
         <form
-          className="flex items-center gap-2"
+          className="flex flex-wrap sm:flex-nowrap items-center gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             setScramble(draft);
@@ -208,7 +208,7 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Paste a scramble, e.g. R U2 F' L2 D B2…"
             spellCheck={false}
-            className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 font-mono text-sm text-white outline-none focus:border-white/25"
+            className="w-full sm:w-auto sm:flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 font-mono text-sm text-white outline-none focus:border-white/25"
           />
           <button type="submit" className="btn-secondary text-xs">
             <Sparkles size={13} /> Analyze
@@ -217,8 +217,8 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
             <RefreshCw size={13} /> Random
           </button>
         </form>
-        <div className="w-full overflow-x-auto">
-          <div className="flex items-center gap-3">
+        <div className="w-full">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {group("Colours", "colours", [["all", "All"], ["whiteYellow", "White + yellow"], ["white", "White"]])}
             {group("CFOP start", "start", [["cross", "Cross"], ["xcross", "XCross"], ["xxcross", "XXCross"], ["xxxcross", "XXXCross"]])}
             {group("F2L", "f2l", [["optimal", "Fewest moves"], ["algorithms", "Algorithms"]])}

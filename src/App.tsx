@@ -11,7 +11,7 @@ import { UpdateNotice } from "./components/UpdateNotice";
 import { AlgorithmDataUpdateNotice } from "./components/AlgorithmDataUpdateNotice";
 import { AppLogo } from "./components/AppLogo";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { NavBar, type NavEntry, SettingsIcon } from "./components/NavBar";
+import { AcademyIcon, NavBar, type NavEntry, SettingsIcon } from "./components/NavBar";
 
 // Lazy-loaded per tab: Training/Attack pull in the (large) OLL/PLL/F2L JSON
 // data via algorithmStore, which Solve never needs — code-splitting here
@@ -42,7 +42,6 @@ const NAV: NavEntry<Tab>[] = [
         { id: "trainer", label: "Trainers" },
         { id: "bld", label: "Blindfolded" },
         { id: "attack", label: "Time Attack" },
-        { id: "academy", label: "Academy" },
       ],
     },
   },
@@ -56,6 +55,7 @@ const NAV: NavEntry<Tab>[] = [
       ],
     },
   },
+  { item: { id: "academy", label: "Academy", icon: <AcademyIcon /> } },
   {
     menu: {
       label: <SettingsIcon />,
@@ -104,7 +104,7 @@ export default function App() {
         <header className="sticky top-0 z-50 h-16 flex items-center px-2 sm:px-6 bg-gray-950/85 backdrop-blur-xl">
           {/* Phones: brand hidden, the tab pill scrolls horizontally (it is
               wider than the viewport). ≥sm: the original centered grid. */}
-          <div className="w-full max-w-7xl mx-auto flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">
+          <div className="w-full flex sm:grid sm:grid-cols-[1fr_auto_1fr] items-center min-w-0">
             <div className="flex items-center gap-2 shrink-0">
               <AppLogo className="hidden sm:block size-12 shrink-0" />
               <span className="hidden lg:block text-sm font-bold tracking-wide text-gray-200 select-none whitespace-nowrap">

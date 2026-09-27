@@ -38,7 +38,7 @@ export function stageSegmentsFor(timings: readonly StageTiming[]): Segment[] {
         const slot = stageSlotLabel(t.stage);
         segments.push({
           start: at,
-          split: at + t.recognitionMs,
+          ...(t.recognitionMs > 0 ? { split: at + t.recognitionMs } : {}),
           end: at + t.totalMs,
           label: group.label,
           detail: group.timings.length > 1 ? (slot ?? t.stage) : undefined,

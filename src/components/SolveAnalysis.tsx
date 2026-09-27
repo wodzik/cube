@@ -150,12 +150,16 @@ function StageTimingRow({
       </div>
       {!skipped && !moveCountOnly && (
         <div className="shrink-0 flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-right">
-          <span className="text-gray-400" title="Recognition time">
-            recog {formatMs(timing.recognitionMs)}
-          </span>
-          <span className="text-gray-400" title="Execution time">
-            exec {formatMs(timing.executionMs)}
-          </span>
+          {timing.stage !== "auf" && (
+            <>
+              <span className="text-gray-400" title="Recognition time">
+                recog {formatMs(timing.recognitionMs)}
+              </span>
+              <span className="text-gray-400" title="Execution time">
+                exec {formatMs(timing.executionMs)}
+              </span>
+            </>
+          )}
           <span className="text-gray-100 font-semibold w-14" title="Total time for this stage">
             {formatMs(timing.totalMs)}
           </span>

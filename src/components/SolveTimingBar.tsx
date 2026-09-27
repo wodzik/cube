@@ -170,8 +170,12 @@ export function SolveTimingBar({ timings }: SolveTimingBarProps) {
             </p>
             <div className="space-y-1">
               <StatRow label="Total Time:" value={`${formatSeconds(hovered.totalMs)}s`} strong />
-              <StatRow label="Recognition:" value={`${formatSeconds(hovered.recognitionMs)}s`} />
-              <StatRow label="Execution:" value={`${formatSeconds(hovered.executionMs)}s`} />
+              {hovered.stage !== "auf" && (
+                <>
+                  <StatRow label="Recognition:" value={`${formatSeconds(hovered.recognitionMs)}s`} />
+                  <StatRow label="Execution:" value={`${formatSeconds(hovered.executionMs)}s`} />
+                </>
+              )}
               <StatRow label="TPS:" value={tps(hovered.moveCount, hovered.totalMs)} />
               <StatRow label="Turns:" value={String(hovered.moveCount)} />
               <StatRow label="Percentage:" value={formatPercent(hovered.totalMs, grandTotalMs)} />

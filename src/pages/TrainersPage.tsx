@@ -656,7 +656,7 @@ function TrainersInner() {
     <TrainerPanel
       header={
         <div className="w-full overflow-x-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <div className="flex items-center gap-0.5 shrink-0 rounded-xl bg-white/[0.03] p-0.5">
               {FAMILIES.map((f) => (
                 <button
@@ -711,7 +711,7 @@ function TrainersInner() {
               <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-1">
             <div className="flex items-center gap-1 shrink-0">
               {TRAINERS.filter((t) => t.family === family).map((t) => (
                 <button
