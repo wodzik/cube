@@ -19,6 +19,7 @@
  * user hasn't physically scrambled anything, we're showing them the case.
  */
 
+import { activeCubeId } from "../services/cubeRegistry";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Video, ChevronLeft, ListChecks, RotateCcw, Compass } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
@@ -369,6 +370,7 @@ function TrainingPageInner() {
       time: (state.endTime - state.startTime) / 1000,
       hadErrors: finalProgress?.hadErrors ?? false,
       source: "training" as const,
+      cube: activeCubeId(),
     };
     if (activeSubgroupId) recordSubgroupAttempt(group, activeSubgroupId, currentCase.name, variant.id, attempt);
     else recordAttempt(group, currentCase.name, variant.id, attempt);

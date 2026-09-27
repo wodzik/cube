@@ -117,6 +117,12 @@ export interface AlgorithmAttempt {
   hadErrors: boolean;
   /** Which practice mode recorded this — absent on attempts recorded before this field existed, treated as "training" (the only mode that recorded attempts back then). */
   source?: AttemptSource;
+  /**
+   * Which smart cube (services/cubeRegistry short id) — stored only when it
+   * changes from the previous attempt ("" = none); read with
+   * caseMutations.attemptCube.
+   */
+  cube?: string;
 }
 
 /**

@@ -7,6 +7,7 @@
  * TrainersPage's effect).
  */
 
+import { cubeLabel } from "../services/cubeRegistry";
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Repeat2 } from "lucide-react";
 import type { TrainerAttempt } from "../types/trainer";
@@ -60,6 +61,7 @@ export function TrainerSummary({ attempt, analysis, optimalSolutions, onRetry }:
         <p className="text-4xl font-mono tabular-nums font-bold text-white mt-1">{formatTimeMs(attempt.timeMs)}</p>
         <p className="text-sm text-gray-400 mt-1">
           {attempt.moveCount} moves{hasOptimal && ` · optimal ${attempt.optimalLength}`}
+          {cubeLabel(attempt.cube) && ` · ${cubeLabel(attempt.cube)}`}
         </p>
       </div>
 

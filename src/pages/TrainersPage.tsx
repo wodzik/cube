@@ -24,6 +24,7 @@
  * you hold it. Scrambles stay physical moves (white up, green front).
  */
 
+import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Eye, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp, RefreshCw } from "lucide-react";
 import {
@@ -464,6 +465,7 @@ function TrainersInner() {
         frameId: a.frame.id,
         virtual: a.virtual || undefined,
         isDNF: false,
+        cube: activeCubeId(),
       };
       saveTrainerAttempt(attempt);
       setAttempts(getTrainerAttempts());
@@ -849,6 +851,7 @@ function TrainersInner() {
                   {a.hintUsed && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-sky-500/15 text-sky-300">hint</span>}
                   {a.virtual && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 bg-white/[0.05] text-gray-400">case</span>}
                   <span className="text-xs text-gray-600 flex-1 truncate font-mono">{a.scramble}</span>
+                  {cubeLabel(a.cube) && <span className="text-[10px] text-gray-500 shrink-0 max-w-32 truncate" title="Cube">{cubeLabel(a.cube)}</span>}
                   <span className="text-[10px] text-gray-700 shrink-0">{new Date(a.endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                   {a.caseState && (
                     <button onClick={() => retryAttempt(a)} className="shrink-0 p-1.5 text-gray-600 hover:text-gray-200 transition-colors" title="Practise this exact case again (a scramble to it from wherever the cube is)">

@@ -38,6 +38,7 @@ import { SimulatedCube, SmartCubeSession } from "@cubecore/bluetooth";
 import { type State, formatMove } from "@cubecore/core";
 import { SKINS } from "@cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";
+import { rememberCube, setActiveCube } from "../services/cubeRegistry";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
 
 type MoveListener = (move: string, timestampMs: number) => void;
@@ -50,6 +51,8 @@ interface SmartCubeContextValue extends DeviceConnection {
   session: SmartCubeSession | null;
   /** Name of the skin that suits the connected cube (its brand / model), or null. */
   suggestedSkin: string | null;
+  /** The connected cube's id in the list of known cubes (services/cubeRegistry), or null. */
+  cubeId: string | null;
   /** Register a move listener; returns an unsubscribe function. */
   addMoveListener: (fn: MoveListener) => () => void;
   /**
@@ -74,6 +77,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const [session, setSession] = useState<SmartCubeSession | null>(null);
   const [suggestedSkin, setSuggestedSkin] = useState<string | null>(null);
+  const [cubeId, setCubeId] = useState<string | null>(null);
   const listenersRef = useRef(new Set<MoveListener>());
   const historyRef = useRef<{ time: number; before: State }[]>([]);
   const simulatedRef = useRef<SimulatedCube | null>(null);
@@ -95,6 +99,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     simulatedRef.current = null;
     setSession(null);
     setSuggestedSkin(null);
+    setActiveCube(null);
+    setCubeId(null);
     setState(INITIAL_DEVICE_CONNECTION);
   }, []);
 
@@ -102,6 +108,10 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const use = useCallback((conn: SmartCubeSession) => {
     connectionRef.current = conn;
     setSession(conn);
+    // Remember this cube (the list in Settings; records are stamped with its id).
+    const known = rememberCube({ name: conn.info.name, mac: conn.info.mac, protocol: conn.info.protocol.id });
+    setActiveCube(known.id);
+    setCubeId(known.id);
 
     setState({
       connected: true,
@@ -222,8 +232,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<SmartCubeContextValue>(
-    () => ({ ...state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin }),
-    [state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin]
+    () => ({ ...state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId }),
+    [state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId]
   );
 
   return <SmartCubeContext.Provider value={value}>{children}</SmartCubeContext.Provider>;
@@ -240,6 +250,7 @@ export interface UseSmartCubeReturn extends DeviceConnection {
   error: string | null;
   session: SmartCubeSession | null;
   suggestedSkin: string | null;
+  cubeId: string | null;
 }
 
 /** The shared connection without subscribing to moves (for views that only need the session / skin); null outside the provider. */

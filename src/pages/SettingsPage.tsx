@@ -7,8 +7,12 @@
  * of them at once.
  */
 
-import { useRef, useState } from "react";
-import { RotateCcw, Trash2, Download, Upload, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { RotateCcw, Trash2, Download, Upload, CheckCircle2, Bluetooth } from "lucide-react";
+import { type KnownCube, cubeName, forgetCube, listCubes, onCubesChange, updateCube } from "../services/cubeRegistry";
+import { getSolves } from "../services/solveStore";
+import { getTrainerAttempts } from "../services/trainerStore";
+import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
@@ -31,7 +35,7 @@ const FINISHES: [CubeLook["finish"], string][] = [["", "The skin's own"], ["matt
 const selectClass = "bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-sm text-white";
 
 function CubeLookSection() {
-  const { look, setLook, autoSkin } = useCubeLook();
+  const { look, setLook, autoSkin, cubeLook } = useCubeLook();
   return (
     <Section title="Cube look">
       <div className="flex gap-5 py-4 border-b border-white/[0.06] items-center">
@@ -41,6 +45,9 @@ function CubeLookSection() {
         <p className="text-xs text-gray-500">
           How the cube is drawn everywhere in the app. <strong className="text-gray-300">Auto</strong> picks the skin that suits the
           connected smart cube (GAN, QiYi, MoYu…) by its name — now: {SKIN_LABELS[autoSkin]}.
+          {cubeLook && (
+            <span className="block mt-1.5 text-sky-300/80">The connected cube has its own look (My cubes, below) — that's what's drawn now.</span>
+          )}
         </p>
       </div>
       <SettingsRow
@@ -88,7 +95,110 @@ function CubeLookSection() {
   );
 }
 
-const ALL_KEYS_PREFIXES = ["nact_solves", "nact_sessions", "alg_group_", "attack_sessions_", "nact_alg_groups", "nact_cube_look"];
+/** A select value for "follow the app's setting" (no per-cube value). */
+const APP = "__app";
+
+/**
+ * The smart cubes this browser has connected (remembered on every
+ * connection): a name of your own and a look per cube — each part either
+ * its own or the app's (Cube look, above).
+ */
+function MyCubesSection() {
+  const [cubes, setCubes] = useState<KnownCube[]>(listCubes);
+  useEffect(() => onCubesChange(() => setCubes(listCubes())), []);
+  const connectedId = useSmartCubeConnection()?.cubeId ?? null;
+  const [confirmForget, setConfirmForget] = useState<string | null>(null);
+  // Records per cube (solves + trainer attempts) — so you know what a cube's history holds.
+  const counts = useMemo(() => {
+    const n = new Map<string, number>();
+    for (const r of [...getSolves(), ...getTrainerAttempts()]) if (r.cube) n.set(r.cube, (n.get(r.cube) ?? 0) + 1);
+    return n;
+  }, []);
+  const sorted = [...cubes].sort((a, b) => b.lastSeen - a.lastSeen);
+
+  const setLookPart = (c: KnownCube, part: keyof CubeLook, value: string) => {
+    const look = { ...c.look, [part]: value === APP ? undefined : value };
+    updateCube(c.id, { look });
+  };
+
+  return (
+    <Section title="My cubes">
+      {sorted.length === 0 ? (
+        <p className="py-4 text-xs text-gray-500">No cube connected yet — every smart cube you connect is remembered here, with its own settings.</p>
+      ) : (
+        sorted.map((c, i) => (
+          <div key={c.id} className={`py-4 flex flex-col gap-3 ${i < sorted.length - 1 ? "border-b border-white/[0.06]" : ""}`}>
+            <div className="flex items-center gap-3">
+              <Bluetooth size={15} className={connectedId === c.id ? "text-emerald-400" : "text-gray-600"} />
+              <input
+                className="flex-1 min-w-0 bg-transparent border-b border-transparent hover:border-white/10 focus:border-white/20 text-sm font-semibold text-white outline-none"
+                defaultValue={c.label ?? ""}
+                placeholder={c.deviceName}
+                onBlur={(e) => updateCube(c.id, { label: e.target.value.trim() || undefined })}
+                title="Your name for this cube"
+              />
+              {connectedId === c.id && <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">connected</span>}
+              <button
+                onClick={() => {
+                  if (confirmForget === c.id) {
+                    forgetCube(c.id);
+                    setConfirmForget(null);
+                  } else setConfirmForget(c.id);
+                }}
+                className={`p-1.5 transition-colors ${confirmForget === c.id ? "text-red-400" : "text-gray-600 hover:text-red-500"}`}
+                title={confirmForget === c.id ? "Click again to forget this cube (its records stay)" : "Forget this cube"}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-500 -mt-1">
+              {c.deviceName} · {c.protocol} · last used {new Date(c.lastSeen).toLocaleDateString()} · {counts.get(c.id) ?? 0} records
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <select className={selectClass} value={c.look?.skin ?? APP} onChange={(e) => setLookPart(c, "skin", e.target.value)} title="Skin for this cube">
+                <option value={APP}>Skin: app setting</option>
+                <option value="auto">Auto — by its name</option>
+                {(Object.keys(SKIN_LABELS) as SkinName[]).map((k) => (
+                  <option key={k} value={k}>
+                    {SKIN_LABELS[k]}
+                  </option>
+                ))}
+              </select>
+              <select className={selectClass} value={c.look?.stickers ?? APP} onChange={(e) => setLookPart(c, "stickers", e.target.value)} title="Stickers for this cube">
+                <option value={APP}>Stickers: app setting</option>
+                {STICKERS.map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <select className={selectClass} value={c.look?.finish ?? APP} onChange={(e) => setLookPart(c, "finish", e.target.value)} title="Finish for this cube">
+                <option value={APP}>Finish: app setting</option>
+                {FINISHES.map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ))
+      )}
+    </Section>
+  );
+}
+
+const ALL_KEYS_PREFIXES = [
+  "nact_solves",
+  "nact_sessions",
+  "alg_group_",
+  "attack_sessions_",
+  "nact_alg_groups",
+  "nact_cube_look",
+  "nact_cubes",
+  "nact_trainer_attempts",
+  "nact_bld_times",
+];
 
 function allNactKeys(): string[] {
   const keys: string[] = [];
@@ -180,6 +290,7 @@ export default function SettingsPage() {
       )}
 
       <CubeLookSection />
+      <MyCubesSection />
 
       <Section title="Algorithm progress">
         <SettingsRow

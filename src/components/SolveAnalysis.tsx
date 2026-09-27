@@ -28,6 +28,7 @@
  * with a manual toggle to compare against the other two regardless.
  */
 
+import { cubeLabel } from "../services/cubeRegistry";
 import { useEffect, useRef, useState } from "react";
 import { X, Play, RotateCcw, Trash2, Link2, Check } from "lucide-react";
 import type { SolveMethod, SolveRecord } from "../types/solve";
@@ -252,6 +253,7 @@ export function SolveAnalysis({
               ) : (
                 <>
                   {record.moveCount} moves · {record.tps.toFixed(2)} TPS
+                  {cubeLabel(record.cube) && <> · {cubeLabel(record.cube)}</>}
                   {fluency !== null && (
                     <>
                       {" · "}

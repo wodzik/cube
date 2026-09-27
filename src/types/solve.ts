@@ -13,6 +13,8 @@ export type SolveMethod = "CFOP" | "Roux" | "LBL" | "unknown";
 export interface SolveRecord {
   id: string;
   sessionId: string;
+  /** Which smart cube (services/cubeRegistry short id), when one was connected. */
+  cube?: string;
 
   // Context
   method: SolveMethod;

@@ -9,6 +9,7 @@
  * populates the tracker and where the result is persisted).
  */
 
+import { activeCubeId } from "../services/cubeRegistry";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
@@ -280,7 +281,7 @@ function AttackPageInner() {
     lastRecordedEndRef.current = state.endTime;
 
     const timeMs = state.endTime - state.startTime;
-    const attempt = { time: timeMs / 1000, hadErrors: false, source: "attack" as const };
+    const attempt = { time: timeMs / 1000, hadErrors: false, source: "attack" as const, cube: activeCubeId() };
     if (activeSubgroupId) recordSubgroupAttempt(group, activeSubgroupId, currentCase.name, variant.id, attempt);
     else recordAttempt(group, currentCase.name, variant.id, attempt);
     const loadedCases = loadCases();

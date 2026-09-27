@@ -75,6 +75,9 @@ export interface TrainerAttempt {
   /** Roux types: face-turn generator of the whole target state — the retry pin. */
   targetGenerator?: string;
 
+  /** Which smart cube (services/cubeRegistry short id), when one was connected. */
+  cube?: string;
+
   // ── cubecore trainers ──
   /** The case (physical cube state right after the scramble), stateCodec-encoded — retry goes back to it from wherever the cube is. */
   caseState?: string;

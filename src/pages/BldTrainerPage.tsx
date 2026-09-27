@@ -12,6 +12,7 @@
  * the centres greyed) or nothing but the centres (the blindfold).
  */
 
+import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@cubecore/element";
 import type { CubeBld, CubePlayer, CubeScramble } from "@cubecore/element";
@@ -46,6 +47,8 @@ interface BldTime {
   memoMs: number;
   execMs: number;
   solved: boolean;
+  /** Which smart cube (services/cubeRegistry short id). */
+  cube?: string;
 }
 
 function read<T>(key: string, fallback: T): T {
@@ -185,7 +188,7 @@ export default function BldTrainerPage() {
       setMarks((m) => {
         const done = { ...m, doneAt: performance.now(), solved };
         if (m.memoAt && m.execAt) {
-          const t: BldTime = { at: Date.now(), memoMs: m.execAt - m.memoAt, execMs: done.doneAt - m.execAt, solved };
+          const t: BldTime = { at: Date.now(), memoMs: m.execAt - m.memoAt, execMs: done.doneAt - m.execAt, solved, cube: activeCubeId() };
           setTimes((prev) => {
             const next = [t, ...prev].slice(0, 100);
             write(TIMES_KEY, next);
@@ -388,6 +391,7 @@ export default function BldTrainerPage() {
                     <span className={t.solved ? "text-white" : "text-gray-500 line-through"}>{fmt(t.memoMs + t.execMs)}</span>
                     <span className="text-gray-500">
                       {fmt(t.memoMs)} + {fmt(t.execMs)}
+                      {cubeLabel(t.cube) && <span className="ml-2 font-sans text-[10px]">{cubeLabel(t.cube)}</span>}
                     </span>
                   </li>
                 ))}

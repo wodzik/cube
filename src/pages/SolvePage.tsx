@@ -12,6 +12,7 @@
  * is what makes isSolved() detection valid during free solving.
  */
 
+import { activeCubeId } from "../services/cubeRegistry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Info, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
@@ -677,6 +678,7 @@ function SolvePageInner({
       rouxDetailVersion: ROUX_DETAIL_VERSION,
       lbl: freshLbl,
       isDNF: false,
+      cube: activeCubeId(),
     };
 
     saveSolve(record);

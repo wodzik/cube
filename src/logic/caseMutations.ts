@@ -9,6 +9,23 @@
 import type { AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus } from "../types/algorithm";
 import { computeVariantStatsAttempts } from "./statistics";
 
+/**
+ * The cube an attempt was made on. Attempts are tiny and many, so `cube` is
+ * stored only when it CHANGES (run-length): an attempt without the field
+ * was made on the same cube as the one before it; "" = no cube connected.
+ */
+export function attemptCube(times: readonly AlgorithmAttempt[], index: number): string | undefined {
+  for (let i = index; i >= 0; i--) if (times[i].cube !== undefined) return times[i].cube || undefined;
+  return undefined;
+}
+
+/** The attempt as stored after `times`: its cube dropped when it's the same as the previous attempt's. */
+function withRunLengthCube(times: readonly AlgorithmAttempt[], attempt: AlgorithmAttempt): AlgorithmAttempt {
+  const { cube, ...rest } = attempt;
+  const previous = times.length ? attemptCube(times, times.length - 1) : undefined;
+  return (cube ?? undefined) === previous ? rest : { ...rest, cube: cube ?? "" };
+}
+
 function recalcStats(variant: AlgorithmVariant): AlgorithmVariant {
   const stats = computeVariantStatsAttempts(variant.times);
   return { ...variant, ...stats };
@@ -26,7 +43,8 @@ export function applyRecordAttempt(
   if (vi < 0) return cases;
   const next = [...cases];
   const algList = [...next[ci].algList];
-  algList[vi] = recalcStats({ ...algList[vi], times: [...algList[vi].times, attempt] });
+  const times = algList[vi].times;
+  algList[vi] = recalcStats({ ...algList[vi], times: [...times, withRunLengthCube(times, attempt)] });
   next[ci] = { ...next[ci], algList };
   return next;
 }

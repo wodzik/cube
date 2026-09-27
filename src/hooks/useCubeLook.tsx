@@ -3,11 +3,15 @@
  * that suits the connected smart cube, by its brand / name), stickers
  * (stickerless as the skin is, or stickered: raised / thin / flat) and the
  * finish (matte / UV). Persisted; read by every CubeVisualisation.
+ *
+ * A connected cube can have its own look (Settings → My cubes): the parts it
+ * sets replace the app's while it's connected.
  */
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { SKINS, type Skin, type StickerStyle, withFinish, withStickers } from "@cubecore/skin";
 import { useSmartCubeConnection } from "./useSmartCube";
+import { type KnownCube, listCubes, onCubesChange } from "../services/cubeRegistry";
 
 const STORAGE_KEY = "nact_cube_look";
 
@@ -41,6 +45,8 @@ interface CubeLookValue {
   skin: Skin;
   /** Which skin "auto" resolved to (for the settings page). */
   autoSkin: SkinName;
+  /** The connected cube's own look, when it has one. */
+  cubeLook: Partial<CubeLook> | null;
 }
 
 const CubeLookContext = createContext<CubeLookValue | null>(null);
@@ -56,6 +62,15 @@ export function CubeLookProvider({ children }: { children: ReactNode }) {
   const [look, setLookState] = useState<CubeLook>(readStored);
   const cube = useSmartCubeConnection();
   const autoSkin = (cube?.suggestedSkin as SkinName | null) ?? "default";
+  const [cubes, setCubes] = useState<KnownCube[]>(listCubes);
+  useEffect(() => onCubesChange(() => setCubes(listCubes())), []);
+  const cubeLook = useMemo(() => {
+    const own = cube?.cubeId ? cubes.find((c) => c.id === cube.cubeId)?.look : undefined;
+    if (!own) return null;
+    const set = Object.fromEntries(Object.entries(own).filter(([, v]) => v !== undefined)) as Partial<CubeLook>;
+    if (set.skin && set.skin !== "auto" && !(set.skin in SKINS)) delete set.skin;
+    return Object.keys(set).length ? set : null;
+  }, [cube?.cubeId, cubes]);
 
   const setLook = useCallback((patch: Partial<CubeLook>) => {
     setLookState((prev) => {
@@ -69,7 +84,10 @@ export function CubeLookProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const value = useMemo(() => ({ look, setLook, skin: resolveSkin(look, autoSkin), autoSkin }), [look, setLook, autoSkin]);
+  const value = useMemo(
+    () => ({ look, setLook, skin: resolveSkin(cubeLook ? { ...look, ...cubeLook } : look, autoSkin), autoSkin, cubeLook }),
+    [look, setLook, autoSkin, cubeLook]
+  );
   return <CubeLookContext.Provider value={value}>{children}</CubeLookContext.Provider>;
 }
 
@@ -81,6 +99,7 @@ export function useCubeLook(): CubeLookValue {
       setLook: () => undefined,
       skin: SKINS.default,
       autoSkin: "default",
+      cubeLook: null,
     }
   );
 }
