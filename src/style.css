@@ -130,7 +130,7 @@
 }
 
 .nav-tab {
-  @apply relative px-5 py-2 text-sm font-semibold rounded-xl transition-all;
+  @apply relative px-2 sm:px-3.5 lg:px-5 py-2 text-[13px] sm:text-sm font-semibold rounded-xl transition-all whitespace-nowrap;
 }
 
 .nav-tab-active {
