@@ -24,6 +24,9 @@ import type { Skin } from "@wodzik/cubecore/render";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { type Frame, type Mask, type State, isSolved } from "@wodzik/cubecore/core";
 import { frameQuaternion } from "../logic/frameView";
+import { IDENTITY, multiply } from "@wodzik/cubecore/bluetooth";
+import { useSmartCubeConnection } from "../hooks/useSmartCube";
+import { useGyro } from "../hooks/useGyro";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 
@@ -59,6 +62,8 @@ export interface CubeVisualisationProps {
   mask?: Mask | null;
   /** Show the cube as held in this frame (e.g. white down for a cross on white). */
   orientation?: Frame | null;
+  /** The live cube: turn it with the connected smart cube's gyroscope when that's on (useGyro). */
+  followGyro?: boolean;
   /** A skin of the page's own (e.g. with letters) instead of the app's look. */
   skin?: Skin | null;
   background?: "none" | "checkered-transparent";
@@ -105,6 +110,7 @@ const VIEW: Record<VisualizationMode, string> = { "3D": "3d", PG3D: "3d", "2D": 
 export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisationProps>(
   (
     {
+      followGyro = false,
       alg = "",
       setupAlg,
       setupAnchor = "start",
@@ -143,6 +149,21 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       p.renderer?.setCamera({ latitude: cameraLatitude, longitude: cameraLongitude });
       p.renderer?.setOrientation(orientation ? frameQuaternion(orientation) : null);
     };
+
+    // The gyroscope: the smart cube's turn (from "held as shown") over the view's own orientation.
+    const session = useSmartCubeConnection()?.session ?? null;
+    const { gyro, supported } = useGyro();
+    const gyroActive = followGyro && gyro && supported && !!session;
+    useEffect(() => {
+      if (!gyroActive || !session) return;
+      const base = orientation ? frameQuaternion(orientation) : IDENTITY;
+      session.calibrate(); // as held now = as shown
+      const off = session.on("orientation", (q) => playerRef.current?.renderer?.setOrientation(multiply(q, base), 0.6));
+      return () => {
+        off();
+        playerRef.current?.renderer?.setOrientation(orientation ? frameQuaternion(orientation) : null);
+      };
+    }, [gyroActive, session, orientation]);
 
     useEffect(() => {
       if (!containerRef.current) return;

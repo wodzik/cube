@@ -6,13 +6,15 @@
  */
 
 import { useState } from "react";
-import { CheckCheck, Navigation } from "lucide-react";
+import { CheckCheck, Compass, Navigation, RotateCcw } from "lucide-react";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { useTurnArrows } from "../hooks/useTurnArrows";
+import { useGyro } from "../hooks/useGyro";
 
 export function CubeTools({ arrows: withArrows = true }: { arrows?: boolean }) {
   const conn = useSmartCubeConnection();
   const { arrows, toggleArrows } = useTurnArrows();
+  const { gyro, supported: hasGyro, toggleGyro, resetGyro } = useGyro();
   const [marked, setMarked] = useState(false);
   if (!conn?.session) return null;
   const btn = "flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors";
@@ -25,6 +27,24 @@ export function CubeTools({ arrows: withArrows = true }: { arrows?: boolean }) {
           title={arrows ? "Hide the turn arrows" : "Show the next turn as arrows on the cube"}
         >
           <Navigation size={12} /> Arrows: {arrows ? "on" : "off"}
+        </button>
+      )}
+      {hasGyro && (
+        <button
+          onClick={toggleGyro}
+          className={`${btn} ${gyro ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"}`}
+          title={gyro ? "Stop turning the 3D cube with the cube's gyroscope" : "Turn the 3D cube as you hold the cube (its gyroscope)"}
+        >
+          <Compass size={12} /> Gyro: {gyro ? "on" : "off"}
+        </button>
+      )}
+      {hasGyro && gyro && (
+        <button
+          onClick={resetGyro}
+          className={`${btn} text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]`}
+          title="Hold the cube as it's shown (white top, green front — or the page's colour down), then press: that's the starting point"
+        >
+          <RotateCcw size={12} /> Reset gyro
         </button>
       )}
       <button

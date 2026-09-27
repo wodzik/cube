@@ -30,6 +30,8 @@ export interface KnownCube {
   look?: Partial<CubeLook>;
   /** This cube's turn arrows (off / round / along the edges); unset: the app's. */
   arrows?: "off" | "circle" | "box";
+  /** Follow this cube's gyroscope (turn the 3D cube as it's held); unset: the app's. */
+  gyro?: boolean;
   /**
    * A cube that can't reset its own state (QiYi…): what it reports when it's
    * solved since "Mark as solved" (stateCodec) — passed to the session on
@@ -74,7 +76,7 @@ export function rememberCube(device: { name: string; mac?: string | null; protoc
   return cube;
 }
 
-export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look" | "arrows" | "base">>): void {
+export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look" | "arrows" | "gyro" | "base">>): void {
   save(listCubes().map((c) => (c.id === id ? { ...c, ...patch } : c)));
 }
 

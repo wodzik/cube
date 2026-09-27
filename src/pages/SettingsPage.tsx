@@ -18,6 +18,7 @@ import { APP_LOGO, type StoredLogo, addLogo, listLogos, onLogosChange, removeLog
 import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
+import { useGyro } from "../hooks/useGyro";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { lookForCube, resolveSkin, useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
@@ -103,8 +104,19 @@ function CubeLookSection() {
 /** Turn arrows: off, round, or along the edges (also switched by the cube; a cube can have its own). */
 function TurnArrowsSection() {
   const { appMode, setAppMode } = useTurnArrows();
+  const { appGyro, setAppGyro } = useGyro();
   return (
-    <Section title="Turn arrows">
+    <Section title="Smart cube">
+      <SettingsRow
+        title="Gyroscope"
+        description="Turn the 3D cube as you hold your smart cube (cubes with a gyroscope: most GAN, MoYu AI…). Also switched under the cube, where Reset gyro sets the cube as you hold it now as the cube as shown; a cube can have its own (My cubes)."
+        action={
+          <select className={selectClass} value={appGyro ? "on" : "off"} onChange={(e) => setAppGyro(e.target.value === "on")}>
+            <option value="off">Off</option>
+            <option value="on">On</option>
+          </select>
+        }
+      />
       <SettingsRow
         title="Turn arrows"
         description="While a smart cube is connected: the next move of the scramble or algorithm drawn on the 3D cube — and the way back after a slip (red), or the right face turned the wrong way (orange). Also switched by the cube; a cube can have its own (My cubes)."
@@ -394,6 +406,21 @@ function KnownCubeCard({
             }
           />
           <SettingsRow
+            title="Gyroscope"
+            description="The 3D cube turns as you hold it (if the cube has one)."
+            action={
+              <select
+                className={selectClass}
+                value={c.gyro === undefined ? APP : c.gyro ? "on" : "off"}
+                onChange={(e) => updateCube(c.id, { gyro: e.target.value === APP ? undefined : e.target.value === "on" })}
+              >
+                <option value={APP}>As in Smart cube</option>
+                <option value="on">On</option>
+                <option value="off">Off</option>
+              </select>
+            }
+          />
+          <SettingsRow
             title="Turn arrows"
             description="The next move drawn on the cube."
             last
@@ -403,7 +430,7 @@ function KnownCubeCard({
                 value={c.arrows ?? APP}
                 onChange={(e) => updateCube(c.id, { arrows: e.target.value === APP ? undefined : (e.target.value as ArrowMode) })}
               >
-                <option value={APP}>As in Turn arrows</option>
+                <option value={APP}>As in Smart cube</option>
                 {ARROW_MODES.map(([v, label]) => (
                   <option key={v} value={v}>
                     {label}
@@ -429,6 +456,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_trainer_attempts",
   "nact_bld_times",
   "nact_turn_arrows",
+  "nact_gyro",
   "nact_logos",
 ];
 

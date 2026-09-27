@@ -206,6 +206,11 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
   const bottom = settings.bottom[family];
 
   const [current, setCurrent] = useState<Attempt | null>(null);
+  // Dev only: the case on the screen (encoded) — lets tests check which case a link opened.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    (window as unknown as { __nactTrainerCase?: string | null }).__nactTrainerCase = current ? (encodeState(current.caseState) ?? null) : null;
+  }, [current]);
   const currentRef = useRef(current);
   currentRef.current = current;
   const [isGenerating, setIsGenerating] = useState(false);
@@ -340,6 +345,9 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
   // Opened on one case (a solve's cross… — services/trainerNav): its trainer, level,
   // colour and mode, then that exact case as the first one.
   const pendingCase = useRef<{ caseState: State; attempt: TrainerAttempt } | null>(null);
+  const pendingRequest = useRef<TrainerRequest | null>(null);
+  /** The practice choice the current case was started for. */
+  const startedKey = useRef<string | null>(null);
   const [requestSeq, setRequestSeq] = useState(0);
   useEffect(() => {
     if (!request) return;
@@ -355,6 +363,7 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
       bottom: { ...s.bottom, [d.family]: request.bottom },
       virtual: request.virtual,
     });
+    pendingRequest.current = request;
     pendingCase.current = {
       caseState: request.caseState,
       attempt: {
@@ -374,12 +383,24 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
   const choiceKey = `${def.id}|${variant}|${level}|${settings.slots.join()}|${bottom}|${settings.virtual}`;
   useEffect(() => {
     const pending = pendingCase.current;
-    pendingCase.current = null;
     if (pending) {
+      // Only once the requested settings are in force — else this render's (old) settings would
+      // start it and the settings change right after would replace it with a random case.
+      const s = settingsRef.current;
+      const d = trainerById(pending.attempt.type);
+      const req = pendingRequest.current;
+      const applied = !!d && !!req && s.type === d.id && s.virtual === req.virtual && s.bottom[d.family] === req.bottom && (req.level === undefined || s.levels[d.id] === req.level);
+      if (!applied) return;
+      pendingCase.current = null;
       setSummary(null);
       setInfo(`This case from your solve${pending.attempt.caseName ? ` — ${pending.attempt.caseName}` : ""}${pending.attempt.targetLength ? ` — optimal ${pending.attempt.targetLength}` : ""}`);
+      startedKey.current = choiceKey;
       void startNextAttempt(pending);
-    } else void startNextAttempt();
+    } else if (startedKey.current !== choiceKey) {
+      // A random case only when what's practised changed (not on a request's own re-render).
+      startedKey.current = choiceKey;
+      void startNextAttempt();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [choiceKey, requestSeq]);
 

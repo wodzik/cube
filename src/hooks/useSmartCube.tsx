@@ -250,6 +250,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       simulatedRef.current = new SimulatedCube();
       use(new SmartCubeSession(simulatedRef.current));
     };
+    (window as unknown as { __nactSimulateGyro?: (q: { x: number; y: number; z: number; w: number }) => void }).__nactSimulateGyro = (q) =>
+      simulatedRef.current?.tilt(q);
     return () => {
       delete w.__nactSimulateMove;
       delete ws.__nactSimulateConnect;

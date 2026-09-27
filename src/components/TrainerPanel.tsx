@@ -345,6 +345,7 @@ export function TrainerPanel({
                 stickeringMaskOrbits={stickeringMaskOrbits}
                 mask={cubeMask}
                 orientation={cubeOrientation}
+                followGyro
                 skin={cubeSkin}
                 background={background}
                 controlPanel={controlPanel}
