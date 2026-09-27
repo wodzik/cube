@@ -34,7 +34,11 @@ export function CubeTools({ arrows: withArrows = true }: { arrows?: boolean }) {
           setTimeout(() => setMarked(false), 1500);
         }}
         className={`${btn} ${marked ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"}`}
-        title="My cube is solved — start tracking it from solved (scrambles and targets are planned again)"
+        title={
+          conn.session.info.capabilities.reset
+            ? "My cube is solved — track it from solved (scrambles and targets are planned again); the cube resets its own state too, so it connects as solved next time"
+            : "My cube is solved — track it from solved (scrambles and targets are planned again). This cube can't store a reset: after reconnecting it reports its own state"
+        }
       >
         <CheckCheck size={12} /> {marked ? "Marked solved" : "Mark as solved"}
       </button>
