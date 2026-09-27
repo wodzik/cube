@@ -22,7 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bluetooth, BluetoothConnected, CheckCheck, RefreshCw, RotateCcw, Trophy } from "lucide-react";
 import "@wodzik/cubecore/element";
 import type { CubePlayer, CubeScramble } from "@wodzik/cubecore/element";
-import { type Move, type State, formatAlg, isSolved, solvedState, statesEqual } from "@wodzik/cubecore/core";
+import { type Move, type State, formatAlg, isSolved, parseAlg, solvedState, statesEqual } from "@wodzik/cubecore/core";
 import { SimulatedCube, SmartCubeSession as SmartCubeSessionClass, type SmartCubeSession } from "@wodzik/cubecore/bluetooth";
 import { SKINS } from "@wodzik/cubecore/skin";
 import { openCubeSession, trackKnownCube, useSmartCube } from "../hooks/useSmartCube";
@@ -30,6 +30,7 @@ import { type SkinName, lookForCube, resolveSkin, useCubeLook } from "../hooks/u
 import { useTurnArrows } from "../hooks/useTurnArrows";
 import { listCubes, onCubesChange } from "../services/cubeRegistry";
 import { cubecoreSolver } from "../services/cubecoreSolver";
+import { takeScramble } from "../services/scrambleQueue";
 
 const NAMES_KEY = "nact_versus_names";
 const COUNTDOWN_MS = 3000;
@@ -157,7 +158,8 @@ export default function VersusPage() {
     setWinner(null);
     setStartAt(null);
     setCountdown(null);
-    const r = await cubecoreSolver().randomScramble({ preset: "full" });
+    const ready = await takeScramble();
+    const r = { moves: parseAlg(ready.moves), state: ready.state };
     setOfficial(r);
     await planPaths(r);
     setPhase("scrambling");

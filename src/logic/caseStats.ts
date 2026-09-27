@@ -5,6 +5,7 @@
  */
 
 import type { SolveRecord } from "../types/solve";
+import type { TrainerAttempt } from "../types/trainer";
 import type { AlgorithmCase, AlgorithmVariant } from "../types/algorithm";
 import { METHOD_DETECTORS } from "./stageDetection/methodRegistry";
 import { computeStageTimings } from "./stageDetection/stageTiming";
@@ -133,3 +134,90 @@ export function drillBest(c: AlgorithmCase | undefined): number | null {
 
 export const fmtSec = (s: number | null) => (s === null ? "—" : formatTime(s));
 export const fmtMs = (ms: number) => `${(ms / 1000).toFixed(2)}`;
+
+/** Drill Algorithms stats of every case of a set (all its algorithms together). */
+export interface CaseDrillStats {
+  name: string;
+  kase: AlgorithmCase;
+  /** Attempts over all the case's algorithms. */
+  tries: number;
+  /** Algorithms with at least one attempt. */
+  drilled: number;
+  /** Seconds — best single / best ao5 / ao12 of any of its algorithms, and the mean of all attempts. */
+  best: number | null;
+  bestAo5: number | null;
+  bestAo12: number | null;
+  mean: number | null;
+}
+
+export function drillStats(kind: CaseKind): CaseDrillStats[] {
+  const { group, subgroup } = caseLocation(kind);
+  const cases = subgroup ? getSubgroupCases(group, subgroup) : loadAlgGroup(group);
+  const min = (xs: (number | null)[]) => {
+    const v = xs.filter((x): x is number => x !== null);
+    return v.length ? Math.min(...v) : null;
+  };
+  return cases.map((kase) => {
+    const { rows } = variantStats(kase);
+    const tries = rows.reduce((n, r) => n + r.count, 0);
+    const sum = rows.reduce((n, r) => n + (r.mean ?? 0) * r.count, 0);
+    return {
+      name: kase.name,
+      kase,
+      tries,
+      drilled: rows.filter((r) => r.count > 0).length,
+      best: min(rows.map((r) => r.best)),
+      bestAo5: min(rows.map((r) => r.ao5)),
+      bestAo12: min(rows.map((r) => r.ao12)),
+      mean: tries ? sum / tries : null,
+    };
+  });
+}
+
+// ─── from the trainers (Recognize) ───
+
+export interface CaseRecognizeStats {
+  kind: CaseKind;
+  name: string;
+  count: number;
+  /** ms from the case on the screen to the first turn. */
+  meanRecognitionMs: number;
+  bestRecognitionMs: number;
+  /** ms, recognition + solving. */
+  meanMs: number;
+  bestMs: number;
+  meanMoves: number;
+  lastAt: number;
+}
+
+const TRAINER_KIND: Record<string, CaseKind> = { oll: "oll", pll: "pll", cmll: "cmll" };
+
+/** Case trainers' Recognize attempts (the case on the screen), per case. */
+export function recognizeStats(attempts: readonly TrainerAttempt[]): Map<string, CaseRecognizeStats> {
+  const by = new Map<string, { kind: CaseKind; name: string; list: TrainerAttempt[] }>();
+  for (const a of attempts) {
+    const kind = TRAINER_KIND[a.type];
+    if (!kind || !a.virtual || !a.caseName || a.isDNF) continue;
+    const key = caseKey({ kind, name: a.caseName });
+    let e = by.get(key);
+    if (!e) by.set(key, (e = { kind, name: a.caseName, list: [] }));
+    e.list.push(a);
+  }
+  const out = new Map<string, CaseRecognizeStats>();
+  for (const [key, e] of by) {
+    const rec = e.list.map((a) => a.recognitionMs).filter((x): x is number => x !== undefined);
+    const total = e.list.map((a) => a.timeMs + (a.recognitionMs ?? 0));
+    out.set(key, {
+      kind: e.kind,
+      name: e.name,
+      count: e.list.length,
+      meanRecognitionMs: avg(rec),
+      bestRecognitionMs: rec.length ? Math.min(...rec) : 0,
+      meanMs: avg(total),
+      bestMs: Math.min(...total),
+      meanMoves: avg(e.list.map((a) => a.moveCount)),
+      lastAt: Math.max(...e.list.map((a) => a.endedAt)),
+    });
+  }
+  return out;
+}

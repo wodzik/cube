@@ -19,6 +19,7 @@ import { type State, applyMoves, formatAlg, invert, solvedState, statesEqual } f
 import { useSession } from "../state/sessionContext";
 import { useSmartCubeConnection } from "./useSmartCube";
 import { cubecoreSolver } from "../services/cubecoreSolver";
+import { takeScramble } from "../services/scrambleQueue";
 
 export interface UseSolveScrambleReturn {
   /** A new random scramble. */
@@ -82,8 +83,8 @@ export function useSolveScramble(): UseSolveScrambleReturn {
   const generate = useCallback(
     () =>
       run(async () => {
-        const r = await cubecoreSolver().randomScramble({ preset: "full" });
-        await arm({ moves: formatAlg(r.moves), state: r.state });
+        // One is usually ready (services/scrambleQueue) — no wait for the solver's tables.
+        await arm(await takeScramble());
       }),
     [run, arm]
   );

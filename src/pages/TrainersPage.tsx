@@ -681,29 +681,29 @@ function TrainersInner() {
                 />
               ))}
             </div>
+            <div className="flex items-center gap-0.5 shrink-0 rounded-xl bg-white/[0.03] p-0.5" title="Scramble: the case scrambled on your cube. Recognize: the case on the screen — recognise it and solve it from there (the time to your first turn is measured).">
+              {([
+                [false, "Scramble"],
+                [true, "Recognize"],
+              ] as const).map(([virtual, label]) => (
+                <button
+                  key={label}
+                  onClick={() => setSettings({ virtual })}
+                  className={`px-2.5 py-1 text-[11px] font-bold rounded-[10px] transition-all ${settings.virtual === virtual ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"}`}
+                  style={settings.virtual === virtual ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="ml-auto flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-0.5 rounded-xl bg-white/[0.03] p-0.5" title="Scramble: the case scrambled on your cube. Recognize: the case on the screen — recognise it and solve it from there (the time to your first turn is measured).">
-                {([
-                  [false, "Scramble"],
-                  [true, "Recognize"],
-                ] as const).map(([virtual, label]) => (
-                  <button
-                    key={label}
-                    onClick={() => setSettings({ virtual })}
-                    className={`px-2.5 py-1 text-[11px] font-bold rounded-[10px] transition-all ${settings.virtual === virtual ? "text-white bg-white/[0.1]" : "text-gray-500 hover:text-gray-300"}`}
-                    style={settings.virtual === virtual ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
               {def.levels && (
                 <button
                   onClick={toggleLadder}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
                     ladderEnabled ? "text-emerald-300 bg-emerald-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
                   }`}
-                  title={`Ladder mode: raise the optimal length automatically once ${LADDER_WINDOW} straight attempts are ≥${LADDER_THRESHOLD * 100}% optimal`}
+                  title={`Ladder: after each attempt, if at least ${LADDER_THRESHOLD * 100}% of your last ${LADDER_WINDOW} attempts at this optimal length were solved optimally, go one move longer (it never goes down)`}
                 >
                   <TrendingUp size={12} /> Ladder
                 </button>

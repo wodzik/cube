@@ -14,7 +14,8 @@ import { getDefaultVariant } from "../logic/algGroupConfig";
 import { openDrill } from "../services/drillNav";
 import { getSolves } from "../services/solveStore";
 import { type CaseKind, CASE_KIND_LABEL, caseLocation, caseTitle } from "../logic/solveCases";
-import { type CaseSolveStats, caseKey, collectCaseStats, drillCase, fmtMs, fmtSec, variantStats } from "../logic/caseStats";
+import { type CaseRecognizeStats, type CaseSolveStats, caseKey, collectCaseStats, drillCase, fmtMs, fmtSec, recognizeStats, variantStats } from "../logic/caseStats";
+import { getTrainerAttempts } from "../services/trainerStore";
 import { formatRelativeTime } from "../logic/statistics";
 
 interface CaseAlgorithmsModalProps {
@@ -23,6 +24,8 @@ interface CaseAlgorithmsModalProps {
   onClose: () => void;
   /** This case's stats from solves, if the caller has them (else computed from all solves). */
   solveStats?: CaseSolveStats | null;
+  /** Its Recognize stats from the trainers, if the caller has them (else computed). */
+  recognizeStats?: CaseRecognizeStats | null;
   /** Called before switching to Drill Algorithms (e.g. to close the modal it was opened from). */
   onNavigate?: () => void;
   layerClassName?: string;
@@ -37,11 +40,15 @@ function Stat({ label, value, title }: { label: string; value: string; title?: s
   );
 }
 
-export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, onNavigate, layerClassName }: CaseAlgorithmsModalProps) {
+export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognizeStats: recognizedIn, onNavigate, layerClassName }: CaseAlgorithmsModalProps) {
   const location = caseLocation(kind);
   const kase = useMemo(() => drillCase(kind, name), [kind, name]);
   const stats = useMemo(() => (solveStats !== undefined ? solveStats : (collectCaseStats(getSolves()).cases.get(caseKey({ kind, name })) ?? null)), [kind, name, solveStats]);
   const variants = useMemo(() => (kase ? variantStats(kase) : null), [kase]);
+  const recognized = useMemo(
+    () => (recognizedIn !== undefined ? recognizedIn : (recognizeStats(getTrainerAttempts()).get(caseKey({ kind, name })) ?? null)),
+    [kind, name, recognizedIn]
+  );
   // Algorithms you've drilled (and the default one) first; the rest of the set on request.
   const [showAll, setShowAll] = useState(false);
   const listed = variants ? variants.rows.filter((r) => showAll || r.count > 0 || r.variant.isDefault) : [];
@@ -108,6 +115,18 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, onNavigat
               <p className="text-xs text-gray-500">Not in your {kind === "cmll" ? "Roux" : "CFOP"} solves yet.</p>
             )}
           </section>
+
+          {recognized && (
+            <section>
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">In the trainer · Recognize</h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                <Stat label="Tries" value={String(recognized.count)} />
+                <Stat label="Recognition" value={`${fmtMs(recognized.meanRecognitionMs)}s`} title="Average time from the case on the screen to your first turn" />
+                <Stat label="Best recog." value={`${fmtMs(recognized.bestRecognitionMs)}s`} />
+                <Stat label="Average" value={`${fmtMs(recognized.meanMs)}s`} title="Recognition + solving, average" />
+              </div>
+            </section>
+          )}
 
           <section>
             <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
