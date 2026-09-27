@@ -9,6 +9,8 @@
  * button (CaseAlgorithmsModal).
  */
 
+import { openTab } from "../services/tabNav";
+import { PageLabel } from "../components/PageLabel";
 import { type ReactNode, useMemo, useState } from "react";
 import { BarChart3 } from "lucide-react";
 import { getSolves } from "../services/solveStore";
@@ -24,6 +26,13 @@ import { CaseAlgorithmsModal } from "../components/CaseAlgorithmsModal";
 import type { AlgorithmCase } from "../types/algorithm";
 
 const KINDS: CaseKind[] = ["f2l", "oll", "pll", "cmll"];
+
+/** Where each source's data comes from — the empty state links there. */
+const EMPTY_LINK: Record<"solves" | "drill" | "recognize", [string, string]> = {
+  solves: ["solve", "Go to Solve"],
+  drill: ["training", "Go to Drill Algorithms"],
+  recognize: ["trainer", "Go to Trainers"],
+};
 
 type Source = "solves" | "drill" | "recognize";
 const SOURCES: [Source, string, string][] = [
@@ -210,7 +219,8 @@ export default function CaseStatsPage() {
   };
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+    <main className="w-full px-4 sm:px-6 py-3 flex flex-col gap-4">
+      <PageLabel className="pt-1.5">Stats</PageLabel>
       <div className="flex flex-wrap items-center gap-3">
         <Tabs items={SOURCES} value={source} onChange={(s) => { setSource(s); setSortBy("count"); }} />
         <Tabs
@@ -252,6 +262,9 @@ export default function CaseStatsPage() {
         <div className="flex flex-col items-center gap-2 py-16 text-center text-gray-500">
           <BarChart3 size={28} />
           <p className="text-sm">{empty[source]}</p>
+          <button onClick={() => openTab(EMPTY_LINK[source][0])} className="text-xs font-semibold text-[var(--accent-bright)] hover:underline">
+            {EMPTY_LINK[source][1]} →
+          </button>
         </div>
       ) : (
         <div className="panel overflow-x-auto">

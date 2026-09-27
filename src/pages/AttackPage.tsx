@@ -425,6 +425,7 @@ function AttackPageInner() {
   return (
     <>
     <TrainerPanel
+      title="Time Attack"
       header={
         activeSubgroup ? (
           <div className="w-full overflow-x-auto">

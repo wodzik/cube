@@ -306,3 +306,13 @@
 .control-button {
   @apply p-2 text-gray-600 hover:text-gray-200 hover:bg-white/5 rounded-lg transition-colors;
 }
+
+/* Versus: each player's scramble — small on phones (two side by side). */
+.versus-scramble {
+  --scramble-size: 0.95rem;
+}
+@media (min-width: 768px) {
+  .versus-scramble {
+    --scramble-size: 1.45rem;
+  }
+}

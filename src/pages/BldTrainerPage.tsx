@@ -287,6 +287,7 @@ function BldInner() {
 
   return (
     <TrainerPanel
+      title="Blindfolded"
       header={
         <div className="w-full overflow-x-auto">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

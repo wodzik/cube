@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Maximize2 } from "lucide-react";
+import { LineChart, Maximize2 } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ao5, ao12, ao100, best, mean, formatTimeMs } from "../logic/statistics";
 import { OverlayModal } from "./OverlayModal";
@@ -114,14 +114,17 @@ interface ChartBodyProps {
   pb: number | null;
   avg: number | null;
   formatValue: (value: number) => string;
+  /** The graph itself (the stat cards always show). */
+  showGraph?: boolean;
 }
 
-function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue }: ChartBodyProps) {
-  const fill = height === "fill";
+function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue, showGraph = true }: ChartBodyProps) {
+  const fill = height === "fill" && showGraph;
   return (
     <div className={`flex flex-col gap-4 ${fill ? "h-full" : ""}`}>
+      {showGraph && (
       <div className={fill ? "flex-1 min-h-0" : "shrink-0"}>
-        <ResponsiveContainer width="100%" height={fill ? "100%" : height}>
+        <ResponsiveContainer width="100%" height={height === "fill" ? "100%" : height}>
           <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="var(--color-gray-700)" strokeDasharray="3 3" />
             <XAxis dataKey="index" tick={{ fill: "var(--color-gray-500)", fontSize: 10 }} tickLine={false} axisLine={false} />
@@ -184,6 +187,7 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
           </ComposedChart>
         </ResponsiveContainer>
       </div>
+      )}
 
       <div className="flex flex-row flex-wrap justify-center sm:justify-start gap-x-8 gap-y-3 shrink-0">
         <StatCard label="Ao5" value={currentAo5 ? formatValue(currentAo5) : null} accent={METRIC_COLOR.ao5} />
@@ -196,6 +200,8 @@ function ChartBody({ data, visible, height, yMin, yMax, currentAo5, currentAo12,
   );
 }
 
+const GRAPH_KEY = "nact_chart_shown";
+
 export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true, showAo12 = true, showAo100 = false, height = 200 }: StatsChartProps) {
   const [visible, setVisible] = useState<Record<Metric, boolean>>({
     single: true,
@@ -204,6 +210,23 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
     ao100: showAo100,
   });
   const [fullscreen, setFullscreen] = useState(false);
+  // Show / hide the graph (the numbers stay) — one choice for every chart, kept in this browser.
+  const [graphShown, setGraphShown] = useState(() => {
+    try {
+      return localStorage.getItem(GRAPH_KEY) !== "false";
+    } catch {
+      return true;
+    }
+  });
+  const toggleGraph = () => {
+    const next = !graphShown;
+    setGraphShown(next);
+    try {
+      localStorage.setItem(GRAPH_KEY, String(next));
+    } catch {
+      // not kept
+    }
+  };
   // The fullscreen chart fills nearly the whole viewport — ResponsiveContainer
   // needs a concrete pixel height (percentage heights need a height-bounded
   // flex ancestor, which fights with the modal's own padding/header math more
@@ -235,26 +258,36 @@ export function StatsChart({ values, formatValue = formatTimeMs, showAo5 = true,
   const yMax = empty ? 1 : Math.max(...values) * 1.05;
 
   const bodyProps = { data, visible, yMin, yMax, currentAo5, currentAo12, currentAo100, pb, avg, formatValue };
-  const fill = height === "fill";
+  const fill = height === "fill" && graphShown;
 
   return (
     <div className={fill ? "h-full flex flex-col" : ""}>
       <div className="flex items-center gap-1 mb-2 shrink-0">
-        {(["single", "ao5", "ao12", "ao100"] as const).map((m) => (
+        {graphShown && (["single", "ao5", "ao12", "ao100"] as const).map((m) => (
           <MetricChip key={m} metric={m} active={visible[m]} onClick={() => toggle(m)} />
         ))}
         <button
-          onClick={() => setFullscreen(true)}
-          title="Open fullscreen"
-          className="ml-auto p-1 rounded-md text-gray-600 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
+          onClick={toggleGraph}
+          title={graphShown ? "Hide the chart" : "Show the chart"}
+          aria-pressed={graphShown}
+          className={`ml-auto p-1 rounded-md transition-colors hover:bg-white/[0.06] ${graphShown ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-200"}`}
         >
-          <Maximize2 size={13} />
+          <LineChart size={14} />
         </button>
+        {graphShown && (
+          <button
+            onClick={() => setFullscreen(true)}
+            title="Open fullscreen"
+            className="p-1 rounded-md text-gray-600 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
+          >
+            <Maximize2 size={13} />
+          </button>
+        )}
       </div>
 
       <div className={`relative ${fill ? "flex-1 min-h-0" : ""}`}>
-        <ChartBody {...bodyProps} height={height} />
-        {empty && (
+        <ChartBody {...bodyProps} height={height} showGraph={graphShown} />
+        {empty && graphShown && (
           <div
             className="absolute inset-x-0 top-0 flex items-center justify-center text-gray-600 text-sm pointer-events-none"
             style={fill ? { height: "100%" } : { height }}

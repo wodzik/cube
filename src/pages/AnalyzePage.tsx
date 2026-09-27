@@ -15,6 +15,9 @@
  * shown next to the lines.
  */
 
+import { openTab } from "../services/tabNav";
+import { getSolves } from "../services/solveStore";
+import { PageLabel } from "../components/PageLabel";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Play, RefreshCw, Sparkles } from "lucide-react";
 import type { Analysis, AnalysisStep, CrossAnalysis, RouxAnalysis, RouxAnalysisResult, RouxStep, ZZAnalysis, ZZAnalysisResult } from "@wodzik/cubecore/analyze";
@@ -108,6 +111,7 @@ const METHOD_LABEL: Record<Method, string> = { cfop: "CFOP", roux: "Roux", zz: "
 
 export default function AnalyzePage({ request }: { request?: AnalyzeRequest | null }) {
   const [scramble, setScramble] = useState(request?.scramble ?? "");
+  const hasSolves = useMemo(() => getSolves().length > 0, []);
   const [draft, setDraft] = useState(request?.scramble ?? "");
   const [solve, setSolve] = useState(request?.solve ?? null);
   const [options, setOptions] = useState<Options>({ start: "cross", f2l: "optimal", colours: "all", zz: "eocross" });
@@ -192,7 +196,8 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
   );
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+    <main className="w-full px-4 sm:px-6 py-3 flex flex-col gap-4">
+      <PageLabel className="pt-1.5">Analyze</PageLabel>
       {/* Scramble + options */}
       <div className="flex flex-col gap-3">
         <form
@@ -229,7 +234,12 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
       </div>
 
       {!scramble.trim() ? (
-        <p className="text-sm text-gray-500 py-10 text-center">Paste a scramble (or take a random one) — or open a solve's analysis and press Analyze.</p>
+        <div className="text-sm text-gray-500 py-10 text-center flex flex-col items-center gap-2">
+          <p>Paste a scramble (or take a random one) — or open a solve's analysis and press Analyze.</p>
+          <button onClick={() => openTab("solve")} className="text-xs font-semibold text-[var(--accent-bright)] hover:underline">
+            {hasSolves ? "Your solves are on the Solve tab →" : "No solves yet — make one on the Solve tab →"}
+          </button>
+        </div>
       ) : (
         <div className="grid lg:grid-cols-[minmax(0,1fr)_22rem] gap-6 items-start">
           {/* The three methods */}

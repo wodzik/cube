@@ -18,6 +18,7 @@
  * player 2 connects a second cube for this page only.
  */
 
+import { PageLabel } from "../components/PageLabel";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bluetooth, BluetoothConnected, CheckCheck, RefreshCw, RotateCcw, Trophy } from "lucide-react";
 import "@wodzik/cubecore/element";
@@ -224,17 +225,18 @@ export default function VersusPage() {
   const bothConnected = !!sessions[0] && !!sessions[1];
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+    <main className="w-full px-4 sm:px-6 py-3 flex flex-col gap-4">
+      <PageLabel className="pt-1.5">Versus</PageLabel>
       {/* Score */}
       <div className="flex flex-col items-center gap-2">
-        <div className="panel px-6 py-3 flex items-center gap-6">
+        <div className="panel px-3 sm:px-6 py-3 flex items-center gap-3 sm:gap-6">
           <ScoreName name={names[0]} colour={COLOURS[0]} onChange={(n) => setName(0, n)} />
           <div className="flex items-baseline gap-3 font-mono tabular-nums">
-            <span className="text-4xl font-bold" style={{ color: COLOURS[0] }}>
+            <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[0] }}>
               {score[0]}
             </span>
             <span className="text-gray-600 text-2xl">–</span>
-            <span className="text-4xl font-bold" style={{ color: COLOURS[1] }}>
+            <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[1] }}>
               {score[1]}
             </span>
           </div>
@@ -248,7 +250,7 @@ export default function VersusPage() {
             <RotateCcw size={13} /> Reset score
           </button>
         </div>
-        <p className="text-xs text-gray-500 h-4">
+        <p className="text-xs text-gray-500 min-h-4 text-center">
           {!bothConnected
             ? "Connect both cubes — each scrambles the same scramble, then 3-2-1 and go."
             : phase === "scrambling"
@@ -264,8 +266,8 @@ export default function VersusPage() {
         {connectError && <p className="text-xs text-red-400">{connectError}</p>}
       </div>
 
-      {/* The two players */}
-      <div className="grid md:grid-cols-2 gap-6 md:gap-0">
+      {/* The two players — side by side on every screen (smaller on phones) */}
+      <div className="grid grid-cols-2">
         {([0, 1] as const).map((i) => (
           <PlayerSide
             key={i}
@@ -297,7 +299,7 @@ function ScoreName({ name, colour, onChange }: { name: string; colour: string; o
     <input
       defaultValue={name}
       onBlur={(e) => onChange(e.target.value.trim() || name)}
-      className="w-28 bg-transparent text-center text-sm font-semibold outline-none border-b border-transparent hover:border-white/10 focus:border-white/20"
+      className="w-20 sm:w-28 bg-transparent text-center text-sm font-semibold outline-none border-b border-transparent hover:border-white/10 focus:border-white/20"
       style={{ color: colour }}
       title="Name"
     />
@@ -359,6 +361,9 @@ function PlayerSide({
 
   useEffect(() => {
     const p = document.createElement("cube-player") as CubePlayer;
+    // The element's own 200 px minimum would overflow a player's half of a phone screen.
+    p.style.minWidth = "0";
+    p.style.minHeight = "0";
     p.setAttribute("controls", "none");
     p.style.width = "100%";
     p.style.height = "100%";
@@ -455,16 +460,15 @@ function PlayerSide({
             : "Solving…";
 
   return (
-    <section className={`flex flex-col items-center gap-4 px-2 md:px-8 ${index === 1 ? "md:border-l md:border-white/[0.06]" : ""}`}>
+    <section className={`flex flex-col items-center gap-2 md:gap-4 px-1.5 md:px-8 min-w-0 ${index === 1 ? "border-l border-white/[0.06]" : ""}`}>
       <div
         ref={scrambleHost}
-        className={`w-full max-w-xl min-h-24 text-gray-100 ${phase === "scrambling" || phase === "loading" ? "" : "invisible"}`}
-        style={{ ["--scramble-size" as string]: "1.45rem" }}
+        className={`versus-scramble w-full max-w-xl min-h-16 md:min-h-24 text-gray-100 ${phase === "scrambling" || phase === "loading" ? "" : "invisible"}`}
       />
 
       <div className="relative flex flex-col items-center">
         <RoundTimer running={phase === "running" || phase === "done"} startAt={startAt} result={result} countdown={countdown} colour={isWinner ? colour : "#9ca3af"} />
-        <p className="text-sm text-gray-500 h-5 mt-1">{status}</p>
+        <p className="text-xs md:text-sm text-gray-500 min-h-5 mt-1 text-center">{status}</p>
         {isWinner && (
           <div className="absolute -top-9 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest" style={{ color: colour, background: `${colour}1f` }}>
             <Trophy size={13} /> Winner
@@ -472,18 +476,18 @@ function PlayerSide({
         )}
       </div>
 
-      <div className="w-72 sm:w-80 aspect-square">
+      <div className="w-full max-w-40 sm:max-w-56 md:max-w-80 aspect-square">
         <div ref={playerHost} className="size-full" />
       </div>
       {!session && (
-        <button onClick={onConnect} className="btn-secondary" style={{ color: colour, borderColor: `${colour}55` }} title="Connect this player's cube">
+        <button onClick={onConnect} className="btn-secondary text-xs" style={{ color: colour, borderColor: `${colour}55` }} title="Connect this player's cube">
           <Bluetooth size={13} /> Connect cube
         </button>
       )}
 
       {session && (
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold" style={{ color: colour, background: `${colour}14` }}>
+        <div className="flex flex-wrap items-center justify-center gap-1 md:gap-2">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold max-w-full truncate" style={{ color: colour, background: `${colour}14` }}>
             <BluetoothConnected size={12} /> {session.info.name}
             {battery !== null && <span className="text-gray-400 font-normal">· {battery}%</span>}
           </span>
@@ -519,7 +523,7 @@ function RoundTimer({ running, startAt, result, countdown, colour }: { running: 
   }, [running, result]);
   const ms = result ? result.timeMs : startAt !== null ? Math.max(0, now - startAt) : 0;
   return (
-    <div className={`text-6xl font-mono tabular-nums font-bold ${result ? "" : "text-white"}`} style={result ? { color: colour } : undefined}>
+    <div className={`text-3xl sm:text-5xl md:text-6xl font-mono tabular-nums font-bold ${result ? "" : "text-white"}`} style={result ? { color: colour } : undefined}>
       {countdown !== null ? countdown : fmt(ms)}
     </div>
   );

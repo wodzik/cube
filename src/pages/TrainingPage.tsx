@@ -551,6 +551,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   return (
     <>
       <TrainerPanel
+        title="Drill Algorithms"
         header={
           activeSubgroup ? (
             <div className="w-full overflow-x-auto">

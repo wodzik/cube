@@ -747,9 +747,9 @@ function SolvePageInner({
     <>
     <TrainerPanel
       layout="side"
+      title="Speed Solve"
       header={
         <div className="flex items-center gap-3 w-full">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Speed Solve</span>
           <div className="ml-auto flex items-center gap-2">
             <SessionPicker
               sessions={sessions}
@@ -877,7 +877,8 @@ function SolvePageInner({
         </div>
       }
       centerBottom={
-        state.phase === "setup" && !isPasteOpen ? (
+        // From scratch it takes the cube's own scrambled state — only with a smart cube to read it from.
+        state.phase === "setup" && !isPasteOpen && (session.startingStage !== "scratch" || cube.session) ? (
           <button
             onClick={confirmManualSetup}
             className="btn-secondary text-xs"
@@ -887,7 +888,7 @@ function SolvePageInner({
                 : "Lock in the position you've just set up by hand as the start of this attempt"
             }
           >
-            <CheckCircle2 size={13} /> {session.startingStage === "scratch" ? "Scrambled by hand — ready" : "Ready"}
+            <CheckCircle2 size={13} /> {session.startingStage === "scratch" ? "Use my own scramble" : "Ready"}
           </button>
         ) : undefined
       }

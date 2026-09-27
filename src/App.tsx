@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { type AnalyzeRequest, onOpenAnalyze } from "./services/analyzeNav";
 import { type DrillRequest, onOpenDrill } from "./services/drillNav";
+import { onOpenTab } from "./services/tabNav";
 import { SmartCubeProvider } from "./hooks/useSmartCube";
 import { CubeLookProvider } from "./hooks/useCubeLook";
 import { useVersionCheck } from "./hooks/useVersionCheck";
@@ -91,6 +92,7 @@ export default function App() {
       }),
     []
   );
+  useEffect(() => onOpenTab((t) => setTab(t as Tab)), []);
   const updateAvailable = useVersionCheck();
   const dataUpdateAvailable = useAlgorithmDataVersionCheck();
   const [dataNoticeDismissed, setDataNoticeDismissed] = useState(false);

@@ -7,8 +7,11 @@
  * of them at once.
  */
 
+import { PageLabel } from "../components/PageLabel";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Trash2, Download, Upload, CheckCircle2, Bluetooth } from "lucide-react";
+import { RotateCcw, Trash2, Download, Upload, CheckCircle2, Bluetooth, ChevronDown } from "lucide-react";
+import { SKINS } from "@wodzik/cubecore/render";
+import { skinForCube } from "@wodzik/cubecore/bluetooth";
 import { type KnownCube, cubeName, forgetCube, listCubes, onCubesChange, updateCube } from "../services/cubeRegistry";
 import { getSolves } from "../services/solveStore";
 import { APP_LOGO, type StoredLogo, addLogo, listLogos, onLogosChange, removeLogo } from "../services/logoStore";
@@ -16,7 +19,7 @@ import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
-import { useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
+import { lookForCube, resolveSkin, useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
 
 /** Names for the skins (cubecore presets). */
@@ -40,8 +43,8 @@ function CubeLookSection() {
   const { look, setLook, autoSkin, cubeLook } = useCubeLook();
   return (
     <Section title="Cube look">
-      <div className="flex gap-5 py-4 border-b border-white/[0.06] items-center">
-        <div className="size-40 shrink-0">
+      <div className="flex flex-col sm:flex-row gap-5 py-4 border-b border-white/[0.06] sm:items-center">
+        <div className="size-40 shrink-0 self-center sm:self-auto">
           <CubeVisualisation cameraLatitude={28} cameraLongitude={32} />
         </div>
         <p className="text-xs text-gray-500">
@@ -217,6 +220,8 @@ function MyCubesSection() {
   useEffect(() => onCubesChange(() => setCubes(listCubes())), []);
   const connectedId = useSmartCubeConnection()?.cubeId ?? null;
   const [confirmForget, setConfirmForget] = useState<string | null>(null);
+  // One cube open at a time: the connected one (or the only one) to begin with.
+  const [openId, setOpenId] = useState<string | null>(() => connectedId ?? (cubes.length === 1 ? cubes[0].id : null));
   // Records per cube (solves + trainer attempts) — so you know what a cube's history holds.
   const counts = useMemo(() => {
     const n = new Map<string, number>();
@@ -236,80 +241,180 @@ function MyCubesSection() {
         <p className="py-4 text-xs text-gray-500">No cube connected yet — every smart cube you connect is remembered here, with its own settings.</p>
       ) : (
         sorted.map((c, i) => (
-          <div key={c.id} className={`py-4 flex flex-col gap-3 ${i < sorted.length - 1 ? "border-b border-white/[0.06]" : ""}`}>
-            <div className="flex items-center gap-3">
-              <Bluetooth size={15} className={connectedId === c.id ? "text-emerald-400" : "text-gray-600"} />
-              <input
-                className="flex-1 min-w-0 bg-transparent border-b border-transparent hover:border-white/10 focus:border-white/20 text-sm font-semibold text-white outline-none"
-                defaultValue={c.label ?? ""}
-                placeholder={c.deviceName}
-                onBlur={(e) => updateCube(c.id, { label: e.target.value.trim() || undefined })}
-                title="Your name for this cube"
-              />
-              {connectedId === c.id && <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">connected</span>}
-              <button
-                onClick={() => {
-                  if (confirmForget === c.id) {
-                    forgetCube(c.id);
-                    setConfirmForget(null);
-                  } else setConfirmForget(c.id);
-                }}
-                className={`p-1.5 transition-colors ${confirmForget === c.id ? "text-red-400" : "text-gray-600 hover:text-red-500"}`}
-                title={confirmForget === c.id ? "Click again to forget this cube (its records stay)" : "Forget this cube"}
-              >
-                <Trash2 size={14} />
-              </button>
+          <KnownCubeCard
+            key={c.id}
+            cube={c}
+            last={i === sorted.length - 1}
+            connected={connectedId === c.id}
+            records={counts.get(c.id) ?? 0}
+            logos={logos}
+            open={openId === c.id}
+            onToggle={() => setOpenId(openId === c.id ? null : c.id)}
+            confirmForget={confirmForget === c.id}
+            onForget={() => {
+              if (confirmForget === c.id) {
+                forgetCube(c.id);
+                setConfirmForget(null);
+              } else setConfirmForget(c.id);
+            }}
+            onLookPart={(part, value) => setLookPart(c, part, value)}
+          />
+        ))
+      )}
+    </Section>
+  );
+}
+
+/**
+ * One remembered cube: its name and records, and — opened — its look laid
+ * out exactly like Cube look / Turn arrows above: a preview and the same
+ * rows, each either the cube's own or as set above.
+ */
+function KnownCubeCard({
+  cube: c,
+  last,
+  connected,
+  records,
+  logos,
+  open,
+  onToggle,
+  confirmForget,
+  onForget,
+  onLookPart,
+}: {
+  cube: KnownCube;
+  last: boolean;
+  connected: boolean;
+  records: number;
+  logos: StoredLogo[];
+  open: boolean;
+  onToggle: () => void;
+  confirmForget: boolean;
+  onForget: () => void;
+  onLookPart: (part: keyof CubeLook, value: string) => void;
+}) {
+  const { look: appLook } = useCubeLook();
+  // The skin this cube gets drawn with: its own look over the app's; "auto" = the one that suits it.
+  const skin = useMemo(() => {
+    const suits = skinForCube({ protocol: { id: c.protocol }, name: c.deviceName });
+    const auto = ((Object.keys(SKINS) as SkinName[]).find((k) => SKINS[k] === suits) ?? "default") as SkinName;
+    return resolveSkin(lookForCube(appLook, c.look), auto);
+  }, [appLook, c.look, c.protocol, c.deviceName]);
+  const own = (part: keyof CubeLook) => c.look?.[part];
+  return (
+    <div className={`py-3 ${last ? "" : "border-b border-white/[0.06]"}`}>
+      <div className="flex items-center gap-3">
+        <Bluetooth size={15} className={connected ? "text-emerald-400 shrink-0" : "text-gray-600 shrink-0"} />
+        <div className="flex-1 min-w-0">
+          <input
+            className="w-full bg-transparent border-b border-transparent hover:border-white/10 focus:border-white/20 text-sm font-semibold text-white outline-none"
+            defaultValue={c.label ?? ""}
+            placeholder={c.deviceName}
+            onBlur={(e) => updateCube(c.id, { label: e.target.value.trim() || undefined })}
+            title="Your name for this cube"
+          />
+          <p className="text-[11px] text-gray-500 mt-0.5 truncate">
+            {c.deviceName} · {c.protocol} · last used {new Date(c.lastSeen).toLocaleDateString()} · {records} records
+          </p>
+        </div>
+        {connected && <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">connected</span>}
+        <button onClick={onToggle} className="btn-secondary text-xs" aria-expanded={open} title={open ? "Hide this cube's settings" : "This cube's settings"}>
+          Settings <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+        <button
+          onClick={onForget}
+          className={`p-1.5 transition-colors ${confirmForget ? "text-red-400" : "text-gray-600 hover:text-red-500"}`}
+          title={confirmForget ? "Click again to forget this cube (its records stay)" : "Forget this cube"}
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      {open && (
+        <div className="mt-2 sm:pl-7">
+          <div className="flex flex-col sm:flex-row gap-4 py-3 border-b border-white/[0.06] sm:items-center">
+            <div className="size-32 shrink-0 self-center sm:self-auto">
+              <CubeVisualisation skin={skin} cameraLatitude={28} cameraLongitude={32} />
             </div>
-            <p className="text-[11px] text-gray-500 -mt-1">
-              {c.deviceName} · {c.protocol} · last used {new Date(c.lastSeen).toLocaleDateString()} · {counts.get(c.id) ?? 0} records
+            <p className="text-xs text-gray-500">
+              How this cube is drawn while it's connected. Each setting is its own, or <strong className="text-gray-300">as in Cube look</strong> above — the skin by
+              default the one that suits it.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <select className={selectClass} value={c.look?.skin && c.look.skin !== "auto" ? c.look.skin : APP} onChange={(e) => setLookPart(c, "skin", e.target.value)} title="Skin for this cube">
-                <option value={APP}>Skin: the one that suits it</option>
+          </div>
+          <SettingsRow
+            title="Skin"
+            description="Its shapes and colours."
+            action={
+              <select className={selectClass} value={own("skin") && own("skin") !== "auto" ? own("skin") : APP} onChange={(e) => onLookPart("skin", e.target.value)}>
+                <option value={APP}>The one that suits it</option>
                 {(Object.keys(SKIN_LABELS) as SkinName[]).map((k) => (
                   <option key={k} value={k}>
                     {SKIN_LABELS[k]}
                   </option>
                 ))}
               </select>
-              <select className={selectClass} value={c.look?.stickers ?? APP} onChange={(e) => setLookPart(c, "stickers", e.target.value)} title="Stickers for this cube">
-                <option value={APP}>Stickers: app setting</option>
+            }
+          />
+          <SettingsRow
+            title="Stickers"
+            description="Stickers on black plastic, or as the skin is."
+            action={
+              <select className={selectClass} value={own("stickers") ?? APP} onChange={(e) => onLookPart("stickers", e.target.value)}>
+                <option value={APP}>As in Cube look</option>
                 {STICKERS.map(([v, label]) => (
                   <option key={v} value={v}>
                     {label}
                   </option>
                 ))}
               </select>
-              <select
-                className={selectClass}
-                value={c.arrows ?? APP}
-                onChange={(e) => updateCube(c.id, { arrows: e.target.value === APP ? undefined : (e.target.value as ArrowMode) })}
-                title="Turn arrows for this cube"
-              >
-                <option value={APP}>Arrows: app setting</option>
-                {ARROW_MODES.map(([v, label]) => (
-                  <option key={v} value={v}>
-                    Arrows: {label.toLowerCase()}
-                  </option>
-                ))}
-              </select>
-              <select className={selectClass} value={c.look?.finish ?? APP} onChange={(e) => setLookPart(c, "finish", e.target.value)} title="Finish for this cube">
-                <option value={APP}>Finish: app setting</option>
+            }
+          />
+          <SettingsRow
+            title="Finish"
+            description="Matte or glossy plastic."
+            action={
+              <select className={selectClass} value={own("finish") ?? APP} onChange={(e) => onLookPart("finish", e.target.value)}>
+                <option value={APP}>As in Cube look</option>
                 {FINISHES.map(([v, label]) => (
                   <option key={v} value={v}>
                     {label}
                   </option>
                 ))}
               </select>
-              <select className={selectClass} value={c.look?.logo ?? APP} onChange={(e) => setLookPart(c, "logo", e.target.value)} title="Logo for this cube">
-                <option value={APP}>Logo: app setting</option>
+            }
+          />
+          <SettingsRow
+            title="Logo"
+            description="On the white centre (add images in Cube look)."
+            action={
+              <select className={selectClass} value={own("logo") ?? APP} onChange={(e) => onLookPart("logo", e.target.value)}>
+                <option value={APP}>As in Cube look</option>
                 <LogoOptions logos={logos} />
               </select>
-            </div>
-          </div>
-        ))
+            }
+          />
+          <SettingsRow
+            title="Turn arrows"
+            description="The next move drawn on the cube."
+            last
+            action={
+              <select
+                className={selectClass}
+                value={c.arrows ?? APP}
+                onChange={(e) => updateCube(c.id, { arrows: e.target.value === APP ? undefined : (e.target.value as ArrowMode) })}
+              >
+                <option value={APP}>As in Turn arrows</option>
+                {ARROW_MODES.map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            }
+          />
+        </div>
       )}
-    </Section>
+    </div>
   );
 }
 
@@ -376,7 +481,7 @@ function SettingsRow({
   last?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between gap-4 py-4 ${last ? "" : "border-b border-white/[0.06]"}`}>
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-x-4 gap-y-2 py-4 ${last ? "" : "border-b border-white/[0.06]"}`}>
       <div>
         <p className="text-sm font-medium text-white">{title}</p>
         <div className="text-xs text-gray-500 mt-0.5 max-w-md">{description}</div>
@@ -405,8 +510,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-6 pt-12 pb-24">
-      <h1 className="text-2xl font-extrabold text-white mb-1">Settings</h1>
+    <div className="px-4 sm:px-6 py-3 pb-24">
+      <PageLabel className="block pt-1.5">Settings</PageLabel>
+      <div className="max-w-2xl mx-auto pt-6">
       <p className="text-sm text-gray-500 mb-8">Data is stored locally in this browser only — no account, no backend.</p>
 
       {message && (
@@ -417,8 +523,8 @@ export default function SettingsPage() {
       )}
 
       <CubeLookSection />
-      <MyCubesSection />
       <TurnArrowsSection />
+      <MyCubesSection />
 
       <Section title="Algorithm progress">
         <SettingsRow
@@ -501,6 +607,7 @@ export default function SettingsPage() {
           }
         />
       </Section>
+      </div>
     </div>
   );
 }

@@ -14,6 +14,7 @@
  *   stats   slot  → StatsChart
  */
 
+import { PageLabel } from "./PageLabel";
 import type { ReactNode, RefObject } from "react";
 import { TrainLayout, type TrainLayoutMode } from "./TrainLayout";
 import { MoveSequenceDisplay } from "./MoveSequenceDisplay";
@@ -53,6 +54,8 @@ function Tap({ onClick, className = "", children }: { onClick?: () => void; clas
 export interface TrainerPanelProps {
   // ── Layout ──
   header: ReactNode;
+  /** The page's name (PageLabel), left of the header's first row (above it on phones). */
+  title?: ReactNode;
   bottom?: ReactNode;
   /** A page's own persistent sidebar, in its own column left of everything else — e.g. a recent-times list (see TrainLayout). */
   leftAside?: ReactNode;
@@ -168,6 +171,7 @@ export interface TrainerPanelProps {
 
 export function TrainerPanel({
   header,
+  title,
   bottom,
   leftAside,
   layout = "side",
@@ -238,7 +242,16 @@ export function TrainerPanel({
 }: TrainerPanelProps) {
   return (
     <TrainLayout
-      header={header}
+      header={
+        title ? (
+          <div className="flex flex-col sm:flex-row sm:items-start gap-x-5 gap-y-2 w-full min-w-0">
+            <PageLabel className="sm:pt-1.5">{title}</PageLabel>
+            <div className="flex-1 min-w-0 flex items-center">{header}</div>
+          </div>
+        ) : (
+          header
+        )
+      }
       leftAside={leftAside}
       layout={layout}
       sequence={
