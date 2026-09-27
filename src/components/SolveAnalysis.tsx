@@ -49,7 +49,7 @@ import { patchSolve } from "../services/solveStore";
 import { buildShareUrl, shareBlocker } from "../logic/shareLink";
 import { copyText } from "../logic/clipboard";
 import { stageDescription } from "./stageDescriptions";
-import { type StageCase, caseTitle, crossCaseOf, isRealCase, solveCases } from "../logic/solveCases";
+import { type StageCase, caseTitle, crossCaseOf, isRealCase, solveCases, stageStartOf } from "../logic/solveCases";
 import { cubecoreSolver } from "../services/cubecoreSolver";
 import { openTrainer } from "../services/trainerNav";
 import { frameForBottom } from "../logic/trainerCatalog";
@@ -99,6 +99,7 @@ function StageTimingRow({
   stageCase,
   onOpenCase,
   cross,
+  practise,
 }: {
   timing: StageTiming;
   onJump: (stage: string, moveIndex: number) => void;
@@ -106,8 +107,10 @@ function StageTimingRow({
   /** The algorithm case this stage started from (F2L / OLL / PLL / CMLL). */
   stageCase?: StageCase;
   onOpenCase?: (c: StageCase) => void;
-  /** The cross (CFOP): its optimal length (null: still computing), and practising this exact cross. */
-  cross?: { optimal: number | null; onTrain: () => void };
+  /** The cross (CFOP): its optimal length (null: still computing). */
+  cross?: { optimal: number | null };
+  /** Practise this stage's exact case in Steps (the cross, an F2L pair, OLL, PLL). */
+  practise?: { onClick: () => void; title: string };
 }) {
   const reached = timing.startMoveIndex !== null;
   // A stage with 0 moves either completed as a side effect of the previous
@@ -163,19 +166,19 @@ function StageTimingRow({
                   optimal {cross.optimal} (+{timing.moveCount - cross.optimal})
                 </span>
               )}
-              {cross.optimal !== null && cross.optimal > 0 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    cross.onTrain();
-                  }}
-                  className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
-                  title="Practise this exact cross in Steps → Cross (Recognize, at its optimal length)"
-                >
-                  Practise this cross →
-                </button>
-              )}
             </>
+          )}
+          {!skipped && practise && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                practise.onClick();
+              }}
+              className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+              title={practise.title}
+            >
+              Practise →
+            </button>
           )}
           {!skipped && stageCase?.name === "other" && (
             <span className="text-[10px] text-gray-500" title="Not one of the set's cases (e.g. a piece was in another slot)">
@@ -310,18 +313,35 @@ export function SolveAnalysis({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crossKey]);
-  const cross =
-    crossCase && !readOnly
-      ? {
-          optimal: crossOptimal?.key === crossKey ? crossOptimal.optimal : null,
-          onTrain: () => {
-            const optimal = crossOptimal?.key === crossKey ? crossOptimal.optimal : null;
-            if (!optimal) return;
-            onClose();
-            openTrainer({ type: "cross", level: optimal, bottom: crossCase.face, virtual: true, caseState: crossCase.start });
-          },
-        }
-      : undefined;
+  const crossOptimalNow = crossOptimal?.key === crossKey ? crossOptimal.optimal : null;
+  const cross = crossCase ? { optimal: crossOptimalNow } : undefined;
+  // "Practise →": the stage's exact case in Steps, in Recognize mode (the case on the screen).
+  const practiseFor = (stage: string): { onClick: () => void; title: string } | undefined => {
+    if (readOnly || method !== "CFOP") return undefined;
+    if (stage === "cross") {
+      if (!crossCase || !crossOptimalNow) return undefined;
+      return {
+        title: `This exact cross in Steps → Cross (Recognize, optimal ${crossOptimalNow})`,
+        onClick: () => {
+          onClose();
+          openTrainer({ type: "cross", level: crossOptimalNow, bottom: crossCase.face, virtual: true, caseState: crossCase.start });
+        },
+      };
+    }
+    const c = cases[stage];
+    if (!isRealCase(c) || (c.kind === "f2l" && !c.slot)) return undefined;
+    const at = stageStartOf(record, stage, boundaries);
+    if (!at) return undefined;
+    const where = c.kind === "f2l" ? `Steps → F2L, the ${c.slot} slot` : `Steps → LL → ${c.kind.toUpperCase()}`;
+    return {
+      title: `This exact case in ${where} (Recognize)`,
+      onClick: () => {
+        onClose();
+        if (c.kind === "f2l") openTrainer({ type: "f2l", bottom: at.face, virtual: true, caseState: at.start, slots: [c.slot!], variant: "free", caseName: c.name });
+        else openTrainer({ type: c.kind === "oll" ? "oll" : "pll", bottom: at.face, virtual: true, caseState: at.start, caseName: c.name });
+      },
+    };
+  };
   const [openCase, setOpenCase] = useState<StageCase | null>(null);
   // For the method currently shown (its stage split defines the pauses).
   const fluency = fluencyPercent(timings, record.timeMs);
@@ -453,6 +473,7 @@ export function SolveAnalysis({
                     stageCase={cases[t.stage]}
                     onOpenCase={setOpenCase}
                     cross={t.stage === "cross" ? cross : undefined}
+                    practise={practiseFor(t.stage)}
                   />
                 ))}
               </div>

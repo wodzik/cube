@@ -8,8 +8,13 @@ import type { TrainerType } from "../types/trainer";
 
 export interface TrainerRequest {
   type: TrainerType;
-  /** The optimal length (the trainer's level). */
-  level: number;
+  /** The optimal length (the trainer's level) — for trainers with levels. */
+  level?: number;
+  /** F2L: the slots trained, and "free" / "solved" for the other ones. */
+  slots?: string[];
+  variant?: string;
+  /** OLL / PLL: the case's name (for its stats). */
+  caseName?: string;
   /** The face that goes down (the colour setting). */
   bottom: Face;
   /** Recognize mode (the case on the screen) — else scrambled on the cube. */

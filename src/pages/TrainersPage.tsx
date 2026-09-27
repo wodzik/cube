@@ -273,7 +273,7 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
         const movesAtStart = moveCounterRef.current;
         let caseState: State;
         let scramble: Move[];
-        let cmllCase: string | undefined;
+        let cmllCase: string | undefined = retry?.attempt.caseName;
         if (retry) {
           caseState = retry.caseState;
           scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
@@ -349,13 +349,22 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
     setSettings({
       type: d.id,
       lastByFamily: { ...s.lastByFamily, [d.family]: d.id },
-      levels: { ...s.levels, [d.id]: request.level },
+      ...(request.level !== undefined ? { levels: { ...s.levels, [d.id]: request.level } } : {}),
+      ...(request.variant !== undefined ? { variants: { ...s.variants, [d.id]: request.variant } } : {}),
+      ...(request.slots ? { slots: request.slots as F2LSlot[] } : {}),
       bottom: { ...s.bottom, [d.family]: request.bottom },
       virtual: request.virtual,
     });
     pendingCase.current = {
       caseState: request.caseState,
-      attempt: { type: d.id, targetLength: request.level, frameId: frameForBottom(request.bottom).id } as TrainerAttempt,
+      attempt: {
+        type: d.id,
+        targetLength: request.level ?? 0,
+        frameId: frameForBottom(request.bottom).id,
+        slot: request.variant,
+        slots: request.slots,
+        caseName: request.caseName,
+      } as TrainerAttempt,
     };
     setRequestSeq((n) => n + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -368,7 +377,7 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
     pendingCase.current = null;
     if (pending) {
       setSummary(null);
-      setInfo(`This case from your solve — optimal ${pending.attempt.targetLength}`);
+      setInfo(`This case from your solve${pending.attempt.caseName ? ` — ${pending.attempt.caseName}` : ""}${pending.attempt.targetLength ? ` — optimal ${pending.attempt.targetLength}` : ""}`);
       void startNextAttempt(pending);
     } else void startNextAttempt();
     // eslint-disable-next-line react-hooks/exhaustive-deps

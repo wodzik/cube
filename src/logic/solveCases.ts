@@ -15,6 +15,7 @@ import { type Face, FRAMES, type Frame, type Move, type State, applyMove, applyM
 import { type F2LSlot, recognizeF2L, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
 import { recognizeCmllAnywhere, secondBlock } from "@wodzik/cubecore/roux";
 import type { SolveRecord } from "../types/solve";
+import { frameForBottom } from "./trainerCatalog";
 import type { StageBoundary } from "./stageDetection/types";
 
 export type CaseKind = "f2l" | "oll" | "pll" | "cmll";
@@ -92,9 +93,8 @@ function statesAt(record: SolveRecord, counts: readonly number[]): Map<number, S
 /** Moves done when a boundary was reached (its move included; -1 = before the first move). */
 const doneAt = (b: StageBoundary) => b.moveIndex + 1;
 
-/** One frame per bottom face (which one of the four around it doesn't matter: F2L case names are the same in every slot). */
-const FRAME_BY_BOTTOM = new Map<Face, Frame>();
-for (const f of FRAMES) if (!FRAME_BY_BOTTOM.has(f.face.D)) FRAME_BY_BOTTOM.set(f.face.D, f);
+/** One frame per bottom face — the one the Steps trainers use (frameForBottom), so a slot here is the same slot there. */
+const FRAME_BY_BOTTOM = new Map<Face, Frame>((["U", "R", "F", "D", "L", "B"] as Face[]).map((d) => [d, frameForBottom(d)]));
 
 /** A frame with the cross face down: the boundary's detail (the cross face) if its cross is solved, else any face whose cross is. */
 function crossFrame(state: State, detail: string | undefined): Frame | null {
@@ -205,6 +205,24 @@ export function crossCaseOf(record: SolveRecord, boundaries: readonly StageBound
   if (!cross || cross.moveIndex < 0) return null;
   const states = statesAt(record, [0, doneAt(cross)]);
   const start = states.get(0);
+  const done = states.get(doneAt(cross));
+  const frame = done && crossFrame(done, cross.detail);
+  return start && frame ? { start, face: frame.face.D } : null;
+}
+
+/**
+ * The cube as a stage of a CFOP solve began (the state its case is in) and
+ * the cross face — to practise that case in Steps.
+ */
+export function stageStartOf(record: SolveRecord, stage: string, boundaries: readonly StageBoundary[] = record.cfop ?? []): { start: State; face: Face } | null {
+  const order = ["cross", "f2l-1", "f2l-2", "f2l-3", "f2l-4", "oll", "pll", "auf"];
+  const i = order.indexOf(stage);
+  const cross = boundaries.find((b) => b.stage === "cross");
+  const prev = i > 0 ? boundaries.find((b) => b.stage === order[i - 1]) : undefined;
+  if (!cross || (i > 0 && !prev)) return null;
+  const at = prev ? doneAt(prev) : 0;
+  const states = statesAt(record, [at, doneAt(cross)]);
+  const start = states.get(at);
   const done = states.get(doneAt(cross));
   const frame = done && crossFrame(done, cross.detail);
   return start && frame ? { start, face: frame.face.D } : null;
