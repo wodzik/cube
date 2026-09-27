@@ -6,7 +6,7 @@
  * for the holder.
  */
 
-import { FACES, type Face, type Frame, type Move, type MoveFamily, formatMove } from "@cubecore/core";
+import { FACES, type Face, type Frame, type Move, type MoveFamily, formatMove } from "@wodzik/cubecore/core";
 
 /** The quaternion that turns the drawn cube so `frame`'s faces sit where the holder sees them. */
 export function frameQuaternion(frame: Frame): { x: number; y: number; z: number; w: number } {

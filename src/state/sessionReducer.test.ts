@@ -3,7 +3,7 @@ import { sessionReducer } from "./sessionReducer";
 import { actions } from "./sessionActions";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionConfig, SessionState } from "../types/session";
-import { applyMoves, solvedState } from "@cubecore/core";
+import { applyMoves, solvedState } from "@wodzik/cubecore/core";
 import { finalOrientationAfterAlg, identityOrientation } from "../logic/moveParser";
 
 function configured(config: Partial<SessionConfig>): SessionState {

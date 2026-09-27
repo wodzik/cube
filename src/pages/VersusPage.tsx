@@ -20,11 +20,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bluetooth, BluetoothConnected, CheckCheck, RefreshCw, RotateCcw, Trophy } from "lucide-react";
-import "@cubecore/element";
-import type { CubePlayer, CubeScramble } from "@cubecore/element";
-import { type Move, type State, formatAlg, isSolved, solvedState, statesEqual } from "@cubecore/core";
-import { SimulatedCube, SmartCubeSession as SmartCubeSessionClass, type SmartCubeSession } from "@cubecore/bluetooth";
-import { SKINS } from "@cubecore/skin";
+import "@wodzik/cubecore/element";
+import type { CubePlayer, CubeScramble } from "@wodzik/cubecore/element";
+import { type Move, type State, formatAlg, isSolved, solvedState, statesEqual } from "@wodzik/cubecore/core";
+import { SimulatedCube, SmartCubeSession as SmartCubeSessionClass, type SmartCubeSession } from "@wodzik/cubecore/bluetooth";
+import { SKINS } from "@wodzik/cubecore/skin";
 import { openCubeSession, trackKnownCube, useSmartCube } from "../hooks/useSmartCube";
 import { type SkinName, lookForCube, resolveSkin, useCubeLook } from "../hooks/useCubeLook";
 import { useTurnArrows } from "../hooks/useTurnArrows";

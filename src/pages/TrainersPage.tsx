@@ -45,10 +45,10 @@ import {
   invert,
   toFaceTurns,
   view as viewOf,
-} from "@cubecore/core";
-import type { F2LSlot } from "@cubecore/cfop";
-import { CMLL_CASES, cmllCaseState, recognizeCmll } from "@cubecore/roux";
-import { OLL_CASES, PLL_CASES, recognizeOll, recognizePll } from "@cubecore/cfop";
+} from "@wodzik/cubecore/core";
+import type { F2LSlot } from "@wodzik/cubecore/cfop";
+import { CMLL_CASES, cmllCaseState, recognizeCmll } from "@wodzik/cubecore/roux";
+import { OLL_CASES, PLL_CASES, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves, collapseToStm } from "../logic/moveReduction";
@@ -82,7 +82,7 @@ import { AlgCaseVisualisation } from "../components/AlgCaseVisualisation";
 import type { CrossMoveAnalysis } from "../components/TrainerSummary";
 import type { SessionConfig } from "../types/session";
 import type { TrainerAttempt, TrainerType } from "../types/trainer";
-import type { Face } from "@cubecore/core";
+import type { Face } from "@wodzik/cubecore/core";
 
 const STORAGE_KEY = "nact_trainers";
 const LADDER_STORAGE_KEY = "nact_trainer_ladder";

@@ -28,9 +28,9 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { RefreshCw, Eye, EyeOff } from "lucide-react";
 import { useTurnArrows } from "../hooks/useTurnArrows";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
-import "@cubecore/element";
-import type { ArrowTarget, CubeAlgPractice, CubeScramble } from "@cubecore/element";
-import { parseAlg, solvedState } from "@cubecore/core";
+import "@wodzik/cubecore/element";
+import type { ArrowTarget, CubeAlgPractice, CubeScramble } from "@wodzik/cubecore/element";
+import { parseAlg, solvedState } from "@wodzik/cubecore/core";
 import type { SequenceTarget, TrackedProgress } from "../logic/cubecoreSequence";
 import type { MoveRecord } from "../types/session";
 

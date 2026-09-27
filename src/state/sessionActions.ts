@@ -1,6 +1,6 @@
 import type { SessionConfig, StartMethod, StopMethod } from "../types/session";
 import type { Orientation } from "../types/cube";
-import type { State } from "@cubecore/core";
+import type { State } from "@wodzik/cubecore/core";
 
 export enum ActionType {
   CONFIGURE = "CONFIGURE",

@@ -18,11 +18,11 @@
  */
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
-import "@cubecore/element"; // registers <cube-player>
-import type { ArrowTarget, CubePlayer } from "@cubecore/element";
-import type { Skin } from "@cubecore/render";
+import "@wodzik/cubecore/element"; // registers <cube-player>
+import type { ArrowTarget, CubePlayer } from "@wodzik/cubecore/element";
+import type { Skin } from "@wodzik/cubecore/render";
 import { useCubeLook } from "../hooks/useCubeLook";
-import { type Frame, type Mask, type State, isSolved } from "@cubecore/core";
+import { type Frame, type Mask, type State, isSolved } from "@wodzik/cubecore/core";
 import { frameQuaternion } from "../logic/frameView";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";

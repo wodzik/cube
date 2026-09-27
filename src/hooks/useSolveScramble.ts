@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useRef, useState } from "react";
-import { type State, applyMoves, formatAlg, invert, solvedState, statesEqual } from "@cubecore/core";
+import { type State, applyMoves, formatAlg, invert, solvedState, statesEqual } from "@wodzik/cubecore/core";
 import { useSession } from "../state/sessionContext";
 import { useSmartCubeConnection } from "./useSmartCube";
 import { cubecoreSolver } from "../services/cubecoreSolver";

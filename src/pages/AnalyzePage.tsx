@@ -17,8 +17,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Play, RefreshCw, Sparkles } from "lucide-react";
-import type { Analysis, AnalysisStep, CrossAnalysis, RouxAnalysis, RouxAnalysisResult, RouxStep, ZZAnalysis, ZZAnalysisResult } from "@cubecore/analyze";
-import { type Face, type Move, formatAlg, parseAlg } from "@cubecore/core";
+import type { Analysis, AnalysisStep, CrossAnalysis, RouxAnalysis, RouxAnalysisResult, RouxStep, ZZAnalysis, ZZAnalysisResult } from "@wodzik/cubecore/analyze";
+import { type Face, type Move, formatAlg, parseAlg } from "@wodzik/cubecore/core";
 import { cubecoreAnalyzer } from "../services/cubecoreAnalyzer";
 import { cubecoreSolver } from "../services/cubecoreSolver";
 import type { AnalyzeRequest } from "../services/analyzeNav";

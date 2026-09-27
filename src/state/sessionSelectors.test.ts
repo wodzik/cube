@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { applyMoves, solvedState } from "@cubecore/core";
+import { applyMoves, solvedState } from "@wodzik/cubecore/core";
 import { selectCurrentProgress, selectTracking } from "./sessionSelectors";
 import { INITIAL_SESSION_STATE } from "../types/session";
 import type { SessionState } from "../types/session";

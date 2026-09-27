@@ -28,10 +28,10 @@ import {
   isSolved,
   isLseStage,
   view,
-} from "@cubecore/core";
-import { CFOP_MASKS, CFOP_TRAINERS, type F2LSlot, OLL_CASES, PLL_CASES } from "@cubecore/cfop";
-import { CMLL_CASES, ROUX_MASKS, ROUX_TRAINERS, cmll } from "@cubecore/roux";
-import { ZZ_TRAINERS } from "@cubecore/zz";
+} from "@wodzik/cubecore/core";
+import { CFOP_MASKS, CFOP_TRAINERS, type F2LSlot, OLL_CASES, PLL_CASES } from "@wodzik/cubecore/cfop";
+import { CMLL_CASES, ROUX_MASKS, ROUX_TRAINERS, cmll } from "@wodzik/cubecore/roux";
+import { ZZ_TRAINERS } from "@wodzik/cubecore/zz";
 import type { TrainerType } from "../types/trainer";
 
 export type Family = "cross" | "f2l" | "ll" | "roux" | "zz";

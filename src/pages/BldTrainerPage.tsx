@@ -18,10 +18,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import "@cubecore/element";
-import type { CubeBld } from "@cubecore/element";
-import { FACES, FRAMES, applyMoves, buildMask, solvedState } from "@cubecore/core";
-import { SCHEMES, letterSkin } from "@cubecore/bld";
+import "@wodzik/cubecore/element";
+import type { CubeBld } from "@wodzik/cubecore/element";
+import { FACES, FRAMES, applyMoves, buildMask, solvedState } from "@wodzik/cubecore/core";
+import { SCHEMES, letterSkin } from "@wodzik/cubecore/bld";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectTracking } from "../state/sessionSelectors";
 import { useSmartCube } from "../hooks/useSmartCube";

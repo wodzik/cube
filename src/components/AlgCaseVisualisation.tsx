@@ -21,9 +21,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { applyMoves, solvedState } from "@cubecore/core";
-import { sharedPictures } from "@cubecore/render";
-import type { Skin } from "@cubecore/render";
+import { applyMoves, solvedState } from "@wodzik/cubecore/core";
+import { sharedPictures } from "@wodzik/cubecore/render";
+import type { Skin } from "@wodzik/cubecore/render";
 import { CubeVisualisation, type CubeVisualisationRef, type VisualizationMode } from "./CubeVisualisation";
 import { buildCanonicalDisplaySetupAlg } from "../logic/moveParser";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
@@ -46,9 +46,9 @@ interface AlgCaseVisualisationProps {
   /** Piece-level mask (overrides `stickering`) — see CubeVisualisation. */
   stickeringMaskOrbits?: import("../types/cube").StickeringMaskOrbits;
   /** A cubecore mask (overrides the stickering props). */
-  cubeMask?: import("@cubecore/core").Mask;
+  cubeMask?: import("@wodzik/cubecore/core").Mask;
   /** Picture the cube as held in this frame. */
-  orientation?: import("@cubecore/core").Frame;
+  orientation?: import("@wodzik/cubecore/core").Frame;
   visualization?: VisualizationMode;
   cameraLatitude?: number;
   cameraLongitude?: number;

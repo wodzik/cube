@@ -24,8 +24,8 @@ import { TimerDisplay } from "./TimerDisplay";
 import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { TrackedProgress } from "../logic/cubecoreSequence";
-import type { Frame, Mask } from "@cubecore/core";
-import type { Skin } from "@cubecore/render";
+import type { Frame, Mask } from "@wodzik/cubecore/core";
+import type { Skin } from "@wodzik/cubecore/render";
 import type { SequenceTracking } from "./MoveSequenceDisplay";
 
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.

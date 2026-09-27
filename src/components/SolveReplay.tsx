@@ -10,10 +10,10 @@
  */
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import "@cubecore/element";
-import type { CubePlayer } from "@cubecore/element";
-import { parseAlg } from "@cubecore/core";
-import type { Segment } from "@cubecore/timeline";
+import "@wodzik/cubecore/element";
+import type { CubePlayer } from "@wodzik/cubecore/element";
+import { parseAlg } from "@wodzik/cubecore/core";
+import type { Segment } from "@wodzik/cubecore/timeline";
 import type { SolveRecord } from "../types/solve";
 import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { useCubeLook } from "../hooks/useCubeLook";

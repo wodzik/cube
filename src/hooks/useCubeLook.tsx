@@ -12,7 +12,7 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { SKINS, type Skin, type StickerStyle, withFinish, withStickers } from "@cubecore/skin";
+import { SKINS, type Skin, type StickerStyle, withFinish, withStickers } from "@wodzik/cubecore/skin";
 import { useSmartCubeConnection } from "./useSmartCube";
 import { type KnownCube, listCubes, onCubesChange } from "../services/cubeRegistry";
 import { logoImage, onLogosChange } from "../services/logoStore";

@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { isSolved } from "@cubecore/core";
+import { isSolved } from "@wodzik/cubecore/core";
 import { useSession } from "../state/sessionContext";
 import { useSmartCubeConnection } from "./useSmartCube";
 

@@ -7,8 +7,8 @@
  * (home facelet), so both follow the pieces as they move.
  */
 
-import { FACELETS, MASK_STATES, type Mask, type MaskState, type Vec3, fullMask } from "@cubecore/core";
-import { maskByName } from "@cubecore/methods";
+import { FACELETS, MASK_STATES, type Mask, type MaskState, type Vec3, fullMask } from "@wodzik/cubecore/core";
+import { maskByName } from "@wodzik/cubecore/methods";
 import type { FaceletMask, StickeringMaskOrbits } from "../types/cube";
 
 const ORBITS: Record<string, readonly string[]> = {

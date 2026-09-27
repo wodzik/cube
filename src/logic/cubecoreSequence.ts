@@ -13,7 +13,7 @@
  * dozen moves).
  */
 
-import { FACES, FRAMES, type Frame, IDENTITY_FRAME, type SequenceProgress, SequenceTracker, type State, parseAlg, solvedState } from "@cubecore/core";
+import { FACES, FRAMES, type Frame, IDENTITY_FRAME, type SequenceProgress, SequenceTracker, type State, parseAlg, solvedState } from "@wodzik/cubecore/core";
 import type { Orientation } from "../types/cube";
 
 export type { SequenceProgress };

@@ -25,7 +25,7 @@ import { useSpacebar } from "../hooks/useSpacebar";
 import { useTimerDevice } from "../hooks/useTimerDevice";
 import { useSolvedDetection } from "../hooks/useSolvedDetection";
 import { useSolveScramble } from "../hooks/useSolveScramble";
-import { solvedState } from "@cubecore/core";
+import { solvedState } from "@wodzik/cubecore/core";
 import { useAnimationTimer } from "../hooks/useAnimationTimer";
 import { useMethodProgress } from "../hooks/useMethodProgress";
 import { useMaskMoves } from "../hooks/useMaskMoves";

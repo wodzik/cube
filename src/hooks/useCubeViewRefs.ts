@@ -7,7 +7,7 @@
  */
 
 import { useMemo, useRef } from "react";
-import type { State } from "@cubecore/core";
+import type { State } from "@wodzik/cubecore/core";
 import type { CubeVisualisationRef } from "../components/CubeVisualisation";
 
 export function useCubeViewRefs() {
