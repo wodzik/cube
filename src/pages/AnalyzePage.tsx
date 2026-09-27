@@ -150,7 +150,7 @@ export default function AnalyzePage({ request }: { request?: AnalyzeRequest | nu
       p.then(set, (e: unknown) => setError(`${METHOD_LABEL[m]}: ${e instanceof Error ? e.message : String(e)}`)).finally(() => done(m));
     await Promise.all([
       run("cfop", a.analyze(text, { start: options.start, f2l: options.f2l, crosses }), (v) => setResults((r) => ({ ...r, cfop: v }))),
-      run("roux", a.analyzeRoux(text, {}), (v) => setResults((r) => ({ ...r, roux: v }))),
+      run("roux", a.analyzeRoux(text, { bottoms: crosses }), (v) => setResults((r) => ({ ...r, roux: v }))),
       run("zz", a.analyzeZZ(text, { start: options.zz, crosses }), (v) => setResults((r) => ({ ...r, zz: v }))),
     ]);
   }, [scramble, options, crosses]);
