@@ -13,7 +13,7 @@ import { type KnownCube, cubeName, forgetCube, listCubes, onCubesChange, updateC
 import { getSolves } from "../services/solveStore";
 import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
-import { type ArrowShape, useTurnArrows } from "../hooks/useTurnArrows";
+import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
 import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
@@ -96,34 +96,30 @@ function CubeLookSection() {
   );
 }
 
-/** Turn arrows: on / off (also by the cube) and their shape. */
+/** Turn arrows: off, round, or along the edges (also switched by the cube; a cube can have its own). */
 function TurnArrowsSection() {
-  const { arrows, toggleArrows, shape, setShape } = useTurnArrows();
+  const { appMode, setAppMode } = useTurnArrows();
   return (
     <Section title="Turn arrows">
       <SettingsRow
-        title="Show turn arrows"
-        description="While a smart cube is connected: the next move of the scramble or algorithm drawn on the 3D cube — and the way back after a slip (red), or the right face turned the wrong way (orange). Also switched by the cube."
-        action={
-          <button onClick={toggleArrows} className={selectClass}>
-            {arrows ? "On" : "Off"}
-          </button>
-        }
-      />
-      <SettingsRow
-        title="Arrow shape"
-        description="Round arcs clear of the corners — or ribbons along the faces, round the cube's edges."
+        title="Turn arrows"
+        description="While a smart cube is connected: the next move of the scramble or algorithm drawn on the 3D cube — and the way back after a slip (red), or the right face turned the wrong way (orange). Also switched by the cube; a cube can have its own (My cubes)."
         last
         action={
-          <select className={selectClass} value={shape} onChange={(e) => setShape(e.target.value as ArrowShape)}>
-            <option value="circle">Round</option>
-            <option value="box">Along the edges</option>
+          <select className={selectClass} value={appMode} onChange={(e) => setAppMode(e.target.value as ArrowMode)}>
+            {ARROW_MODES.map(([v, label]) => (
+              <option key={v} value={v}>
+                {label}
+              </option>
+            ))}
           </select>
         }
       />
     </Section>
   );
 }
+
+const ARROW_MODES: [ArrowMode, string][] = [["off", "Off"], ["circle", "Round"], ["box", "Along the edges"]];
 
 /** A select value for "follow the app's setting" (no per-cube value). */
 const APP = "__app";
@@ -199,6 +195,19 @@ function MyCubesSection() {
                 {STICKERS.map(([v, label]) => (
                   <option key={v} value={v}>
                     {label}
+                  </option>
+                ))}
+              </select>
+              <select
+                className={selectClass}
+                value={c.arrows ?? APP}
+                onChange={(e) => updateCube(c.id, { arrows: e.target.value === APP ? undefined : (e.target.value as ArrowMode) })}
+                title="Turn arrows for this cube"
+              >
+                <option value={APP}>Arrows: app setting</option>
+                {ARROW_MODES.map(([v, label]) => (
+                  <option key={v} value={v}>
+                    Arrows: {label.toLowerCase()}
                   </option>
                 ))}
               </select>

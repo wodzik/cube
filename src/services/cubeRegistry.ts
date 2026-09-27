@@ -28,6 +28,8 @@ export interface KnownCube {
   lastSeen: number;
   /** This cube's look; unset parts follow the app's look (Settings → Cube look). */
   look?: Partial<CubeLook>;
+  /** This cube's turn arrows (off / round / along the edges); unset: the app's. */
+  arrows?: "off" | "circle" | "box";
 }
 
 export function listCubes(): KnownCube[] {
@@ -66,7 +68,7 @@ export function rememberCube(device: { name: string; mac?: string | null; protoc
   return cube;
 }
 
-export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look">>): void {
+export function updateCube(id: string, patch: Partial<Pick<KnownCube, "label" | "look" | "arrows">>): void {
   save(listCubes().map((c) => (c.id === id ? { ...c, ...patch } : c)));
 }
 
