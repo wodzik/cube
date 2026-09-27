@@ -1,47 +1,60 @@
 /**
- * BldTrainerPage — blindfolded (Old Pochmann) practice on cubecore's <cube-bld>.
+ * BldTrainerPage — blindfolded (Old Pochmann), in the same layout as the
+ * trainers and algorithm drills (TrainerPanel).
  *
- * With a smart cube: "New scramble" (a random state from the cube's current
- * one) → follow it on <cube-scramble> → memo starts (timer) → the first turn
- * starts the execution → <cube-bld> follows every letter / parity and calls
- * out wrong swaps → done: memo / execution / total time, solved or not.
- * Without a cube: memo practice — the scramble, its letters and the cube with
- * letter stickers.
+ * An attempt, as at a competition: a scramble from a SOLVED cube (the
+ * official one — with the cube somewhere else, the bar shows the way from
+ * where it is to the same scrambled state, as on Solve) → Space starts the
+ * timer and the memo (the letters appear where the scramble was) → the
+ * first turn starts the execution (memo / execution split) → the cube
+ * solved stops it. Cancel → discard or save as DNF.
  *
- * The cube view can show colours, colours + letters, letters only (all but
- * the centres greyed) or nothing but the centres (the blindfold).
+ * Options (header): letter scheme, how the cube is held, which kind first
+ * (edges or corners — cubecore's BldTracker order), the cube view (colours,
+ * letters on the stickers, letters only, hidden), the memo letters (shown /
+ * each shown once done / hidden), and reading the letters aloud: while
+ * solving, Space says the pair due (Web Speech) — blindfolded, you can hear
+ * where you are.
  */
 
-import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import "@cubecore/element";
-import type { CubeBld, CubePlayer, CubeScramble } from "@cubecore/element";
-import { type Move, type State, applyMoves, buildMask, formatAlg, solvedState } from "@cubecore/core";
-import { SCHEMES, formatMemo, letterSkin, memo } from "@cubecore/bld";
+import type { CubeBld } from "@cubecore/element";
+import { FACES, FRAMES, applyMoves, buildMask, solvedState } from "@cubecore/core";
+import { SCHEMES, letterSkin } from "@cubecore/bld";
+import { SessionProvider, useSession } from "../state/sessionContext";
+import { selectCurrentProgress, selectTracking } from "../state/sessionSelectors";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useCubeLook } from "../hooks/useCubeLook";
-import { cubecoreSolver } from "../services/cubecoreSolver";
+import { useCubeViewRefs } from "../hooks/useCubeViewRefs";
+import { useSolveScramble } from "../hooks/useSolveScramble";
+import { useSolvedDetection } from "../hooks/useSolvedDetection";
+import { useSpacebar } from "../hooks/useSpacebar";
+import { useAnimationTimer } from "../hooks/useAnimationTimer";
+import { TrainerPanel } from "../components/TrainerPanel";
 import { ConnectionPanel } from "../components/ConnectionPanel";
-import { CubeTools } from "../components/CubeTools";
+import { SolveControls } from "../components/SolveControls";
+import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
+import { formatTimeMs } from "../logic/statistics";
+import type { SessionConfig } from "../types/session";
 
-const STORAGE_KEY = "nact_bld";
+const SETTINGS_KEY = "nact_bld";
 const TIMES_KEY = "nact_bld_times";
 
 type Scheme = keyof typeof SCHEMES;
 type View = "colours" | "letters" | "lettersOnly" | "hidden";
 type Reveal = "all" | "done" | "none";
+type Order = "edges" | "corners";
 
 interface Settings {
   scheme: Scheme;
   hold: string;
+  order: Order;
   view: View;
   reveal: Reveal;
+  speak: boolean;
 }
-
-const HOLDS: readonly (readonly [string, string])[] = [
-  ["", "White top, green front"],
-  ["x2 y'", "Yellow top, orange front"],
-];
+const DEFAULTS: Settings = { scheme: "speffz", hold: "", order: "edges", view: "letters", reveal: "all", speak: false };
 
 interface BldTime {
   at: number;
@@ -52,10 +65,18 @@ interface BldTime {
   cube?: string;
 }
 
+const HOLDS: readonly (readonly [string, string])[] = [
+  ["", "White top"],
+  ["x2 y'", "Yellow top"],
+];
+
+const CONFIG: SessionConfig = { mode: "solve", startMethod: ["spacebar"], stopMethod: ["cube-solved"], useInspection: false, inspectionSeconds: 15 };
+
 function read<T>(key: string, fallback: T): T {
   try {
     const v = JSON.parse(localStorage.getItem(key) ?? "null") as T | null;
-    return v && typeof v === "object" && !Array.isArray(fallback) ? { ...fallback, ...v } : (v ?? fallback);
+    if (v === null) return fallback;
+    return Array.isArray(fallback) ? v : { ...fallback, ...v };
   } catch {
     return fallback;
   }
@@ -68,347 +89,320 @@ function write(key: string, value: unknown) {
   }
 }
 
-/** The view's orientation for a cube held by `rotation` (own R, U, F as held → a quaternion). */
-function holdQuaternion(rotation: string) {
+/** The frame a cube held by `rotation` shows (for the view). */
+function holdFrame(rotation: string) {
+  if (!rotation) return null;
   const rot = applyMoves(solvedState(), rotation);
-  const normals = [[0, 1, 0], [1, 0, 0], [0, 0, 1], [0, -1, 0], [-1, 0, 0], [0, 0, -1]]; // U R F D L B
-  const where = (f: number) => normals[[0, 1, 2, 3, 4, 5].find((pos) => rot[pos * 9 + 4] === f * 9 + 4)!];
-  const [x, y, z] = [where(1), where(0), where(2)]; // columns of the rotation matrix
-  const m = [
-    [x[0], y[0], z[0]],
-    [x[1], y[1], z[1]],
-    [x[2], y[2], z[2]],
-  ];
-  const tr = m[0][0] + m[1][1] + m[2][2];
-  if (tr > 0) {
-    const s = Math.sqrt(tr + 1) * 2;
-    return { w: s / 4, x: (m[2][1] - m[1][2]) / s, y: (m[0][2] - m[2][0]) / s, z: (m[1][0] - m[0][1]) / s };
-  }
-  if (m[0][0] > m[1][1] && m[0][0] > m[2][2]) {
-    const s = Math.sqrt(1 + m[0][0] - m[1][1] - m[2][2]) * 2;
-    return { w: (m[2][1] - m[1][2]) / s, x: s / 4, y: (m[0][1] + m[1][0]) / s, z: (m[0][2] + m[2][0]) / s };
-  }
-  if (m[1][1] > m[2][2]) {
-    const s = Math.sqrt(1 + m[1][1] - m[0][0] - m[2][2]) * 2;
-    return { w: (m[0][2] - m[2][0]) / s, x: (m[0][1] + m[1][0]) / s, y: s / 4, z: (m[1][2] + m[2][1]) / s };
-  }
-  const s = Math.sqrt(1 + m[2][2] - m[0][0] - m[1][1]) * 2;
-  return { w: (m[1][0] - m[0][1]) / s, x: (m[0][2] + m[2][0]) / s, y: (m[1][2] + m[2][1]) / s, z: s / 4 };
+  const up = FACES[Math.floor(rot[4] / 9)], front = FACES[Math.floor(rot[22] / 9)];
+  return FRAMES.find((f) => f.face.U === up && f.face.F === front) ?? null;
 }
 
-type Phase = "idle" | "loading" | "scramble" | "memo" | "exec" | "done";
-
-const fmt = (ms: number) => (ms / 1000).toFixed(2);
+/** Say something (Web Speech), in the page's language. */
+function say(text: string) {
+  if (typeof speechSynthesis === "undefined" || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = navigator.language || "en";
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
 
 export default function BldTrainerPage() {
-  const cube = useSmartCube();
+  return (
+    <SessionProvider config={CONFIG}>
+      <BldInner />
+    </SessionProvider>
+  );
+}
+
+/** Puts an element made outside React into the tree (kept across renders). */
+function Mount({ el, className }: { el: HTMLElement; className?: string }) {
+  const host = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    host.current?.append(el);
+  }, [el]);
+  return <div ref={host} className={className} />;
+}
+
+function BldInner() {
+  const { state, submitCubeMove } = useSession();
+  const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
+  const cube = useSmartCube({
+    onMove: (move, timestamp) => {
+      submitCubeMove(move, timestamp);
+      view.addMove(move);
+    },
+  });
   const session = cube.session;
   const { skin } = useCubeLook();
+  const { generate, isGenerating, error: scrambleError, official } = useSolveScramble();
+  useSolvedDetection();
+  const { pressState } = useSpacebar();
 
-  const [settings, setSettingsState] = useState<Settings>(() => read(STORAGE_KEY, { scheme: "speffz", hold: "", view: "letters", reveal: "all" }));
+  const [settings, setSettingsState] = useState<Settings>(() => read(SETTINGS_KEY, DEFAULTS));
   const setSettings = (patch: Partial<Settings>) =>
     setSettingsState((prev) => {
       const next = { ...prev, ...patch };
-      write(STORAGE_KEY, next);
+      write(SETTINGS_KEY, next);
       return next;
     });
   const [times, setTimes] = useState<BldTime[]>(() => read<BldTime[]>(TIMES_KEY, []));
+  const [last, setLast] = useState<BldTime | null>(null);
 
-  const [phase, setPhase] = useState<Phase>("idle");
+  // First scramble.
+  useEffect(() => {
+    void generate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The view follows the real cube from the scramble's start.
+  const targetStart = state.target?.start;
+  useEffect(() => {
+    if (targetStart) view.setState(targetStart);
+  }, [targetStart, view]);
+
+  // ─── the letters (cubecore <cube-bld>) ───
+
+  const bld = useMemo(() => {
+    const el = document.createElement("cube-bld") as CubeBld;
+    el.setAttribute("controls", "none");
+    el.className = "act-sequence";
+    return el;
+  }, []);
+  useEffect(() => {
+    bld.setAttribute("scheme", settings.scheme);
+    if (settings.hold) bld.setAttribute("rotation", settings.hold);
+    else bld.removeAttribute("rotation");
+    bld.setAttribute("order", settings.order);
+    bld.setAttribute("reveal", settings.reveal);
+  }, [bld, settings.scheme, settings.hold, settings.order, settings.reveal]);
+
+  // Memo starts with the timer: the letters of the cube as it is then, followed turn by turn.
+  const phase = state.phase;
+  useEffect(() => {
+    if (phase === "active" && session) bld.attach(session);
+    else if (phase === "setup" || phase === "idle") bld.detach();
+  }, [phase, session, bld]);
+
+  // ─── reading the letters aloud (Space while solving) ───
+
+  const speakRef = useRef(settings.speak);
+  speakRef.current = settings.speak;
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
-  const [scramble, setScramble] = useState<{ moves: Move[]; state: State } | null>(null);
-  const [marks, setMarks] = useState<{ memoAt?: number; execAt?: number; doneAt?: number; solved?: boolean }>({});
-  const [now, setNow] = useState(0);
-  const [info, setInfo] = useState("");
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== "Space" || !speakRef.current || phaseRef.current !== "active") return;
+      e.preventDefault();
+      const p = bld.progress;
+      if (!p || p.complete) return;
+      const step = p.steps[p.done];
+      if (step.kind === "parity") return say("parity");
+      // The pair it belongs to (letters of that kind, in pairs).
+      const ofKind = p.steps.map((s, i) => (s.kind === step.kind ? i : -1)).filter((i) => i >= 0);
+      const k = ofKind.indexOf(p.done);
+      const pair = ofKind.slice(k - (k % 2), k - (k % 2) + 2).map((i) => p.steps[i].letter);
+      say(pair.join(" "));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [bld]);
 
-  // Memo of the case (for the no-cube view and the summary).
-  const caseMemo = useMemo(
-    () => (scramble ? memo(scramble.state, { scheme: SCHEMES[settings.scheme], rotation: settings.hold || undefined }) : null),
-    [scramble, settings.scheme, settings.hold]
+  // ─── the result ───
+
+  const record = useCallback(
+    (solved: boolean) => {
+      if (state.startTime === null) return;
+      const end = state.endTime ?? performance.now();
+      const firstMove = state.moveLog[0]?.timestamp ?? end;
+      const t: BldTime = { at: Date.now(), memoMs: Math.max(0, firstMove - state.startTime), execMs: Math.max(0, end - firstMove), solved, cube: activeCubeId() };
+      setTimes((prev) => {
+        const next = [t, ...prev].slice(0, 200);
+        write(TIMES_KEY, next);
+        return next;
+      });
+      setLast(t);
+    },
+    [state.startTime, state.endTime, state.moveLog]
+  );
+  const recordedRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (state.phase !== "done" || state.endTime === null || recordedRef.current === state.endTime) return;
+    recordedRef.current = state.endTime;
+    record(true);
+    void generate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase, state.endTime]);
+  // The last result stays until the next scramble is started.
+  useEffect(() => {
+    if (state.phase === "setup" && state.moveLog.length > 0) setLast(null);
+  }, [state.phase, state.moveLog.length]);
+
+  // ─── view ───
+
+  const frame = useMemo(() => holdFrame(settings.hold), [settings.hold]);
+  const cubeSkin = useMemo(() => {
+    const letters = settings.view === "letters" || settings.view === "lettersOnly";
+    return letters ? letterSkin(skin, { scheme: SCHEMES[settings.scheme], rotation: settings.hold || undefined, alwaysShow: settings.view === "lettersOnly" }) : null;
+  }, [skin, settings.view, settings.scheme, settings.hold]);
+  const cubeMask = useMemo(
+    () => (settings.view === "lettersOnly" || settings.view === "hidden" ? buildMask((f) => (f.index % 9 === 4 ? "regular" : "ignored")) : null),
+    [settings.view]
   );
 
-  // ---- elements ----
-  const playerHost = useRef<HTMLDivElement>(null);
-  const scrambleHost = useRef<HTMLDivElement>(null);
-  const bldHost = useRef<HTMLDivElement>(null);
-  const player = useRef<CubePlayer | null>(null);
-  const scrambleEl = useRef<CubeScramble | null>(null);
-  const bldEl = useRef<CubeBld | null>(null);
+  const displaySec = useAnimationTimer(state.startTime, state.endTime, state.phase === "active");
+  const firstMoveAt = state.moveLog[0]?.timestamp;
+  const timerState = state.phase === "active" ? "solving" : state.phase === "done" ? "solved" : pressState === "armed" ? "armed" : pressState === "holding" ? "holding" : "idle";
+  const hintText =
+    state.phase === "setup"
+      ? "Perform the scramble shown above"
+      : state.phase === "ready"
+        ? "Space — start the memo (the timer runs)"
+        : state.phase === "active"
+          ? firstMoveAt !== undefined && state.startTime !== null
+            ? `Execution · memo ${formatTimeMs(firstMoveAt - state.startTime)}${settings.speak ? " · Space: say the letters due" : ""}`
+            : "Memo — your first turn starts the execution"
+          : null;
 
-  const startMemo = useCallback(() => {
-    if (!session || !bldEl.current) return;
-    scrambleEl.current?.detach();
-    bldEl.current.attach(session);
-    setMarks({ memoAt: performance.now() });
-    setPhase("memo");
-    setInfo("Memorise — the first turn starts the execution.");
-  }, [session]);
+  const solvedTimes = times.filter((t) => t.solved);
+  const successRate = times.length ? Math.round((solvedTimes.length / times.length) * 100) : null;
+  const best = solvedTimes.length ? Math.min(...solvedTimes.map((t) => t.memoMs + t.execMs)) : null;
 
-  useEffect(() => {
-    const p = document.createElement("cube-player") as CubePlayer;
-    p.setAttribute("controls", "none");
-    p.style.width = "100%";
-    p.style.height = "100%";
-    playerHost.current?.append(p);
-    player.current = p;
+  const chip = (active: boolean) =>
+    `px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${active ? "text-white bg-white/[0.08]" : "text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]"}`;
+  const chipStyle = (active: boolean) => (active ? { boxShadow: "inset 0 0 0 1px var(--accent-glow)" } : undefined);
+  const group = (label: string, options: readonly (readonly [string, string])[], value: string, set: (v: string) => void): ReactNode => (
+    <div className="flex items-center gap-1 shrink-0">
+      <span className="text-[9px] text-gray-600 uppercase tracking-wider mr-1">{label}</span>
+      {options.map(([v, l]) => (
+        <button key={v} onClick={() => set(v)} className={chip(value === v)} style={chipStyle(value === v)}>
+          {l}
+        </button>
+      ))}
+    </div>
+  );
 
-    const s = document.createElement("cube-scramble") as CubeScramble;
-    scrambleHost.current?.append(s);
-    scrambleEl.current = s;
-
-    const b = document.createElement("cube-bld") as CubeBld;
-    bldHost.current?.append(b);
-    bldEl.current = b;
-    return () => {
-      p.remove();
-      s.remove();
-      b.remove();
-      player.current = scrambleEl.current = bldEl.current = null;
-    };
-  }, []);
-
-  // Scramble applied on the cube → memo.
-  useEffect(() => {
-    const s = scrambleEl.current;
-    if (!s) return;
-    const onComplete = () => {
-      if (phaseRef.current === "scramble") queueMicrotask(startMemo); // after this move reached every listener
-    };
-    s.addEventListener("complete", onComplete);
-    return () => s.removeEventListener("complete", onComplete);
-  }, [startMemo]);
-
-  // All letters done → the result.
-  useEffect(() => {
-    const b = bldEl.current;
-    if (!b) return;
-    const onComplete = () => {
-      if (phaseRef.current !== "exec") return;
-      const solved = !!b.progress?.solved;
-      setMarks((m) => {
-        const done = { ...m, doneAt: performance.now(), solved };
-        if (m.memoAt && m.execAt) {
-          const t: BldTime = { at: Date.now(), memoMs: m.execAt - m.memoAt, execMs: done.doneAt - m.execAt, solved, cube: activeCubeId() };
-          setTimes((prev) => {
-            const next = [t, ...prev].slice(0, 100);
-            write(TIMES_KEY, next);
-            return next;
-          });
-        }
-        return done;
-      });
-      setPhase("done");
-      setInfo(solved ? "Solved ✓" : "All letters done — but the cube isn't solved: check the last algorithm.");
-    };
-    const onWrong = () => setInfo("Wrong swap — undo it.");
-    const onLetter = () => setInfo("");
-    b.addEventListener("complete", onComplete);
-    b.addEventListener("wrong", onWrong);
-    b.addEventListener("letter", onLetter);
-    return () => {
-      b.removeEventListener("complete", onComplete);
-      b.removeEventListener("wrong", onWrong);
-      b.removeEventListener("letter", onLetter);
-    };
-  }, []);
-
-  // Live cube: player and scramble follow it; the first turn during memo starts the execution.
-  useEffect(() => {
-    if (!session) return;
-    const offPlayer = player.current?.attach(session, { gyro: false });
-    const offScramble = scrambleEl.current?.attach(session);
-    const offMove = session.on("move", () => {
-      if (phaseRef.current !== "memo") return;
-      phaseRef.current = "exec";
-      setMarks((m) => ({ ...m, execAt: performance.now() }));
-      setPhase("exec");
-      setInfo("");
-    });
-    return () => {
-      offPlayer?.();
-      offScramble?.();
-      offMove();
-    };
-  }, [session]);
-
-  // No cube: show the case.
-  useEffect(() => {
-    if (!session && player.current) player.current.setup = scramble?.state ?? solvedState();
-  }, [session, scramble]);
-
-  // Look: skin with letters, masks, held orientation.
-  useEffect(() => {
-    const p = player.current;
-    if (!p) return;
-    const letters = settings.view === "letters" || settings.view === "lettersOnly";
-    p.skin = letters ? letterSkin(skin, { scheme: SCHEMES[settings.scheme], rotation: settings.hold || undefined, alwaysShow: settings.view === "lettersOnly" }) : skin;
-    p.mask = settings.view === "lettersOnly" || settings.view === "hidden" ? buildMask((f) => (f.index % 9 === 4 ? "regular" : "ignored")) : null;
-    p.renderer?.setOrientation(settings.hold ? holdQuaternion(settings.hold) : null);
-  }, [skin, settings.view, settings.scheme, settings.hold]);
-
-  useEffect(() => {
-    const b = bldEl.current;
-    if (!b) return;
-    b.setAttribute("scheme", settings.scheme);
-    if (settings.hold) b.setAttribute("rotation", settings.hold);
-    else b.removeAttribute("rotation");
-    b.setAttribute("reveal", settings.reveal);
-  }, [settings.scheme, settings.hold, settings.reveal]);
-
-  const newScramble = useCallback(async () => {
-    setPhase("loading");
-    setInfo("");
-    setMarks({});
-    bldEl.current?.detach();
-    const from = session?.state ?? solvedState();
-    const r = await cubecoreSolver().randomScramble({ preset: "full", from });
-    setScramble(r);
-    if (scrambleEl.current) {
-      if (session) scrambleEl.current.attach(session);
-      scrambleEl.current.scramble = r.moves;
-    }
-    setPhase(session ? "scramble" : "idle");
-  }, [session]);
-
-  // "Mark as solved" (by the cube button) while scrambling: a scramble from the new state.
-  const resyncs = cube.resyncs;
-  const firstResyncRef = useRef(resyncs);
-  useEffect(() => {
-    if (resyncs !== firstResyncRef.current && phaseRef.current === "scramble") void newScramble();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resyncs]);
-
-  // Timer tick.
-  useEffect(() => {
-    if (phase !== "memo" && phase !== "exec") return;
-    const id = setInterval(() => setNow(performance.now()), 50);
-    return () => clearInterval(id);
-  }, [phase]);
-
-  const memoMs = marks.memoAt ? (marks.execAt ?? (phase === "memo" ? now : marks.memoAt)) - marks.memoAt : 0;
-  const execMs = marks.execAt ? (marks.doneAt ?? (phase === "exec" ? now : marks.execAt)) - marks.execAt : 0;
-  const successes = times.filter((t) => t.solved);
+  // Once the timer runs, the letters take the scramble's place.
+  const showLetters = state.phase === "active" || state.phase === "done";
 
   return (
-    <main className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-          <label className="flex items-center gap-2">
-            Letters
-            <select className="rounded-lg bg-gray-900 px-2 py-1" value={settings.scheme} onChange={(e) => setSettings({ scheme: e.target.value as Scheme })}>
-              <option value="speffz">Speffz (U L F R B D)</option>
-              <option value="ruwix">ruwix (U F R B L D)</option>
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            Hold
-            <select className="rounded-lg bg-gray-900 px-2 py-1" value={settings.hold} onChange={(e) => setSettings({ hold: e.target.value })}>
-              {HOLDS.map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            Cube
-            <select className="rounded-lg bg-gray-900 px-2 py-1" value={settings.view} onChange={(e) => setSettings({ view: e.target.value as View })}>
-              <option value="colours">colours</option>
-              <option value="letters">colours + letters</option>
-              <option value="lettersOnly">letters only</option>
-              <option value="hidden">hidden (blindfold)</option>
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            Memo letters
-            <select className="rounded-lg bg-gray-900 px-2 py-1" value={settings.reveal} onChange={(e) => setSettings({ reveal: e.target.value as Reveal })}>
-              <option value="all">shown</option>
-              <option value="done">hidden until done</option>
-              <option value="none">hidden</option>
-            </select>
-          </label>
-        </div>
-        <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
-      </div>
-
-      <div ref={scrambleHost} className={`w-fit max-w-3xl mx-auto text-gray-100 ${session && phase === "scramble" ? "" : "hidden"}`} />
-      {!session && scramble && <p className="mx-auto max-w-3xl text-center font-mono text-lg text-gray-100">{formatAlg(scramble.moves)}</p>}
-
-      <div className="grid gap-4 md:grid-cols-[1fr_minmax(0,24rem)] items-start">
-        <div className="flex flex-col items-center gap-2">
-          <div ref={playerHost} className="w-full h-[min(60vh,520px)] min-h-72 rounded-2xl bg-gray-900/60 overflow-hidden" />
-          <div className="flex items-center gap-2">
-            <CubeTools arrows={false} />
-          </div>
-        </div>
-        <div className="flex flex-col gap-3">
-          <div className="rounded-2xl bg-gray-900 p-4 grid grid-cols-2 gap-2 text-center">
-            <div>
-              <div className="text-xs text-gray-500">Memo</div>
-              <div className="text-3xl font-mono tabular-nums text-white">{fmt(memoMs)}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Execution</div>
-              <div className="text-3xl font-mono tabular-nums text-white">{fmt(execMs)}</div>
-            </div>
-            <div className="col-span-2 text-sm text-gray-400">
-              {phase === "done" ? (
-                <>
-                  Total <b className="text-white">{fmt(memoMs + execMs)}</b> — {marks.solved ? "solved" : "DNF"}
-                </>
-              ) : phase === "scramble" ? (
-                "Follow the scramble on your cube"
-              ) : (
-                info
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => void newScramble()} disabled={phase === "loading"} className="flex-1 rounded-xl bg-blue-600 px-3 py-2 text-white hover:bg-blue-500 disabled:opacity-50">
-              New scramble
-            </button>
-            {session && (
-              <button onClick={startMemo} className="rounded-xl bg-gray-800 px-3 py-2 text-gray-200 hover:bg-gray-700" title="Memo the cube as it is now (your own scramble)">
-                Memo now
+    <TrainerPanel
+      header={
+        <div className="w-full overflow-x-auto">
+          <div className="flex items-center gap-3">
+            {group("Letters", [["speffz", "Speffz"], ["ruwix", "ruwix"]], settings.scheme, (v) => setSettings({ scheme: v as Scheme }))}
+            {group("Hold", HOLDS, settings.hold, (v) => setSettings({ hold: v }))}
+            {group("First", [["edges", "Edges"], ["corners", "Corners"]], settings.order, (v) => setSettings({ order: v as Order }))}
+            <div className="ml-auto flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setSettings({ speak: !settings.speak })}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors ${
+                  settings.speak ? "text-sky-300 bg-sky-500/10" : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+                }`}
+                title="While solving, Space says the letters due (so you know where you are, blindfolded)"
+              >
+                Read letters (Space): {settings.speak ? "on" : "off"}
               </button>
-            )}
+              <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
+            </div>
           </div>
-          <div ref={bldHost} className={`rounded-2xl bg-gray-900 p-3 text-gray-100 ${session && phase !== "idle" && phase !== "scramble" && phase !== "loading" ? "" : "hidden"}`} />
-          {!session && caseMemo && (
-            <div className="rounded-2xl bg-gray-900 p-3 text-sm text-gray-300 flex flex-col gap-1">
-              <div>
-                Edges: <b className="font-mono text-white">{formatMemo(caseMemo.edges) || "—"}</b>
-              </div>
-              {caseMemo.parity && <div className="text-amber-400">Parity</div>}
-              <div>
-                Corners: <b className="font-mono text-white">{formatMemo(caseMemo.corners) || "—"}</b>
-              </div>
-            </div>
-          )}
-          {times.length > 0 && (
-            <div className="rounded-2xl bg-gray-900 p-3 text-sm text-gray-300">
-              <div className="mb-2 flex justify-between text-xs text-gray-500">
-                <span>Recent</span>
-                <span>
-                  {successes.length}/{times.length} solved
-                </span>
-              </div>
-              <ul className="flex flex-col gap-1 font-mono tabular-nums">
-                {times.slice(0, 8).map((t) => (
-                  <li key={t.at} className="flex justify-between">
-                    <span className={t.solved ? "text-white" : "text-gray-500 line-through"}>{fmt(t.memoMs + t.execMs)}</span>
-                    <span className="text-gray-500">
-                      {fmt(t.memoMs)} + {fmt(t.execMs)}
-                      {cubeLabel(t.cube) && <span className="ml-2 font-sans text-[10px]">{cubeLabel(t.cube)}</span>}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div className="flex items-center gap-3 mt-1">
+            {group("Cube", [["colours", "Colours"], ["letters", "Letters"], ["lettersOnly", "Letters only"], ["hidden", "Hidden"]], settings.view, (v) => setSettings({ view: v as View }))}
+            {group("Memo letters", [["all", "Shown"], ["done", "Once done"], ["none", "Hidden"]], settings.reveal, (v) => setSettings({ reveal: v as Reveal }))}
+          </div>
         </div>
-      </div>
-    </main>
+      }
+      moves={state.targetNotation.trim().split(/\s+/).filter(Boolean)}
+      progress={selectCurrentProgress(state)}
+      tracking={selectTracking(state)}
+      showRefresh
+      onRefresh={() => void generate()}
+      loading={isGenerating}
+      loadingText={isGenerating ? "Generating scramble…" : (scrambleError ?? undefined)}
+      sequenceTop={
+        state.phase === "setup" && official && official !== state.targetNotation ? (
+          <p className="mb-1.5 px-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+            From your cube as it is — the scramble from solved: <span className="font-mono normal-case tracking-normal text-gray-400">{official}</span>
+          </p>
+        ) : undefined
+      }
+      sequenceContent={
+        showLetters ? (
+          <div className="scramble-card">
+            <Mount el={bld} className="w-full" />
+          </div>
+        ) : undefined
+      }
+      summary={
+        last ? (
+          <p className="text-sm text-gray-400 font-mono tabular-nums">
+            memo {formatTimeMs(last.memoMs)} · execution {formatTimeMs(last.execMs)} ·{" "}
+            <span className={last.solved ? "text-emerald-300" : "text-red-400"}>{last.solved ? formatTimeMs(last.memoMs + last.execMs) : "DNF"}</span>
+          </p>
+        ) : undefined
+      }
+      timeMs={displaySec * 1000}
+      timerState={timerState}
+      hintText={hintText}
+      controls={
+        <SolveControls
+          mode="solve"
+          isActive={state.phase === "active" || state.phase === "ready"}
+          onDiscard={() => void generate()}
+          onSaveAsDNF={() => {
+            record(false);
+            void generate();
+          }}
+        />
+      }
+      cubeRef={cubeRef}
+      visualization="3D"
+      cubeMask={cubeMask}
+      cubeOrientation={frame}
+      cubeSkin={cubeSkin}
+      flatCubeRef={flatCubeRef}
+      timesMs={solvedTimes.map((t) => t.memoMs + t.execMs).reverse()}
+      statsLabel="Blindfolded"
+      showAo12={false}
+      layout="side"
+      statsAside={
+        times.length ? (
+          <div className="panel p-5 h-full flex flex-col justify-center gap-4">
+            <div>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Success rate</p>
+              <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{successRate}%</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Best</p>
+              <p className="text-3xl font-mono tabular-nums font-bold text-white mt-1">{best !== null ? formatTimeMs(best) : "—"}</p>
+            </div>
+            <p className="text-[11px] text-gray-600">
+              {times.length} {times.length === 1 ? "attempt" : "attempts"}
+            </p>
+          </div>
+        ) : undefined
+      }
+      bottom={
+        times.length ? (
+          <div className="flex flex-col">
+            <div className="px-4 sm:px-6 pt-3 pb-1">
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Recent attempts</span>
+            </div>
+            <div className="divide-y divide-gray-800/40">
+              {times.slice(0, 30).map((t) => (
+                <div key={t.at} className="flex items-center gap-3 px-4 sm:px-6 py-1.5 hover:bg-white/[0.03] transition-colors">
+                  <span className={`text-xs font-mono tabular-nums w-24 shrink-0 ${t.solved ? "text-white" : "text-red-400"}`}>{t.solved ? formatTimeMs(t.memoMs + t.execMs) : "DNF"}</span>
+                  <span className="text-xs font-mono tabular-nums text-gray-500 flex-1">
+                    memo {formatTimeMs(t.memoMs)} · execution {formatTimeMs(t.execMs)}
+                  </span>
+                  {cubeLabel(t.cube) && <span className="text-[10px] text-gray-500 shrink-0 max-w-32 truncate">{cubeLabel(t.cube)}</span>}
+                  <span className="text-[10px] text-gray-700 shrink-0">{new Date(t.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : undefined
+      }
+    />
   );
 }

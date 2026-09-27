@@ -25,6 +25,7 @@ import { InspectionCountdown } from "./InspectionCountdown";
 import { StatsChart } from "./StatsChart";
 import type { TrackedProgress } from "../logic/cubecoreSequence";
 import type { Frame, Mask } from "@cubecore/core";
+import type { Skin } from "@cubecore/render";
 import type { SequenceTracking } from "./MoveSequenceDisplay";
 
 // Singles are whole moves; averages (Ao5 etc.) and axis ticks aren't.
@@ -118,6 +119,8 @@ export interface TrainerPanelProps {
   cubeMask?: Mask | null;
   /** Show the 3D cube as held in this frame. */
   cubeOrientation?: Frame | null;
+  /** A skin of the page's own for the cube (e.g. with letters). */
+  cubeSkin?: Skin | null;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -210,6 +213,7 @@ export function TrainerPanel({
   stickeringMaskOrbits,
   cubeMask,
   cubeOrientation,
+  cubeSkin,
   background = "none",
   controlPanel = "none",
   dragInput = "auto",
@@ -328,6 +332,7 @@ export function TrainerPanel({
                 stickeringMaskOrbits={stickeringMaskOrbits}
                 mask={cubeMask}
                 orientation={cubeOrientation}
+                skin={cubeSkin}
                 background={background}
                 controlPanel={controlPanel}
                 dragInput={dragInput}

@@ -59,6 +59,8 @@ export interface CubeVisualisationProps {
   mask?: Mask | null;
   /** Show the cube as held in this frame (e.g. white down for a cross on white). */
   orientation?: Frame | null;
+  /** A skin of the page's own (e.g. with letters) instead of the app's look. */
+  skin?: Skin | null;
   background?: "none" | "checkered-transparent";
   controlPanel?: "none" | "bottom-row";
   dragInput?: "auto" | "none";
@@ -114,6 +116,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       stickeringMaskOrbits,
       mask,
       orientation,
+      skin: skinOverride,
       controlPanel = "none",
       cameraLatitude = 20,
       cameraLongitude = 20,
@@ -127,10 +130,10 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     const { skin: lookSkin } = useCubeLook();
 
     // The skin: the app's chosen look (settings / the connected cube), with floating back stickers when asked.
-    const skinFor = (): Skin => ({
-      ...lookSkin,
-      hints: { ...lookSkin.hints, enabled: hintFacelets === "floating", distance: hintFaceletsElevation ?? lookSkin.hints.distance },
-    });
+    const skinFor = (): Skin => {
+      const base = skinOverride ?? lookSkin;
+      return { ...base, hints: { ...base.hints, enabled: hintFacelets === "floating", distance: hintFaceletsElevation ?? base.hints.distance } };
+    };
     // The page's light / dark theme (data-theme on <html>) → the skin's page adjustments.
     const pageTheme = () => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
     const applyMask = (p: CubePlayer) => {
@@ -188,7 +191,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
     useEffect(() => {
       if (playerRef.current) playerRef.current.skin = skinFor();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [hintFacelets, hintFaceletsElevation, lookSkin]);
+    }, [hintFacelets, hintFaceletsElevation, lookSkin, skinOverride]);
     useEffect(() => {
       playerRef.current?.setAttribute("back-view", backView);
     }, [backView]);
