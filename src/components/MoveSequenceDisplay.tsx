@@ -230,6 +230,8 @@ function SequenceElement({
     el.current = e;
     fed.current = { notation: "", target: null, moves: [] };
     return () => {
+      // Its arrows stay on the 3D cube otherwise (e.g. the scramble done → the bar turns into the stage stepper).
+      e.player?.showTurnArrows(null, {}, e);
       e.remove();
       el.current = null;
     };
