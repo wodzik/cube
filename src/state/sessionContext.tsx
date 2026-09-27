@@ -68,7 +68,7 @@ export function SessionProvider({
   // whatever page/mode this session belongs to (every SessionProvider
   // consumer gets this for free). Only the CUBE matters here, not an
   // optional separately-connected BT timer.
-  const { connected } = useSmartCube();
+  const { connected, resyncs } = useSmartCube();
   const cube = useSmartCubeConnection();
   const cubeRef = useRef(cube);
   cubeRef.current = cube;
@@ -85,6 +85,20 @@ export function SessionProvider({
     }
     wasConnectedRef.current = connected;
   }, [connected]);
+
+  // The cube's state changed other than by a move ("Mark as solved"): a target
+  // not started yet is followed from the new state (pages that PLAN from the
+  // state — scrambles — plan again themselves).
+  const firstResyncRef = useRef(resyncs);
+  useEffect(() => {
+    if (resyncs === firstResyncRef.current) return;
+    const now = cubeRef.current?.session?.state;
+    const t = targetRef.current;
+    if (!now || !t || t.fed) return;
+    t.target = { ...t.target, start: now };
+    t.setAt = performance.now();
+    dispatch(actions.targetStart(now));
+  }, [resyncs]);
 
   const value = useMemo<SessionContextValue>(
     () => ({

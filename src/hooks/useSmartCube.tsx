@@ -53,6 +53,14 @@ interface SmartCubeContextValue extends DeviceConnection {
   suggestedSkin: string | null;
   /** The connected cube's id in the list of known cubes (services/cubeRegistry), or null. */
   cubeId: string | null;
+  /**
+   * Bumped whenever the cube's state changes other than by a move — "Mark
+   * as solved", or the state the cube itself reports after connecting.
+   * Pages planning from the state (scrambles, targets) plan again.
+   */
+  resyncs: number;
+  /** Declare the connected cube solved (tracking drifted, or it was solved by hand while disconnected). */
+  markSolved: () => void;
   /** Register a move listener; returns an unsubscribe function. */
   addMoveListener: (fn: MoveListener) => () => void;
   /**
@@ -78,6 +86,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<SmartCubeSession | null>(null);
   const [suggestedSkin, setSuggestedSkin] = useState<string | null>(null);
   const [cubeId, setCubeId] = useState<string | null>(null);
+  const [resyncs, setResyncs] = useState(0);
+  const markSolved = useCallback(() => connectionRef.current?.markSolved(), []);
   const listenersRef = useRef(new Set<MoveListener>());
   const historyRef = useRef<{ time: number; before: State }[]>([]);
   const simulatedRef = useRef<SimulatedCube | null>(null);
@@ -135,7 +145,9 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
       }),
       // "Mark solved" / a resync from the cube: the next move starts from here.
       conn.on("state", (e) => {
-        if (e.reason !== "move") before = e.state;
+        if (e.reason === "move") return;
+        before = e.state;
+        setResyncs((n) => n + 1);
       }),
       conn.on("battery", (level) => setState((s) => ({ ...s, battery: level }))),
       conn.on("hardware", () => setSuggestedSkin(nameOfSkin())),
@@ -232,8 +244,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<SmartCubeContextValue>(
-    () => ({ ...state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId }),
-    [state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId]
+    () => ({ ...state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId, resyncs, markSolved }),
+    [state, error, connect, disconnect, addMoveListener, stateBefore, session, suggestedSkin, cubeId, resyncs, markSolved]
   );
 
   return <SmartCubeContext.Provider value={value}>{children}</SmartCubeContext.Provider>;
@@ -251,6 +263,8 @@ export interface UseSmartCubeReturn extends DeviceConnection {
   session: SmartCubeSession | null;
   suggestedSkin: string | null;
   cubeId: string | null;
+  resyncs: number;
+  markSolved: () => void;
 }
 
 /** The shared connection without subscribing to moves (for views that only need the session / skin); null outside the provider. */

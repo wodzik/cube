@@ -14,7 +14,7 @@
 
 import { activeCubeId } from "../services/cubeRegistry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Info, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardPaste, CheckCircle2, FolderInput, Info, Plus, Trash2 } from "lucide-react";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTPS, selectTracking } from "../state/sessionSelectors";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
@@ -419,25 +419,7 @@ function SolvePageInner({
     }
   }, [session.startingStage, generate, manual]);
 
-  /**
-   * Abandon whatever's been done on the CURRENT attempt (scrambling or
-   * solving) and restart tracking the SAME scramble from scratch — unlike
-   * Cancel/Discard (startNextAttempt), which moves on to a brand new one.
-   * Re-arming with the identical notation re-enters "setup" with a cleared
-   * moveLog/timer; the targetNotation-keyed effect below won't fire (the
-   * string didn't change), so the visual mirror is reset here explicitly —
-   * same reasoning as the case-loading effect in TrainingPage.
-   */
-  const resetAttempt = useCallback(() => {
-    // The same scramble again — from wherever the cube is now (see useSolveScramble).
-    void rearm();
-    // The dismiss effect below only clears these on the FIRST move of a
-    // fresh "setup" (moveLog.length > 0) — re-arming here lands on an EMPTY
-    // moveLog, so it wouldn't fire; clear explicitly instead of leaving a
-    // stale summary/analysis modal next to the just-reset scramble.
-    setSummaryRecord(null);
-    setAnalysisRecord(null);
-  }, [rearm]);
+
 
   // Every physical move mirrors 1:1 into the 3D view, unconditionally —
   // it's a live shadow of the real cube, not phase-aware.
@@ -483,6 +465,16 @@ function SolvePageInner({
     }
     wasCubeConnectedRef.current = cube.connected;
   }, [cube.connected, state.phase, startNextAttempt]);
+
+  // "Mark as solved" (or the state a cube reports after connecting): the
+  // scramble in progress is planned again from the cube's new state.
+  const resyncs = cube.resyncs;
+  const firstResyncRef = useRef(resyncs);
+  useEffect(() => {
+    if (resyncs === firstResyncRef.current) return;
+    if (state.phase === "setup" || state.phase === "idle") void rearm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resyncs]);
 
   // A cube connected while a scramble waits untouched: it was set up for a
   // solved cube — take the same scramble from wherever this cube really is.
@@ -860,28 +852,22 @@ function SolvePageInner({
       onCenterClick={holdingLastResult && summaryRecord ? () => setAnalysisRecord(summaryRecord) : undefined}
       controls={
         <div className="flex items-center gap-2">
-          {state.phase !== "idle" && (
-            <button
-              onClick={resetAttempt}
-              className="btn-secondary text-xs"
-              title="Restart this scramble from the beginning"
-            >
-              <RotateCcw size={13} /> Reset
-            </button>
-          )}
           <SolveControls
             mode="solve"
-            isActive={state.phase === "active" || state.phase === "inspecting"}
+            // From the moment the scramble is done: cancel the attempt (the cube's
+            // state is the app's, so nothing to "reset" — Mark as solved is by the cube button).
+            isActive={state.phase === "ready" || state.phase === "active" || state.phase === "inspecting"}
             onDiscard={startNextAttempt}
             onSaveAsDNF={startNextAttempt}
-            onResetCube={() => {
-              // Back to the real cube as it is now (or: the start + the moves so far).
-              if (cube.session) view.setState(cube.session.state);
-              else {
-                view.setState(state.target?.start ?? solvedState());
-                state.moveLog.forEach((m) => view.addMove(m.move));
-              }
-            }}
+            // Without a smart cube the view is driven by hand: offer putting it back.
+            onResetCube={
+              cube.session
+                ? undefined
+                : () => {
+                    view.setState(state.target?.start ?? solvedState());
+                    state.moveLog.forEach((m) => view.addMove(m.move));
+                  }
+            }
             // No manual stop trigger (spacebar/timer) enabled -> Cancel can
             // only mean "give up", so skip the Discard/Save-as-DNF menu and
             // discard directly. Once a manual method is available the user

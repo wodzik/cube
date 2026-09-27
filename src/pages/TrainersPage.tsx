@@ -26,7 +26,7 @@
 
 import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Lightbulb, Repeat2, RotateCcw, Trash2, TrendingUp, RefreshCw } from "lucide-react";
+import { Eye, Lightbulb, Repeat2, Trash2, TrendingUp, RefreshCw } from "lucide-react";
 import {
   type Frame,
   type Move,
@@ -514,11 +514,20 @@ function TrainersInner() {
     setLadderEnabled(!ladderEnabled);
     localStorage.setItem(LADDER_STORAGE_KEY, String(!ladderEnabled));
   };
-  const resync = () => {
-    cube.session?.markSolved();
-    setSummary(null);
-    void startNextAttempt();
-  };
+  // "Mark as solved" (by the cube button) or a state the cube reports: a scramble to the case is planned again.
+  const resyncs = cube.resyncs;
+  const firstResyncRef = useRef(resyncs);
+  useEffect(() => {
+    if (resyncs === firstResyncRef.current || currentRef.current?.virtual) return;
+    if (phaseRef.current === "setup" || phaseRef.current === "ready" || phaseRef.current === "idle") {
+      const a = currentRef.current;
+      setSummary(null);
+      // The same case, from where the cube is now.
+      if (a) void startNextAttempt({ caseState: a.caseState, attempt: { type: a.def.id, slot: a.variant, slots: a.slots, targetLength: a.level ?? 0, frameId: a.frame.id } as TrainerAttempt });
+      else void startNextAttempt();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resyncs]);
   const retryAttempt = (a: TrainerAttempt) => {
     const caseState = a.caseState ? decodeState(a.caseState) : null;
     if (!caseState) return;
@@ -636,13 +645,6 @@ function TrainersInner() {
                   <TrendingUp size={12} /> Ladder
                 </button>
               )}
-              <button
-                onClick={resync}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-500 hover:text-gray-200 hover:bg-white/[0.04] transition-colors"
-                title="My physical cube is solved — restart state tracking from it"
-              >
-                <RotateCcw size={12} /> Resync
-              </button>
               <ConnectionPanel cube={cube} onConnectCube={cube.connect} onDisconnectCube={cube.disconnect} />
             </div>
           </div>
@@ -722,13 +724,14 @@ function TrainersInner() {
           isActive={state.phase === "active"}
           onDiscard={regenerate}
           onSaveAsDNF={regenerate}
-          onResetCube={() => {
-            if (!shown) return;
-            if (shown.virtual) {
-              view.setState(shown.caseState);
-              state.moveLog.forEach((m) => view.addMove(m.move));
-            } else if (cube.session) view.setState(cube.session.state);
-          }}
+          onResetCube={
+            shown?.virtual
+              ? () => {
+                  view.setState(shown.caseState);
+                  state.moveLog.forEach((m) => view.addMove(m.move));
+                }
+              : undefined
+          }
           stopByCube
         />
       }

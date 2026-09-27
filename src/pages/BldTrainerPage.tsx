@@ -270,6 +270,14 @@ export default function BldTrainerPage() {
     setPhase(session ? "scramble" : "idle");
   }, [session]);
 
+  // "Mark as solved" (by the cube button) while scrambling: a scramble from the new state.
+  const resyncs = cube.resyncs;
+  const firstResyncRef = useRef(resyncs);
+  useEffect(() => {
+    if (resyncs !== firstResyncRef.current && phaseRef.current === "scramble") void newScramble();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resyncs]);
+
   // Timer tick.
   useEffect(() => {
     if (phase !== "memo" && phase !== "exec") return;
@@ -360,11 +368,6 @@ export default function BldTrainerPage() {
               </button>
             )}
           </div>
-          {session && (
-            <button onClick={() => session.markSolved()} className="self-start text-xs text-gray-500 hover:text-gray-300">
-              Cube out of sync? Mark it solved
-            </button>
-          )}
           <div ref={bldHost} className={`rounded-2xl bg-gray-900 p-3 text-gray-100 ${session && phase !== "idle" && phase !== "scramble" && phase !== "loading" ? "" : "hidden"}`} />
           {!session && caseMemo && (
             <div className="rounded-2xl bg-gray-900 p-3 text-sm text-gray-300 flex flex-col gap-1">
