@@ -1,8 +1,8 @@
 /**
  * One algorithm case: how it went in your solves, and every algorithm you
- * have for it in Drill Algorithms with its drill stats — ⚡ the fastest
+ * have for it in Algorithms (Practice) with its drill stats — ⚡ the fastest
  * single, 🏆 the best average (the most consistent) — and a Drill button
- * that opens Drill Algorithms on that algorithm.
+ * that opens Algorithms on that algorithm.
  */
 
 import { useMemo, useState } from "react";
@@ -26,7 +26,7 @@ interface CaseAlgorithmsModalProps {
   solveStats?: CaseSolveStats | null;
   /** Its Recognize stats from the trainers, if the caller has them (else computed). */
   recognizeStats?: CaseRecognizeStats | null;
-  /** Called before switching to Drill Algorithms (e.g. to close the modal it was opened from). */
+  /** Called before switching to Algorithms (e.g. to close the modal it was opened from). */
   onNavigate?: () => void;
   layerClassName?: string;
 }
@@ -92,7 +92,7 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognize
             </div>
           )}
           {kase && (
-            <button onClick={() => drill()} className="btn-primary text-xs w-full justify-center" title="Drill this case in Drill Algorithms">
+            <button onClick={() => drill()} className="btn-primary text-xs w-full justify-center" title="Drill this case in Algorithms">
               <Dumbbell size={13} /> Drill this case
             </button>
           )}
@@ -130,10 +130,10 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognize
 
           <section>
             <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
-              Algorithms <span className="normal-case tracking-normal text-gray-500">· Drill Algorithms, {CASE_KIND_LABEL[kind]}</span>
+              Algorithms <span className="normal-case tracking-normal text-gray-500">· Practice → Algorithms, {CASE_KIND_LABEL[kind]}</span>
             </h3>
             {!kase || !variants ? (
-              <p className="text-xs text-gray-500">This case isn't in your Drill Algorithms set.</p>
+              <p className="text-xs text-gray-500">This case isn't in your Algorithms set.</p>
             ) : (
               <div className="flex flex-col gap-1">
                 {listed.map((r) => (

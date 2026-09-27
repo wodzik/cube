@@ -38,10 +38,10 @@ const NAV: NavEntry<Tab>[] = [
   { item: { id: "solve", label: "Solve" } },
   {
     menu: {
-      label: "Train",
+      label: "Practice",
       items: [
-        { id: "training", label: "Drill Algorithms" },
-        { id: "trainer", label: "Trainers" },
+        { id: "training", label: "Algorithms" },
+        { id: "trainer", label: "Steps" },
         { id: "bld", label: "Blindfolded" },
         { id: "attack", label: "Time Attack" },
       ],
@@ -83,7 +83,7 @@ export default function App() {
       }),
     []
   );
-  // Drill one case's algorithm from anywhere (a solve's case, the case stats): switch to Drill Algorithms on it.
+  // Drill one case's algorithm from anywhere (a solve's case, the case stats): switch to Algorithms on it.
   const [drillRequest, setDrillRequest] = useState<DrillRequest | null>(null);
   useEffect(
     () =>

@@ -1,6 +1,6 @@
 /**
  * The header's tabs: a few top-level entries, the rest grouped in menus
- * (Train ▾, Analyze ▾, ⚙ ▾) so the strip fits narrower screens. A group
+ * (Practice ▾, Analyze ▾, ⚙ ▾) so the strip fits narrower screens. A group
  * lights up while you're on one of its pages (its menu marks which).
  *
  * Menus open as `fixed` popovers under their button — the strip scrolls

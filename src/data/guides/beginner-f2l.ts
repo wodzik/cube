@@ -120,7 +120,7 @@ export const BEGINNER_F2L_GUIDE: Guide = {
       title: "How to practise",
       eyebrow: "Step 3",
       blocks: [
-        { kind: "list", items: ["**Solve slowly and look.** Before each pair, find both pieces and say which basic insert you're heading for. Speed comes later.", "**One slot at a time.** The Skill Trainers tab has F2L drills that scramble a single pair over a solved cross, so you can repeat the recognition without doing a whole solve.", "**The full case list** lives in the Drill Algorithms tab (F2L, 41 cases) once you want optimal solutions for each situation — but you can be fast without ever opening it."] },
+        { kind: "list", items: ["**Solve slowly and look.** Before each pair, find both pieces and say which basic insert you're heading for. Speed comes later.", "**One slot at a time.** Practice → Steps has pair drills (Cross+ → Pair) that scramble a single pair over a solved cross, so you can repeat the recognition without doing a whole solve.", "**The full case list** lives in Practice → Algorithms (F2L, 41 cases) once you want optimal solutions for each situation — but you can be fast without ever opening it."] },
       ],
     },
     {

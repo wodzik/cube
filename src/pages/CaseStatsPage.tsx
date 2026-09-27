@@ -2,7 +2,7 @@
  * Case stats — F2L / OLL / PLL / CMLL, per case, from three places:
  *   Solves     — the cases that came up in your solves (CFOP: F2L pairs,
  *                OLL, PLL; Roux: CMLL) and how they went (logic/solveCases);
- *   Drill      — Drill Algorithms: your attempts at each case's algorithms;
+ *   Drill      — Practice → Algorithms: your attempts at each case's algorithms;
  *   Recognize  — the case trainers' Recognize mode (the case on the screen):
  *                time to the first turn, and to solved.
  * A row opens the case: its algorithms with their drill stats and a Drill
@@ -30,14 +30,14 @@ const KINDS: CaseKind[] = ["f2l", "oll", "pll", "cmll"];
 /** Where each source's data comes from — the empty state links there. */
 const EMPTY_LINK: Record<"solves" | "drill" | "recognize", [string, string]> = {
   solves: ["solve", "Go to Solve"],
-  drill: ["training", "Go to Drill Algorithms"],
-  recognize: ["trainer", "Go to Trainers"],
+  drill: ["training", "Go to Algorithms"],
+  recognize: ["trainer", "Go to Steps"],
 };
 
 type Source = "solves" | "drill" | "recognize";
 const SOURCES: [Source, string, string][] = [
   ["solves", "Solves", "Cases that came up in your solves (CFOP: F2L, OLL, PLL · Roux: CMLL)"],
-  ["drill", "Drill", "Drill Algorithms: your attempts at each case's algorithms"],
+  ["drill", "Drill", "Practice → Algorithms: your attempts at each case's algorithms"],
   ["recognize", "Recognize", "Trainers in Recognize mode: the case on the screen — time to your first turn"],
 ];
 
@@ -73,7 +73,7 @@ const COLUMNS: Record<Source, Column[]> = {
     { id: "recog", label: "Recog.", title: "Average pause before the first move", show: s2, desc: true },
     { id: "exec", label: "Exec.", wide: true, title: "Average time turning", show: s2 },
     { id: "moves", label: "Moves", wide: true, show: (v) => v.toFixed(1) },
-    { id: "drill", label: "Drill best", wide: true, title: "Your best single in Drill Algorithms (any of the case's algorithms)", show: (v) => fmtSec(v) },
+    { id: "drill", label: "Drill best", wide: true, title: "Your best single in Algorithms (any of the case's algorithms)", show: (v) => fmtSec(v) },
   ],
   drill: [
     { id: "count", label: "Tries", show: String, desc: true },
@@ -214,8 +214,8 @@ export default function CaseStatsPage() {
 
   const empty: Record<Source, string> = {
     solves: `No ${CASE_KIND_LABEL[shownKind]} cases in your solves yet — they're recognised in ${shownKind === "cmll" ? "Roux" : "CFOP"} solves on the Solve tab.`,
-    drill: `No ${CASE_KIND_LABEL[shownKind]} drill attempts yet — practise the cases in Drill Algorithms.`,
-    recognize: `No ${CASE_KIND_LABEL[shownKind]} Recognize attempts yet — Trainers → ${CASE_KIND_LABEL[shownKind]}, Recognize.`,
+    drill: `No ${CASE_KIND_LABEL[shownKind]} drill attempts yet — practise the cases in Practice → Algorithms.`,
+    recognize: `No ${CASE_KIND_LABEL[shownKind]} Recognize attempts yet — Practice → Steps → ${CASE_KIND_LABEL[shownKind]}, Recognize.`,
   };
 
   return (

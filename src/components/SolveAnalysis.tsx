@@ -170,9 +170,9 @@ function StageTimingRow({
                     cross.onTrain();
                   }}
                   className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
-                  title="Practise this exact cross in the cross trainer (Recognize, at its optimal length)"
+                  title="Practise this exact cross in Steps → Cross (Recognize, at its optimal length)"
                 >
-                  Train this cross →
+                  Practise this cross →
                 </button>
               )}
             </>
