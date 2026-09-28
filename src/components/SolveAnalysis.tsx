@@ -49,7 +49,9 @@ import { patchSolve } from "../services/solveStore";
 import { buildShareUrl, shareBlocker } from "../logic/shareLink";
 import { copyText } from "../logic/clipboard";
 import { stageDescription } from "./stageDescriptions";
-import { type StageCase, caseTitle, crossCaseOf, isRealCase, solveCases, stageStartOf } from "../logic/solveCases";
+import { type StageCase, caseLocation, caseTitle, crossCaseOf, isRealCase, solveCases } from "../logic/solveCases";
+import { drillCase } from "../logic/caseStats";
+import { openDrill } from "../services/drillNav";
 import { cubecoreSolver } from "../services/cubecoreSolver";
 import { openTrainer } from "../services/trainerNav";
 import { frameForBottom } from "../logic/trainerCatalog";
@@ -315,11 +317,12 @@ export function SolveAnalysis({
   }, [crossKey]);
   const crossOptimalNow = crossOptimal?.key === crossKey ? crossOptimal.optimal : null;
   const cross = crossCase ? { optimal: crossOptimalNow } : undefined;
-  // "Practise →": the stage's exact case in Steps, in Recognize mode (the case on the screen).
+  // "Practise →": the cross — that exact cross in Steps (no algorithm to it); a case (F2L, OLL, PLL,
+  // CMLL) — its algorithms in Practice → Algorithms, where the one to use is.
   const practiseFor = (stage: string): { onClick: () => void; title: string } | undefined => {
-    if (readOnly || method !== "CFOP") return undefined;
+    if (readOnly) return undefined;
     if (stage === "cross") {
-      if (!crossCase || !crossOptimalNow) return undefined;
+      if (method !== "CFOP" || !crossCase || !crossOptimalNow) return undefined;
       return {
         title: `This exact cross in Steps → Cross (Recognize, optimal ${crossOptimalNow})`,
         onClick: () => {
@@ -329,16 +332,13 @@ export function SolveAnalysis({
       };
     }
     const c = cases[stage];
-    if (!isRealCase(c) || (c.kind === "f2l" && !c.slot)) return undefined;
-    const at = stageStartOf(record, stage, boundaries);
-    if (!at) return undefined;
-    const where = c.kind === "f2l" ? `Steps → F2L, the ${c.slot} slot` : `Steps → LL → ${c.kind.toUpperCase()}`;
+    if (!isRealCase(c) || !drillCase(c.kind, c.name)) return undefined;
+    const { group, subgroup } = caseLocation(c.kind);
     return {
-      title: `This exact case in ${where} (Recognize)`,
+      title: `${caseTitle(c)} in Practice → Algorithms — its algorithms, to drill`,
       onClick: () => {
         onClose();
-        if (c.kind === "f2l") openTrainer({ type: "f2l", bottom: at.face, virtual: true, caseState: at.start, slots: [c.slot!], variant: "free", caseName: c.name });
-        else openTrainer({ type: c.kind === "oll" ? "oll" : "pll", bottom: at.face, virtual: true, caseState: at.start, caseName: c.name });
+        openDrill({ group, subgroup, caseName: c.name });
       },
     };
   };
