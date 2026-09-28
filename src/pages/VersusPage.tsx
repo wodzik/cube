@@ -1,8 +1,8 @@
 /**
- * VersusPage — two smart cubes, one scramble, who solves it first.
+ * VersusPage — two to four smart cubes, one scramble, who solves it first.
  *
- * Layout: the score card on top (names editable, Next round / Reset score),
- * then two columns — one per player — each with its scramble, a big timer
+ * Layout: the score card on top (names editable, how many players, Next
+ * round / Reset score), then one column per player (four: two rows of two) — each with its scramble, a big timer
  * and status, and its cube live in 3D (with that cube's own look); the
  * cube's chip (name, battery, Mark as solved, disconnect) under it, or
  * Connect over the cube.
@@ -15,7 +15,8 @@
  * time. Nothing is saved — the score lives while the page is open.
  *
  * Player 1 uses the app's connected cube (connect it here or anywhere);
- * player 2 connects a second cube for this page only.
+ * players 2–4 connect their cubes for this page only. How many cubes can be
+ * connected at once is up to the computer's Bluetooth (usually 5–7).
  */
 
 import { PageLabel } from "../components/PageLabel";
@@ -34,8 +35,10 @@ import { cubecoreSolver } from "../services/cubecoreSolver";
 import { takeScramble } from "../services/scrambleQueue";
 
 const NAMES_KEY = "nact_versus_names";
+const COUNT_KEY = "nact_versus_players";
 const COUNTDOWN_MS = 3000;
-const COLOURS = ["#38bdf8", "#fb923c"] as const; // player 1 / player 2 (sky / orange)
+const MAX_PLAYERS = 4;
+const COLOURS = ["#38bdf8", "#fb923c", "#34d399", "#e879f9"] as const; // players 1–4 (sky / orange / emerald / fuchsia)
 
 type Phase = "idle" | "loading" | "scrambling" | "countdown" | "running" | "done";
 
@@ -45,26 +48,46 @@ interface Result {
 
 const fmt = (ms: number) => (ms / 1000).toFixed(2);
 
-function readNames(): [string, string] {
+function readNames(): string[] {
+  const names = Array.from({ length: MAX_PLAYERS }, (_, i) => `Player ${i + 1}`);
   try {
-    const n = JSON.parse(localStorage.getItem(NAMES_KEY) ?? "null") as [string, string] | null;
-    if (Array.isArray(n) && n.length === 2) return n;
+    const n = JSON.parse(localStorage.getItem(NAMES_KEY) ?? "null") as string[] | null;
+    if (Array.isArray(n)) n.slice(0, MAX_PLAYERS).forEach((v, i) => typeof v === "string" && v && (names[i] = v));
   } catch {
     // default
   }
-  return ["Player 1", "Player 2"];
+  return names;
+}
+
+function readCount(): number {
+  try {
+    const n = Number(localStorage.getItem(COUNT_KEY));
+    return n >= 2 && n <= MAX_PLAYERS ? n : 2;
+  } catch {
+    return 2;
+  }
+}
+
+const ORDINAL = ["1st", "2nd", "3rd", "4th"];
+
+/** A cube this page connected (players 2–4); player 1 is the app's. */
+interface Extra {
+  session: SmartCubeSession;
+  off: () => void;
 }
 
 export default function VersusPage() {
   const app = useSmartCube();
-  const [second, setSecond] = useState<{ session: SmartCubeSession; off: () => void } | null>(null);
+  const [count, setCountState] = useState(readCount);
+  const [extras, setExtras] = useState<(Extra | null)[]>(() => Array(MAX_PLAYERS - 1).fill(null));
   const [connectError, setConnectError] = useState<string | null>(null);
-  const sessions: [SmartCubeSession | null, SmartCubeSession | null] = [app.session, second?.session ?? null];
+  const sessions: (SmartCubeSession | null)[] = [app.session, ...extras.map((e) => e?.session ?? null)].slice(0, count);
+  const players = Array.from({ length: count }, (_, i) => i);
 
-  const [names, setNamesState] = useState<[string, string]>(readNames);
-  const setName = (i: 0 | 1, name: string) =>
+  const [names, setNamesState] = useState<string[]>(readNames);
+  const setName = (i: number, name: string) =>
     setNamesState((prev) => {
-      const next: [string, string] = [...prev];
+      const next = [...prev];
       next[i] = name;
       try {
         localStorage.setItem(NAMES_KEY, JSON.stringify(next));
@@ -73,69 +96,88 @@ export default function VersusPage() {
       }
       return next;
     });
-  const [score, setScore] = useState<[number, number]>([0, 0]);
+  const [score, setScore] = useState<number[]>(() => Array(MAX_PLAYERS).fill(0));
 
   const [phase, setPhase] = useState<Phase>("idle");
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const [official, setOfficial] = useState<{ moves: Move[]; state: State } | null>(null);
-  const [paths, setPaths] = useState<[Move[] | null, Move[] | null]>([null, null]);
-  const [ready, setReady] = useState<[boolean, boolean]>([false, false]);
-  const [results, setResults] = useState<[Result | null, Result | null]>([null, null]);
+  const [paths, setPaths] = useState<(Move[] | null)[]>(() => Array(MAX_PLAYERS).fill(null));
+  const [ready, setReady] = useState<boolean[]>(() => Array(MAX_PLAYERS).fill(false));
+  const [results, setResults] = useState<(Result | null)[]>(() => Array(MAX_PLAYERS).fill(null));
   const [startAt, setStartAt] = useState<number | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [winner, setWinner] = useState<0 | 1 | null>(null);
+  const [winner, setWinner] = useState<number | null>(null);
 
-  // ─── connecting player 2 ───
+  // ─── connecting players 2–4 ───
 
-  const connectSecond = async () => {
+  const extrasRef = useRef(extras);
+  extrasRef.current = extras;
+  const setExtra = (slot: number, extra: Extra | null) => setExtras((prev) => prev.map((e, i) => (i === slot ? extra : e)));
+
+  const connectExtra = async (slot: number) => {
     setConnectError(null);
     try {
       const session = await openCubeSession();
-      if (app.session && session.info.name === app.session.info.name) {
+      const taken = [app.session, ...extrasRef.current.map((e) => e?.session ?? null)].findIndex((s) => s?.info.name === session.info.name);
+      if (taken >= 0) {
         await session.disconnect().catch(() => undefined);
-        throw new Error("That cube is already player 1's — pick the other one");
+        throw new Error(`That cube is already player ${taken + 1}'s — pick another one`);
       }
       const { off } = trackKnownCube(session);
-      const offDisconnect = session.on("disconnect", () => setSecond(null));
-      setSecond({ session, off: () => (off(), offDisconnect()) });
+      const offDisconnect = session.on("disconnect", () => setExtras((prev) => prev.map((e) => (e?.session === session ? null : e))));
+      setExtra(slot, { session, off: () => (off(), offDisconnect()) });
     } catch (err) {
       setConnectError(err instanceof Error ? err.message : "Could not connect");
     }
   };
-  const disconnectSecond = async () => {
-    const s = second;
-    setSecond(null);
-    s?.off();
-    await s?.session.disconnect().catch(() => undefined);
+  const disconnectExtra = async (slot: number) => {
+    const e = extrasRef.current[slot];
+    setExtra(slot, null);
+    e?.off();
+    await e?.session.disconnect().catch(() => undefined);
   };
-  // Dev only: a simulated cube for player 2 (headless checks) — __nactVersusConnect(), __nactVersusMove("R").
+  // Dev only: simulated cubes for players 2–4 (headless checks) — __nactVersusConnect(slot = first free), __nactVersusMove("R", slot = 0).
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    const w = window as unknown as { __nactVersusConnect?: () => void; __nactVersusMove?: (m: string) => void };
-    let cube: SimulatedCube | null = null;
-    w.__nactVersusConnect = () => {
-      cube = new SimulatedCube();
-      const session = new SmartCubeSessionClass(cube);
-      setSecond({ session, off: () => undefined });
+    const w = window as unknown as { __nactVersusConnect?: (slot?: number) => void; __nactVersusMove?: (m: string, slot?: number) => void };
+    const cubes: (SimulatedCube | null)[] = Array(MAX_PLAYERS - 1).fill(null);
+    w.__nactVersusConnect = (slot) => {
+      const i = slot ?? extrasRef.current.findIndex((e) => !e);
+      if (i < 0) return;
+      cubes[i] = new SimulatedCube();
+      setExtra(i, { session: new SmartCubeSessionClass(cubes[i]!), off: () => undefined });
     };
-    w.__nactVersusMove = (m) => cube?.turn(m);
+    w.__nactVersusMove = (m, slot = 0) => cubes[slot]?.turn(m);
     return () => {
       delete w.__nactVersusConnect;
       delete w.__nactVersusMove;
     };
   }, []);
 
-  // Player 2's cube is this page's own: let it go with the page.
-  const secondRef = useRef(second);
-  secondRef.current = second;
+  // The page's own cubes go with the page.
   useEffect(
     () => () => {
-      secondRef.current?.off();
-      void secondRef.current?.session.disconnect().catch(() => undefined);
+      for (const e of extrasRef.current) {
+        e?.off();
+        void e?.session.disconnect().catch(() => undefined);
+      }
     },
     []
   );
+
+  const setCount = (n: number) => {
+    setCountState(n);
+    try {
+      localStorage.setItem(COUNT_KEY, String(n));
+    } catch {
+      // not kept
+    }
+    // Players no longer playing let their cubes go.
+    extrasRef.current.forEach((e, slot) => {
+      if (e && slot + 2 > n) void disconnectExtra(slot);
+    });
+  };
 
   // ─── a round ───
 
@@ -148,14 +190,14 @@ export default function VersusPage() {
       if (!s || statesEqual(s.state, solvedState())) return target.moves;
       return (await cubecoreSolver().solveBetween(s.state, target.state)) ?? target.moves;
     };
-    const [a, b] = sessionsRef.current;
-    setPaths([await plan(a), await plan(b)]);
-    setReady([false, false]);
+    const all = [...sessionsRef.current, ...Array(MAX_PLAYERS).fill(null)].slice(0, MAX_PLAYERS);
+    setPaths(await Promise.all(all.map(plan)));
+    setReady(Array(MAX_PLAYERS).fill(false));
   }, []);
 
   const newRound = useCallback(async () => {
     setPhase("loading");
-    setResults([null, null]);
+    setResults(Array(MAX_PLAYERS).fill(null));
     setWinner(null);
     setStartAt(null);
     setCountdown(null);
@@ -173,16 +215,16 @@ export default function VersusPage() {
   }, []);
 
   // A cube connected (or marked solved) while scrambling: its way is planned again.
-  const sessionKey = `${app.session?.info.name ?? ""}|${second?.session.info.name ?? ""}|${app.resyncs}`;
+  const sessionKey = `${sessions.map((s) => s?.info.name ?? "").join("|")}|${app.resyncs}`;
   useEffect(() => {
     if (phaseRef.current === "scrambling" && official) void planPaths(official);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionKey]);
 
-  // Both scrambled → 3-2-1 → go.
+  // Everyone scrambled → 3-2-1 → go.
   useEffect(() => {
-    if (phase === "scrambling" && ready[0] && ready[1]) setPhase("countdown");
-  }, [phase, ready]);
+    if (phase === "scrambling" && ready.slice(0, count).every(Boolean)) setPhase("countdown");
+  }, [phase, ready, count]);
   useEffect(() => {
     if (phase !== "countdown") return;
     const t0 = performance.now();
@@ -199,62 +241,94 @@ export default function VersusPage() {
     return () => clearInterval(id);
   }, [phase]);
 
-  const onReady = useCallback((i: 0 | 1) => setReady((r) => (i === 0 ? [true, r[1]] : [r[0], true])), []);
+  const onReady = useCallback((i: number) => setReady((r) => r.map((v, j) => (j === i ? true : v))), []);
 
   const resultsRef = useRef(results);
   resultsRef.current = results;
   const onSolved = useCallback(
-    (i: 0 | 1, time: number) => {
+    (i: number, time: number) => {
       if ((phaseRef.current !== "running" && phaseRef.current !== "done") || startAt === null) return;
       const prev = resultsRef.current;
       if (prev[i]) return;
-      const next: [Result | null, Result | null] = [...prev];
+      const next = [...prev];
       next[i] = { timeMs: Math.max(0, time - startAt) };
       resultsRef.current = next;
       setResults(next);
       // The first one solved wins the round.
-      if (!prev[0] && !prev[1]) {
+      if (prev.every((r) => !r)) {
         setWinner(i);
-        setScore((s) => (i === 0 ? [s[0] + 1, s[1]] : [s[0], s[1] + 1]));
+        setScore((s) => s.map((v, j) => (j === i ? v + 1 : v)));
         setPhase("done");
       }
     },
     [startAt]
   );
 
-  const bothConnected = !!sessions[0] && !!sessions[1];
+  const allConnected = sessions.every(Boolean);
+  const winnerResult = winner !== null ? results[winner] : null;
+  /** 1-based place among those finished. */
+  const placeOf = (i: number) => {
+    const r = results[i];
+    return r ? results.slice(0, count).filter((o) => o && o.timeMs < r.timeMs).length : -1;
+  };
+  const cols = count === 3 ? 3 : 2;
 
   return (
     <main className="w-full px-4 sm:px-6 py-3 flex flex-col gap-4">
       <PageLabel className="pt-1.5">Versus</PageLabel>
       {/* Score */}
       <div className="flex flex-col items-center gap-2">
-        <div className="panel px-3 sm:px-6 py-3 flex items-center gap-3 sm:gap-6">
-          <ScoreName name={names[0]} colour={COLOURS[0]} onChange={(n) => setName(0, n)} />
-          <div className="flex items-baseline gap-3 font-mono tabular-nums">
-            <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[0] }}>
-              {score[0]}
-            </span>
-            <span className="text-gray-600 text-2xl">–</span>
-            <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[1] }}>
-              {score[1]}
-            </span>
-          </div>
-          <ScoreName name={names[1]} colour={COLOURS[1]} onChange={(n) => setName(1, n)} />
+        <div className={`panel px-3 sm:px-6 py-3 flex flex-wrap items-center justify-center ${count === 2 ? "gap-3" : "gap-1"} sm:gap-6`}>
+          {count === 2 ? (
+            <>
+              <ScoreName name={names[0]} colour={COLOURS[0]} onChange={(n) => setName(0, n)} />
+              <div className="flex items-baseline gap-3 font-mono tabular-nums">
+                <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[0] }}>
+                  {score[0]}
+                </span>
+                <span className="text-gray-600 text-2xl">–</span>
+                <span className="text-3xl sm:text-4xl font-bold" style={{ color: COLOURS[1] }}>
+                  {score[1]}
+                </span>
+              </div>
+              <ScoreName name={names[1]} colour={COLOURS[1]} onChange={(n) => setName(1, n)} />
+            </>
+          ) : (
+            players.map((i) => (
+              <div key={i} className="flex flex-col items-center">
+                <ScoreName name={names[i]} colour={COLOURS[i]} onChange={(n) => setName(i, n)} narrow />
+                <span className="text-3xl font-bold font-mono tabular-nums" style={{ color: COLOURS[i] }}>
+                  {score[i]}
+                </span>
+              </div>
+            ))
+          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5" title="How many players">
+            {[2, 3, 4].map((n) => (
+              <button
+                key={n}
+                onClick={() => setCount(n)}
+                disabled={phase === "countdown" || phase === "running"}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${count === n ? "bg-white/10 text-white" : "text-gray-400 hover:text-gray-200"}`}
+              >
+                {n} players
+              </button>
+            ))}
+          </div>
           <button onClick={() => void newRound()} disabled={phase === "loading" || phase === "countdown"} className="btn-secondary text-xs">
             <RefreshCw size={13} /> {phase === "done" ? "Next round" : "New scramble"}
           </button>
-          <button onClick={() => setScore([0, 0])} className="btn-secondary text-xs" title="Start the score again">
+          <button onClick={() => setScore(Array(MAX_PLAYERS).fill(0))} className="btn-secondary text-xs" title="Start the score again">
             <RotateCcw size={13} /> Reset score
           </button>
         </div>
         <p className="text-xs text-gray-500 min-h-4 text-center">
-          {!bothConnected
-            ? "Connect both cubes — each scrambles the same scramble, then 3-2-1 and go."
+          {!allConnected
+            ? `Connect ${count === 2 ? "both" : `all ${count}`} cubes — each scrambles the same scramble, then 3-2-1 and go.`
             : phase === "scrambling"
-              ? "Scramble your cube — the round starts when both are scrambled."
+              ? `Scramble your cube — the round starts when ${count === 2 ? "both are" : "all are"} scrambled.`
               : phase === "countdown"
                 ? "Get ready…"
                 : phase === "running"
@@ -266,12 +340,13 @@ export default function VersusPage() {
         {connectError && <p className="text-xs text-red-400">{connectError}</p>}
       </div>
 
-      {/* The two players — side by side on every screen (smaller on phones) */}
-      <div className="grid grid-cols-2">
-        {([0, 1] as const).map((i) => (
+      {/* The players — side by side (2, 3), or two rows of two (4) */}
+      <div className={`grid gap-y-6 ${cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {players.map((i) => (
           <PlayerSide
             key={i}
-            index={i}
+            divider={i % cols !== 0}
+            compact={count > 2}
             colour={COLOURS[i]}
             session={sessions[i]}
             path={paths[i]}
@@ -280,13 +355,14 @@ export default function VersusPage() {
             countdown={countdown}
             startAt={startAt}
             result={results[i]}
-            other={results[i === 0 ? 1 : 0]}
+            winnerResult={winnerResult}
+            place={count > 2 ? placeOf(i) : -1}
             isWinner={winner === i}
             ready={ready[i]}
             onReady={() => onReady(i)}
             onSolved={(t) => onSolved(i, t)}
-            onConnect={i === 0 ? () => void app.connect() : () => void connectSecond()}
-            onDisconnect={i === 0 ? () => void app.disconnect() : () => void disconnectSecond()}
+            onConnect={i === 0 ? () => void app.connect() : () => void connectExtra(i - 1)}
+            onDisconnect={i === 0 ? () => void app.disconnect() : () => void disconnectExtra(i - 1)}
           />
         ))}
       </div>
@@ -294,12 +370,12 @@ export default function VersusPage() {
   );
 }
 
-function ScoreName({ name, colour, onChange }: { name: string; colour: string; onChange: (n: string) => void }) {
+function ScoreName({ name, colour, onChange, narrow = false }: { name: string; colour: string; onChange: (n: string) => void; narrow?: boolean }) {
   return (
     <input
       defaultValue={name}
       onBlur={(e) => onChange(e.target.value.trim() || name)}
-      className="w-20 sm:w-28 bg-transparent text-center text-sm font-semibold outline-none border-b border-transparent hover:border-white/10 focus:border-white/20"
+      className={`${narrow ? "w-[4.5rem]" : "w-20"} sm:w-28 bg-transparent text-center text-sm font-semibold outline-none border-b border-transparent hover:border-white/10 focus:border-white/20`}
       style={{ color: colour }}
       title="Name"
     />
@@ -307,7 +383,8 @@ function ScoreName({ name, colour, onChange }: { name: string; colour: string; o
 }
 
 function PlayerSide({
-  index,
+  divider,
+  compact,
   colour,
   session,
   path,
@@ -316,7 +393,8 @@ function PlayerSide({
   countdown,
   startAt,
   result,
-  other,
+  winnerResult,
+  place,
   isWinner,
   ready,
   onReady,
@@ -324,7 +402,10 @@ function PlayerSide({
   onConnect,
   onDisconnect,
 }: {
-  index: 0 | 1;
+  /** A line on its left (not the first in its row). */
+  divider: boolean;
+  /** Three or four players: a smaller cube. */
+  compact: boolean;
   colour: string;
   session: SmartCubeSession | null;
   path: Move[] | null;
@@ -333,7 +414,9 @@ function PlayerSide({
   countdown: number | null;
   startAt: number | null;
   result: Result | null;
-  other: Result | null;
+  winnerResult: Result | null;
+  /** Place among the finished (0 = first), with three or more players; -1: not shown. */
+  place: number;
   isWinner: boolean;
   ready: boolean;
   onReady: () => void;
@@ -447,23 +530,23 @@ function PlayerSide({
       ? "Generating…"
       : phase === "scrambling"
         ? ready
-          ? "Scrambled — waiting for the other player"
+          ? "Scrambled — waiting for the others"
           : "Scramble"
         : phase === "countdown"
           ? ""
           : result
             ? isWinner
               ? "Winner!"
-              : other
-                ? `+${fmt(result.timeMs - other.timeMs)}`
+              : winnerResult
+                ? `${place >= 0 ? `${ORDINAL[place]} · ` : ""}+${fmt(result.timeMs - winnerResult.timeMs)}`
                 : ""
             : "Solving…";
 
   return (
-    <section className={`flex flex-col items-center gap-2 md:gap-4 px-1.5 md:px-8 min-w-0 ${index === 1 ? "border-l border-white/[0.06]" : ""}`}>
+    <section className={`flex flex-col items-center gap-2 md:gap-4 px-1.5 md:px-8 min-w-0 ${divider ? "border-l border-white/[0.06]" : ""}`}>
       <div
         ref={scrambleHost}
-        className={`versus-scramble w-full max-w-xl min-h-16 md:min-h-24 text-gray-100 ${phase === "scrambling" || phase === "loading" ? "" : "invisible"}`}
+        className={`versus-scramble ${compact ? "versus-compact" : ""} w-full max-w-xl min-h-16 md:min-h-24 text-gray-100 ${phase === "scrambling" || phase === "loading" ? "" : "invisible"}`}
       />
 
       <div className="relative flex flex-col items-center">
@@ -476,7 +559,7 @@ function PlayerSide({
         )}
       </div>
 
-      <div className="w-full max-w-40 sm:max-w-56 md:max-w-80 aspect-square">
+      <div className={`w-full aspect-square ${compact ? "max-w-32 sm:max-w-44 md:max-w-60" : "max-w-40 sm:max-w-56 md:max-w-80"}`}>
         <div ref={playerHost} className="size-full" />
       </div>
       {!session && (

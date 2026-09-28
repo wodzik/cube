@@ -316,3 +316,12 @@
     --scramble-size: 1.45rem;
   }
 }
+/* Three players side by side on a phone: a smaller scramble, so the columns line up. */
+.versus-scramble.versus-compact {
+  --scramble-size: 0.72rem;
+}
+@media (min-width: 768px) {
+  .versus-scramble.versus-compact {
+    --scramble-size: 1.2rem;
+  }
+}
