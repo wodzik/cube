@@ -8,24 +8,11 @@
 
 import { useEffect, useState } from "react";
 import type { Face } from "@wodzik/cubecore/core";
-import type { Quat } from "@wodzik/cubecore/bluetooth";
+import { AXES_SPECS, DEFAULT_AXES_SPEC, IDENTITY_GRIP, type Quat, detectAxes, gripQuaternion, readGrip, rotateGrip } from "@wodzik/cubecore/bluetooth";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { useGyro } from "../hooks/useGyro";
-import { updateCube } from "../services/cubeRegistry";
-import {
-  ALL_AXES,
-  DEFAULT_AXES,
-  currentAxes,
-  currentGrip,
-  detectAxes,
-  gripTracking,
-  onAbsoluteOrientation,
-  onGripChange,
-  rawReading,
-  resetToShown,
-  setAxes,
-} from "../services/gyroOrientation";
-import { IDENTITY_GRIP, readGrip, rotateGrip } from "../logic/grip";
+import { listCubes, updateCube } from "../services/cubeRegistry";
+import { applyAxes, gripRecorder, resetToShown } from "../services/gyroOrientation";
 import { CubeVisualisation } from "./CubeVisualisation";
 
 const COLOUR: Record<Face, string> = { U: "white", D: "yellow", F: "green", B: "blue", R: "red", L: "orange" };
@@ -43,23 +30,22 @@ export function GyroDebugPanel() {
   const { supported } = useGyro();
   const [live, setLive] = useState<{ top: Face; front: Face; off: number } | null>(null);
   const [log, setLog] = useState<string[]>([]);
-  const [axes, setAxesState] = useState(currentAxes);
+  const [axes, setAxesState] = useState(() => listCubes().find((c) => c.id === cubeId)?.gyroAxes ?? DEFAULT_AXES_SPEC);
   const [samples, setSamples] = useState<Quat[]>([]);
   const [result, setResult] = useState<{ spec: string; errorDeg: number }[] | null>(null);
 
   useEffect(() => {
     if (!session) return;
     let last = 0;
-    const offAbs = onAbsoluteOrientation(session, (q) => {
+    const offAbs = session.on("orientation", (q) => {
       const now = performance.now();
       if (now - last < 100) return;
       last = now;
       const { grip, offDeg } = readGrip(q);
       setLive({ top: grip.face.U, front: grip.face.F, off: Math.round(offDeg) });
     });
-    const offGrip = onGripChange(session, () => {
-      const h = gripTracking(session).history.at(-1);
-      if (h?.rotation) setLog((l) => [`${h.rotation}  →  ${COLOUR[h.grip.face.U]} top, ${COLOUR[h.grip.face.F]} front`, ...l].slice(0, 30));
+    const offGrip = gripRecorder(session).onChange((h) => {
+      if (h.rotation) setLog((l) => [`${h.rotation}  →  ${COLOUR[h.grip.face.U]} top, ${COLOUR[h.grip.face.F]} front`, ...l].slice(0, 30));
     });
     return () => {
       offAbs();
@@ -71,13 +57,13 @@ export function GyroDebugPanel() {
   if (!supported) return <p className="p-6 text-sm text-gray-500">This cube reports no gyroscope.</p>;
 
   const chooseAxes = (spec: string) => {
-    setAxes(spec);
+    applyAxes(session, spec);
     setAxesState(spec);
-    if (cubeId) updateCube(cubeId, { gyroAxes: spec === DEFAULT_AXES ? undefined : spec });
+    if (cubeId) updateCube(cubeId, { gyroAxes: spec === DEFAULT_AXES_SPEC ? undefined : spec });
   };
 
   const capture = () => {
-    const raw = rawReading(session);
+    const raw = session.rawOrientation;
     if (!raw) return;
     const next = [...samples, raw];
     if (next.length < 3) {
@@ -86,10 +72,10 @@ export function GyroDebugPanel() {
       return;
     }
     setSamples([]);
-    setResult(detectAxes(next[0], next[1], next[2], rotateGrip(IDENTITY_GRIP, "x"), rotateGrip(IDENTITY_GRIP, "y")).slice(0, 3));
+    setResult(detectAxes(next[0], next[1], next[2], gripQuaternion(rotateGrip(IDENTITY_GRIP, "x")), gripQuaternion(rotateGrip(IDENTITY_GRIP, "y"))).slice(0, 3));
   };
 
-  const grip = currentGrip(session);
+  const grip = gripRecorder(session).grip;
 
   return (
     <div className="flex flex-1 min-h-0 flex-col sm:flex-row">
@@ -177,10 +163,10 @@ export function GyroDebugPanel() {
               onChange={(e) => chooseAxes(e.target.value)}
               className="bg-gray-950/60 border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-300 font-mono"
             >
-              {ALL_AXES.map((a) => (
+              {AXES_SPECS.map((a) => (
                 <option key={a} value={a}>
                   {a}
-                  {a === DEFAULT_AXES ? " (GAN)" : ""}
+                  {a === DEFAULT_AXES_SPEC ? " (GAN)" : ""}
                 </option>
               ))}
             </select>

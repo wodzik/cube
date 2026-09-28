@@ -22,8 +22,7 @@ import { parseMove } from "../logic/moveParser";
 import { sessionMethodsForInput } from "../logic/inputMethod";
 import { useSmartCube } from "../hooks/useSmartCube";
 import { useRotationCounting } from "../hooks/useRotationCounting";
-import { currentGrip, gripAt, gripChangesBetween, reanchor } from "../services/gyroOrientation";
-import { recordRotations } from "../logic/solveRotations";
+import { gripRecorder } from "../services/gyroOrientation";
 import { useSpacebar } from "../hooks/useSpacebar";
 import { useTimerDevice } from "../hooks/useTimerDevice";
 import { useSolvedDetection } from "../hooks/useSolvedDetection";
@@ -614,7 +613,7 @@ function SolvePageInner({
   const rotationCounting = useRotationCounting();
   const countRotations = rotationCounting.active ? cube.session : null;
   useEffect(() => {
-    if (state.phase === "active" && countRotations) reanchor(countRotations);
+    if (state.phase === "active" && countRotations) countRotations.alignToGrip();
   }, [state.phase, countRotations]);
 
   const notifiedRef = useRef(false);
@@ -685,19 +684,12 @@ function SolvePageInner({
       isDNF: false,
       cube: activeCubeId(),
     };
-    if (countRotations) {
-      const startGrip = gripAt(countRotations, state.startTime) ?? currentGrip(countRotations);
-      if (startGrip) {
-        Object.assign(
-          record,
-          recordRotations(
-            startGrip,
-            gripChangesBetween(countRotations, state.startTime, state.endTime),
-            state.moveLog.map((m) => m.timestamp),
-            state.startTime
-          )
-        );
-      }
+    if (countRotations && state.moveLog.length > 0) {
+      // The solve's moves in the session's stream: the rotations among them (cubecore GripRecorder).
+      const rec = gripRecorder(countRotations);
+      const first = rec.moveNumberAt(state.moveLog[0].timestamp);
+      const r = first !== null ? rec.forMoves(first, state.moveLog.length, state.startTime) : null;
+      if (r) Object.assign(record, r);
     }
 
     saveSolve(record);

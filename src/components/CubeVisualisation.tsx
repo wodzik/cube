@@ -25,7 +25,7 @@ import { useCubeLook } from "../hooks/useCubeLook";
 import { type Frame, type Mask, type State, isSolved } from "@wodzik/cubecore/core";
 import { frameQuaternion } from "../logic/frameView";
 import { IDENTITY } from "@wodzik/cubecore/bluetooth";
-import { calibrateAs, isCalibrated, onAbsoluteOrientation, setShownView } from "../services/gyroOrientation";
+import { calibrateAs, isCalibrated, setShownView } from "../services/gyroOrientation";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { useGyro } from "../hooks/useGyro";
 import { useTurnArrows } from "../hooks/useTurnArrows";
@@ -167,7 +167,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       const base = orientation ? frameQuaternion(orientation) : IDENTITY;
       if (!isCalibrated(session)) calibrateAs(session, base); // as held now = as shown
       const unshow = setShownView(base);
-      const off = onAbsoluteOrientation(session, (q) => playerRef.current?.renderer?.setOrientation(q, 0.6));
+      const off = session.on("orientation", (q) => playerRef.current?.renderer?.setOrientation(q, 0.6));
       return () => {
         off();
         unshow();

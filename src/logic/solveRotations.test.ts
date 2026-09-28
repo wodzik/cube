@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { IDENTITY_GRIP, gripOf, rotateGrip } from "./grip";
-import { heldDisplay, heldMove, heldTokens, recordRotations, rotationCount } from "./solveRotations";
+import { IDENTITY_GRIP, gripOf, heldMove, rotateGrip } from "@wodzik/cubecore/bluetooth";
+import { heldDisplay, heldTokens, rotationCount } from "./solveRotations";
 
 const moves = (s: string) => s.split(" ").map((move, i) => ({ move, timestamp: 1000 + i * 100, relativeMs: i * 100, phase: "active" as const }));
 
@@ -10,12 +10,6 @@ describe("solve rotations", () => {
     expect(heldMove("L", orangeFront)).toBe("F");
     expect(heldMove("F'", orangeFront)).toBe("R'");
     expect(heldMove("U2", orangeFront)).toBe("U2");
-  });
-
-  it("records the start grip and when each rotation came", () => {
-    const r = recordRotations(gripOf("U", "L"), [{ at: 1150, rotation: "y" }], [1000, 1100, 1200], 1000);
-    expect(r.startRotation).toBe("y'");
-    expect(r.rotations).toEqual([{ after: 2, t: 150, move: "y" }]);
   });
 
   it("shows the solve as seen, rotations combined", () => {

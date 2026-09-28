@@ -39,7 +39,7 @@ import { type State, decodeState, encodeState, formatMove } from "@wodzik/cubeco
 import { SKINS } from "@wodzik/cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";
 import { findCube, listCubes, rememberCube, setActiveCube, updateCube } from "../services/cubeRegistry";
-import { gripTracking, sessionAxes, setAxes } from "../services/gyroOrientation";
+import { applyAxes, gripRecorder } from "../services/gyroOrientation";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";
 
 type MoveListener = (move: string, timestampMs: number) => void;
@@ -101,7 +101,6 @@ export async function openCubeSession(): Promise<SmartCubeSession> {
       },
     },
     {
-      axes: sessionAxes,
       // A cube that can't reset its own state: what it reports when solved, kept from "Mark as solved".
       base: (device) => {
         const kept = findCube(device)?.base;
@@ -165,8 +164,8 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     setActiveCube(knownId);
     setCubeId(knownId);
     // This cube's gyro axis correction (Debug → Gyroscope axes), and its grips followed from now.
-    setAxes(listCubes().find((c) => c.id === knownId)?.gyroAxes);
-    gripTracking(conn);
+    applyAxes(conn, listCubes().find((c) => c.id === knownId)?.gyroAxes);
+    gripRecorder(conn);
 
     setState({
       connected: true,
@@ -253,7 +252,7 @@ export function SmartCubeProvider({ children }: { children: ReactNode }) {
     ws.__nactCubeState = () => connectionRef.current?.state ?? null;
     ws.__nactSimulateConnect = () => {
       simulatedRef.current = new SimulatedCube();
-      use(new SmartCubeSession(simulatedRef.current, { axes: sessionAxes }));
+      use(new SmartCubeSession(simulatedRef.current));
     };
     (window as unknown as { __nactSimulateGyro?: (q: { x: number; y: number; z: number; w: number }) => void }).__nactSimulateGyro = (q) =>
       simulatedRef.current?.tilt(q);
