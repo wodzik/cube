@@ -14,6 +14,7 @@ import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { SolveTimingBar } from "./SolveTimingBar";
+import { useMoveReading } from "../hooks/useMoveReading";
 import { heldTokens, rotationCount } from "../logic/solveRotations";
 
 interface SolveSummaryProps {
@@ -28,7 +29,8 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
   const timings = computeStageTimings(detector.stages, boundaries ?? [], record.moves);
   const fluency = moveCountOnly ? null : fluencyPercent(timings, record.timeMs);
-  const held = heldTokens(record);
+  const reading = useMoveReading();
+  const held = heldTokens(record, reading);
   const rotations = held
     ? { text: `${rotationCount(held)} y rot`, title: `y rotations (regrips), from the gyroscope — x and z aren't counted${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}` }
     : null;

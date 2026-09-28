@@ -28,6 +28,7 @@
  * with a manual toggle to compare against the other two regardless.
  */
 
+import { useMoveReading } from "../hooks/useMoveReading";
 import { type CurrentItem, type DisplayItem, displayItems, heldTokens, isCurrent, plainTokens, rotationCount } from "../logic/solveRotations";
 import { cubeLabel } from "../services/cubeRegistry";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -285,7 +286,8 @@ export function SolveAnalysis({
   }
   // Display text: collapsed, compact (R2 instead of R R).
   // Rotations (gyroscope): the moves as seen, with the x / y / z between them.
-  const held = useMemo(() => heldTokens(record), [record]);
+  const reading = useMoveReading();
+  const held = useMemo(() => heldTokens(record, reading), [record, reading]);
   const rotations = held ? rotationCount(held) : null;
   const tokens = useMemo(() => held ?? plainTokens(record), [held, record]);
   const displayMoves = useMemo(() => displayItems(tokens, 0, record.moves.length), [tokens, record.moves.length]);

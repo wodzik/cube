@@ -11,7 +11,7 @@
  * PURE FUNCTIONS.
  */
 
-import { type HeldToken, heldTokens as cubecoreHeldTokens } from "@wodzik/cubecore/bluetooth";
+import { type HeldOptions, type HeldToken, heldTokens as cubecoreHeldTokens } from "@wodzik/cubecore/bluetooth";
 import type { SolveRecord } from "../types/solve";
 import { collapseRun } from "./moveReduction";
 
@@ -25,12 +25,13 @@ export const hasRotations = (record: Pick<SolveRecord, "startRotation">): boolea
  * wide moves read back from face moves with the core's rotation. Null for a
  * solve recorded without rotations.
  */
-export function heldTokens(record: Pick<SolveRecord, "moves" | "startRotation" | "rotations">): HeldToken[] | null {
+export function heldTokens(record: Pick<SolveRecord, "moves" | "startRotation" | "rotations">, options?: HeldOptions): HeldToken[] | null {
   if (record.startRotation === undefined) return null;
   return cubecoreHeldTokens(
     record.moves.map((m) => ({ move: m.move, t: m.relativeMs })),
     record.startRotation,
-    record.rotations ?? []
+    record.rotations ?? [],
+    options
   );
 }
 

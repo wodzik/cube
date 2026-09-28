@@ -22,6 +22,7 @@ import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { groupStageTimings, stageGroupShades, stageSlotLabel } from "./stageGroups";
 import { stageCubeColors } from "./cubeColors";
+import { useMoveReading } from "../hooks/useMoveReading";
 import { type CurrentItem, type DisplayItem, heldTokens, plainTokens, playbackItems } from "../logic/solveRotations";
 
 export interface SolveReplayRef {
@@ -76,6 +77,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, SolveReplayProps>(
     const onCurrentRef = useRef(onCurrent);
     onCurrentRef.current = onCurrent;
     const { skin } = useCubeLook();
+    const reading = useMoveReading();
 
     useEffect(() => {
       const p = document.createElement("cube-player") as CubePlayer;
@@ -123,7 +125,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, SolveReplayProps>(
       // With rotations recorded (gyroscope): picked up as it was held, the
       // rotations in between, each move as it was seen. One step per shown
       // move: U U is one U2 (U' U' one U2', turned that way).
-      const held = heldTokens(record);
+      const held = heldTokens(record, reading);
       const items = playbackItems(held ?? plainTokens(record));
       const moves: { move: Move; t: number }[] = [];
       const itemOfMove: DisplayItem[] = [];
@@ -141,7 +143,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, SolveReplayProps>(
       playerIndexRef.current = (i) => at[i] ?? i;
       itemOfMoveRef.current = itemOfMove;
       p.recording = { scramble, moves, totalMs: Math.max(record.timeMs, moves.at(-1)?.t ?? 0) };
-    }, [record]);
+    }, [record, reading]);
 
     useEffect(() => {
       segmentsRef.current = stageSegmentsFor(timings);

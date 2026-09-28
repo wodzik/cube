@@ -19,6 +19,7 @@ import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
 import { useGyro } from "../hooks/useGyro";
+import { SLICE_MOVES, WIDE_MOVES, setMoveReading, useMoveReading } from "../hooks/useMoveReading";
 import { useRotationCounting } from "../hooks/useRotationCounting";
 import { listGroups, migrateAlgorithmStorage, resetAlgorithmStorageMigration, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { lookForCube, resolveSkin, useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
@@ -102,6 +103,38 @@ function CubeLookSection() {
   );
 }
 
+/** Which slices / wide moves a solve's moves are read as (with Count rotations): the rest stay face turns and a rotation. */
+function MoveReadingRow() {
+  const reading = useMoveReading();
+  const toggle = (kind: "wide" | "slices", m: string) => {
+    const list = reading[kind];
+    setMoveReading({ ...reading, [kind]: list.includes(m) ? list.filter((x) => x !== m) : [...list, m] });
+  };
+  const chip = (on: boolean) =>
+    `w-8 py-1 rounded-md text-xs font-mono font-semibold transition-colors ${on ? "bg-white/10 text-white" : "text-gray-600 hover:text-gray-300 hover:bg-white/[0.04]"}`;
+  return (
+    <SettingsRow
+      title="Slices and wide moves"
+      description="With Count rotations: which moves a solve shows as one slice or wide move (a smart cube reports them as face turns while its centres turn — M as R L' and the centres turning). The rest show as the face turns and a rotation: a u is usually a U turn and a y regrip, an l in the cross may be a peek. Applies to every solve, recorded before too."
+      action={
+        <div className="flex flex-wrap items-center gap-1">
+          {WIDE_MOVES.map((m) => (
+            <button key={m} onClick={() => toggle("wide", m)} className={chip(reading.wide.includes(m))} title={`${m}: ${reading.wide.includes(m) ? "read as a wide move" : "a face turn and a rotation"}`}>
+              {m}
+            </button>
+          ))}
+          <span className="w-2" />
+          {SLICE_MOVES.map((m) => (
+            <button key={m} onClick={() => toggle("slices", m)} className={chip(reading.slices.includes(m))} title={`${m}: ${reading.slices.includes(m) ? "read as a slice" : "two face turns and a rotation"}`}>
+              {m}
+            </button>
+          ))}
+        </div>
+      }
+    />
+  );
+}
+
 /** Turn arrows: off, round, or along the edges (also switched by the cube; a cube can have its own). */
 function TurnArrowsSection() {
   const { appMode, setAppMode } = useTurnArrows();
@@ -129,6 +162,7 @@ function TurnArrowsSection() {
           </select>
         }
       />
+      <MoveReadingRow />
       <SettingsRow
         title="Turn arrows"
         description="While a smart cube is connected: the next move of the scramble or algorithm drawn on the 3D cube — and the way back after a slip (red), or the right face turned the wrong way (orange). Also switched by the cube; a cube can have its own (My cubes)."
@@ -486,6 +520,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_turn_arrows",
   "nact_gyro",
   "nact_rotations",
+  "nact_move_reading",
   "nact_logos",
 ];
 
