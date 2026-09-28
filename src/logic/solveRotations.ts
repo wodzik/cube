@@ -81,7 +81,7 @@ export function heldTokens(record: Pick<SolveRecord, "moves" | "startRotation" |
  * same moment — S as F' B + z, r as L + x. Such a group (the rotation and one
  * or two moves on its axis, within SAME_MOMENT_MS) is the slice / wide move.
  */
-const SAME_MOMENT_MS = 350;
+const SAME_MOMENT_MS = 500;
 const SLICE_WIDE = ["M", "E", "S", "r", "l", "u", "d", "f", "b"].flatMap((f) => [f, `${f}'`, `${f}2`]);
 const effect = (alg: string) => applyMoves(solvedState(), alg).join();
 const SLICE_WIDE_EFFECT = new Map<string, string>();
@@ -93,6 +93,32 @@ function sliceOrWide(group: readonly string[]): string | null {
 
 /** How far apart (ms) the gyro's "rotation" of a slice / wide move and its face moves can be reported. */
 const SNAP_MS = 600;
+/** Face moves one slice / wide move can come as: a half slice turn done as two quarters is four (R' L R' L). */
+const MAX_GROUP = 4;
+/** A slice's rotation can come in this late (ms) — past a couple of other moves — when the cube wasn't held still. */
+const SLICE_LATE_MS = 2500;
+const SLICE_SKIP = 2;
+
+/**
+ * The consecutive run (up to MAX_GROUP) of moves on the axis nearest to
+ * `from` going `dir`, skipping at most SLICE_SKIP other moves before it,
+ * within SLICE_LATE_MS of the rotation.
+ */
+function axisRun(moves: SolveRecord["moves"], from: number, dir: 1 | -1, onAxis: (j: number) => boolean, t: number): number[] {
+  let j = from;
+  let skipped = 0;
+  while (j >= 0 && j < moves.length && !onAxis(j) && skipped < SLICE_SKIP && Math.abs(moves[j].relativeMs - t) <= SLICE_LATE_MS) {
+    j += dir;
+    skipped++;
+  }
+  const run: number[] = [];
+  while (j >= 0 && j < moves.length && onAxis(j) && run.length < MAX_GROUP && Math.abs(moves[j].relativeMs - t) <= SLICE_LATE_MS) {
+    if (dir === -1) run.unshift(j);
+    else run.push(j);
+    j += dir;
+  }
+  return run;
+}
 const AXIS_FACES: Record<string, [Face, Face]> = { x: ["R", "L"], y: ["U", "D"], z: ["F", "B"] };
 
 /**
@@ -111,20 +137,24 @@ function snapToSlices(moves: SolveRecord["moves"], startGrip: Grip, rotations: R
       const physical = faces.map((f) => grip.face[f]);
       const onAxis = (j: number) => physical.includes(moves[j].move[0] as Face);
       const letters = (idx: number[]) => idx.map((j) => heldMove(moves[j].move, grip));
-      const back: number[] = [];
-      for (let j = r.after - 1; j >= 0 && back.length < 2 && moves[j].relativeMs >= r.t - SNAP_MS; j--) if (onAxis(j)) back.unshift(j);
-      const fwd: number[] = [];
-      for (let j = r.after; j < moves.length && fwd.length < 2 && moves[j].relativeMs <= r.t + SNAP_MS; j++) if (onAxis(j)) fwd.push(j);
-      const tries: [number[], number][] = [
-        [back, back.at(-1)! + 1],
-        [back.slice(-1), back.at(-1)! + 1],
-        [fwd, fwd[0]],
-        [fwd.slice(0, 1), fwd[0]],
-      ];
+      // The last run of this axis's moves before it (a few other moves may
+      // have come in between — made after the slice, while the gyro hadn't
+      // settled, e.g. a pause to recognise the next case), and the first after.
+      const back = axisRun(moves, r.after - 1, -1, onAxis, r.t);
+      const fwd = axisRun(moves, r.after, 1, onAxis, r.t);
+      // The most moves first (M2 as four quarter turns), then fewer.
+      const tries: [number[], number][] = [];
+      for (let n = MAX_GROUP; n >= 1; n--) if (back.length >= n) tries.push([back.slice(-n), back.at(-1)! + 1]);
+      for (let n = MAX_GROUP; n >= 1; n--) if (fwd.length >= n) tries.push([fwd.slice(0, n), fwd[0]]);
       for (const [idx, after] of tries) {
-        if (idx.length === 0) continue;
+        // Far from the rotation, only a slice's signature (both faces of the axis) is trusted —
+        // one face and a rotation could as well be a real regrip after a face turn.
+        const far = idx.some((j) => Math.abs(moves[j].relativeMs - r.t) > SNAP_MS);
+        if (far && new Set(idx.map((j) => moves[j].move[0])).size < 2) continue;
         if (sliceOrWide([...letters(idx), r.move])) {
           r.after = after;
+          // It happened with those moves: its time is theirs (the merge compares times).
+          r.t = moves[after > idx[0] ? idx.at(-1)! : idx[0]].relativeMs;
           break;
         }
       }
@@ -139,14 +169,10 @@ export function mergeSlicesAndWides(tokens: readonly HeldToken[]): HeldToken[] {
   for (let k = 0; k < out.length; k++) {
     const rot = out[k];
     if (rot.kind !== "rotation" || /\s/.test(rot.move)) continue;
-    // Two moves around it first (a slice), then one (a wide move).
-    const windows: [number, number][] = [
-      [k - 2, k],
-      [k - 1, k + 1],
-      [k, k + 2],
-      [k - 1, k],
-      [k, k + 1],
-    ];
+    // The most moves around it first — a slice half turn made of quarters
+    // is four (M2: R' L R' L + x2), a slice two, a wide move one.
+    const windows: [number, number][] = [];
+    for (let n = MAX_GROUP; n >= 1; n--) for (let o = 0; o <= n; o++) windows.push([k - n + o, k + o]);
     for (const [a, b] of windows) {
       if (a < 0 || b >= out.length) continue;
       const group = out.slice(a, b + 1);

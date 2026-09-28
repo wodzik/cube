@@ -70,4 +70,28 @@ describe("solve rotations", () => {
     expect(tokens.filter((t) => t.kind === "rotation").map((t) => t.move)).toEqual(["x", "y", "z'"]);
     expect(rotationCount(tokens)).toBe(1);
   });
+
+  it("M2 done as two quarters (R' L R' L and the core's x2) is one M2 — also when the x2 comes in late", () => {
+    const at = (list: [string, number][]) => list.map(([move, t]) => ({ move, timestamp: 1000 + t, relativeMs: t, phase: "active" as const }));
+    const quarters: [string, number][] = [["R'", 0], ["L", 40], ["R'", 110], ["L", 150]];
+    const on = heldTokens({ moves: at([...quarters, ["U", 800]]), startRotation: "", rotations: [{ after: 4, t: 200, move: "x2" }] })!;
+    expect(on.map((t) => t.move)).toEqual(["M2", "D"]);
+    expect(rotationCount(on)).toBe(0);
+    const late = heldTokens({ moves: at([...quarters, ["U", 230], ["F", 300]]), startRotation: "", rotations: [{ after: 6, t: 320, move: "x2" }] })!;
+    expect(late.map((t) => t.move)).toEqual(["M2", "D", "B"]);
+  });
+
+  it("a slice's rotation that came in a second late, after the next move (L R' … pause … F' x), is still the M'", () => {
+    const at = (list: [string, number][]) => list.map(([move, t]) => ({ move, timestamp: 1000 + t, relativeMs: t, phase: "active" as const }));
+    const s = heldTokens({ moves: at([["U'", 0], ["L", 300], ["R'", 340], ["F'", 1600], ["R'", 1800]]), startRotation: "", rotations: [{ after: 4, t: 1700, move: "x" }] })!;
+    // M' happened with L R' (the centres turned like x): the F' after it was on what's now the top.
+    expect(s.map((t) => t.move)).toEqual(["U'", "M'", "U'", "R'"]);
+    expect(rotationCount(s)).toBe(0);
+  });
+
+  it("one face and a rotation far apart stay a face turn and a rotation (a real regrip)", () => {
+    const at = (list: [string, number][]) => list.map(([move, t]) => ({ move, timestamp: 1000 + t, relativeMs: t, phase: "active" as const }));
+    const s = heldTokens({ moves: at([["R'", 0], ["U", 1500]]), startRotation: "", rotations: [{ after: 1, t: 1200, move: "x" }] })!;
+    expect(s.map((t) => t.move)).toEqual(["R'", "x", "B"]);
+  });
 });
