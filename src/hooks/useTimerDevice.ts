@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { connectGanTimer, GanTimerState, type GanTimerConnection } from "smartcube-web-bluetooth";
+import { connectGanTimer, GanTimerState, type GanTimerConnection } from "@wodzik/cubecore/bluetooth";
 import { useSession } from "../state/sessionContext";
 import type { DeviceConnection } from "../types/hardware";
 import { INITIAL_DEVICE_CONNECTION } from "../types/hardware";

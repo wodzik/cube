@@ -33,8 +33,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getCachedMacForDevice } from "smartcube-web-bluetooth";
-import { SimulatedCube, SmartCubeSession } from "@wodzik/cubecore/bluetooth";
+import { SimulatedCube, SmartCubeSession, getCachedMacForDevice } from "@wodzik/cubecore/bluetooth";
 import { type State, decodeState, encodeState, formatMove } from "@wodzik/cubecore/core";
 import { SKINS } from "@wodzik/cubecore/skin";
 import type { DeviceConnection } from "../types/hardware";

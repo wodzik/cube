@@ -1,18 +1,6 @@
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-
-// smartcube-web-bluetooth is installed straight from GitHub and ships no
-// prebuilt dist/ (its package.json "main"/"module"/"types" point at dist
-// paths that only exist after running its own build, which itself needs
-// devDependencies — vitest, etc. — that aren't installed for a nested git
-// dependency). Point directly at its TS source instead: esbuild transpiles
-// it like any other source file, no prebuild step needed. Matched by a
-// "paths" entry in tsconfig.json so `tsc --noEmit` resolves the same way.
-const smartcubeSrc = fileURLToPath(
-  new URL("./node_modules/smartcube-web-bluetooth/src/index.ts", import.meta.url)
-);
 
 // Build identity for the "new version available" check: baked into the
 // bundle as __BUILD_ID__ AND emitted as dist/version.json. A deployed page
@@ -39,11 +27,6 @@ export default defineConfig({
       },
     },
   ],
-  resolve: {
-    alias: [
-      { find: "smartcube-web-bluetooth", replacement: smartcubeSrc },
-    ],
-  },
   build: {
     chunkSizeWarningLimit: 2048,
     // No modulepreload hints for dynamic imports. Vite's preload helper
