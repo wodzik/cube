@@ -14,6 +14,7 @@ import { detectorForMethod } from "../logic/stageDetection/methodRegistry";
 import { computeStageTimings } from "../logic/stageDetection/stageTiming";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { SolveTimingBar } from "./SolveTimingBar";
+import { heldTokens, rotationCount } from "../logic/solveRotations";
 
 interface SolveSummaryProps {
   record: SolveRecord;
@@ -27,12 +28,17 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
     record.method === "Roux" ? record.roux : record.method === "LBL" ? record.lbl : record.cfop;
   const timings = computeStageTimings(detector.stages, boundaries ?? [], record.moves);
   const fluency = moveCountOnly ? null : fluencyPercent(timings, record.timeMs);
+  const held = heldTokens(record);
+  const rotations = held
+    ? { text: `${rotationCount(held)} rot`, title: `Cube rotations (gyroscope)${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}` }
+    : null;
 
   const parts: { text: string; title?: string }[] = moveCountOnly
-    ? [{ text: `${record.moveCount} turns` }, { text: record.method }]
+    ? [{ text: `${record.moveCount} turns` }, rotations, { text: record.method }].filter((p): p is { text: string; title?: string } => p !== null)
     : [
         { text: `${record.tps.toFixed(2)} TPS` },
         { text: `${record.moveCount} turns` },
+        rotations,
         fluency === null ? null : { text: `${fluency}% fluency`, title: FLUENCY_TOOLTIP },
         { text: record.method },
       ].filter((p): p is { text: string; title?: string } => p !== null);

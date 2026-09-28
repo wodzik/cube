@@ -5,6 +5,9 @@
  * same colours as SolveTimingBar) — hover / playhead shows the stage, click
  * a stage to jump there.
  *
+ * With rotations recorded (gyroscope), it's replayed as it was held: the
+ * cube picked up in its grip, the x / y / z at their moments.
+ *
  * `seekToStage` (ref) jumps to a stage's start (the stage rows in
  * SolveAnalysis).
  */
@@ -19,6 +22,7 @@ import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { groupStageTimings, stageGroupShades, stageSlotLabel } from "./stageGroups";
 import { stageCubeColors } from "./cubeColors";
+import { heldTokens } from "../logic/solveRotations";
 
 export interface SolveReplayRef {
   /** Jump to the stage's start (else, with no timed stages — a move-count-only session — to the raw move index). */
@@ -59,6 +63,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
     const host = useRef<HTMLDivElement>(null);
     const player = useRef<CubePlayer | null>(null);
     const segmentsRef = useRef<Segment[]>([]);
+    const playerIndexRef = useRef<(raw: number) => number>((i) => i);
     const { skin } = useCubeLook();
 
     useEffect(() => {
@@ -93,8 +98,24 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
     useEffect(() => {
       const p = player.current;
       if (!p) return;
-      const moves = record.moves.flatMap((m) => parseAlg(m.move).map((move) => ({ move, t: Math.max(0, m.relativeMs) })));
-      p.recording = { scramble: parseAlg(record.scramble), moves, totalMs: Math.max(record.timeMs, moves.at(-1)?.t ?? 0) };
+      // With rotations recorded (gyroscope): picked up as it was held, the
+      // rotations in between, each move as it was seen.
+      const held = heldTokens(record);
+      const moves = held
+        ? held.flatMap((tok) => parseAlg(tok.move).map((move) => ({ move, t: Math.max(0, tok.t) })))
+        : record.moves.flatMap((m) => parseAlg(m.move).map((move) => ({ move, t: Math.max(0, m.relativeMs) })));
+      const scramble = parseAlg(held && record.startRotation ? `${record.scramble} ${record.startRotation}` : record.scramble);
+      // Raw move index → the player's (rotations and double moves count there too).
+      const at: number[] = [];
+      if (held) {
+        let n = 0;
+        for (const tok of held) {
+          if (tok.kind === "move") at[tok.index] = n;
+          n += parseAlg(tok.move).length;
+        }
+      }
+      playerIndexRef.current = held ? (i) => at[i] ?? i : (i) => i;
+      p.recording = { scramble, moves, totalMs: Math.max(record.timeMs, moves.at(-1)?.t ?? 0) };
     }, [record]);
 
     useEffect(() => {
@@ -108,7 +129,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
         if (!p) return;
         const s = segmentsRef.current.find((x) => x.id === stage);
         if (s) p.seek(s.start);
-        else p.seekToMove(moveIndex);
+        else p.seekToMove(playerIndexRef.current(moveIndex));
       },
     }));
 

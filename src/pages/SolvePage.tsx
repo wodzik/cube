@@ -21,6 +21,9 @@ import { collapseIdenticalMoves } from "../logic/moveReduction";
 import { parseMove } from "../logic/moveParser";
 import { sessionMethodsForInput } from "../logic/inputMethod";
 import { useSmartCube } from "../hooks/useSmartCube";
+import { useRotationCounting } from "../hooks/useRotationCounting";
+import { currentGrip, gripAt, gripChangesBetween, reanchor } from "../services/gyroOrientation";
+import { recordRotations } from "../logic/solveRotations";
 import { useSpacebar } from "../hooks/useSpacebar";
 import { useTimerDevice } from "../hooks/useTimerDevice";
 import { useSolvedDetection } from "../hooks/useSolvedDetection";
@@ -606,6 +609,14 @@ function SolvePageInner({
   // Persist exactly once per completed attempt. `method` comes straight
   // from the session's configured solveMethod (see StoredSession) — no
   // auto-detection happens here, that's future work (methodResolvers.ts).
+  // Cube rotations (gyroscope): at the start the cube is held square — snap
+  // the gyro's drift onto that grip; the rotations are read back at the end.
+  const rotationCounting = useRotationCounting();
+  const countRotations = rotationCounting.active ? cube.session : null;
+  useEffect(() => {
+    if (state.phase === "active" && countRotations) reanchor(countRotations);
+  }, [state.phase, countRotations]);
+
   const notifiedRef = useRef(false);
   useEffect(() => {
     if (state.phase !== "done") {
@@ -674,6 +685,20 @@ function SolvePageInner({
       isDNF: false,
       cube: activeCubeId(),
     };
+    if (countRotations) {
+      const startGrip = gripAt(countRotations, state.startTime) ?? currentGrip(countRotations);
+      if (startGrip) {
+        Object.assign(
+          record,
+          recordRotations(
+            startGrip,
+            gripChangesBetween(countRotations, state.startTime, state.endTime),
+            state.moveLog.map((m) => m.timestamp),
+            state.startTime
+          )
+        );
+      }
+    }
 
     saveSolve(record);
     // Only mirror into the visible "this session" list/stats if it actually
@@ -691,7 +716,7 @@ function SolvePageInner({
     // until the user actually starts performing that scramble (see the
     // dismissing effect below).
     startNextAttempt();
-  }, [state.phase, solveTimeMs, state.startTime, state.endTime, state.moveLog, scramble, state.startedBy, state.endedBy, state.config.startMethod, state.config.stopMethod, moveCount, tps, startState, session.id, session.solveMethod, customScramblesSessionId, onSolved, startNextAttempt]);
+  }, [state.phase, solveTimeMs, state.startTime, state.endTime, state.moveLog, scramble, state.startedBy, state.endedBy, state.config.startMethod, state.config.stopMethod, moveCount, tps, startState, session.id, session.solveMethod, customScramblesSessionId, onSolved, startNextAttempt, countRotations]);
 
   // Dismiss the inline summary (and any open analysis modal, and the held
   // timer display above) the moment the user moves on to the next attempt —

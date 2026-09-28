@@ -19,12 +19,14 @@ import { useSmartCube } from "../hooks/useSmartCube";
 import { ConnectionPanel } from "../components/ConnectionPanel";
 import { CubeVisualisation, type CubeVisualisationRef } from "../components/CubeVisualisation";
 import { TryAlgorithmPanel } from "../components/TryAlgorithmPanel";
+import { GyroDebugPanel } from "../components/GyroDebugPanel";
 
-type DebugTab = "log" | "try";
+type DebugTab = "log" | "try" | "gyro";
 
 const TABS: { id: DebugTab; label: string }[] = [
   { id: "log", label: "Move Log" },
   { id: "try", label: "Try Algorithm" },
+  { id: "gyro", label: "Gyroscope" },
 ];
 
 interface MoveEntry {
@@ -176,6 +178,8 @@ export default function DebugPage() {
             <div ref={bottomRef} />
           </div>
         </div>
+      ) : activeTab === "gyro" ? (
+        <GyroDebugPanel />
       ) : (
         <TryAlgorithmPanel />
       )}

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listCubes, onCubesChange, updateCube } from "../services/cubeRegistry";
 import { useSmartCubeConnection } from "./useSmartCube";
+import { resetToShown } from "../services/gyroOrientation";
 
 const KEY = "nact_gyro";
 const EVENT = "nact-gyro";
@@ -68,7 +69,9 @@ export function useGyro(): Gyro {
     if (cubeGyro !== null && cubeId) updateCube(cubeId, { gyro: !gyro });
     else setAppGyro(!gyro);
   }, [cubeGyro, cubeId, gyro, setAppGyro]);
-  const resetGyro = useCallback(() => session?.calibrate(), [session]);
+  const resetGyro = useCallback(() => {
+    if (session) resetToShown(session);
+  }, [session]);
   const supported = !!session?.info.capabilities.gyroscope;
   return { gyro, supported, appGyro, setAppGyro, cubeGyro, toggleGyro, resetGyro };
 }

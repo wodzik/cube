@@ -28,8 +28,9 @@
  * with a manual toggle to compare against the other two regardless.
  */
 
+import { heldDisplay, heldTokens, rotationCount } from "../logic/solveRotations";
 import { cubeLabel } from "../services/cubeRegistry";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { X, Play, RotateCcw, Trash2, Link2, Check, Sparkles } from "lucide-react";
 import { openAnalyze } from "../services/analyzeNav";
 import type { SolveMethod, SolveRecord } from "../types/solve";
@@ -102,8 +103,11 @@ function StageTimingRow({
   onOpenCase,
   cross,
   practise,
+  heldMoves,
 }: {
   timing: StageTiming;
+  /** The stage's moves as seen, rotations included (a solve with rotations recorded). */
+  heldMoves?: string[];
   onJump: (stage: string, moveIndex: number) => void;
   moveCountOnly?: boolean;
   /** The algorithm case this stage started from (F2L / OLL / PLL / CMLL). */
@@ -188,7 +192,9 @@ function StageTimingRow({
             </span>
           )}
         </div>
-        {timing.moves.length > 0 && <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{timing.moves.join(" ")}</p>}
+        {(heldMoves ?? timing.moves).length > 0 && (
+          <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{(heldMoves ?? timing.moves).join(" ")}</p>
+        )}
       </div>
       {!skipped && !moveCountOnly && (
         <div className="shrink-0 flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-right">
@@ -241,7 +247,10 @@ export function SolveAnalysis({
     }
   }
   // Display text: collapsed, compact (R2 instead of R R).
-  const displayAlg = record.reducedMoves.join(" ");
+  // Rotations (gyroscope): the moves as seen, with the x / y / z between them.
+  const held = useMemo(() => heldTokens(record), [record]);
+  const rotations = held ? rotationCount(held) : null;
+  const displayAlg = held ? heldDisplay(held, 0, record.moves.length).join(" ") : record.reducedMoves.join(" ");
   const [method, setMethod] = useState<DisplayMethod>(record.method !== "unknown" ? record.method : "CFOP");
   const cubeRef = useRef<SolveReplayRef>(null);
 
@@ -370,6 +379,14 @@ export function SolveAnalysis({
               ) : (
                 <>
                   {record.moveCount} moves · {record.tps.toFixed(2)} TPS
+                  {rotations !== null && (
+                    <>
+                      {" · "}
+                      <span title={`Cube rotations during the solve (gyroscope)${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}`}>
+                        {rotations} {rotations === 1 ? "rotation" : "rotations"}
+                      </span>
+                    </>
+                  )}
                   {cubeLabel(record.cube) && <> · {cubeLabel(record.cube)}</>}
                   {fluency !== null && (
                     <>
@@ -474,6 +491,7 @@ export function SolveAnalysis({
                     onOpenCase={setOpenCase}
                     cross={t.stage === "cross" ? cross : undefined}
                     practise={practiseFor(t.stage)}
+                    heldMoves={held && t.startMoveIndex !== null && t.endMoveIndex !== null ? heldDisplay(held, t.startMoveIndex, t.endMoveIndex) : undefined}
                   />
                 ))}
               </div>
@@ -481,6 +499,11 @@ export function SolveAnalysis({
 
             <div>
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Solve moves</h3>
+              {record.startRotation && (
+                <p className="text-[11px] text-gray-500 mb-1">
+                  Picked up with <span className="font-mono text-gray-300">{record.startRotation}</span> (from white top, green front)
+                </p>
+              )}
               <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayAlg || "—"}</p>
             </div>
           </div>

@@ -19,6 +19,7 @@ import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
 import { useGyro } from "../hooks/useGyro";
+import { useRotationCounting } from "../hooks/useRotationCounting";
 import { listGroups, migrateAlgorithmStorage, resetAlgorithmStorageMigration, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { lookForCube, resolveSkin, useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
@@ -105,6 +106,7 @@ function CubeLookSection() {
 function TurnArrowsSection() {
   const { appMode, setAppMode } = useTurnArrows();
   const { appGyro, setAppGyro } = useGyro();
+  const { appOn: appRotations, setAppOn: setAppRotations } = useRotationCounting();
   return (
     <Section title="Smart cube">
       <SettingsRow
@@ -112,6 +114,16 @@ function TurnArrowsSection() {
         description="Turn the 3D cube as you hold your smart cube (cubes with a gyroscope: most GAN, MoYu AI…). Also switched under the cube, where Reset gyro sets the cube as you hold it now as the cube as shown; a cube can have its own (My cubes)."
         action={
           <select className={selectClass} value={appGyro ? "on" : "off"} onChange={(e) => setAppGyro(e.target.value === "on")}>
+            <option value="off">Off</option>
+            <option value="on">On</option>
+          </select>
+        }
+      />
+      <SettingsRow
+        title="Count rotations"
+        description="Solves record your cube rotations (x, y, z) from the gyroscope: how you picked the cube up, each rotation in the moves and the replay, the moves lettered as you saw them. Needs a cube with a gyroscope; hold it white top, green front and press Reset gyro (under the cube) once. A cube can have its own (My cubes)."
+        action={
+          <select className={selectClass} value={appRotations ? "on" : "off"} onChange={(e) => setAppRotations(e.target.value === "on")}>
             <option value="off">Off</option>
             <option value="on">On</option>
           </select>
@@ -421,6 +433,21 @@ function KnownCubeCard({
             }
           />
           <SettingsRow
+            title="Count rotations"
+            description="Cube rotations in solves, from its gyroscope."
+            action={
+              <select
+                className={selectClass}
+                value={c.rotations === undefined ? APP : c.rotations ? "on" : "off"}
+                onChange={(e) => updateCube(c.id, { rotations: e.target.value === APP ? undefined : e.target.value === "on" })}
+              >
+                <option value={APP}>As in Smart cube</option>
+                <option value="on">On</option>
+                <option value="off">Off</option>
+              </select>
+            }
+          />
+          <SettingsRow
             title="Turn arrows"
             description="The next move drawn on the cube."
             last
@@ -458,6 +485,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_bld_times",
   "nact_turn_arrows",
   "nact_gyro",
+  "nact_rotations",
   "nact_logos",
 ];
 

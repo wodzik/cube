@@ -49,6 +49,22 @@ export interface SolveRecord {
   rouxDetailVersion?: number;
 
   isDNF: boolean;
+
+  // Cube rotations (gyroscope, when counting them is on — logic/solveRotations).
+  /** How the cube was held at the start, as a rotation from white top / green front ("" = held so, "y'" = orange in front). Unset: not recorded. */
+  startRotation?: string;
+  /** Rotations during the solve (moves stay the physical faces). */
+  rotations?: RotationRecord[];
+}
+
+/** A cube rotation during a solve. */
+export interface RotationRecord {
+  /** How many raw moves (record.moves) came before it. */
+  after: number;
+  /** Ms after the timer started. */
+  t: number;
+  /** "x", "y'", "z2", or two: "x y". */
+  move: string;
 }
 
 /**
