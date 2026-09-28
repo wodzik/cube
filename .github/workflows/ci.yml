@@ -4,6 +4,8 @@
 # ONE-TIME REPO SETUP (already done for this repo): GitHub Settings ->
 # Pages -> Build and deployment -> Source: "GitHub Actions". Without it the
 # deploy job fails with "Pages site not found".
+#
+# Actions on their Node 24 majors.
 
 name: CI & Deploy
 
@@ -19,7 +21,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -29,9 +31,9 @@ jobs:
         run: bun run build
       # Pages artifact only when this run can deploy (push/manual, not PRs).
       - if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -50,4 +52,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
