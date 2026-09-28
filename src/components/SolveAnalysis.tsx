@@ -95,6 +95,29 @@ function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
+/** A cube rotation (gyroscope) among the moves: bold yellow on a tint, so it stands out. */
+function RotationMark({ move, title = "Cube rotation" }: { move: string; title?: string }) {
+  return (
+    <span className="font-bold text-amber-300 bg-amber-400/15 rounded px-1" title={title}>
+      {move}
+    </span>
+  );
+}
+
+/** Moves, the rotations among them marked. */
+function MoveText({ moves }: { moves: readonly string[] }) {
+  return (
+    <>
+      {moves.map((m, i) => (
+        <span key={i}>
+          {i > 0 && " "}
+          {/^[xyz]/.test(m) ? <RotationMark move={m} /> : m}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function StageTimingRow({
   timing,
   onJump,
@@ -193,7 +216,9 @@ function StageTimingRow({
           )}
         </div>
         {(heldMoves ?? timing.moves).length > 0 && (
-          <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">{(heldMoves ?? timing.moves).join(" ")}</p>
+          <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">
+            <MoveText moves={heldMoves ?? timing.moves} />
+          </p>
         )}
       </div>
       {!skipped && !moveCountOnly && (
@@ -250,7 +275,7 @@ export function SolveAnalysis({
   // Rotations (gyroscope): the moves as seen, with the x / y / z between them.
   const held = useMemo(() => heldTokens(record), [record]);
   const rotations = held ? rotationCount(held) : null;
-  const displayAlg = held ? heldDisplay(held, 0, record.moves.length).join(" ") : record.reducedMoves.join(" ");
+  const displayMoves = held ? heldDisplay(held, 0, record.moves.length) : record.reducedMoves;
   const [method, setMethod] = useState<DisplayMethod>(record.method !== "unknown" ? record.method : "CFOP");
   const cubeRef = useRef<SolveReplayRef>(null);
 
@@ -434,7 +459,15 @@ export function SolveAnalysis({
             <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-950/50">
               <SolveReplay ref={cubeRef} record={record} timings={moveCountOnly ? [] : timings} className="size-full" />
             </div>
-            <p className="text-[11px] text-gray-400 text-center leading-relaxed font-mono break-all">{record.scramble}</p>
+            <p className="text-[11px] text-gray-400 text-center leading-relaxed font-mono break-all">
+              {record.scramble}
+              {held && record.startRotation && (
+                <>
+                  {" "}
+                  <RotationMark move={record.startRotation} title="How the cube was picked up (from white top, green front)" />
+                </>
+              )}
+            </p>
             <button
               onClick={() => {
                 onClose();
@@ -501,10 +534,10 @@ export function SolveAnalysis({
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Solve moves</h3>
               {record.startRotation && (
                 <p className="text-[11px] text-gray-500 mb-1">
-                  Picked up with <span className="font-mono text-gray-300">{record.startRotation}</span> (from white top, green front)
+                  Picked up with <span className="font-mono"><RotationMark move={record.startRotation} /></span> (from white top, green front)
                 </p>
               )}
-              <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayAlg || "—"}</p>
+              <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayMoves.length > 0 ? <MoveText moves={displayMoves} /> : "—"}</p>
             </div>
           </div>
         </div>
