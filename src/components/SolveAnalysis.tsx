@@ -28,7 +28,7 @@
  * with a manual toggle to compare against the other two regardless.
  */
 
-import { heldDisplay, heldTokens, rotationCount } from "../logic/solveRotations";
+import { type CurrentItem, type DisplayItem, displayItems, heldTokens, isCurrent, plainTokens, rotationCount } from "../logic/solveRotations";
 import { cubeLabel } from "../services/cubeRegistry";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { X, Play, RotateCcw, Trash2, Link2, Check, Sparkles } from "lucide-react";
@@ -96,24 +96,33 @@ function formatMs(ms: number): string {
 }
 
 /** A cube rotation (gyroscope) among the moves: bold yellow on a tint, so it stands out. */
-function RotationMark({ move, title = "Cube rotation" }: { move: string; title?: string }) {
+function RotationMark({ move, title = "Cube rotation", current = false }: { move: string; title?: string; current?: boolean }) {
   return (
-    <span className="font-bold text-amber-300 bg-amber-400/15 rounded px-1" title={title}>
+    <span className={`font-bold text-amber-300 bg-amber-400/15 rounded px-1 ${current ? "ring-1 ring-amber-300" : ""}`} title={title}>
       {move}
     </span>
   );
 }
 
-/** Moves, the rotations among them marked. */
-function MoveText({ moves }: { moves: readonly string[] }) {
+/** Moves, the rotations among them marked, and the one the replay is at framed. */
+function MoveText({ items, current }: { items: readonly DisplayItem[]; current: CurrentItem | null }) {
   return (
     <>
-      {moves.map((m, i) => (
-        <span key={i}>
-          {i > 0 && " "}
-          {/^[xyz]/.test(m) ? <RotationMark move={m} /> : m}
-        </span>
-      ))}
+      {items.map((m, i) => {
+        const now = isCurrent(m, current);
+        return (
+          <span key={i}>
+            {i > 0 && " "}
+            {m.rotation ? (
+              <RotationMark move={m.move} current={now} />
+            ) : now ? (
+              <span className="rounded px-0.5 -mx-0.5 bg-sky-400/20 text-white ring-1 ring-sky-400/70">{m.move}</span>
+            ) : (
+              m.move
+            )}
+          </span>
+        );
+      })}
     </>
   );
 }
@@ -126,11 +135,14 @@ function StageTimingRow({
   onOpenCase,
   cross,
   practise,
-  heldMoves,
+  items,
+  current,
 }: {
   timing: StageTiming;
   /** The stage's moves as seen, rotations included (a solve with rotations recorded). */
-  heldMoves?: string[];
+  items: DisplayItem[];
+  /** Where the replay is. */
+  current: CurrentItem | null;
   onJump: (stage: string, moveIndex: number) => void;
   moveCountOnly?: boolean;
   /** The algorithm case this stage started from (F2L / OLL / PLL / CMLL). */
@@ -215,9 +227,9 @@ function StageTimingRow({
             </span>
           )}
         </div>
-        {(heldMoves ?? timing.moves).length > 0 && (
+        {items.length > 0 && (
           <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">
-            <MoveText moves={heldMoves ?? timing.moves} />
+            <MoveText items={items} current={current} />
           </p>
         )}
       </div>
@@ -275,7 +287,10 @@ export function SolveAnalysis({
   // Rotations (gyroscope): the moves as seen, with the x / y / z between them.
   const held = useMemo(() => heldTokens(record), [record]);
   const rotations = held ? rotationCount(held) : null;
-  const displayMoves = held ? heldDisplay(held, 0, record.moves.length) : record.reducedMoves;
+  const tokens = useMemo(() => held ?? plainTokens(record), [held, record]);
+  const displayMoves = useMemo(() => displayItems(tokens, 0, record.moves.length), [tokens, record.moves.length]);
+  // The move the replay is at, framed in the lists.
+  const [current, setCurrent] = useState<CurrentItem | null>(null);
   const [method, setMethod] = useState<DisplayMethod>(record.method !== "unknown" ? record.method : "CFOP");
   const cubeRef = useRef<SolveReplayRef>(null);
 
@@ -457,7 +472,7 @@ export function SolveAnalysis({
         <div className="flex flex-1 overflow-y-auto flex-col sm:flex-row">
           <div className="flex flex-col items-center gap-3 p-6 sm:border-r border-white/[0.06] sm:w-[26rem] shrink-0">
             <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-950/50">
-              <SolveReplay ref={cubeRef} record={record} timings={moveCountOnly ? [] : timings} className="size-full" />
+              <SolveReplay ref={cubeRef} record={record} timings={moveCountOnly ? [] : timings} onCurrent={setCurrent} className="size-full" />
             </div>
             <p className="text-[11px] text-gray-400 text-center leading-relaxed font-mono break-all">
               {record.scramble}
@@ -524,7 +539,8 @@ export function SolveAnalysis({
                     onOpenCase={setOpenCase}
                     cross={t.stage === "cross" ? cross : undefined}
                     practise={practiseFor(t.stage)}
-                    heldMoves={held && t.startMoveIndex !== null && t.endMoveIndex !== null ? heldDisplay(held, t.startMoveIndex, t.endMoveIndex) : undefined}
+                    items={t.startMoveIndex !== null && t.endMoveIndex !== null ? displayItems(tokens, t.startMoveIndex, t.endMoveIndex) : []}
+                    current={current}
                   />
                 ))}
               </div>
@@ -537,7 +553,7 @@ export function SolveAnalysis({
                   Picked up with <span className="font-mono"><RotationMark move={record.startRotation} /></span> (from white top, green front)
                 </p>
               )}
-              <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayMoves.length > 0 ? <MoveText moves={displayMoves} /> : "—"}</p>
+              <p className="text-xs text-gray-300 font-mono break-all leading-relaxed">{displayMoves.length > 0 ? <MoveText items={displayMoves} current={current} /> : "—"}</p>
             </div>
           </div>
         </div>

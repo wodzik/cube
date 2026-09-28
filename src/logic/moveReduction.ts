@@ -43,10 +43,23 @@ export function areOppositeFaces(face1: string, face2: string): boolean {
  * @example
  * collapseIdenticalMoves(["R", "R"]) → ["R2"]
  * collapseIdenticalMoves(["R", "R'"]) → ["R", "R'"]        (NOT merged)
+ * collapseIdenticalMoves(["R'", "R'"]) → ["R2'"]            (turned counter-clockwise — kept)
  * collapseIdenticalMoves(["R", "R", "R"]) → ["R'"]
  * collapseIdenticalMoves(["R", "R", "R", "R"]) → []         (full turn, net zero)
  * collapseIdenticalMoves(["R", "U", "R"]) → ["R", "U", "R"] (not adjacent)
  */
+/**
+ * `count` turns of `token` as one move, or null (a full turn). A half turn
+ * made of counter-clockwise quarters keeps its direction: R' R' = R2' (the
+ * same state as R2, but not the same hands).
+ */
+export function collapseRun(token: string, count: number): string | null {
+  const base = getMoveBase(token);
+  const power = (getMovePower(token) * count) % 4;
+  if (power === 2 && count > 1 && getMovePower(token) === 3) return `${base}2'`;
+  return createMoveStr(base, power);
+}
+
 export function collapseIdenticalMoves(moves: string[]): string[] {
   const result: string[] = [];
   let i = 0;
@@ -58,10 +71,7 @@ export function collapseIdenticalMoves(moves: string[]): string[] {
       runLength++;
     }
 
-    const base = getMoveBase(token);
-    const power = getMovePower(token);
-    const combinedPower = (power * runLength) % 4;
-    const merged = createMoveStr(base, combinedPower);
+    const merged = collapseRun(token, runLength);
     if (merged) result.push(merged);
 
     i += runLength;

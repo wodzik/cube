@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { collapseIdenticalMoves, collapseToStm, areOppositeFaces } from "./moveReduction";
+import { collapseIdenticalMoves, collapseRun, collapseToStm, areOppositeFaces } from "./moveReduction";
 
 describe("areOppositeFaces", () => {
   it("identifies opposite face pairs", () => {
@@ -79,5 +79,14 @@ describe("collapseToStm", () => {
   it("counts a realistic Roux LSE fragment fairly", () => {
     // physical M' U M (M' reported as R'+L, M as R+L')
     expect(collapseToStm(["R'", "L", "U", "R", "L'"])).toEqual(["M'", "U", "M"]);
+  });
+});
+
+describe("collapseRun", () => {
+  it("keeps the direction of a half turn made of counter-clockwise quarters", () => {
+    expect(collapseRun("U'", 2)).toBe("U2'");
+    expect(collapseRun("U", 2)).toBe("U2");
+    expect(collapseRun("U'", 3)).toBe("U");
+    expect(collapseRun("U", 4)).toBeNull();
   });
 });

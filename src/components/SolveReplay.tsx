@@ -15,14 +15,14 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import "@wodzik/cubecore/element";
 import type { CubePlayer } from "@wodzik/cubecore/element";
-import { parseAlg } from "@wodzik/cubecore/core";
+import { type Move, parseAlg } from "@wodzik/cubecore/core";
 import type { Segment } from "@wodzik/cubecore/timeline";
 import type { SolveRecord } from "../types/solve";
 import type { StageTiming } from "../logic/stageDetection/stageTiming";
 import { useCubeLook } from "../hooks/useCubeLook";
 import { groupStageTimings, stageGroupShades, stageSlotLabel } from "./stageGroups";
 import { stageCubeColors } from "./cubeColors";
-import { heldTokens } from "../logic/solveRotations";
+import { type CurrentItem, type DisplayItem, heldTokens, plainTokens, playbackItems } from "../logic/solveRotations";
 
 export interface SolveReplayRef {
   /** Jump to the stage's start (else, with no timed stages — a move-count-only session — to the raw move index). */
@@ -58,12 +58,23 @@ export function stageSegmentsFor(timings: readonly StageTiming[]): Segment[] {
 
 const pageTheme = () => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
 
-export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; timings: readonly StageTiming[]; className?: string }>(
-  ({ record, timings, className = "" }, ref) => {
+interface SolveReplayProps {
+  record: SolveRecord;
+  timings: readonly StageTiming[];
+  className?: string;
+  /** The move (or rotation) last played — for marking it in the move lists. */
+  onCurrent?: (current: CurrentItem | null) => void;
+}
+
+export const SolveReplay = forwardRef<SolveReplayRef, SolveReplayProps>(
+  ({ record, timings, className = "", onCurrent }, ref) => {
     const host = useRef<HTMLDivElement>(null);
     const player = useRef<CubePlayer | null>(null);
     const segmentsRef = useRef<Segment[]>([]);
     const playerIndexRef = useRef<(raw: number) => number>((i) => i);
+    const itemOfMoveRef = useRef<DisplayItem[]>([]);
+    const onCurrentRef = useRef(onCurrent);
+    onCurrentRef.current = onCurrent;
     const { skin } = useCubeLook();
 
     useEffect(() => {
@@ -79,6 +90,16 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
       p.style.color = pageTheme() === "light" ? "#1f2937" : "#e5e7eb";
       host.current?.append(p);
       player.current = p;
+      let shown: DisplayItem | null = null;
+      const onTime = () => {
+        const item = p.applied > 0 ? (itemOfMoveRef.current[p.applied - 1] ?? null) : null;
+        if (item === shown) return;
+        shown = item;
+        onCurrentRef.current?.(
+          item ? (item.rotation ? { rotation: true, after: item.after! } : { rotation: false, first: item.first, last: item.last }) : null
+        );
+      };
+      p.addEventListener("timeupdate", onTime);
       const themeWatch = new MutationObserver(() => {
         p.setAttribute("theme", pageTheme());
         p.style.color = pageTheme() === "light" ? "#1f2937" : "#e5e7eb";
@@ -86,6 +107,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
       themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
       return () => {
         themeWatch.disconnect();
+        p.removeEventListener("timeupdate", onTime);
         p.remove();
         player.current = null;
       };
@@ -99,22 +121,25 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
       const p = player.current;
       if (!p) return;
       // With rotations recorded (gyroscope): picked up as it was held, the
-      // rotations in between, each move as it was seen.
+      // rotations in between, each move as it was seen. One step per shown
+      // move: U U is one U2 (U' U' one U2', turned that way).
       const held = heldTokens(record);
-      const moves = held
-        ? held.flatMap((tok) => parseAlg(tok.move).map((move) => ({ move, t: Math.max(0, tok.t) })))
-        : record.moves.flatMap((m) => parseAlg(m.move).map((move) => ({ move, t: Math.max(0, m.relativeMs) })));
-      const scramble = parseAlg(held && record.startRotation ? `${record.scramble} ${record.startRotation}` : record.scramble);
-      // Raw move index → the player's (rotations and double moves count there too).
-      const at: number[] = [];
-      if (held) {
-        let n = 0;
-        for (const tok of held) {
-          if (tok.kind === "move") for (let i = tok.index; i <= (tok.lastIndex ?? tok.index); i++) at[i] = n;
-          n += parseAlg(tok.move).length;
+      const items = playbackItems(held ?? plainTokens(record));
+      const moves: { move: Move; t: number }[] = [];
+      const itemOfMove: DisplayItem[] = [];
+      for (const item of items)
+        for (const move of parseAlg(item.move)) {
+          moves.push({ move, t: Math.max(0, item.t) });
+          itemOfMove.push(item);
         }
-      }
-      playerIndexRef.current = held ? (i) => at[i] ?? i : (i) => i;
+      const scramble = parseAlg(held && record.startRotation ? `${record.scramble} ${record.startRotation}` : record.scramble);
+      // Raw move index → the player's (rotations and collapsed runs shift it).
+      const at: number[] = [];
+      itemOfMove.forEach((item, n) => {
+        for (let i = item.first; i <= item.last; i++) at[i] ??= n;
+      });
+      playerIndexRef.current = (i) => at[i] ?? i;
+      itemOfMoveRef.current = itemOfMove;
       p.recording = { scramble, moves, totalMs: Math.max(record.timeMs, moves.at(-1)?.t ?? 0) };
     }, [record]);
 
