@@ -27,6 +27,8 @@ import { frameQuaternion } from "../logic/frameView";
 import { IDENTITY, multiply } from "@wodzik/cubecore/bluetooth";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { useGyro } from "../hooks/useGyro";
+import { useTurnArrows } from "../hooks/useTurnArrows";
+import { turnArrow } from "@wodzik/cubecore/core";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
 import { namedMaskToCubecore, orbitMaskToCubecore } from "../logic/cubecoreMask";
 
@@ -64,6 +66,8 @@ export interface CubeVisualisationProps {
   orientation?: Frame | null;
   /** The live cube: turn it with the connected smart cube's gyroscope when that's on (useGyro). */
   followGyro?: boolean;
+  /** Playback ("Show me how"): an arrow for the move being played / due next, with or without a smart cube. */
+  playbackArrows?: boolean;
   /** A skin of the page's own (e.g. with letters) instead of the app's look. */
   skin?: Skin | null;
   background?: "none" | "checkered-transparent";
@@ -111,6 +115,7 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
   (
     {
       followGyro = false,
+      playbackArrows = false,
       alg = "",
       setupAlg,
       setupAnchor = "start",
@@ -201,6 +206,31 @@ export const CubeVisualisation = forwardRef<CubeVisualisationRef, CubeVisualisat
       // Mounted once and driven imperatively.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Playback arrows: the move turning now (or next, when paused) drawn on the cube.
+    const { shape: arrowShape } = useTurnArrows();
+    useEffect(() => {
+      const p = playerRef.current;
+      if (!playbackArrows || !p) return;
+      const owner = {};
+      let shown = -2;
+      const update = () => {
+        const i = p.applied;
+        if (i === shown) return;
+        shown = i;
+        const move = p.moves[i];
+        p.showTurnArrows(move ? [turnArrow(move)] : null, { shape: arrowShape }, owner);
+      };
+      update();
+      p.addEventListener("timeupdate", update);
+      p.addEventListener("load", update);
+      return () => {
+        p.removeEventListener("timeupdate", update);
+        p.removeEventListener("load", update);
+        p.showTurnArrows(null, {}, owner);
+      };
+    }, [playbackArrows, arrowShape, alg, setupAlg]);
+
 
     useEffect(() => {
       if (playerRef.current) applyMask(playerRef.current);
