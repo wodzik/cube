@@ -974,6 +974,8 @@ export function isAttackAvailable(g: AlgGroupMeta): boolean {
 // ─── One-time migration: built-in sets become read-only (stable ids) ───
 
 const MIGRATED_KEY = "nact_alg_storage_v2";
+/** The algorithm data as it was before the migration (kept, in case it's ever needed back). */
+const BACKUP_KEY = "nact_alg_storage_v1_backup";
 
 /** Run the migration again next time (after importing a backup that may predate it). */
 export function resetAlgorithmStorageMigration(): void {
@@ -1012,6 +1014,17 @@ export function migrateAlgorithmStorage(): void {
     if (localStorage.getItem(MIGRATED_KEY)) return;
   } catch {
     return;
+  }
+  // A copy of the old data first (if there's any and it fits) — a way back should the migration go wrong.
+  try {
+    const old: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)!;
+      if (k.startsWith("alg_group_") || k.startsWith("alg_subgroup_")) old[k] = localStorage.getItem(k)!;
+    }
+    if (Object.keys(old).length && !localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, JSON.stringify(old));
+  } catch {
+    // no room for the copy — migrate anyway
   }
   const orphanBatches: { from: string; cases: AlgorithmCase[] }[] = [];
   const v1 = (key: string) => {
