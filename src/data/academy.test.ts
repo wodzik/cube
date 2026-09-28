@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { cube3x3x3 } from "cubing/puzzles";
+import { kpuzzle as KPUZZLE } from "../testing/kpattern";
 import { ACADEMY_LESSONS, F2L_METHOD, FIRST_LAYER, FOUR_LOOK_LL_CORNERS_FIRST, TWO_FIRST_LAYERS, SECOND_LAYER, ZETA_SLOTTING, parseDecoratedAlg } from "./academy";
 import { academyStepMask } from "../logic/trainer/trainerMasks";
 import { buildCaseSetupAlg } from "../logic/moveParser";
@@ -25,7 +25,7 @@ describe("parseDecoratedAlg", () => {
 
 describe("4LLL corners-first lesson data", () => {
   it("every algorithm is a last-layer algorithm (first two layers untouched, centers home)", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const step of FOUR_LOOK_LL_CORNERS_FIRST.steps) {
       for (const a of step.algs) {
         const { tokens } = parseDecoratedAlg(a.alg);
@@ -49,7 +49,7 @@ describe("4LLL corners-first lesson data", () => {
   const stepById = (id: string) => FOUR_LOOK_LL_CORNERS_FIRST.steps.find((s) => s.id === id)!;
 
   it("A + B equals the literal composition of blocks A and B", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const co = stepById("co");
     const a = parseDecoratedAlg(co.algs.find((x) => x.id === "block-a")!.alg).tokens.join(" ");
     const b = parseDecoratedAlg(co.algs.find((x) => x.id === "block-b")!.alg).tokens.join(" ");
@@ -63,7 +63,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("EO step comes before CP and its algs keep corners oriented", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const order = FOUR_LOOK_LL_CORNERS_FIRST.steps.map((s) => s.id);
     expect(order).toEqual(["co", "eo", "cp", "epll"]);
     for (const alg of stepById("eo").algs) {
@@ -75,7 +75,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("corner-permutation algs permute corners without disturbing their orientation", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const id of ["a-plus-b", "b-plus-a"]) {
       const alg = stepById("cp").algs.find((x) => x.id === id)!;
       const p = kpuzzle.defaultPattern().applyAlg(parseDecoratedAlg(alg.alg).tokens.join(" "));
@@ -87,7 +87,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("EPLL algs touch only edge permutation (corners fully solved)", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const alg of stepById("epll").algs) {
       const p = kpuzzle.defaultPattern().applyAlg(parseDecoratedAlg(alg.alg).tokens.join(" "));
       expect(p.patternData.CORNERS.pieces.join()).toBe("0,1,2,3,4,5,6,7");
@@ -122,7 +122,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("Zeta Slotting's edge cases insert without disturbing the cross; oriented ones start with orientation 0, unoriented with 1", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const id of ["edge-right", "edge-left", "edge-unoriented-right", "edge-unoriented-left"]) {
       const alg = ZETA_SLOTTING.steps[0].algs.find((a) => a.id === id)!;
       const { tokens } = parseDecoratedAlg(alg.alg);
@@ -138,7 +138,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("every algorithm in every lesson solves its case from the drill's setup (inverse applied to solved)", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const lesson of ACADEMY_LESSONS) {
       for (const step of lesson.steps) {
         for (const a of step.algs) {
@@ -167,7 +167,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("Two first layers' corner cases: white right / up / front and their left-hand mirrors point white where the names say", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
     const step = FIRST_LAYER.steps[0];
     // "White right" is a sexy move minus its last U', which only turns the top layer.
@@ -196,7 +196,7 @@ describe("4LLL corners-first lesson data", () => {
   const zetaCornersStep = () => ZETA_SLOTTING.steps.find((s) => s.id === "zeta-corners")!;
 
   it("Zeta Slotting's corner algs never disturb the already-seated FR edge or the cross", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     for (const a of zetaCornersStep().algs) {
       const { tokens } = parseDecoratedAlg(a.alg);
       const setup = kpuzzle.defaultPattern().applyAlg(buildCaseSetupAlg(tokens.join(" ")));
@@ -215,7 +215,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("Zeta Slotting's 3 right-hand corner cases cover white pointing up / front / right", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
     const CORNER_FACES = CORNERS.map((n) => n.split(""));
     const faces = new Set<string>();
@@ -231,7 +231,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("Zeta Slotting's 3 left-hand corner cases cover white pointing up / front / left", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const CORNERS = ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"];
     const CORNER_FACES = CORNERS.map((n) => n.split(""));
     const faces = new Set<string>();
@@ -246,7 +246,7 @@ describe("4LLL corners-first lesson data", () => {
   });
 
   it("F2L lesson's set-up cases each reduce to a basic insert without moving the cross", async () => {
-    const kpuzzle = await cube3x3x3.kpuzzle();
+    const kpuzzle = KPUZZLE;
     const setup = F2L_METHOD.steps[1];
     // The two inserts' distinguishing tail — matched ends "R U' R'", split ends "R U R'"
     // (see F2L_METHOD.steps[0]) — set-up cases prepend alignment/extraction moves but

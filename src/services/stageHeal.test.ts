@@ -33,7 +33,7 @@ const base = (overrides: Partial<SolveRecord>): SolveRecord => ({
 describe("stored solves healed to the current stage detection", () => {
   beforeEach(() => localStorage.clear());
 
-  it("a red-cross solve (version 1 saw its OLL only at the end) gets its OLL; a white-cross one is just stamped", async () => {
+  it("a red-cross solve (version 1 saw its OLL only at the end) gets its OLL; every stale solve is stamped", async () => {
     // The red-cross solve from a bug report (moves as the cube reported them).
     const held =
       "x' y' F' l' F B' L' D' B y' D' x' y' R R' y F2 D' z F2 L L' F L2 F2 L' L F F' L' F L F' L' F' R F R' F' D F D' z F D F2 D' z F L F' L' F' L' F L F' L' F L F D F' D' F' D F' D' F D F' D' z' F2 D U' B R B' D' U F' l' F R F' x' F B R' F' R B' F R2 F R' F R F' R F' l' R' U";
@@ -46,7 +46,7 @@ describe("stored solves healed to the current stage detection", () => {
     const white = base({ cfop: [{ stage: "cross", moveIndex: 3, timestampMs: 300, detail: "D" }] });
     saveSolve(stale);
     saveSolve(white);
-    expect(await healStageBoundaries()).toBe(1);
+    expect(await healStageBoundaries()).toBe(1); // the white one has no moves: just stamped
     const [a, b] = getSolves();
     expect(a.cfop.find((x) => x.stage === "oll")?.moveIndex).toBe(75);
     expect(a.cfop.find((x) => x.stage === "pll")?.moveIndex).toBe(92);

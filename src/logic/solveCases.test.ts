@@ -1,8 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { formatAlg, frameFor, invert, parseAlg, transformMoves } from "@wodzik/cubecore/core";
 import { F2L_CASES } from "@wodzik/cubecore/cfop";
-import { applyMoveToState, createSolvedState } from "./stageDetection/liveCubeState";
-import { cfopStageDetector, computeStageBoundaries, rouxStageDetector } from "./stageDetection/methodTracker";
+import { cfopStageDetector, computeStageBoundaries, rouxStageDetector, startStateOf } from "./stageDetection/methodTracker";
 import { solveCases } from "./solveCases";
 import type { SolveRecord } from "../types/solve";
 
@@ -11,7 +10,7 @@ async function solveOf(segments: string[], method: "CFOP" | "Roux") {
   const all = segments.flatMap((s) => parseAlg(s));
   const scramble = formatAlg(invert(all));
   const moves = all.map((m, i) => ({ move: formatAlg([m]), relativeMs: i * 100 }));
-  const start = scramble.split(" ").reduce((s, m) => applyMoveToState(s, m), await createSolvedState());
+  const start = startStateOf(scramble);
   const record = { id: `t-${Math.random()}`, scramble, moves, method } as unknown as SolveRecord;
   record.cfop = computeStageBoundaries(cfopStageDetector, moves, start);
   record.roux = computeStageBoundaries(rouxStageDetector, moves, start);

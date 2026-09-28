@@ -1,21 +1,13 @@
 /**
- * Stickering masks for the Case Trainer's 3D view — show only the pieces
- * the current drill is about, so the view answers "where are my cross
- * pieces" at a glance instead of drowning them in a full scramble.
+ * Piece masks (in cubing's orbit format — logic/cubecoreMask.ts turns them
+ * into cubecore masks): the Practice group mask picker's pieces
+ * (pieceMask), the Academy step views and the Roux blocks view.
  *
- * Masks address PIECES (they follow a piece as it moves), using the same
- * verified orbit indexing as liveCubeState.ts. Centers show at full color
- * (crossStickeringMask, xcrossStickeringMask, multiSlotStickeringMask,
- * xxcrossStickeringMask, eocrossStickeringMask — every Case Trainer/Skill
- * Trainers mask) rather than the generic pieceMask default of dim, since
- * a solver still uses them as a color-orientation reference while
- * training. academyStepMask and rouxBlocksStickeringMask below are
- * exceptions with their own, more selective center logic — see each.
+ * Masks address PIECES (they follow a piece as it moves), in cubing's slot
+ * order (CORNERS URF UBR ULB UFL DFR DLF DBL DRB, EDGES UF UR UB UL DF DR DB
+ * DL FR FL BR BL).
  */
 
-import { FACE_SLOTS, type Face } from "../stageDetection/lastLayerShared";
-import { XXCROSS_PAIR_FRAMES, XCROSS_SLOT_FRAMES, type XCrossSlot, type XXCrossPair } from "./xcrossFrames";
-import type { LiveCubeState } from "../stageDetection/liveCubeState";
 import type { FaceletMask, StickeringMaskOrbits } from "../../types/cube";
 
 /** Exported for logic/maskPieceGroups.ts — the Practice group mask picker composes piece-groups the same way. */
@@ -47,10 +39,6 @@ export function pieceMask(
       },
     },
   };
-}
-
-export function crossStickeringMask(face: Face): StickeringMaskOrbits {
-  return pieceMask(new Set(FACE_SLOTS[face].edgeSlots), new Set(), undefined, true);
 }
 
 export type AcademyView = "first-layer" | "f2l" | "f2l-edges" | "oll-corners" | "oll" | "corners" | "full";
@@ -116,41 +104,6 @@ export function academyStepMask(view: AcademyView): StickeringMaskOrbits {
   };
 }
 
-/** Cross edges + the trained slot's corner/edge pair (also used by the free-pair trainer). */
-export function xcrossStickeringMask(face: Face, slot: XCrossSlot): StickeringMaskOrbits {
-  const frame = XCROSS_SLOT_FRAMES[slot];
-  return pieceMask(
-    new Set([...FACE_SLOTS[face].edgeSlots, frame.edgeSlot]),
-    new Set([frame.cornerSlot]),
-    undefined,
-    true
-  );
-}
-
-/** Cross edges + any number of trained slots' pairs (F2L multi-pair drills). */
-export function multiSlotStickeringMask(face: Face, slots: readonly XCrossSlot[]): StickeringMaskOrbits {
-  const frames = slots.map((s) => XCROSS_SLOT_FRAMES[s]);
-  return pieceMask(
-    new Set([...FACE_SLOTS[face].edgeSlots, ...frames.map((f) => f.edgeSlot)]),
-    new Set(frames.map((f) => f.cornerSlot)),
-    undefined,
-    true
-  );
-}
-
-/** Cross edges + both trained slots' pairs. */
-export function xxcrossStickeringMask(face: Face, pair: XXCrossPair): StickeringMaskOrbits {
-  const [s1, s2] = XXCROSS_PAIR_FRAMES[pair].slots;
-  const f1 = XCROSS_SLOT_FRAMES[s1];
-  const f2 = XCROSS_SLOT_FRAMES[s2];
-  return pieceMask(
-    new Set([...FACE_SLOTS[face].edgeSlots, f1.edgeSlot, f2.edgeSlot]),
-    new Set([f1.cornerSlot, f2.cornerSlot]),
-    undefined,
-    true
-  );
-}
-
 /**
  * Roux "both blocks built" view — used by CMLL and the Roux-specific
  * Practice groups (Second Block Last Slot). Always hides the front/back
@@ -178,48 +131,6 @@ export function rouxBlocksStickeringMask(hideTopCorners: boolean, hideOtherCente
       CENTERS: {
         pieces: Array.from({ length: 6 }, (_, p) => ({ facelets: [center(p), center(p), center(p), center(p)] })),
       },
-    },
-  };
-}
-
-/**
- * Cross edges in full color; every other edge orientation-only. Without
- * `liveState`, "orientation-only" is cubing.js's single static teal marker
- * (its "oriented" facelet colors every masked piece identically, regardless
- * of whether it's actually flipped correctly right now — see FaceletMask) —
- * used as a fallback for callers with no live cube state (e.g. a tab icon).
- * With `liveState`, each non-cross edge is colored per its ACTUAL current
- * orientation: teal ("oriented") if good, salmon-pink ("mystery", the
- * closest to red among cubing.js's other fixed marker colors) if it still
- * needs flipping — real per-piece feedback, recomputed by the caller after
- * every move.
- */
-export function eocrossStickeringMask(face: Face, liveState?: LiveCubeState): StickeringMaskOrbits {
-  const crossEdges = new Set(FACE_SLOTS[face].edgeSlots);
-  if (!liveState) {
-    const others = new Set(Array.from({ length: 12 }, (_, i) => i).filter((i) => !crossEdges.has(i)));
-    return pieceMask(crossEdges, new Set(), others, true);
-  }
-  // The mask array is indexed by PIECE IDENTITY (it follows a piece to
-  // wherever it currently sits — see this file's header comment), but
-  // `patternData.EDGES.{pieces,orientation}` are indexed by CURRENT SLOT
-  // (pieces[slot] = which piece identity currently occupies that slot).
-  // Build the inverse — piece identity -> its current slot — so each
-  // piece's orientation can be looked up correctly before writing it into
-  // the identity-indexed mask.
-  const pieceAtSlot = liveState.patternData.EDGES.pieces;
-  const orientation = liveState.patternData.EDGES.orientation;
-  const currentSlotOfPiece = new Array<number>(12);
-  for (let slot = 0; slot < 12; slot++) currentSlotOfPiece[pieceAtSlot[slot]] = slot;
-  const edge = (pieceId: number): FaceletMask => {
-    if (crossEdges.has(pieceId)) return "regular";
-    return orientation[currentSlotOfPiece[pieceId]] === 0 ? "oriented" : "mystery";
-  };
-  return {
-    orbits: {
-      EDGES: { pieces: Array.from({ length: 12 }, (_, p) => ({ facelets: [edge(p), edge(p)] })) },
-      CORNERS: { pieces: Array.from({ length: 8 }, () => ({ facelets: ["ignored", "ignored", "ignored"] })) },
-      CENTERS: { pieces: Array.from({ length: 6 }, () => ({ facelets: ["regular", "regular", "regular", "regular"] })) },
     },
   };
 }

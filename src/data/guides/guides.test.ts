@@ -11,8 +11,8 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { cube3x3x3 } from "cubing/puzzles";
-import type { KPattern } from "cubing/kpuzzle";
+import { kpuzzle as KPUZZLE } from "../../testing/kpattern";
+import type { KPattern } from "../../testing/kpattern";
 import { GUIDES, guideById, type Guide, type GuideCase, type GuideDemo } from "./index";
 import { LAYER_BY_LAYER_GUIDE } from "./layer-by-layer";
 import { LAST_LAYER_GUIDE } from "./last-layer";
@@ -30,7 +30,7 @@ const CORNER_FACES = CORNERS.map((n) => n.split(""));
 const slotE = (name: string) => EDGES.indexOf(name);
 const slotC = (name: string) => CORNERS.indexOf(name);
 
-const kpuzzle = await cube3x3x3.kpuzzle();
+const kpuzzle = KPUZZLE;
 const solved = () => kpuzzle.defaultPattern();
 const SOLVED_Z2 = solved().applyAlg("z2");
 

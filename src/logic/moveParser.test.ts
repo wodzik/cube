@@ -10,7 +10,7 @@ import {
   algToPhysicalMoves,
   computeStageSplits,
 } from "./moveParser";
-import { createSolvedState, applyMoveToState, isFullySolved } from "./stageDetection/liveCubeState";
+import { FACELETS, applyMoves, isSolved, solvedState } from "@wodzik/cubecore/core";
 
 describe("parseMove", () => {
   it("parses basic moves", () => {
@@ -113,20 +113,16 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
       // The correct setup inverts the FULL text, rotations included.
       expect(setup).toEqual(invertSequence(alg.split(" ")).join(" "));
 
-      const solved = await createSolvedState();
-      const state = setup
-        .split(/\s+/)
-        .filter(Boolean)
-        .reduce((s, m) => applyMoveToState(s, m), solved);
+      const state = applyMoves(solvedState(), setup);
+      const kind = (pos: readonly number[]) => pos.filter((c) => c !== 0).length; // 1 centre, 2 edge, 3 corner
+      const face = (v: number) => "URFDLB"[Math.floor(v / 9)];
 
-      // Textbook Aa: edges untouched, corners a clean 3-cycle (no twist), centers identity (2D-LL's "PLL" stickering reads this orbit to decide what's dimmed — a non-identity center orbit is what caused the wrong pieces to dim).
-      expect(state.patternData.EDGES.pieces).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-      expect(state.patternData.EDGES.orientation).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-      expect(state.patternData.CORNERS.orientation).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
-      expect(state.patternData.CENTERS.pieces).toEqual([0, 1, 2, 3, 4, 5]);
-
-      const afterAlg = alg.split(" ").reduce((s, m) => applyMoveToState(s, m), state);
-      expect(isFullySolved(afterAlg)).toBe(true);
+      // Textbook Aa: edges untouched, corners a clean 3-cycle (no twist — every U / D sticker still on U / D), centres home (2D-LL's "PLL" stickering reads them to decide what's dimmed — moved centres are what caused the wrong pieces to dim).
+      for (const f of FACELETS) {
+        if (kind(f.pos) !== 3) expect(`${f.index}: ${state[f.index]}`).toBe(`${f.index}: ${f.index}`);
+        else if (f.face === "U" || f.face === "D") expect(["U", "D"]).toContain(face(state[f.index]));
+      }
+      expect(isSolved(applyMoves(state, alg))).toBe(true);
     });
 
     it("REGRESSION: buildCaseSetupAlg (the LIVE-TRACKING function — TrainingPage/AcademyPage/AttackPage/VariantTest) must stay on its ORIGINAL leading-strip-only behavior for this exact alg — those callers track physical moves against stripLeadingRotations(fullAlg) and rely on setup∘that = solved; the canonical (whole-invert) setup above does NOT cancel against that shorter, leading-rotation-dropped sequence, so it would break live solving if buildCaseSetupAlg ever used it", async () => {
@@ -135,12 +131,7 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
       expect(trackingSetup).toEqual(invertSequence(stripLeadingRotations(alg.split(" "))).join(" "));
 
       const trackedTokens = stripLeadingRotations(alg.split(" "));
-      const solved = await createSolvedState();
-      const afterTrackedPlay = [...trackingSetup.split(/\s+/).filter(Boolean), ...trackedTokens].reduce(
-        (s, m) => applyMoveToState(s, m),
-        solved
-      );
-      expect(isFullySolved(afterTrackedPlay)).toBe(true);
+      expect(isSolved(applyMoves(solvedState(), [trackingSetup, ...trackedTokens].join(" ")))).toBe(true);
     });
   });
 
@@ -154,19 +145,13 @@ describe("stripLeadingRotations / buildCaseSetupAlg", () => {
     const displayTokens = stripLeadingRotations(fullTokens);
     const setup = buildCaseSetupAlg(fullTokens.join(" "));
 
-    const solved = await createSolvedState();
-    const afterSetup = setup
-      .split(/\s+/)
-      .filter(Boolean)
-      .reduce((s, m) => applyMoveToState(s, m), solved);
-    const afterPlaying = displayTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
-    expect(isFullySolved(afterPlaying)).toBe(true);
+    const afterSetup = applyMoves(solvedState(), setup);
+    expect(isSolved(applyMoves(afterSetup, displayTokens.join(" ")))).toBe(true);
 
     // The broken combination (setup from stripped tokens, but the FULL
     // alg — rotation included — played forward) must NOT be solved, or
     // this regression test isn't actually exercising the bug.
-    const afterPlayingFull = fullTokens.reduce((s, m) => applyMoveToState(s, m), afterSetup);
-    expect(isFullySolved(afterPlayingFull)).toBe(false);
+    expect(isSolved(applyMoves(afterSetup, fullTokens.join(" ")))).toBe(false);
   });
 });
 

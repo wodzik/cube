@@ -9,8 +9,8 @@
 
 import { describe, it, expect } from "bun:test";
 import { algToPhysicalMoves, createMoveStr } from "../moveParser";
-import { applyMoveToState, createSolvedState } from "./liveCubeState";
-import { computeStageBoundaries } from "./methodTracker";
+import { applyMoves, isSolved } from "@wodzik/cubecore/core";
+import { computeStageBoundaries, startStateOf } from "./methodTracker";
 import { rouxStageDetector } from "./rouxStages";
 
 interface RecoSolve {
@@ -75,8 +75,7 @@ const SOLVES: RecoSolve[] = [
 ];
 
 async function replay(solve: RecoSolve) {
-  let state = await createSolvedState();
-  for (const m of solve.scramble.split(/\s+/)) state = applyMoveToState(state, m);
+  const state = startStateOf(solve.scramble);
 
   // Token index range (in the joined solution alg) covered by each stage.
   const ranges: Partial<Record<string, { first: number; last: number }>> = {};
@@ -95,10 +94,9 @@ async function replay(solve: RecoSolve) {
   const boundaries = computeStageBoundaries(rouxStageDetector, moves, state);
 
   // Last physical move must fully solve the cube — sanity check of the replay itself.
-  let end = state;
-  for (const m of moves) end = applyMoveToState(end, m.move);
+  const end = applyMoves(state, moves.map((m) => m.move).join(" "));
 
-  return { boundaries, physical, ranges, solvedAtEnd: end.experimentalIsSolved({ ignorePuzzleOrientation: true, ignoreCenterOrientation: true }) };
+  return { boundaries, physical, ranges, solvedAtEnd: isSolved(end) };
 }
 
 describe("rouxStageDetector against reco.nz reconstructions (smart-cube style replay)", () => {

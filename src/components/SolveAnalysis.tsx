@@ -41,11 +41,10 @@ import { StageProgress } from "./StageProgress";
 import { SolveTimingBar } from "./SolveTimingBar";
 import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
-import { cfopStageDetector, rouxStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
+import { cfopStageDetector, rouxStageDetector, computeStageBoundaries, startStateOf } from "../logic/stageDetection/methodTracker";
 import { ROUX_DETAIL_VERSION } from "../logic/stageDetection/rouxStages";
 import { STAGES_VERSION } from "../logic/stageDetection/lastLayerShared";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
-import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
 import { formatTimeMs } from "../logic/statistics";
 import { patchSolve } from "../services/solveStore";
@@ -326,24 +325,13 @@ export function SolveAnalysis({
       record.stagesVersion === STAGES_VERSION
     )
       return;
-    let cancelled = false;
-    createSolvedState().then((solved) => {
-      if (cancelled) return;
-      const startState = record.scramble
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .reduce((s, m) => applyMoveToState(s, m), solved);
-      const timedMoves = record.moves.map((m) => ({ move: m.move, relativeMs: m.relativeMs }));
-      const cfop = computeStageBoundaries(cfopStageDetector, timedMoves, startState);
-      const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
-      const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
-      setHealed({ cfop, lbl, roux });
-      if (!readOnly) patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION, stagesVersion: STAGES_VERSION });
-    });
-    return () => {
-      cancelled = true;
-    };
+    const startState = startStateOf(record.scramble);
+    const timedMoves = record.moves.map((m) => ({ move: m.move, relativeMs: m.relativeMs }));
+    const cfop = computeStageBoundaries(cfopStageDetector, timedMoves, startState);
+    const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
+    const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
+    setHealed({ cfop, lbl, roux });
+    if (!readOnly) patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION, stagesVersion: STAGES_VERSION });
   }, [record, readOnly]);
 
   const detector = METHOD_DETECTORS[method];

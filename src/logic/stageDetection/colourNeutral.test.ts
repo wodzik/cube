@@ -5,12 +5,10 @@
  */
 import { describe, expect, it } from "bun:test";
 import { FRAMES, formatAlg, invert, parseAlg, transformMoves } from "@wodzik/cubecore/core";
-import { applyMoveToState, createSolvedState } from "./liveCubeState";
-import { computeStageBoundaries } from "./methodTracker";
+import { computeStageBoundaries, startStateOf } from "./methodTracker";
 import { cfopStageDetector } from "./cfopStages";
 import { lblStageDetector } from "./lblStages";
 import { rouxStageDetector } from "./rouxStages";
-import { isOllSolvedOnFace } from "./lastLayerShared";
 
 // A white-cross (D) CFOP solve, stage by stage (face turns only — as a smart cube reports them).
 const SEGMENTS = [
@@ -27,9 +25,7 @@ const SEGMENTS = [
 async function boundaries(detector: typeof cfopStageDetector, frameId: number) {
   const frame = FRAMES[frameId];
   const solution = transformMoves(parseAlg(SEGMENTS.join(" ")), frame);
-  const scramble = invert(solution);
-  let start = await createSolvedState();
-  for (const m of formatAlg(scramble).split(" ")) start = applyMoveToState(start, m);
+  const start = startStateOf(formatAlg(invert(solution)));
   const moves = formatAlg(solution)
     .split(" ")
     .map((move, i) => ({ move, relativeMs: i * 100 }));
@@ -46,21 +42,4 @@ describe("stages are found the same whatever face the solve is on", () => {
       }
     });
   }
-});
-
-describe("OLL by stickers", () => {
-  it("an oriented last layer on each face (and not yet oriented) — for every face as the cross", async () => {
-    const OLL = parseAlg("R U2 R2 F R F' U2 R' F R F'");
-    for (const frame of FRAMES) {
-      const cross = frame.face.D;
-      // Solved, then the OLL undone (last layer not oriented), then done again.
-      let s = await createSolvedState();
-      for (const m of formatAlg(invert(transformMoves(OLL, frame))).split(" ")) s = applyMoveToState(s, m);
-      expect(`${frame.id} ${isOllSolvedOnFace(s, cross as "U")}`).toBe(`${frame.id} false`);
-      for (const m of formatAlg(transformMoves(OLL, frame)).split(" ")) s = applyMoveToState(s, m);
-      expect(`${frame.id} ${isOllSolvedOnFace(s, cross as "U")}`).toBe(`${frame.id} true`);
-      // A last-layer turn keeps it oriented.
-      expect(isOllSolvedOnFace(applyMoveToState(s, frame.face.U), cross as "U")).toBe(true);
-    }
-  });
 });

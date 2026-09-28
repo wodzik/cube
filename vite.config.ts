@@ -14,9 +14,6 @@ const smartcubeSrc = fileURLToPath(
   new URL("./node_modules/smartcube-web-bluetooth/src/index.ts", import.meta.url)
 );
 
-const workerImportMetaUrlRE =
-  /\bnew\s+(?:Worker|SharedWorker)\s*\(\s*(new\s+URL\s*\(\s*('[^']+'|"[^"]+"|`[^`]+`)\s*,\s*import\.meta\.url\s*\))/g;
-
 // Build identity for the "new version available" check: baked into the
 // bundle as __BUILD_ID__ AND emitted as dist/version.json. A deployed page
 // polls version.json (see hooks/useVersionCheck.ts) and prompts a reload
@@ -50,11 +47,10 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 2048,
     // No modulepreload hints for dynamic imports. Vite's preload helper
-    // touches `document` the moment a dep list is present — and cubing.js's
-    // search-worker entry (a regular chunk loaded INSIDE a module worker)
-    // dynamic-imports its solver with deps, crashing the worker in
-    // production ("document is not defined" -> no scrambles). Costs only
-    // the preload hint, not correctness: imports still resolve normally.
+    // touches `document` the moment a dep list is present — fatal in a chunk
+    // that runs inside a module worker (cubecore's solver worker): "document
+    // is not defined", no scrambles, in production only. Costs only the
+    // preload hint, not correctness: imports still resolve normally.
     modulePreload: false,
     rolldownOptions: {
       output: {
@@ -67,30 +63,8 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    // cubing ships its own workers/wasm — pre-bundling breaks it.
-    exclude: ["cubing"],
-  },
   worker: {
     format: "es",
-    plugins: () => [
-      {
-        name: "disable-nested-workers",
-        enforce: "pre",
-        transform(code: string, _id: string) {
-          if (
-            code.includes("new Worker") &&
-            code.includes("new URL") &&
-            code.includes("import.meta.url")
-          ) {
-            return code.replace(
-              workerImportMetaUrlRE,
-              `((() => { throw new Error('Nested workers are disabled') })()`
-            );
-          }
-        },
-      },
-    ],
     rollupOptions: {
       output: {
         chunkFileNames: "assets/worker/[name]-[hash].js",

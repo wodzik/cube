@@ -91,8 +91,9 @@ kind can take a few seconds.
 - **[smartcube-web-bluetooth](https://github.com/poliva/smartcube-web-bluetooth)**
   by Pau Oliva and Andy Fedotov (MIT) — the Bluetooth protocols of the
   supported cubes (inside cubecore) and the GAN smart timer.
-- **[cubing.js](https://js.cubing.net/)** (`MPL-2.0 OR GPL-3.0-or-later`,
-  used under MPL-2.0) — the puzzle model behind the solve-stage detection.
+- **[cubing.js](https://js.cubing.net/)** by Lucas Garron and Tom Rokicki —
+  earlier versions ran the 3D cube, the notation and the solve-stage
+  detection on it; all of that is cubecore's now.
 - **[RubiksSolverDemo](https://github.com/or18/RubiksSolverDemo)** by or18
   and **[roux-trainers](https://github.com/onionhoney/roux-trainers)** by
   onionhoney — the ideas of the CFOP and Roux case trainers (exact-depth
@@ -111,7 +112,7 @@ kind can take a few seconds.
 
 That's a choice, not something a dependency requires: the GPL-3.0 engines
 earlier versions bundled are gone, and everything the app uses now is
-MIT / ISC / Apache-2.0 / MPL-2.0 (cubecore, cubing.js under MPL-2.0).
+MIT / ISC / Apache-2.0 / MPL-2.0 (cubecore).
 
 "Rubik's Cube" is a trademark of its respective owner, as are the smart
 cube brands named here; this project is not affiliated with or endorsed by

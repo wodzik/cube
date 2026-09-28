@@ -15,13 +15,9 @@
  * is always a suffix, never a truncation — safe to track by count.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  applyMoveToState,
-  createSolvedState,
-  type LiveCubeState,
-} from "../logic/stageDetection/liveCubeState";
-import { StageWalker } from "../logic/stageDetection/methodTracker";
+import { useMemo, useRef } from "react";
+import type { State } from "@wodzik/cubecore/core";
+import { StageWalker, startStateOf } from "../logic/stageDetection/methodTracker";
 import type { StageBoundary } from "../logic/stageDetection/methodTracker";
 import type { StageDetector } from "../logic/stageDetection/types";
 import type { MoveRecord } from "../types/session";
@@ -32,7 +28,7 @@ export interface UseMethodProgressReturn {
    *  fresh, authoritative snapshot at a specific instant (e.g. right when persisting a solve
    *  record) via logic/stageDetection/methodTracker's computeStageBoundaries, independent of
    *  this hook's own live tracking. */
-  startState: LiveCubeState | null;
+  startState: State | null;
 }
 
 export function useMethodProgress(
@@ -40,28 +36,11 @@ export function useMethodProgress(
   moves: readonly MoveRecord[],
   detector: StageDetector
 ): UseMethodProgressReturn {
-  const [solvedState, setSolvedState] = useState<LiveCubeState | null>(null);
+  const startState = useMemo(() => startStateOf(scramble), [scramble]);
 
-  useEffect(() => {
-    let cancelled = false;
-    createSolvedState().then((state) => {
-      if (!cancelled) setSolvedState(state);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const startState = useMemo(() => {
-    if (!solvedState) return null;
-    const tokens = scramble.trim().split(/\s+/).filter(Boolean);
-    return tokens.reduce((state, move) => applyMoveToState(state, move), solvedState);
-  }, [solvedState, scramble]);
-
-  const walkerRef = useRef<{ startState: LiveCubeState; method: string; walker: StageWalker; fedCount: number } | null>(null);
+  const walkerRef = useRef<{ startState: State; method: string; walker: StageWalker; fedCount: number } | null>(null);
 
   const boundaries = useMemo(() => {
-    if (!startState) return [];
     if (walkerRef.current?.startState !== startState || walkerRef.current.method !== detector.method) {
       walkerRef.current = { startState, method: detector.method, walker: new StageWalker(detector, startState), fedCount: 0 };
     }
