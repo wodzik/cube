@@ -128,6 +128,26 @@ function MoveText({ items, current }: { items: readonly DisplayItem[]; current: 
   );
 }
 
+/** Which of the case's algorithms the stage's moves did (by effect), and the moves before it — or "own way". */
+function DoneWith({ stageCase }: { stageCase: StageCase }) {
+  const d = stageCase.done;
+  if (!d) {
+    return (
+      <span className="text-[10px] text-gray-500 italic" title="The moves did none of this case's algorithms — intuitive, or one you haven't added to the set">
+        own way
+      </span>
+    );
+  }
+  // Variant names start with the case's ("OLL 39 [Main] - (R U F)"): the rest says which.
+  const short = d.variantName.startsWith(stageCase.name) ? d.variantName.slice(stageCase.name.length).replace(/^\s*-?\s*/, "") : d.variantName;
+  return (
+    <span className="text-[10px] text-emerald-300/90" title={`Done with ${d.variantName}: ${d.alg}${d.setup ? ` — after ${d.setup} setup ${d.setup === 1 ? "move" : "moves"}` : ""}`}>
+      ✓ {short || "its algorithm"}
+      {d.setup > 0 && <span className="text-gray-400"> · {d.setup} setup</span>}
+    </span>
+  );
+}
+
 function StageTimingRow({
   timing,
   onJump,
@@ -191,6 +211,14 @@ function StageTimingRow({
             >
               {caseTitle(stageCase)}
             </button>
+          )}
+          {!skipped && stageCase?.after ? (
+            <span className="text-[10px] text-gray-400" title="A piece of the pair was stuck in another slot: the case came up once it was out">
+              after {stageCase.after} {stageCase.after === 1 ? "move" : "moves"}
+            </span>
+          ) : null}
+          {!skipped && isRealCase(stageCase) && stageCase.done !== undefined && (
+            <DoneWith stageCase={stageCase} />
           )}
           {!skipped && cross && (
             <>
@@ -374,7 +402,7 @@ export function SolveAnalysis({
     }
     const c = cases[stage];
     if (!isRealCase(c) || !drillCase(c.kind, c.name)) return undefined;
-    const { group, subgroup } = caseLocation(c.kind);
+    const { group, subgroup } = caseLocation(c.kind, c.kind === "af2l" ? c.subgroup : undefined);
     return {
       title: `${caseTitle(c)} in Practice → Algorithms — its algorithms, to drill`,
       onClick: () => {

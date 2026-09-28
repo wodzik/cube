@@ -51,7 +51,19 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognize
   );
   // Algorithms you've drilled (and the default one) first; the rest of the set on request.
   const [showAll, setShowAll] = useState(false);
-  const listed = variants ? variants.rows.filter((r) => showAll || r.count > 0 || r.variant.isDefault) : [];
+  // How each algorithm went in your solves (by its place in the list — the same in every slot's set).
+  const inSolves = useMemo(() => {
+    const by = new Map<number | null, number[]>();
+    for (const s of stats?.seen ?? []) if (s.variantIndex !== undefined) by.set(s.variantIndex, [...(by.get(s.variantIndex) ?? []), s.executionMs]);
+    return by;
+  }, [stats]);
+  const solveUse = (index: number | null) => {
+    const xs = inSolves.get(index);
+    return xs?.length ? { count: xs.length, mean: xs.reduce((a, b) => a + b, 0) / xs.length } : null;
+  };
+  const indexOf = (id: string) => kase?.algList.findIndex((v) => v.id === id) ?? -1;
+  const listed = variants ? variants.rows.filter((r) => showAll || r.count > 0 || r.variant.isDefault || solveUse(indexOf(r.variant.id)) !== null) : [];
+  const ownWay = solveUse(null);
   const hidden = variants ? variants.rows.length - listed.length : 0;
 
   const groupMeta = getGroupMeta(location.group);
@@ -154,6 +166,14 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognize
                         )}
                       </div>
                       <p className="text-[11px] font-mono text-gray-100 break-words">{r.variant.alg}</p>
+                      {(() => {
+                        const u = solveUse(indexOf(r.variant.id));
+                        return u ? (
+                          <p className="text-[10px] text-emerald-300/80 mt-0.5" title="Recognised in your solves by what the moves did (setups and slips aside)">
+                            in your solves: {u.count}× · execution {fmtMs(u.mean)} s
+                          </p>
+                        ) : null;
+                      })()}
                     </div>
                     <div className="shrink-0 grid grid-cols-5 gap-3 text-right text-[11px] font-mono tabular-nums">
                       <Stat label="Tries" value={String(r.count)} />
@@ -171,6 +191,11 @@ export function CaseAlgorithmsModal({ kind, name, onClose, solveStats, recognize
                   <button onClick={() => setShowAll((v) => !v)} className="text-[11px] text-gray-400 hover:text-gray-200 self-start px-2.5 py-1">
                     {showAll ? "Only the ones you've drilled" : `Show all ${variants.rows.length} algorithms (${hidden} not drilled yet)`}
                   </button>
+                )}
+                {ownWay && (
+                  <p className="text-[11px] text-gray-400 px-2.5" title="The moves did none of these algorithms — intuitive, or one you haven't added">
+                    Your own way in solves: {ownWay.count}× · execution {fmtMs(ownWay.mean)} s
+                  </p>
                 )}
                 <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-3">
                   <span className="flex items-center gap-1">

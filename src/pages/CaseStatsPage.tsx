@@ -25,7 +25,7 @@ import { AlgCaseVisualisation } from "../components/AlgCaseVisualisation";
 import { CaseAlgorithmsModal } from "../components/CaseAlgorithmsModal";
 import type { AlgorithmCase } from "../types/algorithm";
 
-const KINDS: CaseKind[] = ["f2l", "oll", "pll", "cmll"];
+const KINDS: CaseKind[] = ["f2l", "af2l", "oll", "pll", "cmll"];
 
 /** Where each source's data comes from — the empty state links there. */
 const EMPTY_LINK: Record<"solves" | "drill" | "recognize", [string, string]> = {
@@ -149,7 +149,7 @@ export default function CaseStatsPage() {
 
   const columns = COLUMNS[source];
   const sortColumn = columns.find((c) => c.id === sortBy) ?? columns[0];
-  const kinds = source === "recognize" ? KINDS.filter((k) => k !== "f2l") : KINDS;
+  const kinds = source === "recognize" ? KINDS.filter((k) => k !== "f2l" && k !== "af2l") : KINDS;
   const shownKind = kinds.includes(kind) ? kind : kinds[0];
 
   const rows = useMemo<Row[]>(() => {
@@ -201,7 +201,7 @@ export default function CaseStatsPage() {
   }, [rows, showUnseen, sortColumn]);
 
   const counts = useMemo(() => {
-    const out: Record<CaseKind, number> = { f2l: 0, oll: 0, pll: 0, cmll: 0 };
+    const out: Record<CaseKind, number> = { f2l: 0, af2l: 0, oll: 0, pll: 0, cmll: 0 };
     if (source === "solves") for (const c of solves.cases.values()) out[c.kind] += c.count;
     else if (source === "recognize") for (const c of recognized.values()) out[c.kind] += c.count;
     else for (const k of KINDS) out[k] = drillStats(k).reduce((n, d) => n + d.tries, 0);
@@ -255,7 +255,9 @@ export default function CaseStatsPage() {
             )}
           </span>
         )}
-        {source === "drill" && shownKind === "f2l" && <span className="text-[11px] text-gray-500 ml-auto">F2L: the Front Right set</span>}
+        {source === "drill" && (shownKind === "f2l" || shownKind === "af2l") && (
+          <span className="text-[11px] text-gray-500 ml-auto">{CASE_KIND_LABEL[shownKind]}: the Front Right set</span>
+        )}
       </div>
 
       {sorted.length === 0 ? (

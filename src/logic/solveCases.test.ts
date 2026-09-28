@@ -57,4 +57,35 @@ describe("solveCases", () => {
     const record = await solveOf(["R U R' U R U2 R'"], "CFOP");
     expect(solveCases(record, "LBL")).toEqual({});
   });
+
+  it("how it was done: the case's algorithm its moves did, by effect", async () => {
+    const record = await solveOf([F2L_CASES[0].algs.FR, "R U R' U R U2 R'", "R U R' U' R' F R2 U' R' U' R U R' F'"], "CFOP");
+    const cases = solveCases(record, "CFOP");
+    expect(cases.oll?.done).toMatchObject({ setup: 0 });
+    expect(cases.oll?.done?.alg.replace(/[()]/g, "").replace(/\s+/g, " ").trim()).toBe("R U R' U R U2 R'");
+    expect(cases.pll?.done).toMatchObject({ setup: 0 });
+  });
+
+  it("Advanced F2L: the BL pair's piece stuck in FR", async () => {
+    // The BL pair goes in (extracting its piece from FR); the FR pair, still out, after it.
+    const record = await solveOf(["R U R' U L U L'", F2L_CASES[0].algs.FR], "CFOP");
+    const cases = solveCases(record, "CFOP");
+    const last = Object.values(cases).find((c) => c.kind === "af2l");
+    expect(last).toMatchObject({ kind: "af2l", slot: "BL" });
+    expect(last?.name).toMatch(/^AF2L \d+/);
+    expect(last?.subgroup).toBe("front-right");
+  });
+
+  it("a stuck piece taken out first: the case it became, after how many moves, and the algorithm after the extraction", () => {
+    // A real solve (smart cube, face turns as reported): its second pair had a piece stuck in another slot.
+    const moves = "U' R' R' B R L U' F F D F' D' F' R F D' F' R R' R' F D' F' D' F D' D' B D B' D F' D F D D L D L' R' D R D' R' D R D' R' D R R F L' F' L' R L' R B L B' B' B L' B' R L' D' L' D' D' L D' D' L' F L D L' D' L' F' L L D' D'".split(" ").map((move, i) => ({ move, relativeMs: i * 100 }));
+    const scramble = "F U B2 R' U' B D R2 U2 L U R2 U' F2 U' L2 B2 L2 D2 F2";
+    const record = { id: "real-1", scramble, moves, method: "CFOP" } as unknown as SolveRecord;
+    record.cfop = computeStageBoundaries(cfopStageDetector, moves, startStateOf(scramble));
+    const cases = solveCases(record, "CFOP");
+    expect(cases["f2l-2"]).toMatchObject({ kind: "f2l", name: "F2L 4", after: 4 });
+    expect(cases["f2l-2"]?.done).toMatchObject({ setup: 4 });
+    expect(cases.oll).toMatchObject({ name: "OLL 20" });
+    expect(cases.oll?.done).not.toBeNull();
+  });
 });

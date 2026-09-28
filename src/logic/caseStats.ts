@@ -26,6 +26,10 @@ export interface CaseSeen {
   recognitionMs: number;
   executionMs: number;
   moves: number;
+  /** The algorithm it was done with (its place in the case's list); null: your own way; undefined: not known. */
+  variantIndex?: number | null;
+  /** Moves before the algorithm (setup / extraction). */
+  setup?: number;
 }
 
 export interface CaseSolveStats {
@@ -48,7 +52,7 @@ const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.le
 /** Every real case in these solves (their own method: CFOP → F2L / OLL / PLL, Roux → CMLL), with how it went each time. Also counts skips per kind. */
 export function collectCaseStats(solves: readonly SolveRecord[]): { cases: Map<string, CaseSolveStats>; skips: Record<CaseKind, number>; solves: number } {
   const seen = new Map<string, { kind: CaseKind; name: string; seen: CaseSeen[] }>();
-  const skips: Record<CaseKind, number> = { f2l: 0, oll: 0, pll: 0, cmll: 0 };
+  const skips: Record<CaseKind, number> = { f2l: 0, af2l: 0, oll: 0, pll: 0, cmll: 0 };
   let counted = 0;
   for (const record of solves) {
     if (record.method !== "CFOP" && record.method !== "Roux") continue;
@@ -67,7 +71,16 @@ export function collectCaseStats(solves: readonly SolveRecord[]): { cases: Map<s
       const key = caseKey(c);
       let entry = seen.get(key);
       if (!entry) seen.set(key, (entry = { kind: c.kind, name: c.name, seen: [] }));
-      entry.seen.push({ solveId: record.id, at: record.endedAt, stage, totalMs: t.totalMs, recognitionMs: t.recognitionMs, executionMs: t.executionMs, moves: t.moveCount });
+      entry.seen.push({
+        solveId: record.id,
+        at: record.endedAt,
+        stage,
+        totalMs: t.totalMs,
+        recognitionMs: t.recognitionMs,
+        executionMs: t.executionMs,
+        moves: t.moveCount,
+        ...(c.done !== undefined ? { variantIndex: c.done?.variantIndex ?? null, setup: c.done?.setup ?? 0 } : {}),
+      });
     }
   }
   const out = new Map<string, CaseSolveStats>();

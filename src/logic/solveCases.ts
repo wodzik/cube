@@ -8,17 +8,33 @@
  * match the Drill Algorithms groups' case names ("F2L 5", "OLL 27", "T",
  * "Sune Left Bar"), so a case links straight to its algorithms.
  *
+ * F2L: one of the 41 cases; with a piece of the pair stuck in another slot,
+ * one of the Advanced F2L set's (recognised from its own algorithms); else
+ * the case the pair became once the piece was out ("after" n moves).
+ *
+ * How each case was DONE: the stage's moves (as the cube was held, cross
+ * down) matched by effect (cubecore AlgMatcher — any notation, slips and
+ * slice halves in any order) against the case's algorithms, the ones you
+ * added included; the longest ending that is one of them, the moves before
+ * it a setup. None matching: done your own way (intuitive, or an algorithm
+ * not in the set).
+ *
  * Results are cached per solve id (a solve never changes its moves).
  */
 
-import { type Face, FRAMES, type Frame, type Move, type State, applyMove, applyMoves, checks, parseAlg, solvedState, view } from "@wodzik/cubecore/core";
-import { type F2LSlot, recognizeF2L, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
+import { type Face, FRAMES, type Frame, type Move, type State, applyMove, applyMoves, checks, invert, parseAlg, solvedState, view } from "@wodzik/cubecore/core";
+import { AlgMatcher } from "@wodzik/cubecore/core";
+import { F2LCaseTable, type F2LSlot, isTrappedF2L, recognizeF2L, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
+import advancedF2lJson from "../algs/advanced-f2l.json";
+import { loadAlgGroup } from "../services/algorithmStore";
+import { getSubgroupCases } from "../services/algGroupRegistry";
+import type { AlgorithmCase } from "../types/algorithm";
 import { recognizeCmllAnywhere, secondBlock } from "@wodzik/cubecore/roux";
 import type { SolveRecord } from "../types/solve";
 import { frameForBottom } from "./trainerCatalog";
 import type { StageBoundary } from "./stageDetection/types";
 
-export type CaseKind = "f2l" | "oll" | "pll" | "cmll";
+export type CaseKind = "f2l" | "af2l" | "oll" | "pll" | "cmll";
 
 /** Where a case's algorithms live in Drill Algorithms. */
 export interface CaseLocation {
@@ -35,12 +51,33 @@ export interface StageCase {
   preAuf?: string;
   /** F2L: the slot the pair went into (canonical, cross on D). */
   slot?: F2LSlot;
+  /** Advanced F2L: the set's subgroup the case is from (where the piece was stuck). */
+  subgroup?: string;
+  /** F2L: the case came up only after this many moves (a piece taken out of another slot first). */
+  after?: number;
+  /** How it was done — the case's algorithm its moves matched (see the file's comment); null: none of them. Unset: not checked. */
+  done?: CaseExecution | null;
 }
 
-export const CASE_KIND_LABEL: Record<CaseKind, string> = { f2l: "F2L", oll: "OLL", pll: "PLL", cmll: "CMLL" };
+export interface CaseExecution {
+  variantId: string;
+  /** Its place in the case's list — the same algorithm in every slot's F2L set. */
+  variantIndex: number;
+  variantName: string;
+  alg: string;
+  /** Moves before the algorithm (a setup, an extraction, an AUF split off…). */
+  setup: number;
+}
 
-export function caseLocation(kind: CaseKind): CaseLocation {
-  if (kind === "f2l") return { group: "f2l", subgroup: "front-right" };
+export const CASE_KIND_LABEL: Record<CaseKind, string> = { f2l: "F2L", af2l: "Advanced F2L", oll: "OLL", pll: "PLL", cmll: "CMLL" };
+
+/** F2L / Advanced F2L sets' subgroup per slot (canonical, cross on D). */
+export const SLOT_SUBGROUP: Record<F2LSlot, string> = { FR: "front-right", FL: "front-left", BL: "back-left", BR: "back-right" };
+
+/** Where a case's algorithms live; F2L / Advanced F2L cases are the same in every slot's set — `subgroup` picks one (default the front-right set). */
+export function caseLocation(kind: CaseKind, subgroup?: string): CaseLocation {
+  if (kind === "f2l") return { group: "f2l", subgroup: subgroup ?? "front-right" };
+  if (kind === "af2l") return { group: "advanced-f2l", subgroup: subgroup ?? "front-right" };
   return { group: kind };
 }
 
@@ -135,8 +172,7 @@ function cfopCases(record: SolveRecord, boundaries: readonly StageBoundary[]): R
       out[`f2l-${n}`] = { kind: "f2l", name: "skip", slot };
       continue;
     }
-    const match = slot ? recognizeF2L(before, slot) : null;
-    out[`f2l-${n}`] = match && match !== "solved" ? { kind: "f2l", name: match.id, preAuf: match.preAuf, slot } : { kind: "f2l", name: "other", slot };
+    out[`f2l-${n}`] = slot ? f2lCase(record, frame, before, slot, doneAt(prev), doneAt(cur)) : { kind: "f2l", name: "other" };
   }
 
   const done = (st: string) => (byStage.get(st)?.moveIndex ?? -1) >= 0;
@@ -158,7 +194,100 @@ function cfopCases(record: SolveRecord, boundaries: readonly StageBoundary[]): R
       // not an oriented last layer
     }
   }
+  // How each case was done: its stage's moves against the case's algorithms.
+  const range = (stage: string, prevStage: string) => {
+    const b = byStage.get(stage);
+    const p = byStage.get(prevStage);
+    return b && p ? ([doneAt(p), doneAt(b)] as const) : null;
+  };
+  const previous: Record<string, string> = { "f2l-1": "cross", "f2l-2": "f2l-1", "f2l-3": "f2l-2", "f2l-4": "f2l-3", oll: "f2l-4", pll: "oll" };
+  for (const [stage, c] of Object.entries(out)) {
+    if (!isRealCase(c)) continue;
+    const r = range(stage, previous[stage]);
+    if (r && r[1] > r[0]) c.done = execution(record, frame, c, r[0], r[1]);
+  }
   return out;
+}
+
+// ─── F2L beyond the 41: Advanced F2L, or the case after an extraction ───
+
+/** Advanced F2L recognition per target slot, from the set's own algorithms (its subgroups are where the piece is stuck; the pair it's for is the target). */
+let advanced: Map<F2LSlot, F2LCaseTable> | null = null;
+function advancedTables(): Map<F2LSlot, F2LCaseTable> {
+  if (advanced) return advanced;
+  const slots: F2LSlot[] = ["FR", "FL", "BL", "BR"];
+  const bySlot = new Map<F2LSlot, { id: string; alg: string }[]>(slots.map((s) => [s, []]));
+  for (const sg of (advancedF2lJson as { subgroups: { id: string; cases: { name: string; algList: { alg: string; isDefault?: boolean }[] }[] }[] }).subgroups) {
+    for (const c of sg.cases) {
+      const alg = (c.algList.find((v) => v.isDefault) ?? c.algList[0])?.alg.replace(/[()]/g, " ");
+      if (!alg) continue;
+      let s: State;
+      try {
+        s = applyMoves(solvedState(), invert(parseAlg(alg)));
+      } catch {
+        continue;
+      }
+      // The pair the algorithm is for: the one with a piece stuck elsewhere (a case with both pairs stuck is left out).
+      const targets = slots.filter((x) => isTrappedF2L(s, x));
+      if (targets.length === 1) bySlot.get(targets[0])!.push({ id: `${sg.id}|${c.name}`, alg });
+    }
+  }
+  advanced = new Map(slots.map((slot) => [slot, new F2LCaseTable(slot, bySlot.get(slot)!)]));
+  return advanced;
+}
+
+function f2lCase(record: SolveRecord, frame: Frame, before: State, slot: F2LSlot, from: number, to: number): StageCase {
+  const match = recognizeF2L(before, slot);
+  if (match && match !== "solved") return { kind: "f2l", name: match.id, preAuf: match.preAuf, slot };
+  if (!isTrappedF2L(before, slot)) return { kind: "f2l", name: "other", slot };
+  const adv = advancedTables().get(slot)?.recognize(before);
+  if (adv) {
+    const [subgroup, name] = adv.id.split("|");
+    return { kind: "af2l", name, subgroup, preAuf: adv.preAuf, slot };
+  }
+  // Not in the set: the case the pair became once the stuck piece was out.
+  const counts = Array.from({ length: to - from + 1 }, (_, k) => from + k);
+  const states = statesAt(record, counts);
+  for (const c of counts) {
+    const s = states.get(c);
+    if (!s) break;
+    const v = view(s, frame);
+    if (isTrappedF2L(v, slot)) continue;
+    const m = recognizeF2L(v, slot);
+    if (m && m !== "solved") return { kind: "f2l", name: m.id, preAuf: m.preAuf, slot, after: c - from };
+    break;
+  }
+  return { kind: "f2l", name: "other", slot };
+}
+
+// ─── how a case was done ───
+
+/** The algorithms a case has in its set (yours included). */
+function algorithmsOf(c: StageCase): AlgorithmCase | undefined {
+  const { group, subgroup } = caseLocation(c.kind, c.kind === "f2l" && c.slot ? SLOT_SUBGROUP[c.slot] : c.subgroup);
+  const cases = subgroup ? getSubgroupCases(group, subgroup) : loadAlgGroup(group);
+  return cases.find((x) => x.name === c.name);
+}
+
+/** A face as the cube was held in `frame` (canonical letter for a physical face). */
+const heldLetter = (frame: Frame, move: string) => {
+  const canonical = (Object.keys(frame.face) as Face[]).find((f) => frame.face[f] === move[0]);
+  return canonical ? canonical + move.slice(1) : move;
+};
+
+function execution(record: SolveRecord, frame: Frame, c: StageCase, from: number, to: number): CaseExecution | null {
+  const kase = algorithmsOf(c);
+  if (!kase) return null;
+  const matcher = new AlgMatcher<{ id: string; index: number; name: string; alg: string }>();
+  kase.algList.forEach((v, index) => matcher.add(v.alg, { id: v.id, index, name: v.name, alg: v.alg }));
+  const moves = record.moves.slice(from, to).map((m) => heldLetter(frame, m.move));
+  let found: ReturnType<typeof matcher.matchSuffix> = null;
+  try {
+    found = matcher.matchSuffix(moves.join(" "));
+  } catch {
+    return null;
+  }
+  return found ? { variantId: found.data.id, variantIndex: found.data.index, variantName: found.data.name, alg: found.data.alg, setup: found.start } : null;
 }
 
 function rouxCases(record: SolveRecord, boundaries: readonly StageBoundary[]): Record<string, StageCase> {
@@ -181,11 +310,13 @@ const cache = new Map<string, Record<string, StageCase>>();
  */
 export function solveCases(record: SolveRecord, method: string, boundaries?: readonly StageBoundary[]): Record<string, StageCase> {
   if (method !== "CFOP" && method !== "Roux") return {};
-  const key = `${record.id}|${method}|${boundaries ? boundaries.map((b) => b.moveIndex).join(",") : ""}`;
+  const bs = boundaries ?? (method === "CFOP" ? record.cfop : record.roux) ?? [];
+  // Keyed by the boundaries actually used: a stored solve recomputed (healed) gets new ones.
+  const key = `${record.id}|${method}|${bs.map((b) => b.moveIndex).join(",")}`;
   let hit = cache.get(key);
   if (!hit) {
     try {
-      hit = method === "CFOP" ? cfopCases(record, boundaries ?? record.cfop ?? []) : rouxCases(record, boundaries ?? record.roux ?? []);
+      hit = method === "CFOP" ? cfopCases(record, bs) : rouxCases(record, bs);
     } catch {
       hit = {};
     }
