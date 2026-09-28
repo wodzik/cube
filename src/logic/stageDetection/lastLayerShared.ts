@@ -114,16 +114,52 @@ export function detectCrossFace(state: LiveCubeState): Face | null {
   return FACES.find((face) => isCrossSolvedOnFace(state, face)) ?? null;
 }
 
-/** Last-layer CORNERS only oriented (2-look OLL's "orient corners" half) — permutation not checked. */
+/**
+ * Version of the CFOP / LBL stage detection a record's boundaries were
+ * computed with (SolveRecord.stagesVersion). 2: OLL by stickers — before, a
+ * cross on any colour but white / yellow only saw its OLL at the very end.
+ * Records below it are recomputed (SolveAnalysis on open, stageHeal.ts in
+ * the background).
+ */
+export const STAGES_VERSION = 2;
+
+/**
+ * The pieces in cubing's slot order (logic/stageDetection/liveCubeState.ts),
+ * each named by its faces in its facelet order. The sticker at facelet k of
+ * slot s is the piece's (k − orientation) mod n — checked against cubecore's
+ * facelets in colourNeutral.test.ts.
+ */
+const PIECE_NAMES = {
+  CORNERS: ["URF", "UBR", "ULB", "UFL", "DFR", "DLF", "DBL", "DRB"],
+  EDGES: ["UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL"],
+} as const;
+
+/** The home face of the sticker showing on `face` at every `orbit` slot that touches it — all `face`? */
+function layerShowsOwnColour(state: LiveCubeState, orbit: "CORNERS" | "EDGES", face: Face): boolean {
+  const names = PIECE_NAMES[orbit];
+  const { pieces, orientation } = state.patternData[orbit];
+  return names.every((name, slot) => {
+    const k = name.indexOf(face);
+    if (k < 0) return true;
+    const n = name.length;
+    return names[pieces[slot]][(k - orientation[slot] + n) % n] === face;
+  });
+}
+
+/**
+ * Last-layer CORNERS only oriented (2-look OLL's "orient corners" half) —
+ * permutation not checked: the last layer's corner stickers on its face all
+ * show its colour. By stickers, not cubing's orientation numbers: those are
+ * measured against the U / D axis, so they only mean "oriented" for a last
+ * layer on U or D (a cross on any other colour never saw its OLL).
+ */
 export function isOllCornersOrientedOnFace(state: LiveCubeState, face: Face): boolean {
-  const corners = state.patternData.CORNERS;
-  return FACE_SLOTS[OPPOSITE_FACE[face]].cornerSlots.every((slot) => corners.orientation[slot] === 0);
+  return layerShowsOwnColour(state, "CORNERS", OPPOSITE_FACE[face]);
 }
 
 /** Last-layer EDGES only oriented (2-look OLL's "orient edges" half, i.e. the top cross) — permutation not checked. */
 export function isOllEdgesOrientedOnFace(state: LiveCubeState, face: Face): boolean {
-  const edges = state.patternData.EDGES;
-  return FACE_SLOTS[OPPOSITE_FACE[face]].edgeSlots.every((slot) => edges.orientation[slot] === 0);
+  return layerShowsOwnColour(state, "EDGES", OPPOSITE_FACE[face]);
 }
 
 export function isOllSolvedOnFace(state: LiveCubeState, face: Face): boolean {

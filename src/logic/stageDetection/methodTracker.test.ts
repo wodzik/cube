@@ -56,10 +56,17 @@ describe("cfopStageDetector — verified against known single-move effects", () 
     expect(cfopStageDetector.isStageSolved("cross", state)).toBe(true);
   });
 
-  it("a single R twists URF/UBR — OLL relative to the still-intact L cross is broken", async () => {
+  it("a single R, for the still-intact L cross, is just an AUF of its last layer: OLL and PLL still done", async () => {
+    // (It used to count OLL as broken: cubing's orientation numbers are
+    // measured against U / D, not the last layer's own face — see
+    // lastLayerShared.ts isOllCornersOrientedOnFace, colourNeutral.test.ts.)
     const solved = await createSolvedState();
     const state = applyMoveToState(solved, "R");
-    expect(cfopStageDetector.isStageSolved("oll", state)).toBe(false);
+    const context = cfopStageDetector.createContext?.();
+    expect(cfopStageDetector.isStageSolved("cross", state, context)).toBe(true);
+    expect(cfopStageDetector.isStageSolved("oll", state, context)).toBe(true);
+    expect(cfopStageDetector.isStageSolved("pll", state, context)).toBe(true);
+    expect(cfopStageDetector.isStageSolved("auf", state, context)).toBe(false);
   });
 
   it("cross/F2L/OLL/PLL are all still correctly detected when the cross ends up on U instead of D", async () => {

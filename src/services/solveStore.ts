@@ -151,6 +151,12 @@ export function patchSolve(id: string, patch: Partial<Omit<SolveRecord, "id">>):
   }
 }
 
+/** Merge fields into several stored solves at once (one write) — solves gone meanwhile are skipped. */
+export function patchSolves(patches: ReadonlyMap<string, Partial<Omit<SolveRecord, "id">>>): void {
+  if (patches.size === 0) return;
+  writeSolvesWithQuotaFallback(getSolves().map((s) => (patches.has(s.id) ? { ...s, ...patches.get(s.id) } : s)));
+}
+
 export function deleteSolve(id: string): void {
   writeSolvesWithQuotaFallback(getSolves().filter((s) => s.id !== id));
 }

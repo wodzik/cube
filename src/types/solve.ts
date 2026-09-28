@@ -47,6 +47,8 @@ export interface SolveRecord {
   lbl: StageBoundary[];
   /** Which version of rouxStageDetector's stageDetail encoding `roux` was computed with — see ROUX_DETAIL_VERSION (rouxStages.ts) and SolveAnalysis's self-heal effect. Missing on any record older than this field itself. */
   rouxDetailVersion?: number;
+  /** Which version of the CFOP / LBL detection `cfop` / `lbl` were computed with — see STAGES_VERSION (lastLayerShared.ts). Missing: older than 2. */
+  stagesVersion?: number;
 
   isDNF: boolean;
 

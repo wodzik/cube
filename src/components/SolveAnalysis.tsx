@@ -43,6 +43,7 @@ import { METHOD_DETECTORS } from "../logic/stageDetection/methodRegistry";
 import { lblStageDetector } from "../logic/stageDetection/lblStages";
 import { cfopStageDetector, rouxStageDetector, computeStageBoundaries } from "../logic/stageDetection/methodTracker";
 import { ROUX_DETAIL_VERSION } from "../logic/stageDetection/rouxStages";
+import { STAGES_VERSION } from "../logic/stageDetection/lastLayerShared";
 import { fluencyPercent, FLUENCY_TOOLTIP } from "../logic/stageDetection/fluency";
 import { applyMoveToState, createSolvedState } from "../logic/stageDetection/liveCubeState";
 import { computeStageTimings, type StageTiming } from "../logic/stageDetection/stageTiming";
@@ -321,7 +322,8 @@ export function SolveAnalysis({
       record.lbl !== undefined &&
       !lacksDetail(record.cfop, "cross") &&
       !lacksDetail(record.lbl, "cross") &&
-      record.rouxDetailVersion === ROUX_DETAIL_VERSION
+      record.rouxDetailVersion === ROUX_DETAIL_VERSION &&
+      record.stagesVersion === STAGES_VERSION
     )
       return;
     let cancelled = false;
@@ -337,7 +339,7 @@ export function SolveAnalysis({
       const lbl = computeStageBoundaries(lblStageDetector, timedMoves, startState);
       const roux = computeStageBoundaries(rouxStageDetector, timedMoves, startState);
       setHealed({ cfop, lbl, roux });
-      if (!readOnly) patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION });
+      if (!readOnly) patchSolve(record.id, { cfop, lbl, roux, rouxDetailVersion: ROUX_DETAIL_VERSION, stagesVersion: STAGES_VERSION });
     });
     return () => {
       cancelled = true;
