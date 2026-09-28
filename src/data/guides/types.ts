@@ -63,8 +63,8 @@ export type GuideBlock =
   | { kind: "guideLink"; guideId: string; label: string; text?: string }
   /** A table (cells take the same inline notation as text). */
   | { kind: "table"; columns: string[]; rows: string[][] }
-  /** Open Practice → Blindfolded → Letter pairs with this method. */
-  | { kind: "bldTrainer"; method: "op-edges" | "op-corners" | "m2"; label: string; text?: string };
+  /** Open Practice → Blindfolded (Letter pairs, or Setups) with this method. */
+  | { kind: "bldTrainer"; method: "op-edges" | "op-corners" | "m2"; mode?: "letters" | "setups"; label: string; text?: string };
 
 export interface GuideSection {
   id: string;

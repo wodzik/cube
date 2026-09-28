@@ -30,12 +30,13 @@ interface GuidePageProps {
 }
 
 /** `code` → notation, **text** → bold. Nothing else — guide text is our own, not user input. */
-/** Practice → Blindfolded, in its Letter pairs mode, with `method`. */
-function openLetterPairs(method: string): void {
+/** Practice → Blindfolded, in its Letter pairs / Setups mode, with `method`. */
+function openBldTrainer(method: string, mode: "letters" | "setups"): void {
   try {
-    localStorage.setItem("nact_bld_mode", "letters");
-    const prev = JSON.parse(localStorage.getItem("nact_bld_letters") ?? "{}") as object;
-    localStorage.setItem("nact_bld_letters", JSON.stringify({ ...prev, method }));
+    localStorage.setItem("nact_bld_mode", mode);
+    const key = mode === "setups" ? "nact_bld_setups" : "nact_bld_letters";
+    const prev = JSON.parse(localStorage.getItem(key) ?? "{}") as object;
+    localStorage.setItem(key, JSON.stringify({ ...prev, method }));
   } catch {
     // opens with whatever was kept
   }
@@ -196,7 +197,7 @@ function Block({ block, onOpenGuide, onPractice }: { block: GuideBlock; onOpenGu
     case "bldTrainer":
       return (
         <button
-          onClick={() => openLetterPairs(block.method)}
+          onClick={() => openBldTrainer(block.method, block.mode ?? "letters")}
           className="flex items-center gap-3 text-left panel px-4 py-3 hover:bg-white/[0.05] transition-colors w-full max-w-xl"
         >
           <Dumbbell size={16} className="text-[var(--accent-bright)] shrink-0" />

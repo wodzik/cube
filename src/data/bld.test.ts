@@ -62,3 +62,20 @@ describe("sticker names match the scheme's positions", () => {
         expect(`${a}${b} ${samePiece("corner", letterPosition(OP_CORNERS, a), letterPosition(OP_CORNERS, b))}`).toBe(`${a}${b} ${key(CORNER_STICKER[a]) === key(CORNER_STICKER[b])}`);
   });
 });
+
+import { setupDone, setupLetters } from "./bld";
+describe("the setups drill check", () => {
+  it("every table setup counts; the swap alone or a move off the rule doesn't", () => {
+    for (const method of Object.values(BLD_METHODS)) {
+      for (const l of setupLetters(method)) {
+        const ok = applyMoves(solvedState(), method.setups[l]);
+        expect(`${method.id} ${l} ${setupDone(method, solvedState(), ok, l)}`).toBe(`${method.id} ${l} true`);
+        expect(`${method.id} ${l} untouched ${setupDone(method, solvedState(), solvedState(), l)}`).toBe(`${method.id} ${l} untouched false`);
+      }
+    }
+    // A move that brings the sticker but disturbs the buffer doesn't count (U: UB → UL, but UR moves too).
+    expect(setupDone(OP_EDGES, solvedState(), applyMoves(solvedState(), "U'"), "A")).toBe(false);
+    // Another setup than the table's counts: X (DL) is L2 in the table; l' L' does it with a wide move (the core turns — another frame).
+    expect(setupDone(OP_EDGES, solvedState(), applyMoves(solvedState(), "l' L'"), "X")).toBe(true);
+  });
+});

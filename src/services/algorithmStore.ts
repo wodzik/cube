@@ -40,6 +40,7 @@ import antiPllJson from "../algs/anti-pll.json";
 import edgesOfTheLastLayerJson from "../algs/edges-of-the-last-layer.json";
 import cornersLastSlotJson from "../algs/corners-last-slot.json";
 import eo4aJson from "../algs/eo4a.json";
+import { BLD_M2, BLD_OP_CORNERS, BLD_OP_EDGES, BLD_SWAPS } from "../algs/bld";
 
 function storageKey(group: AlgGroup): string {
   return `alg_group_${group}`;
@@ -129,6 +130,10 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   "edges-of-the-last-layer": edgesOfTheLastLayerJson,
   "corners-last-slot": cornersLastSlotJson,
   eo4a: eo4aJson,
+  "blind-swaps": BLD_SWAPS,
+  "blind-op-edges": BLD_OP_EDGES,
+  "blind-op-corners": BLD_OP_CORNERS,
+  "blind-m2": BLD_M2,
 };
 
 /** The bundled (built-in) cases of a group — hydrated once, they never change at runtime. [] for a group of your own. */

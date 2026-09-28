@@ -177,6 +177,9 @@ export const BLD_OP_GUIDE: Guide = {
       title: "Practise",
       blocks: [
         { kind: "practice", lessonId: "blindfolded", stepId: "op-edges", label: "Drill the swaps in the Academy" },
+        { kind: "p", text: "Every swap and every letter (setup, swap, undo) is also a set in **Practice → Algorithms → Blind** — with times per letter, your own setups as variants, and hiding the ones you don't use." },
+        { kind: "bldTrainer", method: "op-edges", mode: "setups", label: "Setups: edges", text: "A letter, only its setup (any that works counts), undo — until the setups are a reflex." },
+        { kind: "bldTrainer", method: "op-corners", mode: "setups", label: "Setups: corners", text: "The same for the corners." },
         { kind: "bldTrainer", method: "op-edges", label: "Letter pairs: edges", text: "Two letters at a time — setup, T-perm, undo — checked on a smart cube." },
         { kind: "bldTrainer", method: "op-corners", label: "Letter pairs: corners", text: "The same with the Y-perm." },
       ],
@@ -239,6 +242,7 @@ export const BLD_M2_GUIDE: Guide = {
       title: "Practise",
       blocks: [
         { kind: "practice", lessonId: "blindfolded", stepId: "m2", label: "Drill the special letters in the Academy" },
+        { kind: "bldTrainer", method: "m2", mode: "setups", label: "Setups: M2", text: "A letter, only its setup to UB — the M slice untouched." },
         { kind: "bldTrainer", method: "m2", label: "Letter pairs: M2", text: "Pairs of letters, the second-letter rule included — checked on a smart cube." },
       ],
     },

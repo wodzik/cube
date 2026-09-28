@@ -60,7 +60,7 @@ interface Prompt {
   expected: State | null;
 }
 
-function read<T extends object>(key: string, fallback: T): T {
+export function read<T extends object>(key: string, fallback: T): T {
   try {
     const v = JSON.parse(localStorage.getItem(key) ?? "null") as T | null;
     if (v === null) return fallback;
@@ -69,7 +69,7 @@ function read<T extends object>(key: string, fallback: T): T {
     return fallback;
   }
 }
-function write(key: string, value: unknown) {
+export function write(key: string, value: unknown) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
@@ -78,12 +78,12 @@ function write(key: string, value: unknown) {
 }
 
 /** How the cube is held (the Blindfolded page's own "Hold" setting). */
-function readHold(): string {
+export function readHold(): string {
   return read<{ hold?: string }>("nact_bld", {}).hold ?? "";
 }
 
 /** The frame a cube held by `rotation` shows. */
-function holdFrame(rotation: string) {
+export function holdFrame(rotation: string) {
   if (!rotation) return null;
   const rot = applyMoves(solvedState(), rotation);
   const up = FACES[Math.floor(rot[4] / 9)], front = FACES[Math.floor(rot[22] / 9)];

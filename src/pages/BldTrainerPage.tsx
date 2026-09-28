@@ -1,7 +1,7 @@
 /**
  * BldTrainerPage — blindfolded (Old Pochmann), in the same layout as the
  * trainers and algorithm drills (TrainerPanel). Two modes: a full solve
- * (below) and letter pairs (BldLettersTrainer).
+ * (below), letter pairs (BldLettersTrainer) and setups (BldSetupsTrainer).
  *
  * An attempt, as at a competition: a scramble from a SOLVED cube (the
  * official one — with the cube somewhere else, the bar shows the way from
@@ -39,6 +39,7 @@ import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
 import { formatTimeMs } from "../logic/statistics";
 import type { SessionConfig } from "../types/session";
 import { BldLettersTrainer } from "./BldLettersTrainer";
+import { BldSetupsTrainer } from "./BldSetupsTrainer";
 
 const SETTINGS_KEY = "nact_bld";
 const TIMES_KEY = "nact_bld_times";
@@ -110,12 +111,13 @@ function say(text: string) {
 }
 
 const MODE_KEY = "nact_bld_mode";
-type Mode = "solve" | "letters";
+type Mode = "solve" | "letters" | "setups";
 
 export default function BldTrainerPage() {
   const [mode, setModeState] = useState<Mode>(() => {
     try {
-      return localStorage.getItem(MODE_KEY) === "letters" ? "letters" : "solve";
+      const m = localStorage.getItem(MODE_KEY);
+      return m === "letters" || m === "setups" ? m : "solve";
     } catch {
       return "solve";
     }
@@ -134,6 +136,7 @@ export default function BldTrainerPage() {
         [
           ["solve", "Full solve"],
           ["letters", "Letter pairs"],
+          ["setups", "Setups"],
         ] as const
       ).map(([m, label]) => (
         <button
@@ -147,6 +150,7 @@ export default function BldTrainerPage() {
     </div>
   );
   if (mode === "letters") return <BldLettersTrainer modeSwitch={modeSwitch} />;
+  if (mode === "setups") return <BldSetupsTrainer modeSwitch={modeSwitch} />;
   return (
     <SessionProvider config={CONFIG}>
       <BldInner modeSwitch={modeSwitch} />

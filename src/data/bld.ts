@@ -18,7 +18,7 @@
  */
 
 import { CORNER_BUFFER, EDGE_BUFFER, SPEFFZ } from "@wodzik/cubecore/bld";
-import { formatAlg, invert, parseAlg } from "@wodzik/cubecore/core";
+import { FRAMES, type State, formatAlg, invert, parseAlg, view } from "@wodzik/cubecore/core";
 
 export type BldMethodId = "op-edges" | "op-corners" | "m2";
 
@@ -38,6 +38,12 @@ export interface BldMethod {
   /** Letters that swap round when they're a pair's second letter (M2: C ↔ W, I ↔ S). */
   secondOfPair?: Record<string, string>;
   parity: { name: string; alg: string; when: string };
+  /**
+   * What a setup must do (the setups drill): bring the letter's sticker to
+   * `dest`, and leave every sticker in `keep` where it was — the buffer, and
+   * what the swap moves on the side (or, for M2, the M slice).
+   */
+  setupRule: { dest: number; keep: number[] };
 }
 
 export const T_PERM = "R U R' U' R' F R2 U' R' U' R U R' F'";
@@ -81,6 +87,8 @@ export const OP_EDGES: BldMethod = {
     C: { name: "Jb-perm", alg: JB_PERM },
   },
   parity: { name: "Ra-perm", alg: RA_PARITY, when: "an odd number of edge letters: after the edges, before the corners" },
+  // UL; keep UR (buffer) and the corners the T-perm swaps (UBR, UFR).
+  setupRule: { dest: 3, keep: [5, 10, 2, 45, 11, 8, 9, 20] },
 };
 
 export const OP_CORNERS: BldMethod = {
@@ -115,6 +123,8 @@ export const OP_CORNERS: BldMethod = {
   },
   direct: {},
   parity: { name: "Ra-perm", alg: RA_PARITY, when: "an odd number of edge letters: between the edges and the corners" },
+  // RDF; keep ULB (buffer) and the edges the Y-perm swaps (UB, UL).
+  setupRule: { dest: 15, keep: [0, 36, 47, 1, 46, 3, 37] },
 };
 
 /** DF, U side — the M2 buffer. */
@@ -155,6 +165,8 @@ export const M2_EDGES: BldMethod = {
   },
   secondOfPair: { C: "W", W: "C", I: "S", S: "I" },
   parity: { name: "M2 parity", alg: M2_PARITY, when: "an odd number of edge letters: after the edges (then solve corners with UB and UL swapped)" },
+  // UB; keep the M slice's other edges (UF, DF, DB).
+  setupRule: { dest: 1, keep: [7, 19, 28, 25, 34, 52] },
 };
 
 export const BLD_METHODS: Record<BldMethodId, BldMethod> = { "op-edges": OP_EDGES, "op-corners": OP_CORNERS, m2: M2_EDGES };
@@ -227,3 +239,21 @@ export const CORNER_STICKER: Record<string, string> = {
   M: "RUF", N: "RUB", O: "RDB", P: "RDF", Q: "BUR", R: "BUL", S: "BDL", T: "BDR", U: "DFL", V: "DFR", W: "DBR", X: "DBL",
 };
 export const stickerName = (method: BldMethod, letter: string): string => (method.kind === "edge" ? EDGE_STICKER : CORNER_STICKER)[letter] ?? letter;
+
+/** Letters drilled as setups: those with setup moves (not the swap spot itself, not the ones with their own algorithm). */
+export const setupLetters = (method: BldMethod): string[] => targetLetters(method).filter((l) => !!method.setups[l]);
+
+/**
+ * `current` (from `start`) is a finished setup for `letter`: its sticker on
+ * the swap spot, nothing in `keep` moved. Any setup counts, not only the
+ * table's. Checked in every whole-cube frame — a wide move (d, l) turns the
+ * cube's core, and with it the frame the smart cube reports in.
+ */
+export function setupDone(method: BldMethod, start: State, current: State, letter: string): boolean {
+  const p = letterPosition(method, letter);
+  const { dest, keep } = method.setupRule;
+  return FRAMES.some((f) => {
+    const v = view(current, f);
+    return v[dest] === start[p] && keep.every((k) => v[k] === start[k]);
+  });
+}

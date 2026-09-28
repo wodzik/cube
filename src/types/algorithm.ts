@@ -57,7 +57,7 @@ export interface DisplayConfig {
  * user-extensible taxonomy. Undefined (on old data / not explicitly picked)
  * is treated as "Other".
  */
-export type AlgCategory = "CFOP" | "Roux" | "Other";
+export type AlgCategory = "CFOP" | "Roux" | "Other" | "Blind";
 
 /**
  * A clickable folder inside a group (e.g. ZBLL grouped by top-layer
