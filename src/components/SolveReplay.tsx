@@ -110,7 +110,7 @@ export const SolveReplay = forwardRef<SolveReplayRef, { record: SolveRecord; tim
       if (held) {
         let n = 0;
         for (const tok of held) {
-          if (tok.kind === "move") at[tok.index] = n;
+          if (tok.kind === "move") for (let i = tok.index; i <= (tok.lastIndex ?? tok.index); i++) at[i] = n;
           n += parseAlg(tok.move).length;
         }
       }

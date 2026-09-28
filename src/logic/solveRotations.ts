@@ -10,7 +10,7 @@
  * PURE FUNCTIONS.
  */
 
-import type { Face } from "@wodzik/cubecore/core";
+import { type Face, applyMoves, solvedState } from "@wodzik/cubecore/core";
 import type { RotationRecord, SolveRecord } from "../types/solve";
 import { type Grip, IDENTITY_GRIP, rotateGrip, rotationBetween } from "./grip";
 import { collapseIdenticalMoves } from "./moveReduction";
@@ -34,7 +34,7 @@ export function recordRotations(
 
 export type HeldToken =
   | { kind: "rotation"; move: string; t: number; after: number }
-  | { kind: "move"; move: string; t: number; index: number };
+  | { kind: "move"; move: string; t: number; index: number; /** A slice / wide move made of several raw moves: the last one's index. */ lastIndex?: number };
 
 /** A physical move ("L'", "R2") as the holder of `grip` names it. */
 export function heldMove(move: string, grip: Grip): string {
@@ -53,7 +53,7 @@ export const hasRotations = (record: Pick<SolveRecord, "startRotation">): boolea
 export function heldTokens(record: Pick<SolveRecord, "moves" | "startRotation" | "rotations">): HeldToken[] | null {
   if (record.startRotation === undefined) return null;
   let grip = rotateGrip(IDENTITY_GRIP, record.startRotation);
-  const rotations = [...(record.rotations ?? [])].sort((a, b) => a.after - b.after || a.t - b.t);
+  const rotations = snapToSlices(record.moves, grip, [...(record.rotations ?? [])].sort((a, b) => a.after - b.after || a.t - b.t));
   const tokens: HeldToken[] = [];
   let r = 0;
   for (let i = 0; i <= record.moves.length; i++) {
@@ -72,7 +72,95 @@ export function heldTokens(record: Pick<SolveRecord, "moves" | "startRotation" |
       tokens.push({ kind: "move", move: heldMove(m.move, grip), t: m.relativeMs, index: i });
     }
   }
-  return tokens;
+  return mergeSlicesAndWides(tokens);
+}
+
+/**
+ * The gyroscope sits in the core, with the centres: a slice or wide move
+ * turns the centres, so it reaches us as face moves plus a "rotation" at the
+ * same moment — S as F' B + z, r as L + x. Such a group (the rotation and one
+ * or two moves on its axis, within SAME_MOMENT_MS) is the slice / wide move.
+ */
+const SAME_MOMENT_MS = 350;
+const SLICE_WIDE = ["M", "E", "S", "r", "l", "u", "d", "f", "b"].flatMap((f) => [f, `${f}'`, `${f}2`]);
+const effect = (alg: string) => applyMoves(solvedState(), alg).join();
+const SLICE_WIDE_EFFECT = new Map<string, string>();
+
+function sliceOrWide(group: readonly string[]): string | null {
+  if (SLICE_WIDE_EFFECT.size === 0) for (const m of SLICE_WIDE) SLICE_WIDE_EFFECT.set(effect(m), m);
+  return SLICE_WIDE_EFFECT.get(effect(group.join(" "))) ?? null;
+}
+
+/** How far apart (ms) the gyro's "rotation" of a slice / wide move and its face moves can be reported. */
+const SNAP_MS = 600;
+const AXIS_FACES: Record<string, [Face, Face]> = { x: ["R", "L"], y: ["U", "D"], z: ["F", "B"] };
+
+/**
+ * The gyro and the moves reach us with different delays: the "rotation" of
+ * an S can be reported a move or two after its F' B (F' B U L z). Such a
+ * rotation is put right after (or before) the face moves on its axis it
+ * makes a slice / wide move with — and the moves in between, made after the
+ * centres had turned, are lettered accordingly.
+ */
+function snapToSlices(moves: SolveRecord["moves"], startGrip: Grip, rotations: RotationRecord[]): RotationRecord[] {
+  let grip = startGrip;
+  const out = rotations.map((r) => ({ ...r }));
+  for (const r of out) {
+    const faces = AXIS_FACES[r.move[0]];
+    if (faces && !/\s/.test(r.move)) {
+      const physical = faces.map((f) => grip.face[f]);
+      const onAxis = (j: number) => physical.includes(moves[j].move[0] as Face);
+      const letters = (idx: number[]) => idx.map((j) => heldMove(moves[j].move, grip));
+      const back: number[] = [];
+      for (let j = r.after - 1; j >= 0 && back.length < 2 && moves[j].relativeMs >= r.t - SNAP_MS; j--) if (onAxis(j)) back.unshift(j);
+      const fwd: number[] = [];
+      for (let j = r.after; j < moves.length && fwd.length < 2 && moves[j].relativeMs <= r.t + SNAP_MS; j++) if (onAxis(j)) fwd.push(j);
+      const tries: [number[], number][] = [
+        [back, back.at(-1)! + 1],
+        [back.slice(-1), back.at(-1)! + 1],
+        [fwd, fwd[0]],
+        [fwd.slice(0, 1), fwd[0]],
+      ];
+      for (const [idx, after] of tries) {
+        if (idx.length === 0) continue;
+        if (sliceOrWide([...letters(idx), r.move])) {
+          r.after = after;
+          break;
+        }
+      }
+    }
+    grip = rotateGrip(grip, r.move);
+  }
+  return out.sort((a, b) => a.after - b.after || a.t - b.t);
+}
+
+export function mergeSlicesAndWides(tokens: readonly HeldToken[]): HeldToken[] {
+  const out = [...tokens];
+  for (let k = 0; k < out.length; k++) {
+    const rot = out[k];
+    if (rot.kind !== "rotation" || /\s/.test(rot.move)) continue;
+    // Two moves around it first (a slice), then one (a wide move).
+    const windows: [number, number][] = [
+      [k - 2, k],
+      [k - 1, k + 1],
+      [k, k + 2],
+      [k - 1, k],
+      [k, k + 1],
+    ];
+    for (const [a, b] of windows) {
+      if (a < 0 || b >= out.length) continue;
+      const group = out.slice(a, b + 1);
+      const moves = group.filter((t): t is Extract<HeldToken, { kind: "move" }> => t.kind === "move");
+      if (moves.length !== group.length - 1 || moves.some((m) => Math.abs(m.t - rot.t) > SAME_MOMENT_MS)) continue;
+      const merged = sliceOrWide(group.map((t) => t.move));
+      if (!merged) continue;
+      const first = moves[0];
+      out.splice(a, b - a + 1, { kind: "move", move: merged, t: first.t, index: first.index, lastIndex: moves.at(-1)!.index });
+      k = a;
+      break;
+    }
+  }
+  return out;
 }
 
 /** Single rotations in a token's "x y" = 2. */
