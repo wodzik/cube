@@ -30,7 +30,7 @@ export function SolveSummary({ record, moveCountOnly = false }: SolveSummaryProp
   const fluency = moveCountOnly ? null : fluencyPercent(timings, record.timeMs);
   const held = heldTokens(record);
   const rotations = held
-    ? { text: `${rotationCount(held)} rot`, title: `Cube rotations (gyroscope)${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}` }
+    ? { text: `${rotationCount(held)} y rot`, title: `y rotations (regrips), from the gyroscope — x and z aren't counted${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}` }
     : null;
 
   const parts: { text: string; title?: string }[] = moveCountOnly

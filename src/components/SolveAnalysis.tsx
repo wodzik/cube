@@ -422,8 +422,8 @@ export function SolveAnalysis({
                   {rotations !== null && (
                     <>
                       {" · "}
-                      <span title={`Cube rotations during the solve (gyroscope)${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}`}>
-                        {rotations} {rotations === 1 ? "rotation" : "rotations"}
+                      <span title={`y rotations (regrips) during the solve, from the gyroscope — x and z are shown in the moves but not counted${record.startRotation ? ` — picked up with ${record.startRotation}` : ""}`}>
+                        {rotations} y {rotations === 1 ? "rotation" : "rotations"}
                       </span>
                     </>
                   )}

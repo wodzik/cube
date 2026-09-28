@@ -55,4 +55,19 @@ describe("solve rotations", () => {
     // After the S the white face (physical U) is on the right, orange (L) on top.
     expect(s.map((t) => t.move)).toEqual(["S", "R", "U"]);
   });
+
+  it("counts only y rotations (regrips) — x and z are part of algorithms", () => {
+    const at = (list: [string, number][]) => list.map(([move, t]) => ({ move, timestamp: 1000 + t, relativeMs: t, phase: "active" as const }));
+    const tokens = heldTokens({
+      moves: at([["R", 0], ["U", 2000], ["F", 4000], ["D", 6000]]),
+      startRotation: "",
+      rotations: [
+        { after: 1, t: 1000, move: "x" },
+        { after: 2, t: 3000, move: "y" },
+        { after: 3, t: 5000, move: "z'" },
+      ],
+    })!;
+    expect(tokens.filter((t) => t.kind === "rotation").map((t) => t.move)).toEqual(["x", "y", "z'"]);
+    expect(rotationCount(tokens)).toBe(1);
+  });
 });

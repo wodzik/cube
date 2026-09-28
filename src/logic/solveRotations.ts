@@ -163,10 +163,10 @@ export function mergeSlicesAndWides(tokens: readonly HeldToken[]): HeldToken[] {
   return out;
 }
 
-/** Single rotations in a token's "x y" = 2. */
-const rotationCountOf = (move: string) => move.split(/\s+/).filter(Boolean).length;
+/** The y's in a rotation token ("x y" = 1): an x or z is usually part of an algorithm, a y is a regrip. */
+const rotationCountOf = (move: string) => move.split(/\s+/).filter((m) => m.startsWith("y")).length;
 
-/** How many cube rotations the solve had (not counting how it was picked up). */
+/** How many regrips (y rotations) the solve had — x / z aren't counted, nor how it was picked up. The moves still show every rotation. */
 export const rotationCount = (tokens: readonly HeldToken[]): number =>
   tokens.reduce((n, t) => n + (t.kind === "rotation" ? rotationCountOf(t.move) : 0), 0);
 
