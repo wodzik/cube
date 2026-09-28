@@ -96,9 +96,9 @@ describe("4LLL corners-first lesson data", () => {
     }
   });
 
-  it("lesson registry lists Two first layers, Last layer, Zeta Slotting, F2L in order — four independent lessons", () => {
-    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["two-first-layers", "4lll-corners-first", "zeta-slotting", "f2l"]);
-    expect(ACADEMY_LESSONS.map((l) => l.title)).toEqual(["Two first layers", "Last layer", "Zeta Slotting", "F2L"]);
+  it("lesson registry lists Two first layers, Last layer, Zeta Slotting, F2L, Blindfolded in order", () => {
+    expect(ACADEMY_LESSONS.map((l) => l.id)).toEqual(["two-first-layers", "4lll-corners-first", "zeta-slotting", "f2l", "blindfolded"]);
+    expect(ACADEMY_LESSONS.map((l) => l.title)).toEqual(["Two first layers", "Last layer", "Zeta Slotting", "F2L", "Blindfolded"]);
   });
 
   it("Two first layers reuses FIRST_LAYER/SECOND_LAYER's step objects; Zeta Slotting has its own, distinct edges step", () => {

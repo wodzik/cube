@@ -420,4 +420,53 @@ export const F2L_METHOD: AcademyLesson = {
   ],
 };
 
-export const ACADEMY_LESSONS: AcademyLesson[] = [TWO_FIRST_LAYERS, FOUR_LOOK_LL_CORNERS_FIRST, ZETA_SLOTTING, F2L_METHOD];
+/**
+ * Blindfolded — the swap algorithms of Old Pochmann and M2 (data/bld.ts is
+ * the source: the guides, the letter-pair trainer and this drill use the
+ * same algorithms). The drill sets up the case (the inverse) and you solve
+ * it; the letters and their setups are drilled in Practice → Blindfolded →
+ * Letter pairs.
+ */
+export const BLINDFOLDED: AcademyLesson = {
+  id: "blindfolded",
+  title: "Blindfolded",
+  description: "The swaps of Old Pochmann and M2 — the algorithms every letter comes down to.",
+  steps: [
+    {
+      id: "op-edges",
+      title: "OP edges",
+      description: "Buffer UR: the T-perm swaps it with UL; A (UB) and C (UF) go straight with a J-perm. The Ra-perm is the parity.",
+      view: "full",
+      algs: [
+        { id: "t-perm", name: "T-perm (swap UR ↔ UL)", alg: "(R U R' U') R' F R2 (U' R' U') R U R' F'", required: true },
+        { id: "ja-perm", name: "Ja-perm (A: UR ↔ UB)", alg: "R2 D R D' R F2 r' F r F2", required: true },
+        { id: "jb-perm", name: "Jb-perm (C: UR ↔ UF)", alg: "R U R' F' (R U R' U') R' F R2 U' R' U'", required: true },
+        { id: "parity", name: "Parity (Ra-perm)", alg: "R U' R' U' R U R D R' U' R D' R' U2 R' U'", required: true },
+      ],
+    },
+    {
+      id: "op-corners",
+      title: "OP corners",
+      description: "Buffer ULB: the modified Y-perm swaps it with RDF (P).",
+      view: "full",
+      algs: [{ id: "y-perm", name: "Modified Y-perm (swap ULB ↔ RDF)", alg: "(R U' R' U') R U R' F' (R U R' U') R' F R", required: true }],
+    },
+    {
+      id: "m2",
+      title: "M2 edges",
+      description: "Buffer DF: M2 swaps it with UB. The M-slice letters have their own algorithms.",
+      view: "full",
+      algs: [
+        { id: "m2", name: "M2 (swap DF ↔ UB)", alg: "M2", required: true },
+        { id: "uf", name: "UF (C) — as a second letter: DB", alg: "U2 M' U2 M'", required: true },
+        { id: "db", name: "DB (W) — as a second letter: UF", alg: "M U2 M U2", required: true },
+        { id: "fu", name: "FU (I) — as a second letter: BD", alg: "D M' U R2 U' M U R2 U' D' M2", required: false },
+        { id: "bd", name: "BD (S) — as a second letter: FU", alg: "M2 D U R2 U' M' U R2 U' M D'", required: false },
+        { id: "bu", name: "BU (Q)", alg: "U B' R U' B M2 B' U R' B U'", required: false },
+        { id: "parity", name: "Parity", alg: "D' L2 D M2 D' L2 D", required: true },
+      ],
+    },
+  ],
+};
+
+export const ACADEMY_LESSONS: AcademyLesson[] = [TWO_FIRST_LAYERS, FOUR_LOOK_LL_CORNERS_FIRST, ZETA_SLOTTING, F2L_METHOD, BLINDFOLDED];
