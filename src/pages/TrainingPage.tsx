@@ -204,6 +204,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
     setGroup(next);
     setActiveSubgroupId(null);
     setVariantOverride(null);
+    setFocusCase(null);
   };
 
   useEffect(() => {
@@ -224,6 +225,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   }, [group, moveBuffer]);
 
   const openSubgroup = (subgroupId: string) => {
+    setFocusCase(null);
     setActiveSubgroupId(subgroupId);
     setCases(getSubgroupCases(group, subgroupId));
     setCaseIdx(0);
@@ -231,6 +233,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   };
 
   const backToFolders = () => {
+    setFocusCase(null);
     setActiveSubgroupId(null);
     setCases([]);
     setCaseIdx(0);
@@ -245,7 +248,13 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   useEffect(() => {
     if (showHidden && hiddenCount === 0) setShowHidden(false);
   }, [showHidden, hiddenCount]);
-  const selectedCases = useMemo(() => cases.filter((c) => c.selected && !c.hidden), [cases]);
+  // Focus mode (opened on one case from a solve / the stats): drill just that case — your own selection
+  // stays as it is, and is back as soon as you leave focus.
+  const [focusCase, setFocusCase] = useState<string | null>(null);
+  const selectedCases = useMemo(
+    () => (focusCase ? cases.filter((c) => c.name === focusCase) : cases.filter((c) => c.selected && !c.hidden)),
+    [cases, focusCase]
+  );
   // Built-in sets are fixed: no new cases there (your own groups / subgroups take them).
   const builtInList = activeSubgroupId ? isBuiltInSubgroup(group, activeSubgroupId) : isBuiltInGroup(group);
 
@@ -261,6 +270,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   const practiceNow = (caseName: string) => {
     const target = cases.find((c) => c.name === caseName);
     if (!target) return;
+    setFocusCase(null); // back to your selection
     if (!target.selected) {
       if (activeSubgroupId) setSubgroupCaseSelected(group, activeSubgroupId, caseName, true);
       else setCaseSelected(group, caseName, true);
@@ -280,7 +290,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
   }, [jumpToCaseName, selectedCases]);
 
   // Opened on one case from elsewhere (a solve's case, the case stats — services/drillNav):
-  // switch to its group / folder, make sure it's selected, jump the drill to it,
+  // switch to its group / folder, drill just that case (focus mode, selection untouched),
   // and drill the requested algorithm of it instead of the default one.
   const [variantOverride, setVariantOverride] = useState<{ caseName: string; variantId: string } | null>(null);
   useEffect(() => {
@@ -289,8 +299,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
     if (!meta) return;
     const folder = meta.hasSubgroups ? (request.subgroup ?? null) : null;
     if (meta.hasSubgroups && !meta.subgroups?.some((sg) => sg.id === folder)) return;
-    if (folder) setSubgroupCaseSelected(request.group, folder, request.caseName, true);
-    else setCaseSelected(request.group, request.caseName, true);
+    setFocusCase(request.caseName); // just this case — your selection untouched
     setGroup(request.group);
     setActiveSubgroupId(folder);
     setCases(folder ? getSubgroupCases(request.group, folder) : loadAlgGroup(request.group));
@@ -633,6 +642,25 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
         maskMoves={maskMoves}
         onToggleMask={toggleMaskMoves}
         loadingText={!currentCase ? "No case selected" : undefined}
+        sequenceTop={
+          focusCase ? (
+            <div className="mb-2 px-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Only {focusCase} — this case alone</p>
+              <button
+                onClick={() => {
+                  setFocusCase(null);
+                  setVariantOverride(null);
+                  setCaseIdx(0);
+                  moveBuffer.clear();
+                }}
+                className="text-[11px] font-semibold text-gray-400 hover:text-white transition-colors"
+                title="Back to the cases you selected (your selection was left as it was)"
+              >
+                Back to my selection →
+              </button>
+            </div>
+          ) : undefined
+        }
         completeText="Algorithm complete!"
         centerTop={
           currentCase ? (
