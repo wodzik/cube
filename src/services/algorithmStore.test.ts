@@ -10,7 +10,9 @@ import {
   addCase,
   deleteCase,
   resetAlgGroup,
+  setCaseHidden,
 } from "./algorithmStore";
+import { takeOrphanCases } from "./algOverlayStore";
 import type { AlgorithmCase } from "../types/algorithm";
 
 /** Raw on-disk value for a group's key — asserting on this (not loadAlgGroup's hydrated output) is how these tests confirm WHAT'S actually persisted, not just what's readable back. */
@@ -131,33 +133,74 @@ describe("algorithmStore", () => {
     });
   });
 
-  describe("structural edits switch a group to full mode", () => {
-    it("updateCase persists the whole case list, and a later recordAttempt stays in full mode instead of reverting to sparse", () => {
+  describe("built-in groups are read-only (stable ids; only your data is stored)", () => {
+    it("built-in variants have stable ids; an edited built-in algorithm keeps the bundled text, your own variant and default choice persist — no full copy", () => {
       const cases = loadAlgGroup("pll");
-      const edited = { ...cases[0], algList: [{ ...cases[0].algList[0], alg: "R U R' U' R U R' U'" }] };
-      updateCase("pll", edited);
+      const c = cases[0];
+      expect(c.builtIn).toBe(true);
+      expect(c.algList.every((v) => v.builtIn && v.id.startsWith("b-"))).toBe(true);
+      const bundledAlg = c.algList[0].alg;
+      const mine = { ...c.algList[0], id: "u-mine", name: "Mine", alg: "R U R' U' R U R' U'", isDefault: true, builtIn: undefined };
+      updateCase("pll", { ...c, algList: [{ ...c.algList[0], alg: "D D D D", isDefault: false }, ...c.algList.slice(1).map((v) => ({ ...v, isDefault: false })), mine] });
 
-      expect((rawStored("pll") as { full?: unknown }).full).toBeDefined();
-      expect(loadAlgGroup("pll")[0].algList[0].alg).toBe("R U R' U' R U R' U'");
+      const raw = rawStored("pll") as { v?: number; full?: unknown };
+      expect(raw.full).toBeUndefined();
+      expect(raw.v).toBe(2);
+      const reloaded = loadAlgGroup("pll")[0];
+      expect(reloaded.algList[0].alg).toBe(bundledAlg); // built-in text can't be edited
+      const own = reloaded.algList.find((v) => v.id === "u-mine")!;
+      expect(own.alg).toBe("R U R' U' R U R' U'");
+      expect(own.isDefault).toBe(true);
+      expect(reloaded.algList.filter((v) => v.isDefault)).toHaveLength(1);
 
-      // A subsequent dynamic-only mutation must NOT drop back to sparse mode
-      // (which would silently discard the edited algorithm text).
-      recordAttempt("pll", cases[0].name, cases[0].algList[0].id, { time: 5, hadErrors: false });
-      expect((rawStored("pll") as { full?: unknown }).full).toBeDefined();
-      const reloaded = loadAlgGroup("pll");
-      expect(reloaded[0].algList[0].alg).toBe("R U R' U' R U R' U'");
-      expect(reloaded[0].algList[0].times).toHaveLength(1);
+      recordAttempt("pll", c.name, "u-mine", { time: 5, hadErrors: false });
+      expect(loadAlgGroup("pll")[0].algList.find((v) => v.id === "u-mine")!.times).toHaveLength(1);
     });
 
-    it("addCase / deleteCase also switch to (and stay in) full mode", () => {
-      addCase("oll", makeCase("My Custom OLL"));
-      expect((rawStored("oll") as { full?: AlgorithmCase[] }).full?.some((c) => c.name === "My Custom OLL")).toBe(true);
-
-      setLearningStatus("oll", loadAlgGroup("oll")[0].name, loadAlgGroup("oll")[0].algList[0].id, "learned");
-      expect((rawStored("oll") as { full?: unknown }).full).toBeDefined(); // stayed full, didn't regress to sparse
-
-      deleteCase("oll", "My Custom OLL");
+    it("addCase to a built-in group is refused; deleteCase hides the case (and it can be shown again)", () => {
+      expect(addCase("oll", makeCase("My Custom OLL"))).toBe(false);
       expect(loadAlgGroup("oll").some((c) => c.name === "My Custom OLL")).toBe(false);
+
+      const name = loadAlgGroup("oll")[3].name;
+      deleteCase("oll", name);
+      expect(loadAlgGroup("oll").find((c) => c.name === name)!.hidden).toBe(true);
+      setCaseHidden("oll", name, false);
+      expect(loadAlgGroup("oll").find((c) => c.name === name)!.hidden).toBeUndefined();
+    });
+  });
+
+  describe("migration of the old storage of a built-in group", () => {
+    it("sparse progress stored under list-position ids moves to the stable ids", () => {
+      const c = loadAlgGroup("oll")[26];
+      const legacyId = c.algList[1].legacyId!;
+      expect(legacyId).toBe("oll-26-1");
+      localStorage.setItem("alg_group_oll", JSON.stringify({ variants: { [legacyId]: { times: [{ time: 1.5, hadErrors: false }], learningStatus: "learning" } }, cases: { [c.name]: { selected: true } } }));
+      const migrated = loadAlgGroup("oll")[26];
+      expect(migrated.algList[1].times).toHaveLength(1);
+      expect(migrated.algList[1].learningStatus).toBe("learning");
+      expect(migrated.selected).toBe(true);
+      expect((rawStored("oll") as { v?: number }).v).toBe(2);
+    });
+
+    it("a full copy (after edits): edited algorithms become your variants, deleted cases hidden, added cases set aside for a group of your own", () => {
+      const base = loadAlgGroup("pll");
+      const full: AlgorithmCase[] = base.slice(1).map((c) => ({ ...c, builtIn: undefined, algList: c.algList.map((v) => ({ ...v, id: v.legacyId!, builtIn: undefined, legacyId: undefined })) }));
+      full[0] = {
+        ...full[0],
+        algList: [{ ...full[0].algList[0], alg: "R2 U R U R' U' R' U' R' U R'", name: "Edited", isDefault: true, times: [{ time: 2, hadErrors: false }] }, ...full[0].algList.slice(1).map((v) => ({ ...v, isDefault: false }))],
+      };
+      full.push(makeCase("My PLL"));
+      localStorage.setItem("alg_group_pll", JSON.stringify({ full }));
+
+      const migrated = loadAlgGroup("pll");
+      expect(migrated.find((c) => c.name === base[0].name)!.hidden).toBe(true); // deleted before → hidden
+      const edited = migrated.find((c) => c.name === base[1].name)!;
+      const mine = edited.algList.find((v) => !v.builtIn)!;
+      expect(mine.alg).toBe("R2 U R U R' U' R' U' R' U R'");
+      expect(mine.isDefault).toBe(true);
+      expect(mine.times).toHaveLength(1);
+      expect(migrated.some((c) => c.name === "My PLL")).toBe(false);
+      expect(takeOrphanCases().flatMap((o) => o.cases.map((c) => c.name))).toContain("My PLL");
     });
   });
 
@@ -227,17 +270,16 @@ describe("algorithmStore", () => {
     expect(times[times.length - 1]?.time).toBe(99); // the just-recorded attempt is never the one dropped
   });
 
-  it("also trims a full-mode group's times the same way once it's been structurally customized", () => {
-    const cases = loadAlgGroup("pll");
-    updateCase("pll", { ...cases[0] }); // switch to full mode without changing anything observable
-    const variantId = cases[0].algList[0].id;
-    for (let i = 0; i < 5; i++) recordAttempt("pll", cases[0].name, variantId, { time: 10 + i, hadErrors: false });
+  it("also trims a group of your own (stored in full) the same way", () => {
+    addCase("mine", makeCase("Case 1"));
+    const variantId = loadAlgGroup("mine")[0].algList[0].id;
+    for (let i = 0; i < 5; i++) recordAttempt("mine", "Case 1", variantId, { time: 10 + i, hadErrors: false });
 
     const realSetItem = localStorage.setItem.bind(localStorage);
     const originalWarn = console.warn;
     console.warn = () => {};
     localStorage.setItem = (key: string, value: string) => {
-      if (key === "alg_group_pll") {
+      if (key === "alg_group_mine") {
         const parsed = JSON.parse(value) as { full: AlgorithmCase[] };
         const variant = parsed.full[0].algList.find((v) => v.id === variantId)!;
         if (variant.times.length > 3) throw new DOMException("quota exceeded", "QuotaExceededError");
@@ -246,13 +288,13 @@ describe("algorithmStore", () => {
     };
 
     try {
-      expect(() => recordAttempt("pll", cases[0].name, variantId, { time: 99, hadErrors: false })).not.toThrow();
+      expect(() => recordAttempt("mine", "Case 1", variantId, { time: 99, hadErrors: false })).not.toThrow();
     } finally {
       localStorage.setItem = realSetItem;
       console.warn = originalWarn;
     }
 
-    const times = loadAlgGroup("pll")[0].algList[0].times;
+    const times = loadAlgGroup("mine")[0].algList[0].times;
     expect(times.length).toBeLessThanOrEqual(3);
     expect(times[times.length - 1]?.time).toBe(99);
   });

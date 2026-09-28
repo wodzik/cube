@@ -61,6 +61,21 @@ export interface RawCase {
   displayConfigOverride?: Partial<DisplayConfig>;
 }
 
+/**
+ * A built-in variant's id: from its case and its algorithm, so progress stays
+ * with the algorithm whatever the bundled list's order ("b-" + a short hash;
+ * a second identical algorithm in the same case gets "~2"…).
+ */
+export function stableVariantId(caseName: string, alg: string, occurrence = 1): string {
+  const text = `${caseName}\n${alg.replace(/[()]/g, "").replace(/\s+/g, " ").trim()}`;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return `b-${(h >>> 0).toString(36)}${occurrence > 1 ? `~${occurrence}` : ""}`;
+}
+
 function hydrateVariant(raw: RawVariant, caseIdx: number, variantIdx: number, group: AlgGroup): AlgorithmVariant {
   return {
     id: `${group}-${caseIdx}-${variantIdx}`,
@@ -77,13 +92,23 @@ function hydrateVariant(raw: RawVariant, caseIdx: number, variantIdx: number, gr
   };
 }
 
-function hydrateCase(raw: RawCase, caseIdx: number, group: AlgGroup): AlgorithmCase {
+function hydrateCase(raw: RawCase, caseIdx: number, group: AlgGroup, builtIn = false): AlgorithmCase {
+  const seen = new Map<string, number>();
+  const algList = raw.algList.map((v, i) => {
+    const variant = hydrateVariant(v, caseIdx, i, group);
+    if (!builtIn) return variant;
+    const base = stableVariantId(raw.name, v.alg);
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return { ...variant, id: stableVariantId(raw.name, v.alg, n), builtIn: true, legacyId: variant.id };
+  });
   return {
     name: raw.name,
     category: raw.category,
     subcategory: raw.subcategory,
-    algList: raw.algList.map((v, i) => hydrateVariant(v, caseIdx, i, group)),
+    algList,
     displayConfigOverride: raw.displayConfigOverride,
+    ...(builtIn ? { builtIn: true } : {}),
   };
 }
 
@@ -106,14 +131,25 @@ const JSON_SOURCES: Record<AlgGroup, unknown> = {
   eo4a: eo4aJson,
 };
 
-function loadFromJson(group: AlgGroup): AlgorithmCase[] {
-  const raw = JSON_SOURCES[group] as RawCase[] | undefined;
-  return raw ? raw.map((c, i) => hydrateCase(c, i, group)) : [];
+/** The bundled (built-in) cases of a group — hydrated once, they never change at runtime. [] for a group of your own. */
+const bundledCache = new Map<AlgGroup, AlgorithmCase[]>();
+export function bundledCases(group: AlgGroup): AlgorithmCase[] {
+  let cases = bundledCache.get(group);
+  if (!cases) {
+    const raw = JSON_SOURCES[group] as RawCase[] | undefined;
+    cases = raw ? raw.map((c, i) => hydrateCase(c, i, group, true)) : [];
+    bundledCache.set(group, cases);
+  }
+  return cases;
 }
+const loadFromJson = bundledCases;
 
-/** Hydrate a portable RawCase[] (hand-authored or imported) into full AlgorithmCase[] — same pipeline the bundled JSON files go through. Exported for algGroupRegistry's import and its own bundled subgroup sets. */
-export function hydrateCasesFromRaw(raw: RawCase[], group: AlgGroup): AlgorithmCase[] {
-  return raw.map((c, i) => hydrateCase(c, i, group));
+/**
+ * Hydrate a portable RawCase[] (hand-authored or imported) into full AlgorithmCase[] — same pipeline
+ * the bundled JSON files go through. `builtIn` for a bundled set (read-only, stable ids).
+ */
+export function hydrateCasesFromRaw(raw: RawCase[], group: AlgGroup, builtIn = false): AlgorithmCase[] {
+  return raw.map((c, i) => hydrateCase(c, i, group, builtIn));
 }
 
 // ─── Public API ───
@@ -130,8 +166,11 @@ export function loadAlgGroup(group: AlgGroup): AlgorithmCase[] {
 
 /** For dynamic-only mutations (attempts, learning status, selection) — stays in whichever mode (sparse overlay or full) the group is already in. */
 export function saveAlgGroup(group: AlgGroup, cases: AlgorithmCase[]): void {
-  saveOverlay(storageKey(group), cases);
+  saveOverlay(storageKey(group), cases, loadFromJson(group));
 }
+
+/** A built-in group (bundled cases, read-only structure) — vs one of your own. */
+export const isBuiltInGroup = (group: AlgGroup): boolean => loadFromJson(group).length > 0;
 
 /**
  * For structural mutations — the case/variant SET itself changed (added,
@@ -140,7 +179,7 @@ export function saveAlgGroup(group: AlgGroup, cases: AlgorithmCase[]): void {
  * group in "full" mode from now on.
  */
 export function saveAlgGroupStructural(group: AlgGroup, cases: AlgorithmCase[]): void {
-  saveOverlayStructural(storageKey(group), cases);
+  saveOverlayStructural(storageKey(group), cases, loadFromJson(group));
 }
 
 /** Wipe localStorage and reload from the original JSON files (or, for a user-created group, back to empty). */
@@ -169,15 +208,22 @@ export function updateCase(group: AlgGroup, updated: AlgorithmCase): void {
 
 /** Append a brand-new case — the "add algorithm" primitive. Rejects a duplicate name. Structural (see updateCase). */
 export function addCase(group: AlgGroup, newCase: AlgorithmCase): boolean {
+  if (isBuiltInGroup(group)) return false; // built-in sets are fixed — add cases to a group of your own
   const next = applyAddCase(loadAlgGroup(group), newCase);
   if (!next) return false;
   saveAlgGroupStructural(group, next);
   return true;
 }
 
-/** Remove a whole case (all its variants) from a group. Structural (see updateCase). */
+/** Remove a whole case (all its variants) from a group of your own — a built-in case is hidden instead. */
 export function deleteCase(group: AlgGroup, caseName: string): void {
+  if (isBuiltInGroup(group)) return setCaseHidden(group, caseName, true);
   saveAlgGroupStructural(group, applyDeleteCase(loadAlgGroup(group), caseName));
+}
+
+/** Hide / show a case in its list (built-in cases are hidden rather than deleted). */
+export function setCaseHidden(group: AlgGroup, caseName: string, hidden: boolean): void {
+  saveAlgGroup(group, loadAlgGroup(group).map((c) => (c.name === caseName ? { ...c, hidden: hidden || undefined } : c)));
 }
 
 export function setCaseSelected(group: AlgGroup, caseName: string, selected: boolean): void {

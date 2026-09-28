@@ -16,6 +16,7 @@ import {
   createGroup,
   importGroup,
   exportGroup,
+  duplicateGroup,
   deleteGroup,
   updateGroupMeta,
   resolveDisplayConfig,
@@ -87,6 +88,13 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
 
   const handleExport = (g: AlgGroupMeta) => {
     downloadJson(`${g.id}.json`, exportGroup(g.id));
+  };
+
+  const handleDuplicate = (g: AlgGroupMeta) => {
+    const id = duplicateGroup(g.id);
+    refresh();
+    setSettingsFor(null);
+    onSelect(id);
   };
 
   const handleDelete = (id: string) => {
@@ -231,6 +239,7 @@ export function GroupTabs({ activeId, onSelect, managementEnabled = false, attac
             settingsFor !== "new" && !settingsFor.isBuiltIn ? () => handleDelete((settingsFor as AlgGroupMeta).id) : undefined
           }
           onExport={settingsFor !== "new" ? () => handleExport(settingsFor as AlgGroupMeta) : undefined}
+          onDuplicate={settingsFor !== "new" && settingsFor.isBuiltIn ? () => handleDuplicate(settingsFor as AlgGroupMeta) : undefined}
           onClose={() => setSettingsFor(null)}
         />
       )}

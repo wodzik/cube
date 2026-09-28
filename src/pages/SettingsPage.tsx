@@ -19,7 +19,7 @@ import { getTrainerAttempts } from "../services/trainerStore";
 import { useSmartCubeConnection } from "../hooks/useSmartCube";
 import { type ArrowMode, useTurnArrows } from "../hooks/useTurnArrows";
 import { useGyro } from "../hooks/useGyro";
-import { listGroups, resetBuiltInGroup } from "../services/algGroupRegistry";
+import { listGroups, migrateAlgorithmStorage, resetAlgorithmStorageMigration, resetBuiltInGroup } from "../services/algGroupRegistry";
 import { lookForCube, resolveSkin, useCubeLook, type CubeLook, type SkinName } from "../hooks/useCubeLook";
 import { CubeVisualisation } from "../components/CubeVisualisation";
 
@@ -449,6 +449,7 @@ const ALL_KEYS_PREFIXES = [
   "nact_solves",
   "nact_sessions",
   "alg_group_",
+  "alg_subgroup_",
   "attack_sessions_",
   "nact_alg_groups",
   "nact_cube_look",
@@ -495,6 +496,9 @@ async function importData(file: File): Promise<void> {
       localStorage.setItem(key, JSON.stringify(value));
     }
   }
+  // A backup from before built-in sets became read-only: move it to the current storage.
+  resetAlgorithmStorageMigration();
+  migrateAlgorithmStorage();
 }
 
 function SettingsRow({

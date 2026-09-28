@@ -29,8 +29,8 @@
 
 import type { AlgGroupMeta, AlgSubgroup, AlgorithmCase, AlgorithmAttempt, DisplayConfig, LearningStatus, StickeringConfig, AlgCategory } from "../types/algorithm";
 import type { StickeringMaskOrbits, VisualizationMode } from "../types/cube";
-import { loadAlgGroup, saveAlgGroupStructural, resetAlgGroup, hydrateCasesFromRaw, type RawCase } from "./algorithmStore";
-import { loadOverlayed, saveOverlay, saveOverlayStructural } from "./algOverlayStore";
+import { loadAlgGroup, saveAlgGroupStructural, resetAlgGroup, hydrateCasesFromRaw, bundledCases, type RawCase } from "./algorithmStore";
+import { type BuiltInOverlay, type CasesOverlay, loadOverlayed, migrateToBuiltIn, readRawOverlay, saveOverlay, saveOverlayStructural, takeOrphanCases, writeOverlayWithQuotaFallback } from "./algOverlayStore";
 import { buildMaskFromPieceGroups } from "../logic/maskPieceGroups";
 import { rouxBlocksStickeringMask } from "../logic/trainer/trainerMasks";
 import {
@@ -58,7 +58,7 @@ const bundledSubgroupCache = new Map<string, Map<string, AlgorithmCase[]>>();
 function bundledSubgroupCases(groupId: string, rawSubgroups: { id: string; cases: RawCase[] }[]): Map<string, AlgorithmCase[]> {
   let cache = bundledSubgroupCache.get(groupId);
   if (!cache) {
-    cache = new Map(rawSubgroups.map((sg) => [sg.id, hydrateCasesFromRaw(sg.cases, sg.id)]));
+    cache = new Map(rawSubgroups.map((sg) => [sg.id, hydrateCasesFromRaw(sg.cases, sg.id, true)]));
     bundledSubgroupCache.set(groupId, cache);
   }
   return cache;
@@ -72,7 +72,8 @@ function subgroupBase(groupId: string, subgroupId: string): AlgorithmCase[] {
   if (groupId === "vls") return bundledSubgroupCases("vls", (vlsJson as { subgroups: RawSubgroup[] }).subgroups).get(subgroupId) ?? [];
   // F2L's "bundled base" is the pre-merge flat groups' own JSON, already
   // wired up through algorithmStore's (already sparse-overlaid) flat store.
-  if (groupId === "f2l") return loadAlgGroup(`f2l-${subgroupId}`);
+  // F2L's slots: the bundled per-slot sets (their old flat-group progress is merged into the slot's own key — migrateAlgorithmStorage).
+  if (groupId === "f2l") return bundledCases(`f2l-${subgroupId}`);
   return [];
 }
 
@@ -786,12 +787,20 @@ export function getSubgroupCases(groupId: string, subgroupId: string): Algorithm
 
 /** For dynamic-only subgroup mutations (attempts, learning status, selection) — stays in whichever mode (sparse overlay or full) this subgroup is already in. */
 export function saveSubgroupCases(groupId: string, subgroupId: string, cases: AlgorithmCase[]): void {
-  saveOverlay(subgroupKey(groupId, subgroupId), cases);
+  saveOverlay(subgroupKey(groupId, subgroupId), cases, subgroupBase(groupId, subgroupId));
+}
+
+/** A built-in subgroup (bundled cases, read-only structure) — vs a subgroup of your own. */
+export const isBuiltInSubgroup = (groupId: string, subgroupId: string): boolean => !!subgroupBase(groupId, subgroupId)[0]?.builtIn;
+
+/** Hide / show a case in a subgroup (built-in cases are hidden rather than deleted). */
+export function setSubgroupCaseHidden(groupId: string, subgroupId: string, caseName: string, hidden: boolean): void {
+  saveSubgroupCases(groupId, subgroupId, getSubgroupCases(groupId, subgroupId).map((c) => (c.name === caseName ? { ...c, hidden: hidden || undefined } : c)));
 }
 
 /** For structural subgroup mutations (case added/updated/deleted) — see algorithmStore's saveAlgGroupStructural. */
 export function saveSubgroupCasesStructural(groupId: string, subgroupId: string, cases: AlgorithmCase[]): void {
-  saveOverlayStructural(subgroupKey(groupId, subgroupId), cases);
+  saveOverlayStructural(subgroupKey(groupId, subgroupId), cases, subgroupBase(groupId, subgroupId));
 }
 
 // ─── Subgroup case mutations — same transforms as algorithmStore.ts's
@@ -828,6 +837,7 @@ export function updateSubgroupCase(groupId: string, subgroupId: string, updated:
 
 /** Rejects a duplicate name (same semantics as algorithmStore's addCase). Structural (see updateSubgroupCase). */
 export function addSubgroupCase(groupId: string, subgroupId: string, newCase: AlgorithmCase): boolean {
+  if (isBuiltInSubgroup(groupId, subgroupId)) return false; // built-in sets are fixed
   const next = applyAddCase(getSubgroupCases(groupId, subgroupId), newCase);
   if (!next) return false;
   saveSubgroupCasesStructural(groupId, subgroupId, next);
@@ -836,6 +846,7 @@ export function addSubgroupCase(groupId: string, subgroupId: string, newCase: Al
 
 /** Structural (see updateSubgroupCase). */
 export function deleteSubgroupCase(groupId: string, subgroupId: string, caseName: string): void {
+  if (isBuiltInSubgroup(groupId, subgroupId)) return setSubgroupCaseHidden(groupId, subgroupId, caseName, true);
   saveSubgroupCasesStructural(groupId, subgroupId, applyDeleteCase(getSubgroupCases(groupId, subgroupId), caseName));
 }
 
@@ -909,7 +920,7 @@ export function exportGroup(id: string): string {
  * case falls back to it only when the file predates the category field.
  */
 export function importGroup(json: string, fallbackName: string, fallbackCategory: AlgCategory = "Other"): string {
-  const parsed: unknown = JSON.parse(json);
+  const parsed: unknown = JSON.parse(json, (k, v) => (k === "builtIn" || k === "legacyId" || k === "hidden" ? undefined : v)); // an import is yours: fully editable (and all shown)
 
   if (Array.isArray(parsed)) {
     const id = createGroup(fallbackName, undefined, false, "", fallbackCategory);
@@ -946,7 +957,102 @@ export function importGroup(json: string, fallbackName: string, fallbackCategory
   return id;
 }
 
+/** A copy of a group (e.g. a built-in set) as a group of your own — fully editable. Returns its id. */
+export function duplicateGroup(id: string, name?: string): string {
+  const meta = getGroupMeta(id);
+  if (!meta) throw new Error(`Unknown group: ${id}`);
+  const file = JSON.parse(exportGroup(id)) as GroupExportFile;
+  file.name = name ?? `My ${meta.name}`;
+  return importGroup(JSON.stringify(file), file.name, meta.category);
+}
+
 /** Whether a group can appear in Time Attack: a group with subgroups needs at least one Attack-enabled folder; otherwise it's available unless opted out. */
 export function isAttackAvailable(g: AlgGroupMeta): boolean {
   return g.hasSubgroups ? (g.subgroups ?? []).some((s) => s.availableInAttack === true) : g.availableInAttack !== false;
+}
+
+// ─── One-time migration: built-in sets become read-only (stable ids) ───
+
+const MIGRATED_KEY = "nact_alg_storage_v2";
+
+/** Run the migration again next time (after importing a backup that may predate it). */
+export function resetAlgorithmStorageMigration(): void {
+  try {
+    localStorage.removeItem(MIGRATED_KEY);
+  } catch {
+    // nothing to reset
+  }
+}
+
+/** Two v2 overlays of the same list, `b` over `a` (F2L: the old flat group, then the slot's own key). */
+function mergeBuiltIn(a: BuiltInOverlay, b: BuiltInOverlay): BuiltInOverlay {
+  const extra = { ...(a.extra ?? {}) };
+  for (const [name, list] of Object.entries(b.extra ?? {})) extra[name] = [...(extra[name] ?? []).filter((e) => !list.some((x) => x.alg === e.alg)), ...list];
+  const hidden = [...new Set([...(a.hidden ?? []), ...(b.hidden ?? [])])];
+  return {
+    v: 2,
+    variants: { ...(a.variants ?? {}), ...(b.variants ?? {}) },
+    cases: { ...(a.cases ?? {}), ...(b.cases ?? {}) },
+    ...(Object.keys(extra).length ? { extra } : {}),
+    defaults: { ...(a.defaults ?? {}), ...(b.defaults ?? {}) },
+    ...(hidden.length ? { hidden } : {}),
+    display: { ...(a.display ?? {}), ...(b.display ?? {}) },
+  };
+}
+
+/**
+ * Built-in sets are read-only from now on: progress moves to stable variant
+ * ids, edits of built-in cases become your own variants / hidden cases, and
+ * cases you had added to a built-in set move to a group of your own ("My OLL
+ * cases"…). Runs once (at app start, before anything reads the sets); cheap
+ * no-op afterwards.
+ */
+export function migrateAlgorithmStorage(): void {
+  try {
+    if (localStorage.getItem(MIGRATED_KEY)) return;
+  } catch {
+    return;
+  }
+  const orphanBatches: { from: string; cases: AlgorithmCase[] }[] = [];
+  const v1 = (key: string) => {
+    const raw = readRawOverlay(key);
+    return raw && (raw as unknown as BuiltInOverlay).v !== 2 ? raw : null;
+  };
+  // F2L slots: the old flat group (alg_group_f2l-<slot>) and the slot's own key, merged into the latter.
+  for (const slot of ["front-right", "front-left", "back-right", "back-left"]) {
+    const base = bundledCases(`f2l-${slot}`);
+    const flatKey = `alg_group_f2l-${slot}`;
+    const slotKey = subgroupKey("f2l", slot);
+    const flatRaw = v1(flatKey);
+    const slotRawAny = readRawOverlay(slotKey);
+    const slotRaw = v1(slotKey);
+    if (!flatRaw && !slotRaw) continue;
+    const a = flatRaw ? migrateToBuiltIn(flatRaw, base) : { overlay: { v: 2 } as BuiltInOverlay, orphans: [] };
+    const b = slotRaw ? migrateToBuiltIn(slotRaw, base) : { overlay: ((slotRawAny as unknown as BuiltInOverlay) ?? { v: 2 }) as BuiltInOverlay, orphans: [] };
+    writeOverlayWithQuotaFallback(slotKey, mergeBuiltIn(a.overlay, b.overlay) as unknown as CasesOverlay);
+    if (flatRaw) localStorage.removeItem(flatKey);
+    orphanBatches.push({ from: slotKey, cases: [...a.orphans, ...b.orphans.filter((o) => !a.orphans.some((x) => x.name === o.name))] });
+  }
+  // Every other built-in list: reading it migrates it (algOverlayStore.loadBuiltIn).
+  for (const g of listGroups().filter((x) => x.isBuiltIn)) {
+    if (g.id === "f2l") continue;
+    if (g.hasSubgroups) for (const sg of g.subgroups ?? []) getSubgroupCases(g.id, sg.id);
+    else loadAlgGroup(g.id);
+  }
+  orphanBatches.push(...takeOrphanCases());
+  // Cases you had added to a built-in set → a group of your own, next to it.
+  for (const { from, cases } of orphanBatches) {
+    if (!cases.length) continue;
+    const m = /^alg_group_(.+)$/.exec(from) ?? /^alg_subgroup_([^_]+)_(.+)$/.exec(from);
+    const meta = m ? getGroupMeta(m[1]) : undefined;
+    const sub = m?.[2] ? meta?.subgroups?.find((s) => s.id === m[2]) : undefined;
+    const name = `My ${[meta?.name ?? "algorithm", sub?.name].filter(Boolean).join(" ")} cases`;
+    const id = createGroup(name, { ...DEFAULT_DISPLAY_CONFIG, ...meta?.displayConfig, ...sub?.displayConfig } as DisplayConfig, false, cases[0]?.algList[0]?.alg ?? "", meta?.category ?? "Other");
+    saveAlgGroupStructural(id, cases.map((c) => ({ ...c, builtIn: undefined, algList: c.algList.map((v) => ({ ...v, builtIn: undefined, legacyId: undefined })) })));
+  }
+  try {
+    localStorage.setItem(MIGRATED_KEY, "1");
+  } catch {
+    // runs again next time — harmless
+  }
 }

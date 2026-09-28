@@ -3,7 +3,9 @@
  *
  * Lets the user: change which variant is default, edit variant name/alg/
  * YouTube URL, add a new variant, clear a variant's times, delete a
- * non-default variant. The preview cube updates live as the selected
+ * non-default variant. A built-in case's own algorithms are read-only (only
+ * the default choice and your times are yours); variants you add to it are
+ * fully yours; the case itself is hidden rather than deleted. The preview cube updates live as the selected
  * variant's algorithm is edited.
  *
  * onSave receives the fully updated AlgorithmCase — the caller persists it
@@ -17,7 +19,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { X, Star, Trash2, Plus, Check, ChevronLeft, ChevronRight, RotateCcw, ExternalLink, Play, Video, ChevronDown } from "lucide-react";
+import { X, Star, Trash2, Plus, Check, ChevronLeft, ChevronRight, RotateCcw, ExternalLink, Play, Video, ChevronDown, Eye, EyeOff } from "lucide-react";
 import type { AlgorithmCase, AlgorithmVariant, AlgGroup, DisplayConfig } from "../types/algorithm";
 import { AlgCaseVisualisation } from "./AlgCaseVisualisation";
 import { AlgPlaybackModal } from "./AlgPlaybackModal";
@@ -41,8 +43,10 @@ interface CaseEditProps {
    * one, so the draft and the flag can't be split.
    */
   onAutoSave?: (updated: AlgorithmCase) => void;
-  /** Deletes the whole case (not just a variant). Omit to hide the affordance. */
+  /** Deletes the whole case (not just a variant) — for a built-in case, hides it. Omit to hide the affordance. */
   onDelete?: () => void;
+  /** Shows a hidden (built-in) case again. */
+  onShow?: () => void;
   /** Jump to the previous case in the list (undefined = at the start). */
   onPrev?: () => void;
   /** Jump to the next case in the list (undefined = at the end). */
@@ -62,7 +66,7 @@ const EMPTY_FORM: NewVariantForm = { name: "", alg: "", youtubeUrl: "" };
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, onAutoSave, onDelete, onPrev, onNext, position }: CaseEditProps) {
+export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, onAutoSave, onDelete, onShow, onPrev, onNext, position }: CaseEditProps) {
   const [variants, setVariants] = useState<AlgorithmVariant[]>(() => structuredClone(case_.algList));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBuf, setEditBuf] = useState<Partial<AlgorithmVariant>>({});
@@ -169,7 +173,7 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
   function addVariant() {
     if (!newForm.name.trim() || !newForm.alg.trim()) return;
     const v: AlgorithmVariant = {
-      id: `${group}-custom-${Date.now()}`,
+      id: `u-${Date.now().toString(36)}`,
       name: newForm.name.trim(),
       alg: newForm.alg.trim(),
       isDefault: false,
@@ -256,6 +260,7 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
                 isConfirmClear={confirmClearId === v.id}
                 isConfirmDelete={confirmDeleteId === v.id}
                 canDelete={variants.length > 1}
+                mine={!!case_.builtIn && !v.builtIn}
                 onSetDefault={() => setDefault(v.id)}
                 onStartEdit={() => startEdit(v)}
                 onCommitEdit={commitEdit}
@@ -346,7 +351,19 @@ export function CaseEdit({ case_, group, groupDisplayConfig, onSave, onClose, on
 
         <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-white/[0.06]">
           <div>
-            {onDelete && (
+            {case_.builtIn && case_.hidden && onShow ? (
+              <button onClick={onShow} className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl text-gray-400 hover:text-gray-100 transition-colors" title="Show this case in its list again">
+                <Eye size={14} /> Show case
+              </button>
+            ) : case_.builtIn && onDelete ? (
+              <button
+                onClick={onDelete}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl text-gray-500 hover:text-gray-200 transition-colors"
+                title="Built-in cases can't be deleted — hide it from the list (Show hidden brings it back)"
+              >
+                <EyeOff size={14} /> Hide case
+              </button>
+            ) : onDelete && (
               <button
                 onClick={() => {
                   if (!confirmDeleteCase) {
@@ -406,6 +423,8 @@ interface VariantRowProps {
   isConfirmClear: boolean;
   isConfirmDelete: boolean;
   canDelete: boolean;
+  /** Your own variant on a built-in case. */
+  mine?: boolean;
   onSetDefault: () => void;
   onStartEdit: () => void;
   onCommitEdit: () => void;
@@ -424,6 +443,7 @@ function VariantRow({
   isConfirmClear,
   isConfirmDelete,
   canDelete,
+  mine,
   onSetDefault,
   onStartEdit,
   onCommitEdit,
@@ -488,6 +508,7 @@ function VariantRow({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-sm text-white font-medium truncate">{variant.name}</span>
+              {mine && <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-sky-300/80">yours</span>}
               {variant.youtubeUrl && (
                 <a
                   href={variant.youtubeUrl}
@@ -535,12 +556,14 @@ function VariantRow({
             >
               <Play size={13} />
             </button>
-            <button onClick={onStartEdit} className="p-1.5 text-gray-600 hover:text-gray-300 transition-colors" title="Edit variant">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </button>
+            {!variant.builtIn && (
+              <button onClick={onStartEdit} className="p-1.5 text-gray-600 hover:text-gray-300 transition-colors" title="Edit variant">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+            )}
 
             {variant.times.length > 0 && (
               <button
@@ -552,7 +575,7 @@ function VariantRow({
               </button>
             )}
 
-            {canDelete && !variant.isDefault && (
+            {canDelete && !variant.isDefault && !variant.builtIn && (
               <button
                 onClick={onDelete}
                 className={`p-1.5 transition-colors ${isConfirmDelete ? "text-red-400 hover:text-red-300" : "text-gray-700 hover:text-red-500"}`}

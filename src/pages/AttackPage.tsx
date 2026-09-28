@@ -141,7 +141,8 @@ function AttackPageInner() {
   // Sessions/queue-order are stored per (group, subgroup) — attackStore just
   // uses this as an opaque localStorage key suffix, no registry lookup.
   const sessionKey = activeSubgroupId ? `${group}:${activeSubgroupId}` : group;
-  const loadCases = () => (activeSubgroupId ? getSubgroupCases(group, activeSubgroupId) : loadAlgGroup(group));
+  // Hidden built-in cases stay out of the queue.
+  const loadCases = () => (activeSubgroupId ? getSubgroupCases(group, activeSubgroupId) : loadAlgGroup(group)).filter((c) => !c.hidden);
   const [cases, setCases] = useState<AlgorithmCase[]>(() => loadCases());
   const [queue, setQueue] = useState<string[]>(() => applyStoredOrder(sessionKey, cases.map((c) => c.name)));
   const [completed, setCompleted] = useState<{ caseName: string; timeMs: number }[]>([]);

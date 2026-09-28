@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Trash2, Download } from "lucide-react";
+import { X, Trash2, Download, Copy } from "lucide-react";
 import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { DisplayConfigFields } from "./DisplayConfigFields";
 
@@ -29,6 +29,8 @@ interface GroupSettingsModalProps {
   ) => void;
   onDelete?: () => void;
   onExport?: () => void;
+  /** A copy as a group of your own (built-in sets are fixed; the copy is fully editable). */
+  onDuplicate?: () => void;
   onClose: () => void;
 }
 
@@ -43,7 +45,7 @@ const DEFAULT_DISPLAY_CONFIG: DisplayConfig = {
 const inputClass =
   "w-full bg-gray-950/60 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[var(--accent)] transition-colors";
 
-export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, onExport, onClose }: GroupSettingsModalProps) {
+export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, onExport, onDuplicate, onClose }: GroupSettingsModalProps) {
   const [name, setName] = useState(group?.name ?? "");
   const [config, setConfig] = useState<DisplayConfig>(group?.displayConfig ?? DEFAULT_DISPLAY_CONFIG);
   const [category, setCategory] = useState<AlgCategory>(group?.category ?? defaultCategory);
@@ -168,6 +170,15 @@ export function GroupSettingsModal({ group, defaultCategory, onSave, onDelete, o
                 className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 hover:text-gray-200 rounded-xl transition-colors"
               >
                 <Download size={14} /> Export
+              </button>
+            )}
+            {onDuplicate && (
+              <button
+                onClick={onDuplicate}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 hover:text-gray-200 rounded-xl transition-colors"
+                title="A copy as a group of your own — its cases fully editable (built-in sets are fixed)"
+              >
+                <Copy size={14} /> Duplicate as my own
               </button>
             )}
             {onDelete && (

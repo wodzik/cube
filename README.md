@@ -14,7 +14,7 @@ No backend, no accounts — everything is stored locally in your browser.
 | Page | What it does |
 |---|---|
 | **Solve** | Timed speedsolves: random-state scrambles (one is always ready), live scramble tracking with wrong-move repair and turn arrows, automatic start / stop, CFOP / Roux / LBL stage detection, a per-stage recognition / execution breakdown with a 3D replay — the **case** each stage started from (F2L pair, OLL, PLL, CMLL), one click from its algorithms, and your cross against the optimal one — one click from practising that exact cross. Sessions, statistics, share links. |
-| **Practice → Algorithms** | Algorithm sets (F2L, OLL, PLL, CMLL, COLL, ZBLL, VLS, … and your own): execute cases on the cube, times per algorithm, learning status. |
+| **Practice → Algorithms** | Algorithm sets (F2L, OLL, PLL, CMLL, COLL, ZBLL, VLS, … and your own): execute cases on the cube, times per algorithm, learning status. Built-in sets are fixed — add your own algorithms to their cases, pick the default, hide cases you don't use, or duplicate a set as your own (fully editable). |
 | **Practice → Steps** | Step trainers with **known-optimal scrambles** (below), in *Scramble* mode (the case scrambled on your cube) or *Recognize* mode (the case on the screen, the time to your first turn measured). |
 | **Practice → Blindfolded** | Old Pochmann blindfolded: letter schemes (Speffz, ruwix), memo from the cube, execution followed letter by letter, letters read aloud. |
 | **Practice → Time Attack** | Every case of a set in one timed run. |

@@ -38,6 +38,8 @@ import {
   updateCase,
   addCase,
   deleteCase,
+  setCaseHidden,
+  isBuiltInGroup,
 } from "../services/algorithmStore";
 import {
   getGroupMeta,
@@ -49,6 +51,8 @@ import {
   updateSubgroupCase,
   addSubgroupCase,
   deleteSubgroupCase,
+  setSubgroupCaseHidden,
+  isBuiltInSubgroup,
   setSubgroupCaseSelected,
   setSubgroupSelectedBatch,
 } from "../services/algGroupRegistry";
@@ -233,7 +237,17 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
     moveBuffer.clear();
   };
 
-  const selectedCases = useMemo(() => cases.filter((c) => c.selected), [cases]);
+  // Hidden built-in cases stay out of the list and the drill (the list can show them, to bring one back).
+  const [showHidden, setShowHidden] = useState(false);
+  const hiddenCount = useMemo(() => cases.filter((c) => c.hidden).length, [cases]);
+  const listedCases = useMemo(() => cases.filter((c) => (showHidden ? c.hidden : !c.hidden)), [cases, showHidden]);
+  // The last hidden case shown again: back to the list.
+  useEffect(() => {
+    if (showHidden && hiddenCount === 0) setShowHidden(false);
+  }, [showHidden, hiddenCount]);
+  const selectedCases = useMemo(() => cases.filter((c) => c.selected && !c.hidden), [cases]);
+  // Built-in sets are fixed: no new cases there (your own groups / subgroups take them).
+  const builtInList = activeSubgroupId ? isBuiltInSubgroup(group, activeSubgroupId) : isBuiltInGroup(group);
 
   // Clamp when the selected set shrinks (e.g. a case gets deselected mid-practice).
   useEffect(() => {
@@ -681,7 +695,10 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
         bottom={
           <AlgorithmListView
             group={group}
-            cases={cases}
+            cases={listedCases}
+            hiddenCount={hiddenCount}
+            showingHidden={showHidden}
+            onToggleHidden={() => setShowHidden((v) => !v)}
             displayConfigOverride={activeSubgroup?.displayConfig}
             onStatusChange={(caseName, variantId, status) => {
               if (activeSubgroupId) setSubgroupLearningStatus(group, activeSubgroupId, caseName, variantId, status);
@@ -700,7 +717,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
             }}
             onEdit={(case_) => setEditingCase(case_)}
             onPractice={(case_) => practiceNow(case_.name)}
-            onAddCase={() => setShowCaseAdd(true)}
+            onAddCase={builtInList ? undefined : () => setShowCaseAdd(true)}
           />
         }
       />
@@ -732,7 +749,7 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
 
       {editingCase &&
         (() => {
-          const editIdx = cases.findIndex((c) => c.name === editingCase.name);
+          const editIdx = listedCases.findIndex((c) => c.name === editingCase.name);
           return (
             <CaseEdit
               // Remount on navigation — CaseEdit's draft state is seeded once
@@ -759,9 +776,15 @@ function TrainingPageInner({ request }: { request: DrillRequest | null }) {
                 setEditingCase(null);
                 reload();
               }}
-              position={editIdx >= 0 ? { index: editIdx, total: cases.length } : undefined}
-              onPrev={editIdx > 0 ? () => setEditingCase(cases[editIdx - 1]) : undefined}
-              onNext={editIdx >= 0 && editIdx < cases.length - 1 ? () => setEditingCase(cases[editIdx + 1]) : undefined}
+              onShow={() => {
+                if (activeSubgroupId) setSubgroupCaseHidden(group, activeSubgroupId, editingCase.name, false);
+                else setCaseHidden(group, editingCase.name, false);
+                setEditingCase(null);
+                reload();
+              }}
+              position={editIdx >= 0 ? { index: editIdx, total: listedCases.length } : undefined}
+              onPrev={editIdx > 0 ? () => setEditingCase(listedCases[editIdx - 1]) : undefined}
+              onNext={editIdx >= 0 && editIdx < listedCases.length - 1 ? () => setEditingCase(listedCases[editIdx + 1]) : undefined}
             />
           );
         })()}

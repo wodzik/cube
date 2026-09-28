@@ -25,7 +25,7 @@
  * PURE FUNCTIONS — no React hooks.
  */
 
-import type { AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, LearningStatus } from "../types/algorithm";
+import type { AlgorithmCase, AlgorithmVariant, AlgorithmAttempt, DisplayConfig, LearningStatus } from "../types/algorithm";
 import { computeVariantStatsAttempts } from "../logic/statistics";
 
 export function isQuotaExceededError(err: unknown): boolean {
@@ -164,7 +164,8 @@ export function writeOverlayWithQuotaFallback(key: string, data: CasesOverlay): 
 }
 
 /** For dynamic-only mutations (attempts, learning status, selection) — stays in whichever mode (sparse overlay or full) `key` is already in. */
-export function saveOverlay(key: string, cases: AlgorithmCase[]): void {
+export function saveOverlay(key: string, cases: AlgorithmCase[], base?: AlgorithmCase[]): void {
+  if (base && isBuiltInList(base)) return writeOverlayWithQuotaFallback(key, buildBuiltInOverlay(cases, base) as unknown as CasesOverlay);
   const raw = readRawOverlay(key);
   const data: CasesOverlay = raw?.full ? { full: cases } : buildOverlay(cases);
   writeOverlayWithQuotaFallback(key, data);
@@ -176,12 +177,15 @@ export function saveOverlay(key: string, cases: AlgorithmCase[]): void {
  * expressed as a delta against a bundled base. Switches (or keeps) `key`
  * in "full" mode from now on.
  */
-export function saveOverlayStructural(key: string, cases: AlgorithmCase[]): void {
+export function saveOverlayStructural(key: string, cases: AlgorithmCase[], base?: AlgorithmCase[]): void {
+  // A built-in list has no "full" mode: what's yours is stored as for any other change.
+  if (base && isBuiltInList(base)) return saveOverlay(key, cases, base);
   writeOverlayWithQuotaFallback(key, { full: cases });
 }
 
 /** `base` merged with whatever overlay (if any) is stored at `key` — the general-purpose read, for a case list WITH a bundled base to fall back to. */
 export function loadOverlayed(key: string, base: AlgorithmCase[]): AlgorithmCase[] {
+  if (isBuiltInList(base)) return loadBuiltIn(key, base);
   const raw = readRawOverlay(key);
   if (raw?.full) return raw.full;
   // Nothing stored at all — pure bundled defaults. Deliberately NOT written
@@ -191,4 +195,175 @@ export function loadOverlayed(key: string, base: AlgorithmCase[]): AlgorithmCase
   // with nothing to show for it — nothing has actually changed yet.
   if (!raw) return base;
   return applyOverlay(base, raw);
+}
+
+// ─── Built-in lists (v2): the bundled cases are read-only ───
+//
+// A built-in list (bundled OLL, PLL, F2L, ZBLL…) is never stored: only what's
+// yours is, keyed by the variants' STABLE ids (algorithmStore.stableVariantId —
+// from the case and the algorithm, not the list position):
+//   variants  times + learning status (bundled variants and your own)
+//   cases     selected for drilling
+//   extra     variants of your own added to a built-in case
+//   defaults  the variant you made the default, where it isn't the bundled one
+//   hidden    cases you hid (built-in cases are hidden, never deleted)
+//   display   a case's own look ("Advanced" in the case editor)
+// Older data (sparse, keyed by list position — or a "full" copy after an edit)
+// is migrated on first read; cases you had added to a built-in list move to a
+// group of your own (see takeOrphanCases / algGroupRegistry).
+
+interface ExtraVariant {
+  id: string;
+  name: string;
+  alg: string;
+  youtubeUrl?: string;
+}
+export interface BuiltInOverlay {
+  v: 2;
+  variants?: Record<string, StoredVariantOverlay>;
+  cases?: Record<string, StoredCaseOverlay>;
+  extra?: Record<string, ExtraVariant[]>;
+  defaults?: Record<string, string>;
+  hidden?: string[];
+  display?: Record<string, Partial<DisplayConfig>>;
+}
+
+const isBuiltInList = (base: AlgorithmCase[]) => base.length > 0 && !!base[0].builtIn;
+const sameJson = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+const normAlg = (alg: string) => alg.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
+
+function readBuiltIn(key: string): BuiltInOverlay | CasesOverlay | null {
+  return readRawOverlay(key) as BuiltInOverlay | CasesOverlay | null;
+}
+
+const ORPHANS_KEY = "nact_alg_orphans";
+/** Cases you had added to a built-in list (before built-ins became read-only), waiting to move to a group of your own. */
+export function takeOrphanCases(): { from: string; cases: AlgorithmCase[] }[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ORPHANS_KEY) ?? "[]") as { from: string; cases: AlgorithmCase[] }[];
+    localStorage.removeItem(ORPHANS_KEY);
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+function stashOrphans(from: string, cases: AlgorithmCase[]): void {
+  if (!cases.length) return;
+  try {
+    const list = JSON.parse(localStorage.getItem(ORPHANS_KEY) ?? "[]") as { from: string; cases: AlgorithmCase[] }[];
+    list.push({ from, cases });
+    localStorage.setItem(ORPHANS_KEY, JSON.stringify(list));
+  } catch {
+    // not kept
+  }
+}
+
+/** Old storage (v1) of a built-in list → v2. Returns the v2 overlay and the cases that aren't built-in (yours). */
+export function migrateToBuiltIn(raw: CasesOverlay, base: AlgorithmCase[]): { overlay: BuiltInOverlay; orphans: AlgorithmCase[] } {
+  const ov: BuiltInOverlay = { v: 2 };
+  const orphans: AlgorithmCase[] = [];
+  const put = (id: string, v: { times: AlgorithmAttempt[]; learningStatus: LearningStatus }) => {
+    if (!v.times?.length && (v.learningStatus ?? "not-started") === "not-started") return;
+    (ov.variants ??= {})[id] = { times: v.times ?? [], learningStatus: v.learningStatus ?? "not-started" };
+  };
+  if (raw.full) {
+    const byName = new Map(base.map((c) => [c.name, c]));
+    const kept = new Set<string>();
+    for (const fc of raw.full) {
+      const bc = byName.get(fc.name);
+      if (!bc) {
+        orphans.push(fc);
+        continue;
+      }
+      kept.add(fc.name);
+      const unmatched = [...bc.algList];
+      let defaultId: string | undefined;
+      for (const fv of fc.algList) {
+        const i = unmatched.findIndex((bv) => normAlg(bv.alg) === normAlg(fv.alg));
+        let id: string;
+        if (i >= 0) {
+          id = unmatched[i].id;
+          unmatched.splice(i, 1);
+        } else {
+          id = fv.id && !fv.id.startsWith("b-") ? fv.id : `u-${Math.random().toString(36).slice(2, 10)}`;
+          (ov.extra ??= {})[fc.name] = [...(ov.extra?.[fc.name] ?? []), { id, name: fv.name, alg: fv.alg, ...(fv.youtubeUrl ? { youtubeUrl: fv.youtubeUrl } : {}) }];
+        }
+        put(id, fv);
+        if (fv.isDefault) defaultId ??= id;
+      }
+      const baseDefault = (bc.algList.find((v) => v.isDefault) ?? bc.algList[0])?.id;
+      if (defaultId && defaultId !== baseDefault) (ov.defaults ??= {})[fc.name] = defaultId;
+      if (fc.selected !== undefined) (ov.cases ??= {})[fc.name] = { selected: fc.selected };
+      if (!sameJson(fc.displayConfigOverride, bc.displayConfigOverride) && fc.displayConfigOverride) (ov.display ??= {})[fc.name] = fc.displayConfigOverride;
+    }
+    const hidden = base.filter((c) => !kept.has(c.name)).map((c) => c.name);
+    if (hidden.length) ov.hidden = hidden;
+  } else {
+    const byLegacy = new Map(base.flatMap((c) => c.algList.map((v) => [v.legacyId ?? v.id, v.id] as const)));
+    for (const [oldId, v] of Object.entries(raw.variants ?? {})) {
+      const id = byLegacy.get(oldId);
+      if (id) put(id, v);
+    }
+    if (raw.cases) ov.cases = raw.cases;
+  }
+  return { overlay: ov, orphans };
+}
+
+/** Your data (v2) over the bundled cases. */
+function applyBuiltIn(base: AlgorithmCase[], ov: BuiltInOverlay): AlgorithmCase[] {
+  const hidden = new Set(ov.hidden ?? []);
+  return base.map((c) => {
+    const variant = (v: AlgorithmVariant): AlgorithmVariant => {
+      const o = ov.variants?.[v.id];
+      return o ? withRecalculatedStats(v, o.times, o.learningStatus) : { ...v };
+    };
+    const extras: AlgorithmVariant[] = (ov.extra?.[c.name] ?? []).map((e) =>
+      variant({ id: e.id, name: e.name, alg: e.alg, youtubeUrl: e.youtubeUrl, isDefault: false, times: [], ao5: null, ao12: null, ao100: null, bestTime: null, learningStatus: "not-started" })
+    );
+    let algList = [...c.algList.map(variant), ...extras];
+    const chosen = ov.defaults?.[c.name];
+    if (chosen && algList.some((v) => v.id === chosen)) algList = algList.map((v) => ({ ...v, isDefault: v.id === chosen }));
+    const selected = ov.cases?.[c.name]?.selected;
+    const display = ov.display?.[c.name];
+    return {
+      ...c,
+      algList,
+      ...(selected !== undefined ? { selected } : {}),
+      ...(display ? { displayConfigOverride: display } : {}),
+      ...(hidden.has(c.name) ? { hidden: true } : {}),
+    };
+  });
+}
+
+/** What of `cases` is yours (v2), against the bundled `base`. Cases not in `base` can't be kept here (they belong in a group of your own). */
+export function buildBuiltInOverlay(cases: AlgorithmCase[], base: AlgorithmCase[]): BuiltInOverlay {
+  const ov: BuiltInOverlay = { v: 2 };
+  const byName = new Map(base.map((c) => [c.name, c]));
+  for (const c of cases) {
+    const bc = byName.get(c.name);
+    if (!bc) continue;
+    const baseIds = new Set(bc.algList.map((v) => v.id));
+    for (const v of c.algList) {
+      if (v.times.length > 0 || v.learningStatus !== "not-started") (ov.variants ??= {})[v.id] = { times: v.times, learningStatus: v.learningStatus };
+      if (!baseIds.has(v.id)) (ov.extra ??= {})[c.name] = [...(ov.extra?.[c.name] ?? []), { id: v.id, name: v.name, alg: v.alg, ...(v.youtubeUrl ? { youtubeUrl: v.youtubeUrl } : {}) }];
+    }
+    const def = (c.algList.find((v) => v.isDefault) ?? c.algList[0])?.id;
+    const baseDef = (bc.algList.find((v) => v.isDefault) ?? bc.algList[0])?.id;
+    if (def && def !== baseDef) (ov.defaults ??= {})[c.name] = def;
+    if (c.selected !== undefined) (ov.cases ??= {})[c.name] = { selected: c.selected };
+    if (c.hidden) (ov.hidden ??= []).push(c.name);
+    if (c.displayConfigOverride && !sameJson(c.displayConfigOverride, bc.displayConfigOverride)) (ov.display ??= {})[c.name] = c.displayConfigOverride;
+  }
+  return ov;
+}
+
+function loadBuiltIn(key: string, base: AlgorithmCase[]): AlgorithmCase[] {
+  let raw = readBuiltIn(key);
+  if (raw && (raw as BuiltInOverlay).v !== 2) {
+    const { overlay, orphans } = migrateToBuiltIn(raw as CasesOverlay, base);
+    stashOrphans(key, orphans);
+    writeOverlayWithQuotaFallback(key, overlay as unknown as CasesOverlay);
+    raw = overlay;
+  }
+  return applyBuiltIn(base, (raw as BuiltInOverlay | null) ?? { v: 2 });
 }

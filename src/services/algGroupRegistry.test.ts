@@ -18,8 +18,10 @@ import {
   resetBuiltInGroup,
   exportGroup,
   importGroup,
+  migrateAlgorithmStorage,
+  duplicateGroup,
 } from "./algGroupRegistry";
-import { loadAlgGroup, recordAttempt } from "./algorithmStore";
+import { loadAlgGroup, recordAttempt, deleteCase } from "./algorithmStore";
 import type { AlgorithmCase } from "../types/algorithm";
 import type { StickeringMaskOrbits } from "../types/cube";
 
@@ -121,29 +123,35 @@ describe("algGroupRegistry — subgroup case storage (ZBLL/F2L/Advanced F2L/VLS 
     expect(reloaded.find((c) => c.name === cases[1].name)!.selected).toBe(true);
   });
 
-  it("a structural edit (updateSubgroupCase) switches THAT subgroup to full mode, and a later attempt stays in full mode", () => {
+  it("a built-in subgroup stays read-only: an edited bundled algorithm keeps its text, your own variant persists (no full copy), other subgroups untouched", () => {
     const cases = getSubgroupCases("zbll", "zbll-l");
-    const edited = { ...cases[0], algList: [{ ...cases[0].algList[0], alg: "EDITED ALG" }] };
-    updateSubgroupCase("zbll", "zbll-l", edited);
+    const bundled = cases[0].algList[0].alg;
+    const mine = { ...cases[0].algList[0], id: "u-mine", name: "Mine", alg: "EDITED ALG", isDefault: false, builtIn: undefined };
+    updateSubgroupCase("zbll", "zbll-l", { ...cases[0], algList: [{ ...cases[0].algList[0], alg: "NOT KEPT" }, ...cases[0].algList.slice(1), mine] });
 
-    expect((rawStored("alg_subgroup_zbll_zbll-l") as { full?: unknown }).full).toBeDefined();
-    expect(getSubgroupCases("zbll", "zbll-l")[0].algList[0].alg).toBe("EDITED ALG");
+    expect((rawStored("alg_subgroup_zbll_zbll-l") as { full?: unknown }).full).toBeUndefined();
+    const reloaded = getSubgroupCases("zbll", "zbll-l")[0];
+    expect(reloaded.algList[0].alg).toBe(bundled);
+    expect(reloaded.algList.find((v) => v.id === "u-mine")!.alg).toBe("EDITED ALG");
 
-    recordSubgroupAttempt("zbll", "zbll-l", cases[0].name, cases[0].algList[0].id, { time: 3, hadErrors: false });
-    expect((rawStored("alg_subgroup_zbll_zbll-l") as { full?: unknown }).full).toBeDefined(); // stayed full
-    expect(getSubgroupCases("zbll", "zbll-l")[0].algList[0].alg).toBe("EDITED ALG"); // edit preserved
+    recordSubgroupAttempt("zbll", "zbll-l", cases[0].name, "u-mine", { time: 3, hadErrors: false });
+    expect(getSubgroupCases("zbll", "zbll-l")[0].algList.find((v) => v.id === "u-mine")!.times).toHaveLength(1);
 
     // A DIFFERENT ZBLL subgroup is completely unaffected.
     expect(localStorage.getItem("alg_subgroup_zbll_zbll-u")).toBeNull();
   });
 
-  it("addSubgroupCase / deleteSubgroupCase also switch to (and stay in) full mode, for that one subgroup only", () => {
-    addSubgroupCase("vls", "uf", makeCase("My Custom VLS Case"));
-    expect(getSubgroupCases("vls", "uf").some((c) => c.name === "My Custom VLS Case")).toBe(true);
-    expect((rawStored("alg_subgroup_vls_uf") as { full?: unknown }).full).toBeDefined();
+  it("a built-in subgroup refuses new cases and hides instead of deleting; a subgroup of your own in a built-in group takes new cases", () => {
+    expect(addSubgroupCase("vls", "uf", makeCase("My Custom VLS Case"))).toBe(false);
+    const name = getSubgroupCases("vls", "uf")[0].name;
+    deleteSubgroupCase("vls", "uf", name);
+    expect(getSubgroupCases("vls", "uf").find((c) => c.name === name)!.hidden).toBe(true);
 
-    deleteSubgroupCase("vls", "uf", "My Custom VLS Case");
-    expect(getSubgroupCases("vls", "uf").some((c) => c.name === "My Custom VLS Case")).toBe(false);
+    addSubgroup("zbll", { id: "mine", name: "Mine", previewAlg: "" });
+    expect(addSubgroupCase("zbll", "mine", makeCase("My ZBLL"))).toBe(true);
+    expect(getSubgroupCases("zbll", "mine").map((c) => c.name)).toEqual(["My ZBLL"]);
+    deleteSubgroupCase("zbll", "mine", "My ZBLL");
+    expect(getSubgroupCases("zbll", "mine")).toEqual([]);
   });
 
   describe("F2L subgroups — bundled base sourced from the pre-merge flat groups", () => {
@@ -162,12 +170,14 @@ describe("algGroupRegistry — subgroup case storage (ZBLL/F2L/Advanced F2L/VLS 
       expect(getSubgroupCases("f2l", "front-right")[0].algList[0].times).toHaveLength(1);
     });
 
-    it("pre-existing progress recorded directly on the flat group (before ever visiting F2L's subgroup tab) still shows up as the subgroup's base", () => {
-      const flatCases = loadAlgGroup("f2l-front-left");
-      recordAttempt("f2l-front-left", flatCases[0].name, flatCases[0].algList[0].id, { time: 7, hadErrors: false });
+    it("old progress on the pre-merge flat group (alg_group_f2l-<slot>) is merged into the slot at migration", () => {
+      const flatCases = getSubgroupCases("f2l", "front-left");
+      localStorage.setItem("alg_group_f2l-front-left", JSON.stringify({ variants: { "f2l-front-left-0-0": { times: [{ time: 7, hadErrors: false }], learningStatus: "learning" } } }));
+      migrateAlgorithmStorage();
 
       const viaSubgroup = getSubgroupCases("f2l", "front-left");
       expect(viaSubgroup.find((c) => c.name === flatCases[0].name)!.algList[0].times).toHaveLength(1);
+      expect(localStorage.getItem("alg_group_f2l-front-left")).toBeNull();
     });
   });
 
@@ -237,10 +247,12 @@ describe("algGroupRegistry — subgroup case storage (ZBLL/F2L/Advanced F2L/VLS 
     });
   });
 
-  it("saveSubgroupCases is the dynamic-mode entry point addSubgroup/mutations build on — direct use also respects sparse/full mode switching", () => {
-    saveSubgroupCases("zbll", "zbll-t", [{ ...makeCase("Direct"), selected: true }]);
-    const raw = rawStored("alg_subgroup_zbll_zbll-t") as { cases?: Record<string, { selected: boolean }> };
-    expect(raw.cases?.Direct?.selected).toBe(true);
+  it("saveSubgroupCases is the dynamic-mode entry point mutations build on — a built-in subgroup stores just your part", () => {
+    const name = getSubgroupCases("zbll", "zbll-t")[0].name;
+    saveSubgroupCases("zbll", "zbll-t", getSubgroupCases("zbll", "zbll-t").map((c) => (c.name === name ? { ...c, selected: true } : c)));
+    const raw = rawStored("alg_subgroup_zbll_zbll-t") as { v?: number; cases?: Record<string, { selected: boolean }> };
+    expect(raw.v).toBe(2);
+    expect(raw.cases?.[name]?.selected).toBe(true);
   });
 });
 
@@ -294,5 +306,50 @@ describe("Second Block Last Slot mask", () => {
     // And it was persisted, so the fix-up doesn't repeat.
     const stored = (rawStored("nact_alg_groups") as { id: string; displayConfig: { stickering: unknown } }[]).find((g) => g.id === "second-block-last-slot")!;
     expect(centerState(stored.displayConfig.stickering)).toEqual(HIDDEN_OTHERS);
+  });
+});
+
+describe("migrateAlgorithmStorage", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("cases you had added to a built-in set move to a group of your own; runs once", () => {
+    const pll = loadAlgGroup("pll");
+    const full = pll.map((c) => ({ ...c, builtIn: undefined, algList: c.algList.map((v) => ({ ...v, id: v.legacyId!, builtIn: undefined, legacyId: undefined })) }));
+    const mine: AlgorithmCase = { name: "My PLL", category: "Mine", algList: [{ id: "x", name: "Main", alg: "R U R' U'", isDefault: true, times: [{ time: 3, hadErrors: false }], ao5: null, ao12: null, ao100: null, bestTime: null, learningStatus: "learning" }] };
+    localStorage.setItem("alg_group_pll", JSON.stringify({ full: [...full, mine] }));
+
+    migrateAlgorithmStorage();
+    const group = listGroups().find((g) => g.name === "My PLL cases")!;
+    expect(group).toBeDefined();
+    expect(group.isBuiltIn).toBe(false);
+    const moved = loadAlgGroup(group.id);
+    expect(moved.map((c) => c.name)).toEqual(["My PLL"]);
+    expect(moved[0].algList[0].times).toHaveLength(1);
+    expect(loadAlgGroup("pll").some((c) => c.name === "My PLL")).toBe(false);
+
+    migrateAlgorithmStorage(); // a second run changes nothing
+    expect(listGroups().filter((g) => g.name.startsWith("My PLL cases"))).toHaveLength(1);
+  });
+});
+
+describe("duplicateGroup", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("copies a built-in set as a group of your own — editable, with your progress", () => {
+    const pll = loadAlgGroup("pll");
+    recordAttempt("pll", pll[0].name, pll[0].algList[0].id, { time: 2, hadErrors: false });
+    const id = duplicateGroup("pll");
+    const meta = listGroups().find((g) => g.id === id)!;
+    expect(meta.isBuiltIn).toBe(false);
+    expect(meta.name).toBe("My PLL");
+    const copy = loadAlgGroup(id);
+    expect(copy).toHaveLength(pll.length);
+    expect(copy[0].builtIn).toBeUndefined();
+    expect(copy[0].algList.every((v) => !v.builtIn)).toBe(true);
+    expect(copy[0].algList[0].times).toHaveLength(1);
+    // Editable: a case can be deleted in the copy (the built-in set is untouched).
+    deleteCase(id, copy[0].name);
+    expect(loadAlgGroup(id)).toHaveLength(pll.length - 1);
+    expect(loadAlgGroup("pll")).toHaveLength(pll.length);
   });
 });

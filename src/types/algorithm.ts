@@ -145,6 +145,10 @@ export interface AlgorithmVariant {
   ao100: number | null;
   bestTime: number | null;
   learningStatus: LearningStatus;
+  /** Part of a built-in set: its name and algorithm are the bundled ones, read-only. */
+  builtIn?: boolean;
+  /** Its id before stable ids (list position) — only to migrate progress stored under it. */
+  legacyId?: string;
 }
 
 /**
@@ -160,4 +164,8 @@ export interface AlgorithmCase {
   selected?: boolean;
   /** "Advanced" per-case override of the group's (or subgroup's) display config — e.g. masking specific slots on one F2L Adv case. */
   displayConfigOverride?: Partial<DisplayConfig>;
+  /** A case of a built-in set: it can't be edited, deleted or moved — only hidden, and given variants of your own. */
+  builtIn?: boolean;
+  /** Hidden from its list (built-in cases are hidden rather than deleted). */
+  hidden?: boolean;
 }

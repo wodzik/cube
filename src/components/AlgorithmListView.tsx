@@ -35,8 +35,12 @@ export interface AlgorithmListViewProps {
   onEdit: (case_: AlgorithmCase) => void;
   /** Jump straight to practicing a case now (play button / clicking its name). */
   onPractice?: (case_: AlgorithmCase) => void;
-  /** Add a brand-new case to this group. */
+  /** Add a brand-new case to this group (groups of your own — built-in sets are fixed). */
   onAddCase?: () => void;
+  /** Hidden built-in cases: how many, whether the list shows them (instead of the others), and the switch. */
+  hiddenCount?: number;
+  showingHidden?: boolean;
+  onToggleHidden?: () => void;
   /** A subgroup's own override, layered on top of the group's display config (undefined when not scoped to a subgroup). */
   displayConfigOverride?: Partial<DisplayConfig>;
 }
@@ -82,6 +86,9 @@ export function AlgorithmListView({
   onEdit,
   onPractice,
   onAddCase,
+  hiddenCount = 0,
+  showingHidden = false,
+  onToggleHidden,
   displayConfigOverride,
 }: AlgorithmListViewProps) {
   const allCategories = useMemo(() => Array.from(new Set(cases.map((c) => c.category))), [cases]);
@@ -209,6 +216,15 @@ export function AlgorithmListView({
             {onAddCase && (
               <button onClick={onAddCase} className="btn-secondary py-0.5 text-[11px]">
                 <Plus size={11} /> New case
+              </button>
+            )}
+            {onToggleHidden && (hiddenCount > 0 || showingHidden) && (
+              <button
+                onClick={onToggleHidden}
+                className={`btn-secondary py-0.5 text-[11px] ${showingHidden ? "text-white" : ""}`}
+                title={showingHidden ? "Back to the cases in the list" : "Cases you hid — open one and Show case to bring it back"}
+              >
+                {showingHidden ? "Back to the list" : `Hidden (${hiddenCount})`}
               </button>
             )}
 
