@@ -434,6 +434,23 @@ function ensureBuiltInExtras(groups: AlgGroupMeta[]): AlgGroupMeta[] {
 }
 
 /** The built-in groups that shipped with the app, and their original hardcoded display config (was algGroupConfig.ts). Cards get the compact 2D-last-layer grid for OLL/PLL; the cube preview always defaults to 3D. F2L's 4 slots and ZBLL/Advanced F2L are added separately (see ensureBuiltInExtras) since they need subgroups. */
+/** A Blind letter set's view: only its kind of piece in colour (the swap's side effects on the other kind aren't the point). */
+function bldDisplay(kind: "edges" | "corners"): DisplayConfig {
+  const on = (n: number) => Array.from({ length: n }, () => ({ facelets: Array(n === 12 ? 2 : 3).fill("regular") }));
+  const off = (n: number) => Array.from({ length: n }, () => ({ facelets: Array(n === 12 ? 2 : 3).fill("ignored") }));
+  return {
+    stickering: {
+      kind: "mask",
+      pieceGroups: [],
+      rawOverride: { orbits: { EDGES: { pieces: kind === "edges" ? on(12) : off(12) }, CORNERS: { pieces: kind === "corners" ? on(8) : off(8) } } },
+    },
+    cardVisualization: "3D",
+    cubeVisualization: "3D",
+    cameraLatitude: 20,
+    cameraLongitude: 20,
+  };
+}
+
 const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; category: AlgCategory; availableInAttack?: boolean }[] = [
   { id: "oll", name: "OLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "OLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
   { id: "pll", name: "PLL", category: "CFOP", displayConfig: { stickering: { kind: "named", value: "PLL" }, cardVisualization: "experimental-2D-LL", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
@@ -529,6 +546,11 @@ const BUILT_IN_SEED: { id: string; name: string; displayConfig: DisplayConfig; c
     },
   },
   { id: "f2l-advanced", name: "F2L Adv", category: "Other", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "F2L" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 25 } },
+  // Blind (src/algs/bld.ts): the swaps, and each method's letters — edges or corners only, the swaps' side effects on the other kind hidden.
+  { id: "blind-swaps", name: "Swaps", category: "Blind", availableInAttack: false, displayConfig: { stickering: { kind: "named", value: "full" }, cardVisualization: "3D", cubeVisualization: "3D", cameraLatitude: 20, cameraLongitude: 20 } },
+  { id: "blind-op-edges", name: "OP edges", category: "Blind", availableInAttack: false, displayConfig: bldDisplay("edges") },
+  { id: "blind-op-corners", name: "OP corners", category: "Blind", availableInAttack: false, displayConfig: bldDisplay("corners") },
+  { id: "blind-m2", name: "M2 edges", category: "Blind", availableInAttack: false, displayConfig: bldDisplay("edges") },
 ];
 
 /**
@@ -621,6 +643,10 @@ const BUILT_IN_ORDER = [
   "vls",
   "f2l-advanced",
   "zbll",
+  "blind-swaps",
+  "blind-op-edges",
+  "blind-op-corners",
+  "blind-m2",
 ];
 
 function sortGroups(groups: AlgGroupMeta[]): AlgGroupMeta[] {

@@ -12,7 +12,7 @@ import { X, Trash2, Download, Copy } from "lucide-react";
 import type { AlgGroupMeta, AlgCategory, DisplayConfig } from "../types/algorithm";
 import { DisplayConfigFields } from "./DisplayConfigFields";
 
-const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
+const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other", "Blind"];
 
 interface GroupSettingsModalProps {
   /** undefined = creating a new group. */

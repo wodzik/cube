@@ -37,7 +37,7 @@ interface GroupTabsProps {
 }
 
 /** Fixed display order — not a general user-extensible taxonomy, just the 3 folders the group-tab row is split into. */
-const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other"];
+const CATEGORIES: AlgCategory[] = ["CFOP", "Roux", "Other", "Blind"];
 
 function groupCategory(g: AlgGroupMeta | undefined): AlgCategory {
   return g?.category ?? "Other";

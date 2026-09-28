@@ -60,7 +60,11 @@ export type GuideBlock =
   /** "Practice this in the Academy drill" — jumps to a lesson step. */
   | { kind: "practice"; lessonId: string; stepId: string; label: string }
   /** Link to another guide. */
-  | { kind: "guideLink"; guideId: string; label: string; text?: string };
+  | { kind: "guideLink"; guideId: string; label: string; text?: string }
+  /** A table (cells take the same inline notation as text). */
+  | { kind: "table"; columns: string[]; rows: string[][] }
+  /** Open Practice → Blindfolded (Letter pairs, or Setups) with this method. */
+  | { kind: "bldTrainer"; method: "op-edges" | "op-corners" | "m2"; mode?: "letters" | "setups"; label: string; text?: string };
 
 export interface GuideSection {
   id: string;
@@ -78,7 +82,7 @@ export interface Guide {
   /** Opening paragraphs under the title. */
   intro: string[];
   /** Grouping on the index page. */
-  category: "learn" | "reference";
+  category: "learn" | "reference" | "blind";
   /** e.g. "~45 min", shown on the index card and header. */
   readingTime: string;
   /** Guide ids the reader should have done first — rendered as chips linking to them. */

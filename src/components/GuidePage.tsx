@@ -16,6 +16,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, ArrowUp, BookOpen, CheckCircle2, Clock, Dumbbell, Info, Lightbulb, TriangleAlert, X } from "lucide-react";
 import { GuideCubeDemo } from "./GuideCubeDemo";
+import { openTab } from "../services/tabNav";
 import { GUIDES, guideById, type Guide, type GuideBlock, type GuideCase, type GuideDemo } from "../data/guides";
 
 interface GuidePageProps {
@@ -29,6 +30,19 @@ interface GuidePageProps {
 }
 
 /** `code` → notation, **text** → bold. Nothing else — guide text is our own, not user input. */
+/** Practice → Blindfolded, in its Letter pairs / Setups mode, with `method`. */
+function openBldTrainer(method: string, mode: "letters" | "setups"): void {
+  try {
+    localStorage.setItem("nact_bld_mode", mode);
+    const key = mode === "setups" ? "nact_bld_setups" : "nact_bld_letters";
+    const prev = JSON.parse(localStorage.getItem(key) ?? "{}") as object;
+    localStorage.setItem(key, JSON.stringify({ ...prev, method }));
+  } catch {
+    // opens with whatever was kept
+  }
+  openTab("bld");
+}
+
 export function renderInline(text: string): ReactNode[] {
   return text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, i) => {
     if (part.startsWith("`") && part.endsWith("`")) {
@@ -151,6 +165,47 @@ function Block({ block, onOpenGuide, onPractice }: { block: GuideBlock; onOpenGu
       return (
         <button onClick={() => onPractice(block.lessonId, block.stepId)} className="btn-primary text-xs w-fit">
           <Dumbbell size={14} /> {block.label}
+        </button>
+      );
+    case "table":
+      return (
+        <div className="overflow-x-auto max-w-3xl">
+          <table className="text-sm border-collapse">
+            <thead>
+              <tr>
+                {block.columns.map((c, i) => (
+                  <th key={i} className="text-left text-[10px] font-bold text-gray-500 uppercase tracking-widest pb-2 pr-6">
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, r) => (
+                <tr key={r} className="border-t border-white/[0.05]">
+                  {row.map((cell, c) => (
+                    <td key={c} className={`py-1.5 pr-6 align-top ${c === 0 ? "font-bold text-white" : "text-gray-300"}`}>
+                      {renderInline(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    case "bldTrainer":
+      return (
+        <button
+          onClick={() => openBldTrainer(block.method, block.mode ?? "letters")}
+          className="flex items-center gap-3 text-left panel px-4 py-3 hover:bg-white/[0.05] transition-colors w-full max-w-xl"
+        >
+          <Dumbbell size={16} className="text-[var(--accent-bright)] shrink-0" />
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-white">{block.label}</span>
+            {block.text && <span className="block text-xs text-gray-500 mt-0.5">{block.text}</span>}
+          </span>
+          <ArrowRight size={14} className="ml-auto text-gray-600 shrink-0" />
         </button>
       );
     case "guideLink": {
@@ -288,7 +343,7 @@ export function GuidePage({ guide, onBack, onClose, onOpenGuide, onPractice }: G
             <div className="flex flex-col md:flex-row gap-6 md:items-start">
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold text-[var(--accent-bright)] uppercase tracking-widest mb-2">
-                  {guide.category === "learn" ? `Learn to solve · Part ${index + 1}` : "Reference"}
+                  {guide.category === "learn" ? `Learn to solve · Part ${index + 1}` : guide.category === "blind" ? "Blindfolded" : "Reference"}
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">{guide.title}</h1>
                 <p className="text-sm text-gray-400 mt-2 max-w-2xl">{guide.tagline}</p>

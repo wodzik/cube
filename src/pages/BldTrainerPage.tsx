@@ -1,6 +1,7 @@
 /**
  * BldTrainerPage — blindfolded (Old Pochmann), in the same layout as the
- * trainers and algorithm drills (TrainerPanel).
+ * trainers and algorithm drills (TrainerPanel). Two modes: a full solve
+ * (below), letter pairs (BldLettersTrainer) and setups (BldSetupsTrainer).
  *
  * An attempt, as at a competition: a scramble from a SOLVED cube (the
  * official one — with the cube somewhere else, the bar shows the way from
@@ -37,6 +38,8 @@ import { SolveControls } from "../components/SolveControls";
 import { activeCubeId, cubeLabel } from "../services/cubeRegistry";
 import { formatTimeMs } from "../logic/statistics";
 import type { SessionConfig } from "../types/session";
+import { BldLettersTrainer } from "./BldLettersTrainer";
+import { BldSetupsTrainer } from "./BldSetupsTrainer";
 
 const SETTINGS_KEY = "nact_bld";
 const TIMES_KEY = "nact_bld_times";
@@ -107,10 +110,50 @@ function say(text: string) {
   speechSynthesis.speak(u);
 }
 
+const MODE_KEY = "nact_bld_mode";
+type Mode = "solve" | "letters" | "setups";
+
 export default function BldTrainerPage() {
+  const [mode, setModeState] = useState<Mode>(() => {
+    try {
+      const m = localStorage.getItem(MODE_KEY);
+      return m === "letters" || m === "setups" ? m : "solve";
+    } catch {
+      return "solve";
+    }
+  });
+  const setMode = (m: Mode) => {
+    setModeState(m);
+    try {
+      localStorage.setItem(MODE_KEY, m);
+    } catch {
+      // not kept
+    }
+  };
+  const modeSwitch = (
+    <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5 shrink-0">
+      {(
+        [
+          ["solve", "Full solve"],
+          ["letters", "Letter pairs"],
+          ["setups", "Setups"],
+        ] as const
+      ).map(([m, label]) => (
+        <button
+          key={m}
+          onClick={() => setMode(m)}
+          className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${mode === m ? "bg-white/10 text-white" : "text-gray-400 hover:text-gray-200"}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+  if (mode === "letters") return <BldLettersTrainer modeSwitch={modeSwitch} />;
+  if (mode === "setups") return <BldSetupsTrainer modeSwitch={modeSwitch} />;
   return (
     <SessionProvider config={CONFIG}>
-      <BldInner />
+      <BldInner modeSwitch={modeSwitch} />
     </SessionProvider>
   );
 }
@@ -124,7 +167,7 @@ function Mount({ el, className }: { el: HTMLElement; className?: string }) {
   return <div ref={host} className={className} />;
 }
 
-function BldInner() {
+function BldInner({ modeSwitch }: { modeSwitch: ReactNode }) {
   const { state, submitCubeMove } = useSession();
   const { cubeRef, flatCubeRef, view } = useCubeViewRefs();
   const cube = useSmartCube({
@@ -291,6 +334,7 @@ function BldInner() {
       header={
         <div className="w-full overflow-x-auto">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            {modeSwitch}
             {group("Letters", [["speffz", "Speffz"], ["ruwix", "ruwix"]], settings.scheme, (v) => setSettings({ scheme: v as Scheme }))}
             {group("Hold", HOLDS, settings.hold, (v) => setSettings({ hold: v }))}
             {group("First", [["edges", "Edges"], ["corners", "Corners"]], settings.order, (v) => setSettings({ order: v as Order }))}

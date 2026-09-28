@@ -40,6 +40,7 @@ function GuideCard({ guide, step, onOpen }: { guide: Guide; step?: number; onOpe
 export function GuidesIndex({ onOpen, onBack }: GuidesIndexProps) {
   const learn = GUIDES.filter((g) => g.category === "learn");
   const reference = GUIDES.filter((g) => g.category === "reference");
+  const blind = GUIDES.filter((g) => g.category === "blind");
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6">
       {onBack && (
@@ -58,6 +59,17 @@ export function GuidesIndex({ onOpen, onBack }: GuidesIndexProps) {
           <GuideCard key={g.id} guide={g} step={i + 1} onOpen={() => onOpen(g.id)} />
         ))}
       </div>
+
+      {blind.length > 0 && (
+        <>
+          <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-8 mb-3">Blindfolded</h2>
+          <div className="grid gap-3">
+            {blind.map((g) => (
+              <GuideCard key={g.id} guide={g} onOpen={() => onOpen(g.id)} />
+            ))}
+          </div>
+        </>
+      )}
 
       {reference.length > 0 && (
         <>
