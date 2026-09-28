@@ -47,6 +47,8 @@ export interface PairTime {
 }
 
 interface Prompt {
+  /** The method it was drawn for (a switch draws a new one — until then it's not shown). */
+  method: BldMethodId;
   first: string;
   second: string;
   /** The reverse of the pair before (Undo each pair). */
@@ -119,7 +121,9 @@ export function BldLettersTrainer({ modeSwitch }: { modeSwitch: ReactNode }) {
   const [hold] = useState(readHold);
   const method = BLD_METHODS[settings.method];
   const [times, setTimes] = useState<PairTime[]>(() => read<PairTime[]>(TIMES_KEY, []));
-  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [storedPrompt, setPrompt] = useState<Prompt | null>(null);
+  // A pair drawn for another method (just switched) isn't this method's letters — e.g. A is a corner buffer.
+  const prompt = storedPrompt && storedPrompt.method === settings.method ? storedPrompt : null;
   const [firstMoveAt, setFirstMoveAt] = useState<number | null>(null);
   const [last, setLast] = useState<{ pair: string; recogMs: number; execMs: number } | null>(null);
   const [now, setNow] = useState(0);
@@ -146,7 +150,7 @@ export function BldLettersTrainer({ modeSwitch }: { modeSwitch: ReactNode }) {
     (reverseOf?: Prompt) => {
       const [first, second] = reverseOf ? [reverseOf.second, reverseOf.first] : randomPair(settings.method, promptRef.current ? promptRef.current.first + promptRef.current.second : null);
       const start = session ? asHeld(session.state, hold || undefined) : null;
-      setPrompt({ first, second, undo: !!reverseOf, shownAt: performance.now(), start, expected: start ? expectedAfter(settings.method, start, first, second) : null });
+      setPrompt({ method: settings.method, first, second, undo: !!reverseOf, shownAt: performance.now(), start, expected: start ? expectedAfter(settings.method, start, first, second) : null });
       setFirstMoveAt(null);
     },
     [session, settings.method, hold]
@@ -196,13 +200,18 @@ export function BldLettersTrainer({ modeSwitch }: { modeSwitch: ReactNode }) {
   );
   const cubeMask = useMemo(() => {
     if (!positions) return null;
+    // The lettered stickers in full colour (with their letter), the rest of
+    // their pieces darker (colour, no letter) — you see which piece and which
+    // way round; the buffer sticker marked, its piece darker too.
     const shown = new Set([positions.first, positions.second]);
+    const pieces = [positions.buffer, positions.first, positions.second];
     return buildMask((f) => {
       if (f.index % 9 === 4 || shown.has(f.index)) return "regular";
       if (f.index === positions.buffer) return "oriented";
+      if (pieces.some((p) => samePiece(method.kind, p, f.index))) return "dim";
       return "ignored";
     }, holdFrame(hold) ?? undefined);
-  }, [positions, hold]);
+  }, [positions, method.kind, hold]);
   const cubeSkin = useMemo(() => letterSkin(skin, { scheme: SCHEMES.speffz, rotation: hold || undefined }), [skin, hold]);
 
   const solution = prompt ? solvePair(method, prompt.first, prompt.second) : null;
