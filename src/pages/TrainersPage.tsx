@@ -48,7 +48,7 @@ import {
 } from "@wodzik/cubecore/core";
 import type { F2LSlot } from "@wodzik/cubecore/cfop";
 import { CMLL_CASES, cmllCaseState, recognizeCmll } from "@wodzik/cubecore/roux";
-import { OLL_CASES, PLL_CASES, recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
+import { recognizeOll, recognizePll } from "@wodzik/cubecore/cfop";
 import { SessionProvider, useSession } from "../state/sessionContext";
 import type { TrainerRequest } from "../services/trainerNav";
 import { selectCurrentProgress, selectMoveCount, selectSolveTimeMs, selectTracking } from "../state/sessionSelectors";
@@ -64,6 +64,7 @@ import {
   doneLocally,
   f2lKeep,
   frameForBottom,
+  llCase,
   trainerById,
 } from "../logic/trainerCatalog";
 import { heldAlg } from "../logic/frameView";
@@ -289,16 +290,9 @@ function TrainersInner({ request }: { request: TrainerRequest | null }) {
           caseState = unreframe(cmllCaseState(kase.id), frame);
           scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
         } else if (d.id === "oll" || d.id === "pll") {
-          // A random case of the group, with random AUFs — for OLL a random permutation too (as it comes in a solve).
-          const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
-          const auf = () => pick(["", "U", "U2", "U'"]);
-          const pool = (d.id === "oll" ? OLL_CASES : PLL_CASES).filter((c) => v === "all" || c.group === v);
-          const kase = pick(pool);
-          cmllCase = kase.id;
-          const solution = d.id === "oll" ? `${auf()} ${kase.alg} ${auf()} ${pick(PLL_CASES).alg} ${auf()}` : `${auf()} ${kase.alg} ${auf()}`;
-          // As face turns (rotations in the algorithms become the grip): the centres stay home.
-          const turns = toFaceTurns(solution).moves;
-          caseState = unreframe(applyMoves(solvedState(), invert(turns)), frame);
+          const ll = llCase(d.id, v, frame);
+          cmllCase = ll.caseId;
+          caseState = ll.state;
           scramble = virtual ? [] : ((await solver.solveBetween(from, caseState)) ?? []);
         } else if (d.id === "f2l") {
           const r = await solver.randomScramble({ preset: "f2l", keep: f2lKeep(slots, v === "free"), frame, from });

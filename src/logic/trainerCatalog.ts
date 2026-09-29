@@ -23,10 +23,15 @@ import {
   type State,
   type StageDef,
   type Vec3,
+  applyMoves,
   checks,
   frameFor,
+  invert,
   isSolved,
   isLseStage,
+  solvedState,
+  toFaceTurns,
+  unreframe,
   view,
 } from "@wodzik/cubecore/core";
 import { CFOP_MASKS, CFOP_TRAINERS, type F2LSlot, OLL_CASES, PLL_CASES } from "@wodzik/cubecore/cfop";
@@ -284,6 +289,21 @@ export function doneLocally(def: TrainerDef, state: State, frame: Frame, variant
   }
   if (def.id === "pll") return isSolved(state);
   return null;
+}
+
+/**
+ * A random OLL / PLL case of the group ("all": any), with random AUFs — for
+ * OLL a random permutation too (as it comes in a solve) — as the physical
+ * state for the cube held in `frame`.
+ */
+export function llCase(kind: "oll" | "pll", group: string, frame: Frame): { state: State; caseId: string } {
+  const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
+  const auf = () => pick(["", "U", "U2", "U'"]);
+  const kase = pick((kind === "oll" ? OLL_CASES : PLL_CASES).filter((c) => group === "all" || c.group === group));
+  const solution = kind === "oll" ? `${auf()} ${kase.alg} ${auf()} ${pick(PLL_CASES).alg} ${auf()}` : `${auf()} ${kase.alg} ${auf()}`;
+  // As face turns (rotations in the algorithms become the grip): the centres stay home.
+  const turns = toFaceTurns(solution).moves;
+  return { state: unreframe(applyMoves(solvedState(), invert(turns)), frame), caseId: kase.id };
 }
 
 const LL_EDGES: readonly Piece[] = [PIECE.UF, PIECE.UR, PIECE.UB, PIECE.UL, PIECE.DF, PIECE.DB];
