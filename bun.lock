@@ -7,7 +7,7 @@
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
-        "@wodzik/cubecore": "^0.1.10",
+        "@wodzik/cubecore": "^0.1.11",
         "lucide-react": "^1.46.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
@@ -198,7 +198,7 @@
 
     "@webgpu/types": ["@webgpu/types@0.1.74", "", {}, "sha512-lgiI4hbuLcI9unnm2cL/tvCaQU45dp0xcLWJh5uB/9MBGvIA4F8XIk7nSiBeg+K4xWGYwgZKn80LmERI5CxoTA=="],
 
-    "@wodzik/cubecore": ["@wodzik/cubecore@0.1.10", "", { "dependencies": { "@types/web-bluetooth": "^0.0.21", "aes-js": "^3.1.2", "lz-string": "^1.5.0", "rxjs": "^7.8.2" }, "peerDependencies": { "@resvg/resvg-js": ">=2", "react": ">=18", "three": ">=0.160" }, "optionalPeers": ["@resvg/resvg-js", "react", "three"] }, "sha512-i6AUMIO0pGvu1MQ0lrfSSeb6GdD4zOWlPFVBjkQlcL49mFkVR6mvHAWpX3dwCCUQjF0DUBVa9HFepMZUDYJQpg=="],
+    "@wodzik/cubecore": ["@wodzik/cubecore@0.1.11", "", { "dependencies": { "@types/web-bluetooth": "^0.0.21", "aes-js": "^3.1.2", "lz-string": "^1.5.0", "rxjs": "^7.8.2" }, "peerDependencies": { "@resvg/resvg-js": ">=2", "react": ">=18", "three": ">=0.160" }, "optionalPeers": ["@resvg/resvg-js", "react", "three"] }, "sha512-km+ZP1uctlarHx770x4DCJGkeda6TZ18wimbljg+zM5wbiV09IiJFp7eL1YjJuQ8LCDM/j9QXISQq/h+5uhs3Q=="],
 
     "aes-js": ["aes-js@3.1.2", "", {}, "sha512-e5pEa2kBnBOgR4Y/p20pskXI74UEz7de8ZGVo58asOtvSVG5YAbJeELPZxOmt+Bnz3rX753YKhfIn4X4l1PPRQ=="],
 
