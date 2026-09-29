@@ -148,6 +148,10 @@ function DoneWith({ stageCase }: { stageCase: StageCase }) {
   );
 }
 
+// The steps as a table: the time columns (recog / exec, total), the same width in the header and in each row.
+const RECOG_EXEC_COL = "w-[6.75rem] shrink-0 text-right";
+const TOTAL_COL = "w-12 shrink-0 text-right";
+
 function StageTimingRow({
   timing,
   onJump,
@@ -183,100 +187,105 @@ function StageTimingRow({
 
   return (
     <div
-      className={`group flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors ${
+      className={`group relative px-2.5 py-2 rounded-lg transition-colors ${
         reached ? "hover:bg-white/[0.05] cursor-pointer" : "opacity-60"
       }`}
       onClick={reached ? () => onJump(timing.stage, timing.startMoveIndex!) : undefined}
       title={reached ? "Jump the player to this stage" : undefined}
     >
       {reached && (
-        <Play size={11} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--accent-bright)" }} fill="currentColor" />
+        <Play
+          size={9}
+          className="absolute left-0.5 top-3 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: "var(--accent-bright)" }}
+          fill="currentColor"
+        />
       )}
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage, timing.detail)}</span>
-          {skipped ? (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
-          ) : (
-            <span className="whitespace-nowrap text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
-          )}
-          {!skipped && isRealCase(stageCase) && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenCase?.(stageCase);
-              }}
-              className="text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 transition-colors"
-              title="This case's algorithms and your stats for it"
-            >
-              {caseTitle(stageCase)}
-            </button>
-          )}
-          {!skipped && stageCase?.after ? (
-            <span className="text-[10px] text-gray-400" title="A piece of the pair was stuck in another slot: the case came up once it was out">
-              after {stageCase.after} {stageCase.after === 1 ? "move" : "moves"}
-            </span>
-          ) : null}
-          {!skipped && isRealCase(stageCase) && stageCase.done !== undefined && (
-            <DoneWith stageCase={stageCase} />
-          )}
-          {!skipped && cross && (
-            <>
-              {cross.optimal === null ? (
-                <span className="text-[10px] text-gray-500">optimal …</span>
-              ) : timing.moveCount <= cross.optimal ? (
-                <span className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-emerald-500/10 text-emerald-300" title={`The shortest cross here is ${cross.optimal} moves — yours too`}>
-                  optimal ✓
-                </span>
-              ) : (
-                <span
-                  className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-amber-500/10 text-amber-300"
-                  title={`The shortest cross here is ${cross.optimal} moves — yours took ${timing.moveCount}`}
-                >
-                  optimal {cross.optimal} (+{timing.moveCount - cross.optimal})
-                </span>
-              )}
-            </>
-          )}
-          {!skipped && practise && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                practise.onClick();
-              }}
-              className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
-              title={practise.title}
-            >
-              Practise →
-            </button>
-          )}
-          {!skipped && stageCase?.name === "other" && (
-            <span className="text-[10px] text-gray-500" title="Not one of the set's cases (e.g. a piece was in another slot)">
-              not a standard case
-            </span>
-          )}
-        </div>
-        {items.length > 0 && (
-          <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">
-            <MoveText items={items} current={current} />
-          </p>
+      {/* Line 1: the step, its case and how it was done. Line 2: its moves, and the times in the table's columns. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-sm font-semibold text-gray-100">{stageDescription(timing.stage, timing.detail)}</span>
+        {skipped ? (
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Skip</span>
+        ) : (
+          <span className="whitespace-nowrap text-[11px] text-gray-400 font-mono tabular-nums">{timing.moveCount} moves</span>
+        )}
+        {!skipped && isRealCase(stageCase) && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenCase?.(stageCase);
+            }}
+            className="text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 transition-colors"
+            title="This case's algorithms and your stats for it"
+          >
+            {caseTitle(stageCase)}
+          </button>
+        )}
+        {!skipped && stageCase?.after ? (
+          <span className="text-[10px] text-gray-400" title="A piece of the pair was stuck in another slot: the case came up once it was out">
+            after {stageCase.after} {stageCase.after === 1 ? "move" : "moves"}
+          </span>
+        ) : null}
+        {!skipped && isRealCase(stageCase) && stageCase.done !== undefined && (
+          <DoneWith stageCase={stageCase} />
+        )}
+        {!skipped && cross && (
+          <>
+            {cross.optimal === null ? (
+              <span className="text-[10px] text-gray-500">optimal …</span>
+            ) : timing.moveCount <= cross.optimal ? (
+              <span className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-emerald-500/10 text-emerald-300" title={`The shortest cross here is ${cross.optimal} moves — yours too`}>
+                optimal ✓
+              </span>
+            ) : (
+              <span
+                className="whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 bg-amber-500/10 text-amber-300"
+                title={`The shortest cross here is ${cross.optimal} moves — yours took ${timing.moveCount}`}
+              >
+                optimal {cross.optimal} (+{timing.moveCount - cross.optimal})
+              </span>
+            )}
+          </>
+        )}
+        {!skipped && stageCase?.name === "other" && (
+          <span className="text-[10px] text-gray-500" title="Not one of the set's cases (e.g. a piece was in another slot)">
+            not a standard case
+          </span>
+        )}
+        {!skipped && practise && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              practise.onClick();
+            }}
+            className="ml-auto whitespace-nowrap text-[11px] font-semibold rounded-md px-1.5 py-0.5 text-gray-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            title={practise.title}
+          >
+            Practise →
+          </button>
         )}
       </div>
-      {!skipped && !moveCountOnly && (
-        <div className="shrink-0 flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-right">
-          {timing.stage !== "auf" && (
+      {(items.length > 0 || (!skipped && !moveCountOnly)) && (
+        <div className="flex items-baseline gap-2 mt-0.5 text-[11px] font-mono">
+          <p className="flex-1 min-w-0 text-gray-400 truncate">
+            <MoveText items={items} current={current} />
+          </p>
+          {!skipped && !moveCountOnly && (
             <>
-              <span className="text-gray-400" title="Recognition time">
-                recog {formatMs(timing.recognitionMs)}
+              <span className={`${RECOG_EXEC_COL} tabular-nums text-gray-400`} title="Recognition / execution time">
+                {timing.stage !== "auf" && (
+                  <>
+                    {formatMs(timing.recognitionMs)}
+                    <span className="text-gray-600"> / </span>
+                    <span className="text-gray-300">{formatMs(timing.executionMs)}</span>
+                  </>
+                )}
               </span>
-              <span className="text-gray-400" title="Execution time">
-                exec {formatMs(timing.executionMs)}
+              <span className={`${TOTAL_COL} tabular-nums text-gray-100 font-semibold`} title="Total time for this stage">
+                {formatMs(timing.totalMs)}
               </span>
             </>
           )}
-          <span className="text-gray-100 font-semibold w-14" title="Total time for this stage">
-            {formatMs(timing.totalMs)}
-          </span>
         </div>
       )}
     </div>
@@ -547,7 +556,15 @@ export function SolveAnalysis({
             {!moveCountOnly && <SolveTimingBar timings={timings} />}
 
             <div>
-              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 px-2.5">{method} steps</h3>
+              <div className="flex items-baseline gap-2 mb-1.5 px-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
+                <h3 className="flex-1 min-w-0">{method} steps</h3>
+                {!moveCountOnly && (
+                  <>
+                    <span className={`${RECOG_EXEC_COL} normal-case tracking-normal font-mono text-gray-500`}>recog / exec</span>
+                    <span className={`${TOTAL_COL} normal-case tracking-normal font-mono text-gray-500`}>total</span>
+                  </>
+                )}
+              </div>
               <div className="flex flex-col gap-0.5">
                 {timings.map((t) => (
                   <StageTimingRow
