@@ -64,6 +64,7 @@ import {
   patchSolve,
   saveSession,
   saveSolve,
+  solveEndedAt,
 } from "../services/solveStore";
 
 function buildStartHint(methods: readonly StartMethod[]): string {
@@ -670,7 +671,8 @@ function SolvePageInner({
       timerStartedAt: state.startTime,
       firstMoveAt: state.moveLog[0]?.timestamp ?? null,
       timeToFirstMoveMs: state.moveLog[0] ? state.moveLog[0].timestamp - state.startTime : null,
-      endedAt: state.endTime,
+      // A date (the timestamps above are the page clock, performance.now()).
+      endedAt: Date.now(),
       timeMs: solveTimeMs,
       scramble,
       scrambleMoves: scramble.trim().split(/\s+/).filter(Boolean),
@@ -1023,9 +1025,9 @@ function SolvePageInner({
                             )}
                             <td className="py-2.5 pr-4 text-sm text-gray-500">{s.method}</td>
                             <td className="py-2.5 pr-4 text-sm text-gray-500 whitespace-nowrap">
-                              {new Date(s.endedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              {solveEndedAt(s) ? new Date(s.endedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—"}
                             </td>
-                            <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">{formatRelativeTime(s.endedAt)}</td>
+                            <td className="py-2.5 pr-4 text-sm text-gray-700 whitespace-nowrap">{solveEndedAt(s) ? formatRelativeTime(s.endedAt) : "—"}</td>
                             <td className="py-2.5">
                               <div className="relative flex items-center justify-end gap-1">
                                 <button

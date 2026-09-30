@@ -12,6 +12,7 @@ import { computeStageTimings } from "./stageDetection/stageTiming";
 import { type CaseKind, type StageCase, caseLocation, isRealCase, solveCases } from "./solveCases";
 import { computeVariantStatsForSource, formatTime } from "./statistics";
 import { loadAlgGroup } from "../services/algorithmStore";
+import { solveEndedAt } from "../services/solveStore";
 import { getSubgroupCases } from "../services/algGroupRegistry";
 
 // ─── from solves ───
@@ -73,7 +74,7 @@ export function collectCaseStats(solves: readonly SolveRecord[]): { cases: Map<s
       if (!entry) seen.set(key, (entry = { kind: c.kind, name: c.name, seen: [] }));
       entry.seen.push({
         solveId: record.id,
-        at: record.endedAt,
+        at: solveEndedAt(record) ?? 0,
         stage,
         totalMs: t.totalMs,
         recognitionMs: t.recognitionMs,

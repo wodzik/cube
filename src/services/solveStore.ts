@@ -8,6 +8,15 @@ import type { MoveRecord } from "../types/session";
 import { collapseIdenticalMoves } from "../logic/moveReduction";
 
 const SOLVES_KEY = "nact_solves";
+
+/**
+ * When a solve ended, if that's a real date: solves saved by builds that took
+ * endedAt from the page clock (performance.now(), ms since the tab opened —
+ * shown as January 1970) have none; null for those.
+ */
+export function solveEndedAt(record: { endedAt: number }): number | null {
+  return record.endedAt >= 1e12 ? record.endedAt : null;
+}
 const SESSIONS_KEY = "nact_sessions";
 
 function readJson<T>(key: string, fallback: T): T {
