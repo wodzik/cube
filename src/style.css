@@ -294,6 +294,27 @@
 .act-sequence::part(undo) {
   justify-content: center;
 }
+/* Phones: a scramble on one line, scrolled along as it's done (followCurrentMove
+   in MoveSequenceDisplay); edges fade where moves are cut off. */
+@media (max-width: 639px) {
+  .act-sequence-line::part(moves) {
+    flex-wrap: nowrap;
+    justify-content: safe center;
+    overflow-x: hidden;
+    --fade-l: 0px;
+    --fade-r: 0px;
+    mask-image: linear-gradient(to right, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+  }
+  .act-sequence-line[data-more-left]::part(moves) {
+    --fade-l: 2.5em;
+  }
+  .act-sequence-line[data-more-right]::part(moves) {
+    --fade-r: 2.5em;
+  }
+  .act-sequence-line::part(move) {
+    flex-shrink: 0;
+  }
+}
 
 .scramble-complete {
   @apply text-emerald-400 text-sm font-semibold;

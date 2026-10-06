@@ -229,7 +229,21 @@ function SequenceElement({
     host.current?.append(e);
     el.current = e;
     fed.current = { notation: "", target: null, moves: [] };
+    // Scrambles on a phone: one line (style.css), scrolled to keep the move due in the middle.
+    let stopFollowing = () => {};
+    if (kind === "scramble") {
+      e.classList.add("act-sequence-line");
+      const onProgress = () => followCurrentMove(e, "smooth");
+      const resize = new ResizeObserver(() => followCurrentMove(e, "instant"));
+      e.addEventListener("progress", onProgress);
+      resize.observe(e);
+      stopFollowing = () => {
+        e.removeEventListener("progress", onProgress);
+        resize.disconnect();
+      };
+    }
     return () => {
+      stopFollowing();
       // Its arrows stay on the 3D cube otherwise (e.g. the scramble done → the bar turns into the stage stepper).
       e.player?.showTurnArrows(null, {}, e);
       e.remove();
@@ -295,4 +309,29 @@ function SequenceElement({
   }, [notation, tracking]);
 
   return <div ref={host} className="w-full" />;
+}
+
+/**
+ * A one-line scramble (overflowing its row — phones, see .act-sequence-line
+ * in style.css): scroll the move due (the first not done) to the middle, so
+ * a few moves either side stay in view. data-more-left / -right fade the
+ * edges where moves are cut off. Wrapped (wider screens): nothing to do.
+ */
+function followCurrentMove(e: HTMLElement, behavior: ScrollBehavior) {
+  const row = e.shadowRoot?.querySelector<HTMLElement>(".moves");
+  if (!row) return;
+  const max = row.scrollWidth - row.clientWidth;
+  let left = 0;
+  if (max > 1) {
+    const moves = [...row.querySelectorAll<HTMLElement>(".move")];
+    const due = moves.find((m) => !m.classList.contains("done")) ?? moves.at(-1);
+    if (due) {
+      const r = row.getBoundingClientRect();
+      const m = due.getBoundingClientRect();
+      left = Math.round(Math.min(max, Math.max(0, row.scrollLeft + m.left + m.width / 2 - (r.left + r.width / 2))));
+    }
+  }
+  row.scrollTo({ left, behavior });
+  e.toggleAttribute("data-more-left", left > 1);
+  e.toggleAttribute("data-more-right", left < max - 1);
 }
